@@ -1,11 +1,13 @@
-# Charity Race Event Management System
+# ParaGrutaRally Management System
 
-This React application serves as a management system for a charity organization that builds custom cars for children with disabilities to participate in race events. The system manages users (parents, admins, and instructors), events, vehicles, and a media gallery.
+This React application serves as a management system for ParaGrutaRally - an organization that builds custom cars for children
+with disabilities to participate in race events.
+The system manages users (parents, admins, and instructors), events, vehicles, and a media gallery.
 
 ## Project Overview
 
 ### Purpose
-The application helps the charity organization efficiently manage:
+The application helps the organization efficiently manage:
 - Parent and child registrations
 - Event scheduling and management
 - Vehicle inventory and assignments
@@ -194,18 +196,16 @@ src/
 7. Run `npm start` to start the development server
 
 ### Firebase Configuration
-Update the configuration in `src/services/firebase/firebase.js`:
 
-```javascript
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
-};
-```
+## Environment Variables Setup
+
+This project uses environment variables to store sensitive configuration data. To set up:
+
+1. Copy `.env.example` to a new file called `.env.local` (under Paragrutarally-WebApp)
+2. Fill in your Firebase configuration values in `.env.local`
+3. Never commit `.env.local` to version control
+
+During production deployment, you'll need to set these environment variables on your hosting platform.
 
 ## User Workflows
 
