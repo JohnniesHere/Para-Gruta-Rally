@@ -9,7 +9,7 @@ import ParentLayout from '../components/layout/ParentLayout';
 
 // Auth pages
 import LoginPage from '../pages/auth/LoginPage';
-import ResetPasswordPage from '../pages/auth/ResetPasswordPage';
+import ResetPasswordPage from '../pages/auth/ResetPasswordPage.jsx';
 
 // Admin pages
 import AdminDashboard from '../pages/admin/AdminDashboard';
