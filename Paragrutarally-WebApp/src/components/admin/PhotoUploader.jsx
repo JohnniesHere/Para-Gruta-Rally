@@ -1,16 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import {
-    collection,
-    addDoc,
-    doc,
-    getDoc,
-    updateDoc,
-    arrayUnion,
-    serverTimestamp,
-    getDocs,
-    query, where
-} from 'firebase/firestore';
+import { collection, addDoc, doc, getDoc, updateDoc, arrayUnion, serverTimestamp } from 'firebase/firestore';
 import { storage, db } from '../../services/firebase/firebase';
 
 const PhotoUploader = ({ eventId }) => {
@@ -73,7 +63,8 @@ const PhotoUploader = ({ eventId }) => {
         try {
             // Check if a gallery document exists for this event
             const galleryRef = collection(db, 'gallery');
-            const galleryQuerySnapshot = await getDocs(query(galleryRef, where('eventId', '==', eventId)));
+            const galleryQuery = query(galleryRef, where('eventId', '==', eventId));
+            const galleryQuerySnapshot = await getDocs(galleryQuery);
 
             let galleryDocId;
             if (!galleryQuerySnapshot.empty) {

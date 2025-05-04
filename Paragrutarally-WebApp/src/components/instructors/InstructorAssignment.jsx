@@ -146,34 +146,6 @@ const InstructorAssignment = ({ eventId }) => {
                                 <div className="instructor-details">
                                     <p><strong>Email:</strong> {instructor.email}</p>
                                     <p><strong>Phone:</strong> {instructor.phone}</p>
-
-                                    {instructor.specialties && instructor.specialties.length > 0 && (
-                                        <div className="specialties">
-                                            <strong>Specialties:</strong>
-                                            <div className="specialties-list">
-                                                {instructor.specialties.map((specialty, index) => (
-                                                    <span key={index} className="specialty-badge">
-                            {specialty}
-                          </span>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {instructor.availability && (
-                                        <div className="availability">
-                                            <strong>Available on:</strong>
-                                            <div className="availability-days">
-                                                {Object.entries(instructor.availability)
-                                                    .filter(([_, isAvailable]) => isAvailable)
-                                                    .map(([day]) => (
-                                                        <span key={day} className="day-badge">
-                              {day.substring(0, 3)}
-                            </span>
-                                                    ))}
-                                            </div>
-                                        </div>
-                                    )}
                                 </div>
                             </div>
                         ))}

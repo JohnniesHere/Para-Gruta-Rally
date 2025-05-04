@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../services/firebase/firebase';
 
-const LoginForm = () => {
+const LoginForm = ({ onError }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -16,9 +16,11 @@ const LoginForm = () => {
         try {
             await signInWithEmailAndPassword(auth, email, password);
             // Redirect will be handled by router/auth context
-        } catch (error) {
-            setError('Failed to log in. Please check your credentials.');
-            console.error(error);
+        } catch (err) {
+            const errorMessage = 'Failed to log in. Please check your credentials.';
+            setError(errorMessage);
+            if (onError) onError(errorMessage);
+            console.error(err);
         } finally {
             setLoading(false);
         }
@@ -26,7 +28,6 @@ const LoginForm = () => {
 
     return (
         <div className="login-form-container">
-            <h2>Login</h2>
             {error && <div className="error-message">{error}</div>}
             <form onSubmit={handleSubmit}>
                 <div className="form-group">
