@@ -1,0 +1,101 @@
+// firebase/storage.rules
+// Firebase Storage security rules
+
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() &&
+        firestore.exists(/databases/(default)/documents/users/$(request.auth.uid)) &&
+        firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    function isStaff() {
+      return isSignedIn() &&
+        firestore.exists(/databases/(default)/documents/users/$(request.auth.uid)) &&
+        (
+          firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'staff' ||
+          firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin'
+        );
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // File size validation (max 10MB)
+    function isValidFileSize() {
+      return request.resource.size <= 10 * 1024 * 1024;
+    }
+
+    // Content type validation for Excel files
+    function isExcelFile() {
+      return request.resource.contentType.matches('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') ||
+             request.resource.contentType.matches('application/vnd.ms-excel');
+    }
+
+    // Content type validation for images
+    function isImageFile() {
+      return request.resource.contentType.matches('image/.*');
+    }
+
+    // Content type validation for documents
+    function isDocumentFile() {
+      return request.resource.contentType.matches('application/pdf') ||
+             request.resource.contentType.matches('application/msword') ||
+             request.resource.contentType.matches('application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+    }
+
+    // Default rules - deny access
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+
+    // Import files - only staff can read/write
+    match /imports/{importType}/{userId}/{fileName} {
+      allow read: if isStaff();
+      allow write: if isStaff() &&
+                    isValidFileSize() &&
+                    isExcelFile() &&
+                    isOwner(userId);
+    }
+
+    // Form attachments - creators and staff can read, only creators can write
+    match /forms/{formId}/attachments/{fileName} {
+      allow read: if isSignedIn() &&
+                  (isStaff() ||
+                   request.auth.uid == firestore.get(/databases/(default)/documents/formSubmissions/$(formId)).data.submittedBy);
+      allow write: if isSignedIn() &&
+                   isValidFileSize() &&
+                   (isDocumentFile() || isImageFile()) &&
+                   request.auth.uid == firestore.get(/databases/(default)/documents/formSubmissions/$(formId)).data.submittedBy;
+    }
+
+    // User profile images - owners and staff can read, only owners can write
+    match /users/{userId}/profile/{fileName} {
+      allow read: if isSignedIn() && (isOwner(userId) || isStaff());
+      allow write: if isSignedIn() &&
+                   isValidFileSize() &&
+                   isImageFile() &&
+                   isOwner(userId);
+    }
+
+    // Team images - all signed-in users can read, only staff can write
+    match /teams/{teamId}/images/{fileName} {
+      allow read: if isSignedIn();
+      allow write: if isStaff() &&
+                   isValidFileSize() &&
+                   isImageFile();
+    }
+
+    // Export files - only staff can read/write
+    match /exports/{exportType}/{fileName} {
+      allow read, write: if isStaff();
+    }
+  }
+}

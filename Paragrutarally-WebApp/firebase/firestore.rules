@@ -1,0 +1,107 @@
+// firebase/firestore.rules
+// Firestore security rules
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    function isStaff() {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        (
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'staff' ||
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
+        );
+    }
+
+    function isCurrentUser(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidTimestamp() {
+      return request.time == request.resource.data.updatedAt;
+    }
+
+    // Users collection
+    match /users/{userId} {
+      // Anyone can read their own user document
+      // Admins can read all user documents
+      // Staff can read all user documents
+      allow read: if isCurrentUser(userId) || isStaff();
+
+      // Only admins can create user documents
+      // Users can update their own documents (but not role)
+      allow create: if isAdmin();
+      allow update: if isAdmin() ||
+        (isCurrentUser(userId) &&
+         request.resource.data.role == resource.data.role);
+
+      // Only admins can delete user documents
+      allow delete: if isAdmin();
+    }
+
+    // Kids collection
+    match /kids/{kidId} {
+      // Staff and admins can read, create, update, delete
+      // External partners can only read
+      allow read: if isSignedIn();
+      allow create, update, delete: if isStaff();
+    }
+
+    // Teams collection
+    match /teams/{teamId} {
+      // Staff and admins can read, create, update, delete
+      // External partners can only read
+      allow read: if isSignedIn();
+      allow create, update, delete: if isStaff();
+    }
+
+    // Activities collection
+    match /activities/{activityId} {
+      // Staff and admins can read, create, update, delete
+      // External partners can only read
+      allow read: if isSignedIn();
+      allow create, update, delete: if isStaff();
+    }
+
+    // Forms collection
+    match /forms/{formId} {
+      // Staff and admins can read, create, update, delete
+      // External partners can only read
+      allow read: if isSignedIn();
+      allow create: if isAdmin();
+      allow update, delete: if isAdmin();
+    }
+
+    // Form submissions collection
+    match /formSubmissions/{submissionId} {
+      // Users can read and create their own submissions
+      // Staff and admins can read all submissions
+      // Only staff and admins can update or delete submissions
+      allow read: if isStaff() ||
+        (isSignedIn() && resource.data.submittedBy == request.auth.uid);
+      allow create: if isSignedIn();
+      allow update: if isStaff() ||
+        (isSignedIn() &&
+         resource.data.submittedBy == request.auth.uid &&
+         resource.data.status == 'draft');
+      allow delete: if isStaff();
+    }
+
+    // Import logs collection
+    match /importLogs/{logId} {
+      // Only staff and admins can read, create, update, delete import logs
+      allow read, create, update, delete: if isStaff();
+    }
+  }
+}
