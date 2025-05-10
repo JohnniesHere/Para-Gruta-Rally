@@ -2,19 +2,15 @@ import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import AppRouter from './routes/AppRouter';
-import './App.css';
-
-import ErrorBoundary from './ErrorBoundary';
+import './styles/main.css';
 
 function App() {
     return (
-        <ErrorBoundary>
-            <BrowserRouter>
-                <AuthProvider>
-                    <AppRouter />
-                </AuthProvider>
-            </BrowserRouter>
-        </ErrorBoundary>
+        <BrowserRouter>
+            <AuthProvider>
+                <AppRouter />
+            </AuthProvider>
+        </BrowserRouter>
     );
 }
 

@@ -1,16 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import {
-    collection,
-    addDoc,
-    doc,
-    getDoc,
-    updateDoc,
-    arrayUnion,
-    serverTimestamp,
-    getDocs,
-    query, where
-} from 'firebase/firestore';
+import { collection, addDoc, doc, getDoc, updateDoc, arrayUnion, serverTimestamp } from 'firebase/firestore';
 import { storage, db } from '../../services/firebase/firebase';
 
 const PhotoUploader = ({ eventId }) => {
