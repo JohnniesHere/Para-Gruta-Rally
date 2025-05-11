@@ -1,7 +1,7 @@
-// src/components/auth/UserProfile.js
+// src/components/auth/UserProfile.jsx
 
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth } from '../../hooks/useAuth.jsx';
 import { useNotification } from '../../contexts/NotificationContext';
 import LoadingSpinner from '../layout/LoadingSpinner';
 

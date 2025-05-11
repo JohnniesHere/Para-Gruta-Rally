@@ -1,12 +1,11 @@
-// src/components/data/DataExport.js
+// src/components/data/DataExport.jsx
 
 import React, { useState } from 'react';
-import { collection, getDocs, query, where, orderBy } from 'firebase/firestore';
+import { collection, getDocs, query, where, orderBy, addDoc, serverTimestamp } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '../../firebase/config';
-import { useAuth } from '../../hooks/useAuth';
-import * as XLSX from 'xlsx';
-import LoadingSpinner from '../layout/LoadingSpinner';
+import { useAuth } from '../../contexts/AuthContext';
+import ExcelJS from 'exceljs';
 import { useNotification } from '../../contexts/NotificationContext';
 
 function DataExport() {
@@ -16,7 +15,10 @@ function DataExport() {
     const [loading, setLoading] = useState(false);
     const [downloadUrl, setDownloadUrl] = useState(null);
     const { currentUser } = useAuth();
-    const { notifySuccess, notifyError } = useNotification();
+    // If you don't have NotificationContext yet, use a simple placeholder
+    const notifySuccess = (message) => console.log('Success:', message);
+    const notifyError = (message) => console.error('Error:', message);
+    const notifyWarning = (message) => console.warn('Warning:', message);
 
     // Available export types
     const exportTypes = [
@@ -57,22 +59,32 @@ function DataExport() {
             }
 
             // Create workbook
-            const workbook = XLSX.utils.book_new();
-            const worksheet = XLSX.utils.json_to_sheet(data);
+            const workbook = new ExcelJS.Workbook();
+            const worksheet = workbook.addWorksheet('Data');
 
-            // Add worksheet to workbook
-            XLSX.utils.book_append_sheet(workbook, worksheet, 'Data');
+            // Add headers
+            if (data.length > 0) {
+                const headers = Object.keys(data[0]);
+                worksheet.addRow(headers);
 
-            // Convert workbook to binary string
-            const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+                // Add data rows
+                data.forEach(item => {
+                    worksheet.addRow(Object.values(item));
+                });
+            }
+
+            // Write to buffer
+            const buffer = await workbook.xlsx.writeBuffer();
 
             // Create Blob
-            const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            const blob = new Blob([buffer], {
+                type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            });
 
-            // Option 1: Save directly to user's device
+            // Save directly to user's device
             downloadFile(blob, fileName);
 
-            // Option 2: Upload to Firebase Storage and provide a download link
+            // Upload to Firebase Storage
             await uploadToStorage(blob, fileName);
 
             notifySuccess('Export completed successfully');

@@ -1,0 +1,40 @@
+/* src/components/layout/Sidebar.css */
+.sidebar {
+    width: 250px;
+    background-color: #ffffff;
+    box-shadow: 1px 0 5px rgba(0, 0, 0, 0.1);
+    padding: 20px 0;
+    overflow-y: auto;
+}
+
+.sidebar-links {
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-links a {
+    padding: 12px 20px;
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+    border-left: 4px solid transparent;
+}
+
+.sidebar-links a:hover {
+    background-color: #f5f5f5;
+}
+
+.sidebar-links a.active {
+    background-color: #e3f2fd;
+    border-left-color: #2196f3;
+    color: #2196f3;
+}
+
+.sidebar-category {
+    margin-top: 20px;
+    padding: 0 20px;
+    font-weight: bold;
+    color: #666;
+    font-size: 14px;
+    text-transform: uppercase;
+}
