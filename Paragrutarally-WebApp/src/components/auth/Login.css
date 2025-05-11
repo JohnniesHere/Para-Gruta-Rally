@@ -1,63 +1,42 @@
 /* src/components/auth/Login.css */
 .login-page {
     display: flex;
-    justify-content: center;
-    align-items: center;
+    flex-direction: column;
     min-height: 100vh;
-    background-color: #f5f5f5;
-    padding: 20px;
-}
-
-.login-container {
-    display: flex;
     width: 100%;
-    max-width: 1000px;
-    background-color: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
+    background-color: #f5f5f5;
 }
 
-.logo-container {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 40px;
+/* Logo header at the top */
+.logo-header {
+    padding: 20px;
+    align-self: flex-start;
 }
 
-.logo-triangle {
-    width: 0;
-    height: 0;
-    border-left: 150px solid transparent;
-    border-right: 150px solid transparent;
-    border-bottom: 260px solid #a8d8ff;
-    position: relative;
-    display: flex;
-    justify-content: center;
+.main-logo {
+    height: 180px; /* Adjust based on your logo size */
+    width: auto;
 }
 
-.logo-text {
-    position: absolute;
-    bottom: -130px;
-    font-size: 24px;
-    font-style: italic;
-}
-
-.login-form-container {
+/* Center content area */
+.login-content {
     flex: 1;
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
-    padding: 40px;
+    justify-content: center;
+    padding: 20px;
+}
+
+.app-title-container {
+    margin-bottom: 30px;
+    text-align: center;
 }
 
 .app-title {
     font-size: 28px;
-    margin-bottom: 30px;
     color: #333;
-    text-align: center;
+    margin: 0;
 }
 
 .login-form-box {
@@ -67,6 +46,7 @@
     border-radius: 8px;
     padding: 30px;
     margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .login-heading {
@@ -94,6 +74,30 @@
     border: 1px solid #ddd;
     border-radius: 4px;
     background-color: #fff;
+}
+
+.login-button {
+    width: 100%;
+    padding: 12px;
+    background-color: #4285f4; /* Google blue color */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.login-button:hover {
+    background-color: #3367d6; /* Darker blue on hover */
+}
+
+.login-button:disabled {
+    background-color: #a0a0a0;
+    cursor: not-allowed;
 }
 
 .login-options {
@@ -147,6 +151,10 @@
     background-color: #ffb3b3;
 }
 
+.contact-container {
+    margin-top: 20px;
+}
+
 .contact-us-btn {
     padding: 10px 20px;
     background-color: #a8d8ff;
@@ -170,27 +178,18 @@
     text-align: center;
 }
 
+/* Responsive adjustments */
 @media (max-width: 768px) {
-    .login-container {
-        flex-direction: column;
+    .logo-header {
+        padding: 15px;
+        text-align: center;
     }
 
-    .logo-container {
-        padding: 20px;
+    .main-logo {
+        height: 40px;
     }
 
-    .logo-triangle {
-        border-left: 100px solid transparent;
-        border-right: 100px solid transparent;
-        border-bottom: 173px solid #a8d8ff;
-    }
-
-    .logo-text {
-        bottom: -90px;
-        font-size: 18px;
-    }
-
-    .login-form-container {
+    .login-form-box {
         padding: 20px;
     }
 }
