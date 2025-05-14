@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { collection, query, where, orderBy, getDocs, doc, getDoc, deleteDoc } from 'firebase/firestore';
-import { db } from '../../firebase';
 import Spinner from '../common/Spinner';
 import ErrorMessage from '../common/ErrorMessage';
 import Tabs from '../common/Tabs';
+
+// Import the forms service instead of direct Firebase imports
+import { 
+    getForm, 
+    getFormSubmissions,
+    deleteDocument
+} from '../../firebase/services/forms';
 
 const FormReview = () => {
     const { formId } = useParams();
@@ -24,26 +29,13 @@ const FormReview = () => {
             try {
                 setLoading(true);
 
-                // Fetch form details
-                const formDoc = await getDoc(doc(db, 'forms', formId));
-                if (!formDoc.exists()) {
-                    throw new Error('Form not found');
-                }
-                setForm(formDoc.data());
+                // Fetch form details using the service
+                const formData = await getForm(formId);
+                setForm(formData);
 
-                // Fetch form submissions
-                const submissionsQuery = query(
-                    collection(db, 'form_submissions'),
-                    where('formId', '==', formId),
-                    orderBy('submittedAt', 'desc')
-                );
-
-                const submissionsSnapshot = await getDocs(submissionsQuery);
-                const submissionsData = submissionsSnapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                }));
-                setSubmissions(submissionsData);
+                // Fetch form submissions using the service
+                const result = await getFormSubmissions(formId);
+                setSubmissions(result.submissions || []);
             } catch (err) {
                 console.error('Error fetching form data:', err);
                 setError(err);
@@ -72,7 +64,8 @@ const FormReview = () => {
     // Delete submission
     const handleDeleteSubmission = async (submissionId) => {
         try {
-            await deleteDoc(doc(db, 'form_submissions', submissionId));
+            // Use the deleteDocument service method
+            await deleteDocument('form_submissions', submissionId);
             setSubmissions(prev => prev.filter(submission => submission.id !== submissionId));
             setSelectedSubmission(null);
             setConfirmDelete(null);

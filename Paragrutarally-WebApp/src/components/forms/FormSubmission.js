@@ -1,376 +1,386 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { doc, getDoc, collection, addDoc, Timestamp, increment, updateDoc } from 'firebase/firestore';
-import { db } from '../../firebase';
 import Spinner from '../common/Spinner';
 import ErrorMessage from '../common/ErrorMessage';
+import Tabs from '../common/Tabs';
 
-const FormSubmission = () => {
+// Import the forms service instead of direct Firebase imports
+import { 
+    getForm, 
+    getFormSubmissions, 
+    getFormSubmission, 
+    deleteDocument  // We'll use the generic delete function for submissions
+} from '../../firebase/services/forms';
+
+const FormReview = () => {
     const { formId } = useParams();
     const navigate = useNavigate();
 
     const [form, setForm] = useState(null);
-    const [formData, setFormData] = useState({});
+    const [submissions, setSubmissions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [submitting, setSubmitting] = useState(false);
-    const [submitted, setSubmitted] = useState(false);
-    const [validationErrors, setValidationErrors] = useState({});
+    const [activeTab, setActiveTab] = useState('all');
+    const [selectedSubmission, setSelectedSubmission] = useState(null);
+    const [confirmDelete, setConfirmDelete] = useState(null);
 
-    // Fetch form data
+    // Fetch form and submissions
     useEffect(() => {
-        const fetchForm = async () => {
+        const fetchData = async () => {
             try {
                 setLoading(true);
-                const formDoc = await getDoc(doc(db, 'forms', formId));
 
-                if (formDoc.exists()) {
-                    const formData = formDoc.data();
+                // Fetch form details using our service
+                const formData = await getForm(formId);
+                setForm(formData);
 
-                    // Check if form is active
-                    if (formData.status !== 'active') {
-                        setError(new Error('This form is not currently active'));
-                        return;
-                    }
-
-                    setForm(formData);
-
-                    // Initialize form values
-                    const initialValues = {};
-                    formData.fields.forEach(field => {
-                        if (field.type === 'checkbox') {
-                            initialValues[field.id] = [];
-                        } else {
-                            initialValues[field.id] = '';
-                        }
-                    });
-                    setFormData(initialValues);
-                } else {
-                    setError(new Error('Form not found'));
-                }
+                // Fetch form submissions using our service
+                const submissionsData = await getFormSubmissions(formId);
+                setSubmissions(submissionsData.submissions || []);
             } catch (err) {
-                console.error('Error fetching form:', err);
+                console.error('Error fetching form data:', err);
                 setError(err);
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchForm();
+        fetchData();
     }, [formId]);
 
-    // Handle field change
-    const handleFieldChange = (fieldId, value) => {
-        setFormData(prev => ({
-            ...prev,
-            [fieldId]: value
-        }));
+    // Format date
+    const formatDate = (timestamp) => {
+        if (!timestamp) return 'N/A';
 
-        // Clear validation error for this field
-        if (validationErrors[fieldId]) {
-            setValidationErrors(prev => {
-                const newErrors = { ...prev };
-                delete newErrors[fieldId];
-                return newErrors;
-            });
-        }
-    };
-
-    // Handle checkbox change
-    const handleCheckboxChange = (fieldId, option, isChecked) => {
-        setFormData(prev => {
-            const currentSelections = prev[fieldId] || [];
-
-            if (isChecked) {
-                // Add option if not already present
-                return {
-                    ...prev,
-                    [fieldId]: currentSelections.includes(option)
-                        ? currentSelections
-                        : [...currentSelections, option]
-                };
-            } else {
-                // Remove option
-                return {
-                    ...prev,
-                    [fieldId]: currentSelections.filter(selected => selected !== option)
-                };
-            }
+        const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+        return date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
         });
-
-        // Clear validation error for this field
-        if (validationErrors[fieldId]) {
-            setValidationErrors(prev => {
-                const newErrors = { ...prev };
-                delete newErrors[fieldId];
-                return newErrors;
-            });
-        }
     };
 
-    // Validate form
-    const validateForm = () => {
-        const errors = {};
-
-        if (!form) return false;
-
-        form.fields.forEach(field => {
-            if (field.required) {
-                const value = formData[field.id];
-
-                if (field.type === 'checkbox') {
-                    if (!value || value.length === 0) {
-                        errors[field.id] = 'Please select at least one option';
-                    }
-                } else if (!value || String(value).trim() === '') {
-                    errors[field.id] = 'This field is required';
-                }
-            }
-        });
-
-        setValidationErrors(errors);
-        return Object.keys(errors).length === 0;
-    };
-
-    // Submit form
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-
-        // Validate form
-        if (!validateForm()) {
-            // Scroll to first error
-            const firstErrorField = document.querySelector('.field-error');
-            if (firstErrorField) {
-                firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-            return;
-        }
-
+    // Delete submission
+    const handleDeleteSubmission = async (submissionId) => {
         try {
-            setSubmitting(true);
+            // Use the generic deleteDocument function from our service
+            await deleteDocument('form_submissions', submissionId);
+            setSubmissions(prev => prev.filter(submission => submission.id !== submissionId));
+            setSelectedSubmission(null);
+            setConfirmDelete(null);
+        } catch (err) {
+            console.error('Error deleting submission:', err);
+        }
+    };
 
-            // Prepare submission data
-            const submission = {
-                formId,
-                formTitle: form.title,
-                data: formData,
-                submittedAt: Timestamp.now()
-            };
+    // Export submissions as CSV
+    const exportCSV = () => {
+        if (!form || submissions.length === 0) return;
 
-            // Add submission to database
-            await addDoc(collection(db, 'form_submissions'), submission);
+        // Get all field IDs from form
+        const fieldIds = form.fields.map(field => field.id);
 
-            // Increment submission count on form
-            await updateDoc(doc(db, 'forms', formId), {
-                submissionCount: increment(1)
+        // Create header row
+        const headers = ['Submission ID', 'Submitted At', ...form.fields.map(field => field.label)];
+
+        // Create data rows
+        const rows = submissions.map(submission => {
+            const rowData = [
+                submission.id,
+                formatDate(submission.submittedAt)
+            ];
+
+            // Add field data
+            fieldIds.forEach(fieldId => {
+                const value = submission.data[fieldId];
+
+                if (Array.isArray(value)) {
+                    // Handle checkbox data
+                    rowData.push(value.join(', '));
+                } else {
+                    rowData.push(value || '');
+                }
             });
 
-            setSubmitted(true);
-        } catch (err) {
-            console.error('Error submitting form:', err);
-            setError(err);
-        } finally {
-            setSubmitting(false);
-        }
+            return rowData;
+        });
+
+        // Combine header and rows
+        const csvContent = [
+            headers.join(','),
+            ...rows.map(row => row.join(','))
+        ].join('\n');
+
+        // Create download link
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.setAttribute('href', url);
+        link.setAttribute('download', `${form.title}_submissions.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     };
 
     if (loading) return <Spinner />;
     if (error) return <ErrorMessage message={error.message} />;
     if (!form) return <ErrorMessage message="Form not found" />;
 
-    if (submitted) {
-        return (
-            <div className="bg-white rounded-lg shadow-md p-6 max-w-3xl mx-auto">
-                <div className="text-center py-8">
-                    <svg
-                        className="mx-auto h-16 w-16 text-green-500"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                    >
-                        <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M5 13l4 4L19 7"
-                        />
-                    </svg>
-                    <h2 className="mt-4 text-2xl font-bold text-gray-900">Form Submitted Successfully</h2>
-                    <p className="mt-2 text-gray-600">Thank you for your submission. Your response has been recorded.</p>
-                    <div className="mt-6">
-                        <button
-                            onClick={() => navigate(-1)}
-                            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-                        >
-                            Back
-                        </button>
-                    </div>
-                </div>
-            </div>
-        );
-    }
+    const tabs = [
+        { id: 'all', label: 'All Submissions' },
+        { id: 'details', label: 'Submission Details', disabled: !selectedSubmission }
+    ];
 
     return (
-        <div className="bg-white rounded-lg shadow-md p-6 max-w-3xl mx-auto">
-            <h1 className="text-2xl font-bold mb-4">{form.title}</h1>
-            {form.description && (
-                <p className="text-gray-600 mb-6">{form.description}</p>
-            )}
+        <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-2xl font-bold">
+                    Form Submissions: {form.title}
+                </h1>
+                <div className="space-x-2">
+                    <button
+                        onClick={exportCSV}
+                        className="bg-indigo-500 text-white px-4 py-2 rounded"
+                        disabled={submissions.length === 0}
+                    >
+                        Export CSV
+                    </button>
+                    <button
+                        onClick={() => navigate('/forms')}
+                        className="bg-gray-200 px-4 py-2 rounded"
+                    >
+                        Back to Forms
+                    </button>
+                </div>
+            </div>
 
-            <form onSubmit={handleSubmit}>
-                <div className="space-y-6">
-                    {form.fields
-                        .sort((a, b) => a.order - b.order)
-                        .map(field => (
-                            <div key={field.id} className={`field-container ${validationErrors[field.id] ? 'field-error' : ''}`}>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    {field.label}
-                                    {field.required && <span className="text-red-500">*</span>}
-                                </label>
+            <Tabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
 
-                                {field.type === 'text' && (
-                                    <input
-                                        type="text"
-                                        value={formData[field.id] || ''}
-                                        onChange={(e) => handleFieldChange(field.id, e.target.value)}
-                                        placeholder={field.placeholder}
-                                        className={`mt-1 block w-full rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 ${
-                                            validationErrors[field.id] ? 'border-red-300' : 'border-gray-300'
-                                        }`}
-                                    />
-                                )}
+            <div className="mt-6">
+                {activeTab === 'all' && (
+                    <div>
+                        {submissions.length > 0 ? (
+                            <div className="bg-white shadow-md rounded-lg overflow-hidden">
+                                <table className="min-w-full divide-y divide-gray-200">
+                                    <thead className="bg-gray-50">
+                                    <tr>
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Submission ID
+                                        </th>
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Submitted At
+                                        </th>
+                                        {form.fields.slice(0, 3).map(field => (
+                                            <th
+                                                key={field.id}
+                                                scope="col"
+                                                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                            >
+                                                {field.label}
+                                            </th>
+                                        ))}
+                                        <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Actions
+                                        </th>
+                                    </tr>
+                                    </thead>
+                                    <tbody className="bg-white divide-y divide-gray-200">
+                                    {submissions.map(submission => (
+                                        <tr
+                                            key={submission.id}
+                                            className={`hover:bg-gray-50 cursor-pointer ${
+                                                selectedSubmission?.id === submission.id ? 'bg-blue-50' : ''
+                                            }`}
+                                            onClick={() => {
+                                                setSelectedSubmission(submission);
+                                                setActiveTab('details');
+                                            }}
+                                        >
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                {submission.id.substring(0, 8)}...
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                {formatDate(submission.submittedAt)}
+                                            </td>
+                                            {form.fields.slice(0, 3).map(field => (
+                                                <td
+                                                    key={field.id}
+                                                    className="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
+                                                >
+                                                    {renderFieldValue(submission.data[field.id], field.type)}
+                                                </td>
+                                            ))}
+                                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setSelectedSubmission(submission);
+                                                        setActiveTab('details');
+                                                    }}
+                                                    className="text-blue-600 hover:text-blue-900 mr-4"
+                                                >
+                                                    View
+                                                </button>
+                                                {confirmDelete === submission.id ? (
+                                                    <>
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleDeleteSubmission(submission.id);
+                                                            }}
+                                                            className="text-red-600 hover:text-red-900 mr-2"
+                                                        >
+                                                            Confirm
+                                                        </button>
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setConfirmDelete(null);
+                                                            }}
+                                                            className="text-gray-600 hover:text-gray-900"
+                                                        >
+                                                            Cancel
+                                                        </button>
+                                                    </>
+                                                ) : (
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setConfirmDelete(submission.id);
+                                                        }}
+                                                        className="text-red-600 hover:text-red-900"
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        ) : (
+                            <div className="text-center py-12 bg-gray-50 rounded-lg">
+                                <p className="text-gray-500">No submissions yet</p>
+                            </div>
+                        )}
+                    </div>
+                )}
 
-                                {field.type === 'textarea' && (
-                                    <textarea
-                                        value={formData[field.id] || ''}
-                                        onChange={(e) => handleFieldChange(field.id, e.target.value)}
-                                        placeholder={field.placeholder}
-                                        rows="3"
-                                        className={`mt-1 block w-full rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 ${
-                                            validationErrors[field.id] ? 'border-red-300' : 'border-gray-300'
-                                        }`}
-                                    ></textarea>
-                                )}
-
-                                {field.type === 'number' && (
-                                    <input
-                                        type="number"
-                                        value={formData[field.id] || ''}
-                                        onChange={(e) => handleFieldChange(field.id, e.target.value)}
-                                        placeholder={field.placeholder}
-                                        className={`mt-1 block w-full rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 ${
-                                            validationErrors[field.id] ? 'border-red-300' : 'border-gray-300'
-                                        }`}
-                                    />
-                                )}
-
-                                {field.type === 'date' && (
-                                    <input
-                                        type="date"
-                                        value={formData[field.id] || ''}
-                                        onChange={(e) => handleFieldChange(field.id, e.target.value)}
-                                        className={`mt-1 block w-full rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 ${
-                                            validationErrors[field.id] ? 'border-red-300' : 'border-gray-300'
-                                        }`}
-                                    />
-                                )}
-
-                                {field.type === 'select' && (
-                                    <select
-                                        value={formData[field.id] || ''}
-                                        onChange={(e) => handleFieldChange(field.id, e.target.value)}
-                                        className={`mt-1 block w-full rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 ${
-                                            validationErrors[field.id] ? 'border-red-300' : 'border-gray-300'
-                                        }`}
+                {activeTab === 'details' && selectedSubmission && (
+                    <div className="bg-white rounded-lg border border-gray-200 p-6">
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-lg font-semibold">Submission Details</h2>
+                            <div className="space-x-2">
+                                <button
+                                    onClick={() => setActiveTab('all')}
+                                    className="text-blue-600 hover:text-blue-900"
+                                >
+                                    Back to List
+                                </button>
+                                {confirmDelete === selectedSubmission.id ? (
+                                    <>
+                                        <button
+                                            onClick={() => handleDeleteSubmission(selectedSubmission.id)}
+                                            className="text-red-600 hover:text-red-900 mr-2"
+                                        >
+                                            Confirm Delete
+                                        </button>
+                                        <button
+                                            onClick={() => setConfirmDelete(null)}
+                                            className="text-gray-600 hover:text-gray-900"
+                                        >
+                                            Cancel
+                                        </button>
+                                    </>
+                                ) : (
+                                    <button
+                                        onClick={() => setConfirmDelete(selectedSubmission.id)}
+                                        className="text-red-600 hover:text-red-900"
                                     >
-                                        <option value="">Select an option</option>
-                                        {field.options.map((option, index) => (
-                                            <option key={index} value={option}>
-                                                {option}
-                                            </option>
-                                        ))}
-                                    </select>
-                                )}
-
-                                {field.type === 'checkbox' && (
-                                    <div className="mt-2 space-y-2">
-                                        {field.options.map((option, index) => (
-                                            <div key={index} className="flex items-center">
-                                                <input
-                                                    type="checkbox"
-                                                    id={`${field.id}-${index}`}
-                                                    checked={(formData[field.id] || []).includes(option)}
-                                                    onChange={(e) => handleCheckboxChange(field.id, option, e.target.checked)}
-                                                    className={`h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 ${
-                                                        validationErrors[field.id] ? 'border-red-300' : ''
-                                                    }`}
-                                                />
-                                                <label
-                                                    htmlFor={`${field.id}-${index}`}
-                                                    className="ml-2 block text-sm text-gray-900"
-                                                >
-                                                    {option}
-                                                </label>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-
-                                {field.type === 'radio' && (
-                                    <div className="mt-2 space-y-2">
-                                        {field.options.map((option, index) => (
-                                            <div key={index} className="flex items-center">
-                                                <input
-                                                    type="radio"
-                                                    id={`${field.id}-${index}`}
-                                                    name={field.id}
-                                                    value={option}
-                                                    checked={formData[field.id] === option}
-                                                    onChange={(e) => handleFieldChange(field.id, e.target.value)}
-                                                    className={`h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500 ${
-                                                        validationErrors[field.id] ? 'border-red-300' : ''
-                                                    }`}
-                                                />
-                                                <label
-                                                    htmlFor={`${field.id}-${index}`}
-                                                    className="ml-2 block text-sm text-gray-900"
-                                                >
-                                                    {option}
-                                                </label>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-
-                                {validationErrors[field.id] && (
-                                    <p className="mt-1 text-sm text-red-600">
-                                        {validationErrors[field.id]}
-                                    </p>
+                                        Delete
+                                    </button>
                                 )}
                             </div>
-                        ))}
-                </div>
+                        </div>
 
-                <div className="mt-8 flex justify-end">
-                    <button
-                        type="button"
-                        onClick={() => navigate(-1)}
-                        className="mr-4 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-                        disabled={submitting}
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        type="submit"
-                        className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-                        disabled={submitting}
-                    >
-                        {submitting ? 'Submitting...' : 'Submit'}
-                    </button>
-                </div>
-            </form>
+                        <div className="grid grid-cols-2 gap-4 mb-6 border-b border-gray-200 pb-4">
+                            <div>
+                                <h3 className="text-sm font-medium text-gray-500">Submission ID</h3>
+                                <p className="mt-1">{selectedSubmission.id}</p>
+                            </div>
+                            <div>
+                                <h3 className="text-sm font-medium text-gray-500">Submitted At</h3>
+                                <p className="mt-1">{formatDate(selectedSubmission.submittedAt)}</p>
+                            </div>
+                        </div>
+
+                        <div className="space-y-6">
+                            {form.fields.map(field => (
+                                <div key={field.id} className="border-b border-gray-200 pb-4 last:border-0">
+                                    <h3 className="text-sm font-medium text-gray-500">{field.label}</h3>
+                                    <div className="mt-2">
+                                        {renderDetailedFieldValue(selectedSubmission.data[field.id], field)}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+            </div>
         </div>
     );
 };
 
-export default FormSubmission;
+// Helper function to render field value in table
+const renderFieldValue = (value, fieldType) => {
+    if (value === undefined || value === null || value === '') {
+        return <span className="text-gray-400">—</span>;
+    }
+
+    if (Array.isArray(value)) {
+        return value.length > 0 ? value.join(', ') : <span className="text-gray-400">—</span>;
+    }
+
+    if (fieldType === 'date') {
+        return new Date(value).toLocaleDateString();
+    }
+
+    return String(value).length > 30
+        ? String(value).substring(0, 30) + '...'
+        : String(value);
+};
+
+// Helper function to render detailed field value
+const renderDetailedFieldValue = (value, field) => {
+    if (value === undefined || value === null || value === '') {
+        return <span className="text-gray-400">Not provided</span>;
+    }
+
+    if (field.type === 'checkbox' && Array.isArray(value)) {
+        return value.length > 0 ? (
+            <ul className="list-disc list-inside">
+                {value.map((item, index) => (
+                    <li key={index} className="text-gray-900">{item}</li>
+                ))}
+            </ul>
+        ) : (
+            <span className="text-gray-400">No options selected</span>
+        );
+    }
+
+    if (field.type === 'date') {
+        return new Date(value).toLocaleDateString();
+    }
+
+    if (field.type === 'textarea') {
+        return <p className="whitespace-pre-line text-gray-900">{value}</p>;
+    }
+
+    return <p className="text-gray-900">{value}</p>;
+};
+
+export default FormReview;

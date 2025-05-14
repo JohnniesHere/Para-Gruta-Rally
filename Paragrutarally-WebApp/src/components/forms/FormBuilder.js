@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { doc, getDoc, setDoc, Timestamp, collection } from 'firebase/firestore';
-import { db } from '../../firebase';
-import { FirestoreService } from '../dataSync';
 import Spinner from '../common/Spinner';
 import ErrorMessage from '../common/ErrorMessage';
 import { v4 as uuidv4 } from 'uuid';
+
+// Import the forms service instead of direct Firebase imports
+import { getForm, createForm, updateForm } from '../../firebase/services/forms';
 
 const FormBuilder = () => {
     const { formId } = useParams();
@@ -31,13 +31,10 @@ const FormBuilder = () => {
         const fetchForm = async () => {
             try {
                 setLoading(true);
-                const formDoc = await getDoc(doc(db, 'forms', formId));
-
-                if (formDoc.exists()) {
-                    setForm(formDoc.data());
-                } else {
-                    setError(new Error('Form not found'));
-                }
+                
+                // Use the getForm service method instead of direct Firebase call
+                const formData = await getForm(formId);
+                setForm(formData);
             } catch (err) {
                 console.error('Error fetching form:', err);
                 setError(err);
@@ -177,23 +174,20 @@ const FormBuilder = () => {
         try {
             setSaving(true);
 
-            const now = Timestamp.now();
+            // Prepare form data for saving
             const formToSave = {
                 ...form,
-                status,
-                updatedAt: now
+                status
             };
 
-            if (!isEditing) {
-                formToSave.createdAt = now;
-                formToSave.submissionCount = 0;
+            // Use the service methods instead of direct Firebase calls
+            if (isEditing) {
+                await updateForm(formId, formToSave);
+            } else {
+                // Assuming current user ID is available - you might need to get this from auth context
+                const userId = localStorage.getItem('userId') || 'anonymous'; // Replace with actual user ID source
+                await createForm(formToSave, userId);
             }
-
-            const formRef = isEditing
-                ? doc(db, 'forms', formId)
-                : doc(collection(db, 'forms'));
-
-            await setDoc(formRef, formToSave);
 
             navigate('/forms');
         } catch (err) {
