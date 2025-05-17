@@ -69,6 +69,11 @@
     font-size: 14px;
 }
 
+.form-group input{
+    width: 90%;
+    max-width: 95%;
+}
+
 .form-group textarea {
     resize: vertical;
 }
