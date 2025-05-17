@@ -3,8 +3,9 @@
     display: flex;
     flex-direction: column;
     height: 100vh;
+    overflow: hidden;
     background-color: #121212;
-    color: #ff0000;
+    color: #fa0000;
 }
 
 .dashboard-content {
