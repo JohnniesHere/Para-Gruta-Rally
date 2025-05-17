@@ -1,0 +1,9 @@
+/* src/pages/shared/MyAccountPage.css */
+.my-account-page {
+    padding: 20px;
+}
+
+.my-account-page h1 {
+    margin-bottom: 25px;
+    color: #e0e0e0;
+}

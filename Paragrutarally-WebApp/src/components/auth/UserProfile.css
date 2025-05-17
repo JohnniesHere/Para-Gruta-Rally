@@ -1,0 +1,306 @@
+/* src/components/auth/UserProfile.css */
+.user-profile {
+    background-color: #2d2d2d;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+}
+
+.profile-header {
+    padding: 25px 30px;
+    background-color: #1e1e1e;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #444;
+}
+
+.profile-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background-color: #3f51b5;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-right: 20px;
+}
+
+.profile-info h2 {
+    color: #e0e0e0;
+    margin-bottom: 5px;
+}
+
+.profile-info p {
+    color: #b3b3b3;
+    margin: 0;
+}
+
+.user-role {
+    margin-top: 5px;
+    color: #64b5f6 !important;
+    font-weight: 500;
+}
+
+.profile-tabs {
+    display: flex;
+    background-color: #262626;
+    border-bottom: 1px solid #444;
+}
+
+.tab-button {
+    padding: 15px 20px;
+    background: none;
+    border: none;
+    color: #b3b3b3;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.tab-button:hover {
+    background-color: #333;
+    color: #fff;
+}
+
+.tab-button.active {
+    color: #fff;
+    border-bottom: 3px solid #3f51b5;
+}
+
+.profile-content {
+    padding: 25px 30px;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.section-header h3 {
+    color: #e0e0e0;
+    margin: 0;
+}
+
+.edit-button, .secondary-button {
+    background-color: transparent;
+    color: #b3b3b3;
+    border: 1px solid #5c5c5c;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.edit-button:hover, .secondary-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+.save-button {
+    background-color: #3f51b5;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+}
+
+.save-button:hover {
+    background-color: #303f9f;
+}
+
+.cancel-button {
+    background-color: transparent;
+    color: #f44336;
+    border: 1px solid #f44336;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    margin-left: 10px;
+    transition: all 0.3s ease;
+}
+
+.cancel-button:hover {
+    background-color: rgba(244, 67, 54, 0.1);
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #e0e0e0;
+    font-weight: 500;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border-radius: 4px;
+    background-color: #333;
+    border: 1px solid #555;
+    color: #e0e0e0;
+    font-size: 1rem;
+}
+
+.form-group textarea {
+    resize: vertical;
+}
+
+.form-actions {
+    display: flex;
+    margin-top: 25px;
+}
+
+.profile-details {
+    margin-top: 20px;
+}
+
+.detail-item {
+    padding: 15px 0;
+    border-bottom: 1px solid #444;
+    display: flex;
+}
+
+.detail-item:last-child {
+    border-bottom: none;
+}
+
+.detail-label {
+    width: 150px;
+    color: #888;
+    font-weight: 500;
+}
+
+.detail-value {
+    flex: 1;
+    color: #e0e0e0;
+}
+
+.detail-value.bio {
+    white-space: pre-line;
+}
+
+.password-change,
+.two-factor,
+.login-history,
+.theme-settings,
+.notification-settings {
+    margin-bottom: 30px;
+}
+
+.password-change h4,
+.two-factor h4,
+.login-history h4,
+.theme-settings h4,
+.notification-settings h4 {
+    color: #e0e0e0;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #444;
+    padding-bottom: 10px;
+}
+
+.two-factor p,
+.notification-settings p {
+    color: #b3b3b3;
+    margin-bottom: 15px;
+}
+
+.password-form .save-button {
+    margin-top: 10px;
+}
+
+.activity-list {
+    margin-top: 15px;
+}
+
+.activity-item {
+    display: flex;
+    padding: 15px;
+    border-bottom: 1px solid #444;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+}
+
+.activity-details {
+    flex: 1;
+}
+
+.activity-info {
+    display: flex;
+    margin-bottom: 5px;
+}
+
+.device {
+    font-weight: 500;
+    color: #e0e0e0;
+    margin-right: 10px;
+}
+
+.location {
+    color: #b3b3b3;
+}
+
+.activity-time {
+    color: #888;
+    font-size: 0.85rem;
+}
+
+.activity-status {
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.activity-status.current {
+    background-color: rgba(76, 175, 80, 0.2);
+    color: #81c784;
+}
+
+.preference-group {
+    margin-bottom: 20px;
+}
+
+.preference-group > label {
+    display: block;
+    margin-bottom: 10px;
+    color: #e0e0e0;
+    font-weight: 500;
+}
+
+.theme-options,
+.notification-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.theme-option,
+.notification-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.theme-option label,
+.notification-option label {
+    color: #b3b3b3;
+    cursor: pointer;
+}
