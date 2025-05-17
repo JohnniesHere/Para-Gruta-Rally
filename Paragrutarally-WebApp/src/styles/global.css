@@ -80,19 +80,19 @@ h2{
 .form-group label {
     display: block;
     margin-bottom: 8px;
-    color: #e0e0e0;
+    color: #000000;
     font-weight: 500;
 }
 
 .form-group input,
 .form-group select,
 .form-group textarea {
-    width: 100%;
+    width: 95%;
     padding: 10px;
     border-radius: 4px;
-    background-color: #333;
+    background-color: #f8f8f8;
     border: 1px solid #555;
-    color: #e0e0e0;
+    color: #000000;
     font-size: 1rem;
 }
 
