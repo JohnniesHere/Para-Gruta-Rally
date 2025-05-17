@@ -1,0 +1,106 @@
+/* src/styles/global.css */
+/* Common styles to be used across the application */
+
+/* Page headings */
+h1 {
+    color: #e0e0e0;
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 25px;
+    margin-top: 0;
+}
+
+h2{
+    color: #e0e0e0;
+    font-size: 1.5rem;
+    font-weight: 500;
+    margin-bottom: 15px;
+    margin-top: 0;
+}
+
+/* Content sections */
+.content-section {
+    background-color: #2d2d2d;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* Section headings */
+.content-section h2 {
+    color: #e0e0e0;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #444;
+}
+
+/* Buttons */
+.primary-button {
+    background-color: #3f51b5;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+}
+
+.primary-button:hover:not(:disabled) {
+    background-color: #303f9f;
+}
+
+.primary-button:disabled {
+    background-color: #5c5c5c;
+    cursor: not-allowed;
+}
+
+.secondary-button {
+    background-color: transparent;
+    color: #b3b3b3;
+    border: 1px solid #5c5c5c;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.secondary-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+/* Form elements */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #e0e0e0;
+    font-weight: 500;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border-radius: 4px;
+    background-color: #333;
+    border: 1px solid #555;
+    color: #e0e0e0;
+    font-size: 1rem;
+}
+
+.form-group textarea {
+    resize: vertical;
+}
+
+/* Page layout */
+.page {
+    padding: 20px;
+}

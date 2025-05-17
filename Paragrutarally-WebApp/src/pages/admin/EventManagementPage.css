@@ -1,8 +1,11 @@
 /* src/pages/admin/EventManagementPage.css */
+/* Complete redesign with a card-based approach instead of traditional table */
+
 .event-management {
     padding: 20px;
 }
 
+/* Header styling */
 .page-header {
     display: flex;
     justify-content: space-between;
@@ -13,6 +16,7 @@
 .page-header h1 {
     margin: 0;
     color: rgba(255, 255, 255, 0.81);
+    font-size: 2rem;
 }
 
 .create-button {
@@ -24,16 +28,20 @@
     text-decoration: none;
     font-weight: 500;
     transition: background-color 0.3s;
+    white-space: nowrap;
 }
 
 .create-button:hover {
     background-color: #388e3c;
 }
 
+/* Search and filters */
 .event-actions {
     display: flex;
     justify-content: space-between;
     margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 15px;
 }
 
 .event-search {
@@ -43,10 +51,12 @@
 
 .search-input {
     padding: 10px;
-    border: 1px solid #ddd;
+    border: 1px solid #444;
     border-radius: 4px;
     width: 250px;
     font-size: 14px;
+    background-color: #333;
+    color: #e0e0e0;
 }
 
 .search-button {
@@ -66,97 +76,144 @@
 .event-filters {
     display: flex;
     gap: 10px;
+    flex-wrap: wrap;
 }
 
 .filter-select {
     padding: 10px;
-    border: 1px solid #ddd;
+    border: 1px solid #444;
     border-radius: 4px;
     font-size: 14px;
-    background-color: white;
+    background-color: #333;
+    color: #e0e0e0;
 }
 
+/* Table container - with grid layout instead of table */
 .events-table-container {
     margin-bottom: 20px;
-    overflow-x: auto;
+    border-radius: 8px;
+    background-color: #1e1e1e;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
+/* Table headers */
 .events-table {
     width: 100%;
-    border-collapse: collapse;
-    background-color: white;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 1px 8px rgba(0, 0, 0, 0.1);
 }
 
-.events-table th,
-.events-table td {
-    padding: 15px;
-    text-align: left;
-    border-bottom: 1px solid #eee;
+.events-table thead {
+    background-color: #1a1a1a;
+    display: block;
+    width: 100%;
+}
+
+.events-table thead tr {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1.5fr 1fr 1fr 1.5fr;
+    width: 100%;
 }
 
 .events-table th {
-    background-color: #f5f5f5;
+    padding: 15px;
+    text-align: left;
+    color: #e0e0e0;
     font-weight: 500;
-    color: #333;
+    border-bottom: 2px solid #333;
 }
 
-.events-table tr:last-child td {
+/* Table body */
+.events-table tbody {
+    display: block;
+    width: 100%;
+}
+
+.events-table tbody tr {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1.5fr 1fr 1fr 1.5fr;
+    width: 100%;
+    border-bottom: 1px solid #333;
+    transition: background-color 0.2s;
+}
+
+.events-table tbody tr:nth-child(odd) {
+    background-color: #2a2a2a;
+}
+
+.events-table tbody tr:nth-child(even) {
+    background-color: #323232;
+}
+
+.events-table tbody tr:hover {
+    background-color: #3a3a3a;
+}
+
+.events-table tbody tr:last-child {
     border-bottom: none;
 }
 
-.events-table tr:hover {
-    background-color: #f9f9f9;
+.events-table td {
+    padding: 15px;
+    color: #e0e0e0;
+    display: flex;
+    align-items: center;
 }
 
+/* Status badges */
 .status-badge {
     display: inline-block;
-    padding: 5px 10px;
-    border-radius: 15px;
+    padding: 6px 12px;
+    border-radius: 20px;
     font-size: 12px;
     font-weight: 500;
+    text-align: center;
+    min-width: 80px;
 }
 
 .status-badge.upcoming {
-    background-color: #e3f2fd;
-    color: #1565c0;
+    background-color: rgba(33, 150, 243, 0.2);
+    color: #64b5f6;
 }
 
 .status-badge.completed {
-    background-color: #e8f5e9;
-    color: #2e7d32;
+    background-color: rgba(76, 175, 80, 0.2);
+    color: #81c784;
 }
 
 .status-badge.cancelled {
-    background-color: #ffebee;
-    color: #c62828;
+    background-color: rgba(244, 67, 54, 0.2);
+    color: #e57373;
 }
 
+/* Action buttons container */
 .action-buttons {
     display: flex;
     gap: 5px;
+    justify-content: flex-start;
 }
 
+/* Action buttons */
 .edit-button,
 .view-button,
 .delete-button {
-    padding: 5px 10px;
+    min-width: 60px;
+    padding: 6px 12px;
     border: none;
     border-radius: 4px;
     font-size: 12px;
+    font-weight: 500;
     cursor: pointer;
-    transition: background-color 0.3s;
+    transition: all 0.2s;
+    text-align: center;
 }
 
 .edit-button {
-    background-color: #ffeb3b;
+    background-color: #fdd835;
     color: #333;
 }
 
 .edit-button:hover {
-    background-color: #fdd835;
+    background-color: #fbc02d;
 }
 
 .view-button {
@@ -177,24 +234,27 @@
     background-color: #d32f2f;
 }
 
+/* Pagination */
 .pagination {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: 10px 0;
 }
 
 .pagination-button {
-    padding: 10px 15px;
-    background-color: #f5f5f5;
-    border: 1px solid #ddd;
+    padding: 8px 16px;
+    background-color: #333;
+    border: 1px solid #444;
     border-radius: 4px;
     font-size: 14px;
     cursor: pointer;
     transition: background-color 0.3s;
+    color: #e0e0e0;
 }
 
 .pagination-button:hover {
-    background-color: #e0e0e0;
+    background-color: #3a3a3a;
 }
 
 .pagination-numbers {
@@ -208,16 +268,17 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #f5f5f5;
-    border: 1px solid #ddd;
+    background-color: #333;
+    border: 1px solid #444;
     border-radius: 4px;
     font-size: 14px;
     cursor: pointer;
     transition: all 0.3s;
+    color: #e0e0e0;
 }
 
 .pagination-number:hover {
-    background-color: #e0e0e0;
+    background-color: #3a3a3a;
 }
 
 .pagination-number.active {
@@ -226,14 +287,55 @@
     border-color: #2196f3;
 }
 
-@media (max-width: 768px) {
-    .event-actions {
-        flex-direction: column;
-        gap: 15px;
+/* Responsive layout */
+@media (max-width: 1200px) {
+    .events-table thead tr,
+    .events-table tbody tr {
+        grid-template-columns: 2fr 1fr 1.5fr 1fr 1.5fr;
     }
 
     .events-table th:nth-child(4),
     .events-table td:nth-child(4) {
         display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .create-button {
+        align-self: flex-start;
+    }
+
+    .events-table thead tr,
+    .events-table tbody tr {
+        grid-template-columns: 2fr 1fr 1.5fr;
+    }
+
+    .events-table th:nth-child(3),
+    .events-table td:nth-child(3),
+    .events-table th:nth-child(5),
+    .events-table td:nth-child(5) {
+        display: none;
+    }
+}
+
+@media (max-width: 576px) {
+    .events-table thead tr,
+    .events-table tbody tr {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .events-table th:nth-child(2),
+    .events-table td:nth-child(2) {
+        display: none;
+    }
+
+    .action-buttons {
+        flex-direction: column;
     }
 }

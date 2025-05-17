@@ -29,6 +29,10 @@ import HostDashboardPage from './pages/host/HostDashboardPage';
 import GalleryPage from './pages/shared/GalleryPage';
 import MyAccountPage from './pages/shared/MyAccountPage';
 
+// Global CSS
+import './styles/global.css';
+
+
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles }) => {
     const { currentUser, userRole } = useAuth();
