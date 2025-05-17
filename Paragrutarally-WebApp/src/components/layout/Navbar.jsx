@@ -1,10 +1,10 @@
 // src/components/layout/Navbar.jsx
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth.jsx';
+import { useAuth } from '../../contexts/AuthContext.jsx'; // Updated import path
 
 const Navbar = ({ userRole }) => {
-    const { user, signOut } = useAuth();
+    const { currentUser, signOut } = useAuth(); // Changed user to currentUser
     const navigate = useNavigate();
 
     const handleSignOut = async () => {
@@ -18,7 +18,7 @@ const Navbar = ({ userRole }) => {
                 <Link to={`/${userRole}/dashboard`}>Charity Racing App</Link>
             </div>
             <div className="nav-links">
-                {user && (
+                {currentUser && ( // Changed user to currentUser
                     <>
                         <Link to="/my-account">My Account</Link>
                         <button onClick={handleSignOut} className="sign-out-btn">Sign Out</button>

@@ -15,6 +15,31 @@ const Login = () => {
     const { signIn, signInWithGoogle } = useAuth();
     const navigate = useNavigate();
 
+    // const handleSubmit = async (e) => {
+    //     e.preventDefault();
+    //     setError('');
+    //     setLoading(true);
+    //
+    //     try {
+    //         await signIn(email, password);
+    //         // Navigation will be handled by the auth state change in the AuthProvider
+    //     } catch (error) {
+    //         console.error("Full error:", error);
+    //
+    //         if (error.code === 'auth/wrong-password') {
+    //             setError('Incorrect password. Please try again.');
+    //         } else if (error.code === 'auth/user-not-found') {
+    //             setError('No user found with this email address.');
+    //         } else if (error.code === 'auth/invalid-credential') {
+    //             setError('Invalid login credentials. Please check your email and password.');
+    //         } else {
+    //             setError(`Login failed: ${error.message}`);
+    //         }
+    //     }
+    //
+    //     setLoading(false);
+    // };
+    //debbuging section V
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
@@ -22,7 +47,13 @@ const Login = () => {
 
         try {
             await signIn(email, password);
-            // Navigation will be handled by the auth state change in the AuthProvider
+            console.log("Login successful, manually redirecting...");
+
+            // Add a slight delay to allow state to update
+            setTimeout(() => {
+                console.log("Redirecting to admin dashboard...");
+                window.location.href = '/admin/dashboard';
+            }, 1000);
         } catch (error) {
             setError('Failed to sign in. Please check your credentials.');
             console.error(error);

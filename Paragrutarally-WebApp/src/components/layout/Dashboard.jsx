@@ -1,13 +1,13 @@
 // src/components/layout/Dashboard.jsx
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth.jsx';
+import { useAuth } from '../../contexts/AuthContext.jsx'; // Updated import path
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
 import './Dashboard.css';
 
 const Dashboard = ({ children, requiredRole }) => {
-    const { user, userRole, loading } = useAuth();
+    const { currentUser, userRole, loading } = useAuth(); // Changed user to currentUser
 
     // Show loading state if auth is still being determined
     if (loading) {
@@ -15,7 +15,7 @@ const Dashboard = ({ children, requiredRole }) => {
     }
 
     // Redirect to login if not authenticated
-    if (!user) {
+    if (!currentUser) { // Changed user to currentUser
         return <Navigate to="/login" />;
     }
 

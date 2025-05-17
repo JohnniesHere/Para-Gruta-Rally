@@ -91,9 +91,27 @@ export function AuthProvider({ children }) {
                             console.log("User data from Firestore:", userData);
                             setCurrentUser({ ...user, ...userData });
                             setUserRole(userData.role);
+
+                            // Redirect based on role
+                            // const role = userData.role;
+                            // if (window.location.pathname === '/login') {
+                            //     if (role === 'admin') {
+                            //         window.location.href = '/admin-dashboard';
+                            //     } else if (role === 'staff') {
+                            //         window.location.href = '/staff-dashboard';
+                            //     } else {
+                            //         window.location.href = '/dashboard';
+                            //     }
+                            // }
+                            // Redirect based on role if on login page
+                            if (window.location.pathname === '/login') {
+                                console.log("On login page, redirecting to:", `/admin/dashboard`);
+                                window.location.href = '/admin/dashboard';
+                            }
                         } else {
                             // If user exists in Auth but not in Firestore, create a record
-                            console.log("User exists in Auth but not in Firestore, creating record");
+                            // console.log("User exists in Auth but not in Firestore, creating record");
+                            console.log("User authenticated but no Firestore document exists");
                             try {
                                 await setDoc(userRef, {
                                     email: user.email,
@@ -110,6 +128,7 @@ export function AuthProvider({ children }) {
                             }
                         }
                     } catch (firestoreError) {
+                        console.error("Error in auth state change:", firestoreError);
                         console.error("Error fetching user data from Firestore:", firestoreError);
                         // Set basic user info even if Firestore fetch fails
                         setCurrentUser(user);
