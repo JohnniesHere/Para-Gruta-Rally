@@ -53,7 +53,7 @@
 .recent-activities h2,
 .upcoming-events h2 {
     margin-top: 0;
-    color: #333;
+    color: rgba(255, 255, 255, 0.81);
     font-size: 18px;
     margin-bottom: 20px;
 }
