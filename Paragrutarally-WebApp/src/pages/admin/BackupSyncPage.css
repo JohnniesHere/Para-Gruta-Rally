@@ -1,0 +1,113 @@
+/* src/pages/admin/BackupSyncPage.css */
+.backup-sync-page {
+    padding: 20px;
+}
+
+.backup-sync-page h1 {
+    margin-bottom: 25px;
+    color: #e0e0e0;
+}
+
+.content-section {
+    background-color: #2d2d2d;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.content-section h2 {
+    color: #e0e0e0;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #444;
+}
+
+.content-section p {
+    color: #b3b3b3;
+    margin-bottom: 20px;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.primary-button {
+    background-color: #3f51b5;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+}
+
+.primary-button:hover {
+    background-color: #303f9f;
+}
+
+.secondary-button {
+    background-color: transparent;
+    color: #b3b3b3;
+    border: 1px solid #5c5c5c;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.secondary-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+.backup-history, .sync-options, .schedule-options {
+    margin-top: 20px;
+}
+
+.empty-state {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    padding: 15px;
+    text-align: center;
+    color: #888;
+}
+
+.sync-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.sync-option {
+    background-color: #333;
+    border-radius: 6px;
+    padding: 15px;
+}
+
+.sync-option h3 {
+    color: #e0e0e0;
+    margin-bottom: 10px;
+}
+
+.schedule-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.schedule-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.schedule-option label {
+    color: #e0e0e0;
+    cursor: pointer;
+}

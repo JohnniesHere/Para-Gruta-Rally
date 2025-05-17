@@ -2,6 +2,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext.jsx';
+import { useNavigationRefresh } from './hooks/useNavigationRefresh';
 
 // Auth Pages
 import LoginPage from './pages/auth/LoginPage';
@@ -56,6 +57,7 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 const MockNotificationProvider = ({ children }) => <>{children}</>;
 
 const AppRoutes = () => {
+    useNavigationRefresh();
     return (
         <Routes>
             {/* Public Routes */}
