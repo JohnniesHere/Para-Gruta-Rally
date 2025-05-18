@@ -1,21 +1,37 @@
-/* src/components/auth/Login.css */
+/* src/components/auth/Login.css - Fixed Background Logo Version */
 .login-page {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
     width: 100%;
-    background-color: #f5f5f5;
+    background-color: #f8f9fa;
+    position: relative;
+    overflow: hidden;
+    margin: 0; /* Ensure no margin */
+    padding: 0; /* Ensure no padding */
+    z-index: 0;
 }
 
-/* Logo header at the top */
+/* Logo as background in the middle */
+.login-page::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('../../assets/images/PGR Logo.png');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    opacity: 1; /* Keep full opacity */
+    z-index: -1; /* Make sure it's behind everything */
+    pointer-events: none;
+}
+
+/* Remove the logo-header completely */
 .logo-header {
-    padding: 20px;
-    align-self: flex-start;
-}
-
-.main-logo {
-    height: 180px; /* Adjust based on your logo size */
-    width: auto;
+    display: none;
 }
 
 /* Center content area */
@@ -24,177 +40,188 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    padding: 20px;
+    justify-content: flex-start; /* Align content to top */
+    padding-top: 20px; /* Just a little space at top */
+    padding-left: 20px;
+    padding-right: 20px;
 }
 
 .app-title-container {
-    margin-bottom: 30px;
+    margin-top: 20px; /* Small controlled space at top */
+    margin-bottom: 15px;
     text-align: center;
 }
 
 .app-title {
     font-size: 28px;
-    color: #333;
+    font-weight: 600;
+    color: #2c3e50;
     margin: 0;
 }
 
 .login-form-box {
     width: 100%;
     max-width: 400px;
-    background-color: #a8d8ff;
-    border-radius: 8px;
-    padding: 30px;
+    background-color: rgba(255, 255, 255, 0.7); /* Semi-transparent white */
+    border-radius: 12px;
+    padding: 40px;
     margin-bottom: 20px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
 }
 
 .login-heading {
     font-size: 24px;
-    color: #333;
-    margin-bottom: 20px;
+    color: #2c3e50;
+    margin-bottom: 24px;
     text-align: center;
+    font-weight: 600;
 }
 
 .form-group {
-    margin-bottom: 20px;
+    margin-bottom: 24px;
 }
 
 .form-group label {
     display: block;
-    font-size: 16px;
+    font-size: 14px;
     margin-bottom: 8px;
     font-weight: 500;
+    color: #566573;
 }
 
 .form-group input {
     width: 100%;
-    padding: 10px;
-    border-radius: 4px;
-    background-color: #333;
-    border: 1px solid #444;
-    color: #e0e0e0;
-    font-size: 1rem;
+    padding: 12px 16px;
+    border-radius: 8px;
+    background-color: #f8f9fa; /* Solid background */
+    border: 1px solid #e1e5eb;
+    color: #2c3e50;
+    font-size: 16px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.form-group input:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    outline: none;
 }
 
 .login-button {
     width: 100%;
     padding: 12px;
-    background-color: #4285f4; /* Google blue color */
+    background-color: #3498db;
     color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: 8px;
     font-size: 16px;
     font-weight: 500;
     cursor: pointer;
     transition: background-color 0.3s;
-    margin-top: 20px;
-    margin-bottom: 20px;
+    margin: 24px 0;
+    opacity: 1; /* Ensure full opacity */
 }
 
 .login-button:hover {
-    background-color: #3367d6; /* Darker blue on hover */
+    background-color: #2980b9;
 }
 
 .login-button:disabled {
-    background-color: #a0a0a0;
+    background-color: #bdc3c7;
     cursor: not-allowed;
 }
 
 .login-options {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    margin-top: 20px;
+    gap: 12px;
+    margin-top: 24px;
 }
 
-.mobile-login-btn {
-    padding: 10px;
-    background-color: #ffe599;
-    border: none;
-    border-radius: 4px;
+.mobile-login-btn, .google-login-btn {
+    padding: 12px;
+    background-color: white;
+    border: 1px solid #e1e5eb;
+    border-radius: 8px;
     font-size: 16px;
     cursor: pointer;
-    transition: background-color 0.3s;
+    transition: all 0.3s;
+    color: #2c3e50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 1; /* Ensure full opacity */
 }
 
-.mobile-login-btn:hover {
-    background-color: #ffd966;
+.mobile-login-btn:hover, .google-login-btn:hover {
+    background-color: #f8f9fa;
+    border-color: #bdc3c7;
 }
 
-.google-login-btn {
-    padding: 10px;
-    background-color: #c6e5bb;
-    border: none;
-    border-radius: 4px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s;
+.mobile-login-btn:before, .google-login-btn:before {
+    content: "";
+    display: inline-block;
+    margin-right: 10px;
+    width: 18px;
+    height: 18px;
 }
 
-.google-login-btn:hover {
-    background-color: #a9d991;
+.mobile-login-btn:before {
+    background: url('../../assets/images/PGR Logo.png') no-repeat center center;
+    background-size: contain;
+}
+
+.google-login-btn:before {
+    background: url('../../assets/images/PGR Logo.png') no-repeat center center;
+    background-size: contain;
 }
 
 .forgot-password-link {
     display: block;
     text-align: center;
-    padding: 10px;
-    background-color: #ffcccc;
-    border-radius: 4px;
-    color: #333;
+    padding: 12px;
+    color: #566573;
     text-decoration: none;
-    font-size: 16px;
-    transition: background-color 0.3s;
+    font-size: 14px;
+    transition: color 0.3s;
+    opacity: 1; /* Ensure full opacity */
 }
 
 .forgot-password-link:hover {
-    background-color: #ffb3b3;
+    color: #3498db;
 }
 
 .contact-container {
     margin-top: 20px;
-}
-
-.contact-us-btn {
-    padding: 10px 20px;
-    background-color: #a8d8ff;
-    border: 1px solid #7ab8f5;
-    border-radius: 4px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-.contact-us-btn:hover {
-    background-color: #7ab8f5;
-}
-
-.error-message {
-    background-color: #ffebee;
-    color: #c62828;
-    padding: 10px;
-    border-radius: 4px;
-    margin-bottom: 20px;
     text-align: center;
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .logo-header {
-        padding: 15px;
-        text-align: center;
-    }
-
-    .main-logo {
-        height: 40px;
-    }
-
-    .login-form-box {
-        padding: 20px;
-    }
+.contact-us-btn {
+    padding: 12px 24px;
+    background-color: transparent;
+    border: 1px solid #3498db;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s;
+    color: #3498db;
+    opacity: 1; /* Ensure full opacity */
 }
 
+.contact-us-btn:hover {
+    background-color: rgba(52, 152, 219, 0.1);
+}
+
+.error-message {
+    background-color: #fdedee;
+    color: #e74c3c;
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 24px;
+    font-size: 14px;
+    text-align: center;
+}
+
+/* Password input styling */
 .password-input-container {
     position: relative;
     display: flex;
@@ -202,28 +229,48 @@
 }
 
 .password-input-container input {
-    flex: 1;
-    width: 100%;
-    padding-right: 70px; /* Make room for the button */
+    padding-right: 100px;
 }
 
 .toggle-password-btn {
     position: absolute;
-    right: 5px;
+    right: 10px;
     top: 50%;
     transform: translateY(-50%);
-    background: #eaeaea none;
-    color: #000000;
-    border: 1px solid #000000;
+    background: transparent;
+    color: #566573;
+    border: none;
     padding: 5px 10px;
-    border-radius: 4px;
     cursor: pointer;
-    font-size: 0.8rem;
-    transition: all 0.2s ease;
+    font-size: 14px;
+    transition: color 0.2s ease;
+    opacity: 1; /* Ensure full opacity */
 }
 
 .toggle-password-btn:hover {
-    background-color: #d6d6d6;
-    color: #000000;
-    border: 1px solid black;
+    color: #3498db;
+}
+
+.login-button,
+.mobile-login-btn,
+.google-login-btn,
+.toggle-password-btn,
+.contact-us-btn {
+    background-color: #3498db;
+    /* Other properties remain the same */
+    /* No transparency */
+}
+/* Add semi-transparent backgrounds to other login options */
+.mobile-login-btn,
+.google-login-btn,
+.forgot-password-link {
+    background-color: rgba(255, 255, 255, 0.7);
+    /* Other properties remain the same */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .login-form-box {
+        padding: 24px;
+    }
 }
