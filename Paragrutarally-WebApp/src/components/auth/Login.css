@@ -1,15 +1,16 @@
-/* src/components/auth/Login.css - Fixed Background Logo Version */
+/* src/components/auth/Login.css - With Dark Mode Support */
 .login-page {
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
+    height: 100vh; /* Use exact viewport height */
     width: 100%;
-    background-color: #f8f9fa;
+    background-color: var(--bg-primary);
     position: relative;
-    overflow: hidden;
-    margin: 0; /* Ensure no margin */
-    padding: 0; /* Ensure no padding */
+    overflow: hidden; /* Prevent scrolling */
+    margin: 0;
+    padding: 0;
     z-index: 0;
+    transition: background-color 0.3s ease;
 }
 
 /* Logo as background in the middle */
@@ -24,12 +25,19 @@
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;
-    opacity: 1; /* Keep full opacity */
-    z-index: -1; /* Make sure it's behind everything */
+    opacity: 0.8; /* Slight transparency */
+    z-index: -1;
     pointer-events: none;
+    /* Filter for dark mode */
+    filter: var(--logo-filter, none);
+    transition: filter 0.3s ease;
 }
 
-/* Remove the logo-header completely */
+/* Apply filter to logo in dark mode */
+.dark-mode .login-page::before {
+    --logo-filter: brightness(0.8) invert(0.8);
+}
+
 .logo-header {
     display: none;
 }
@@ -40,14 +48,16 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start; /* Align content to top */
-    padding-top: 20px; /* Just a little space at top */
+    justify-content: flex-start;
+    padding-top: 20px;
     padding-left: 20px;
     padding-right: 20px;
+    overflow-y: auto; /* Allow content scrolling if needed */
+    max-height: 100vh;
 }
 
 .app-title-container {
-    margin-top: 20px; /* Small controlled space at top */
+    margin-top: 20px;
     margin-bottom: 15px;
     text-align: center;
 }
@@ -55,26 +65,29 @@
 .app-title {
     font-size: 28px;
     font-weight: 600;
-    color: #2c3e50;
+    color: var(--text-primary);
     margin: 0;
+    transition: color 0.3s ease;
 }
 
 .login-form-box {
     width: 100%;
     max-width: 400px;
-    background-color: rgba(255, 255, 255, 0.7); /* Semi-transparent white */
+    background-color: var(--card-bg);
     border-radius: 12px;
     padding: 40px;
     margin-bottom: 20px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 10px 25px var(--shadow-color);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .login-heading {
     font-size: 24px;
-    color: #2c3e50;
+    color: var(--text-primary);
     margin-bottom: 24px;
     text-align: center;
     font-weight: 600;
+    transition: color 0.3s ease;
 }
 
 .form-group {
@@ -86,22 +99,23 @@
     font-size: 14px;
     margin-bottom: 8px;
     font-weight: 500;
-    color: #566573;
+    color: var(--text-secondary);
+    transition: color 0.3s ease;
 }
 
 .form-group input {
     width: 100%;
     padding: 12px 16px;
     border-radius: 8px;
-    background-color: #f8f9fa; /* Solid background */
-    border: 1px solid #e1e5eb;
-    color: #2c3e50;
+    background-color: var(--input-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
     font-size: 16px;
-    transition: border-color 0.3s, box-shadow 0.3s;
+    transition: border-color 0.3s, box-shadow 0.3s, background-color 0.3s, color 0.3s;
 }
 
 .form-group input:focus {
-    border-color: #3498db;
+    border-color: var(--accent-color);
     box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
     outline: none;
 }
@@ -109,7 +123,7 @@
 .login-button {
     width: 100%;
     padding: 12px;
-    background-color: #3498db;
+    background-color: var(--accent-color);
     color: white;
     border: none;
     border-radius: 8px;
@@ -118,15 +132,14 @@
     cursor: pointer;
     transition: background-color 0.3s;
     margin: 24px 0;
-    opacity: 1; /* Ensure full opacity */
 }
 
 .login-button:hover {
-    background-color: #2980b9;
+    background-color: var(--accent-hover);
 }
 
 .login-button:disabled {
-    background-color: #bdc3c7;
+    background-color: var(--text-muted);
     cursor: not-allowed;
 }
 
@@ -139,22 +152,21 @@
 
 .mobile-login-btn, .google-login-btn {
     padding: 12px;
-    background-color: white;
-    border: 1px solid #e1e5eb;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     font-size: 16px;
     cursor: pointer;
     transition: all 0.3s;
-    color: #2c3e50;
+    color: var(--text-primary);
     display: flex;
     align-items: center;
     justify-content: center;
-    opacity: 1; /* Ensure full opacity */
 }
 
 .mobile-login-btn:hover, .google-login-btn:hover {
-    background-color: #f8f9fa;
-    border-color: #bdc3c7;
+    background-color: var(--bg-tertiary);
+    border-color: var(--text-secondary);
 }
 
 .mobile-login-btn:before, .google-login-btn:before {
@@ -168,26 +180,34 @@
 .mobile-login-btn:before {
     background: url('../../assets/images/PGR Logo.png') no-repeat center center;
     background-size: contain;
+    filter: var(--icon-filter, none);
 }
 
 .google-login-btn:before {
     background: url('../../assets/images/PGR Logo.png') no-repeat center center;
     background-size: contain;
+    filter: var(--icon-filter, none);
+}
+
+/* Dark mode icon filter */
+.dark-mode .mobile-login-btn:before,
+.dark-mode .google-login-btn:before {
+    --icon-filter: brightness(1.5);
 }
 
 .forgot-password-link {
     display: block;
     text-align: center;
-    padding: 12px;
-    color: #566573;
+    margin-top: 16px;
+    color: var(--accent-color);
     text-decoration: none;
     font-size: 14px;
     transition: color 0.3s;
-    opacity: 1; /* Ensure full opacity */
 }
 
 .forgot-password-link:hover {
-    color: #3498db;
+    color: var(--accent-hover);
+    text-decoration: underline;
 }
 
 .contact-container {
@@ -198,13 +218,12 @@
 .contact-us-btn {
     padding: 12px 24px;
     background-color: transparent;
-    border: 1px solid #3498db;
+    border: 1px solid var(--accent-color);
     border-radius: 8px;
     font-size: 14px;
     cursor: pointer;
     transition: all 0.3s;
-    color: #3498db;
-    opacity: 1; /* Ensure full opacity */
+    color: var(--accent-color);
 }
 
 .contact-us-btn:hover {
@@ -212,8 +231,8 @@
 }
 
 .error-message {
-    background-color: #fdedee;
-    color: #e74c3c;
+    background-color: rgba(231, 76, 60, 0.1);
+    color: var(--error-color);
     padding: 12px 16px;
     border-radius: 8px;
     margin-bottom: 24px;
@@ -238,39 +257,44 @@
     top: 50%;
     transform: translateY(-50%);
     background: transparent;
-    color: #566573;
+    color: var(--text-secondary);
     border: none;
     padding: 5px 10px;
     cursor: pointer;
     font-size: 14px;
     transition: color 0.2s ease;
-    opacity: 1; /* Ensure full opacity */
 }
 
 .toggle-password-btn:hover {
-    color: #3498db;
+    color: var(--accent-color);
 }
 
-.login-button,
-.mobile-login-btn,
-.google-login-btn,
-.toggle-password-btn,
-.contact-us-btn {
-    background-color: #3498db;
-    /* Other properties remain the same */
-    /* No transparency */
+/* Theme toggle placement */
+.theme-toggle-container {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 10;
 }
-/* Add semi-transparent backgrounds to other login options */
-.mobile-login-btn,
-.google-login-btn,
-.forgot-password-link {
-    background-color: rgba(255, 255, 255, 0.7);
-    /* Other properties remain the same */
+
+/* Ensure the body and html have no scrolling */
+html, body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    height: 100%;
+    background-color: var(--bg-primary);
+    transition: background-color 0.3s ease;
 }
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .login-form-box {
         padding: 24px;
+    }
+
+    .theme-toggle-container {
+        top: 10px;
+        right: 10px;
     }
 }

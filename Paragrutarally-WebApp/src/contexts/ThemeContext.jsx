@@ -1,4 +1,4 @@
-// src/contexts/ThemeContext.js
+// src/contexts/ThemeContext.jsx
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
@@ -38,10 +38,15 @@ export function ThemeProvider({ children }) {
         handleChange();
 
         // Listen for changes
-        mediaQuery.addEventListener('change', handleChange);
-
-        // Clean up
-        return () => mediaQuery.removeEventListener('change', handleChange);
+        try {
+            // Modern API (newer browsers)
+            mediaQuery.addEventListener('change', handleChange);
+            return () => mediaQuery.removeEventListener('change', handleChange);
+        } catch (e) {
+            // Fallback for older browsers
+            mediaQuery.addListener(handleChange);
+            return () => mediaQuery.removeListener(handleChange);
+        }
     }, [theme]);
 
     // Effect to update applied theme when theme changes
@@ -61,8 +66,12 @@ export function ThemeProvider({ children }) {
     useEffect(() => {
         if (appliedTheme === THEMES.DARK) {
             document.documentElement.classList.add('dark');
+            document.body.classList.add('dark-mode');
+            document.body.classList.remove('light-mode');
         } else {
             document.documentElement.classList.remove('dark');
+            document.body.classList.add('light-mode');
+            document.body.classList.remove('dark-mode');
         }
     }, [appliedTheme]);
 

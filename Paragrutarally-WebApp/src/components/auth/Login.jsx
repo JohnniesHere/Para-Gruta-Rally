@@ -1,20 +1,21 @@
 // src/components/auth/Login.jsx
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext.jsx';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext.jsx';
+import DarkModeToggle from '../common/DarkModeToggle.jsx';
 import ContactUsModal from '../layout/ContactUsModal';
-import logoImage from '../../assets/images/PGR Logo.png';
 import './Login.css';
 
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [contactModalOpen, setContactModalOpen] = useState(false);
-    // Add a new state for password visibility
     const [showPassword, setShowPassword] = useState(false);
-    const { signIn, signInWithGoogle } = useAuth();
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+    const { signIn } = useAuth();
+    const { isDarkMode } = useTheme();
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
@@ -24,39 +25,23 @@ const Login = () => {
 
         try {
             await signIn(email, password);
-            // Navigation will be handled by the auth state change in the AuthProvider
-        } catch (error) {
+            navigate('/dashboard');
+        } catch (err) {
             setError('Failed to sign in. Please check your credentials.');
-            console.error(error);
-        }
-
-        setLoading(false);
-    };
-
-    const handleGoogleSignIn = async () => {
-        try {
-            await signInWithGoogle();
-            // Navigation will be handled by the auth state change
-        } catch (error) {
-            setError('Failed to sign in with Google.');
-            console.error(error);
+            console.error(err);
+        } finally {
+            setLoading(false);
         }
     };
 
-    const handleMobileSignIn = () => {
-        // This would be implemented when you're ready to add phone authentication
-        alert('Mobile sign-in functionality coming soon');
-    };
-
-    // Toggle password visibility
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);
     };
 
     return (
-        <div className="login-page">
-            <div className="logo-header">
-                <img src={logoImage} alt="PGR Logo" className="main-logo" />
+        <div className={`login-page ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
+            <div className="theme-toggle-container">
+                <DarkModeToggle />
             </div>
 
             <div className="login-content">
@@ -69,7 +54,7 @@ const Login = () => {
 
                     {error && <div className="error-message">{error}</div>}
 
-                    <form onSubmit={handleSubmit} className="login-form">
+                    <form onSubmit={handleSubmit}>
                         <div className="form-group">
                             <label htmlFor="email">Email:</label>
                             <input
@@ -106,38 +91,29 @@ const Login = () => {
                             className="login-button"
                             disabled={loading}
                         >
-                            {loading ? 'Signing in...' : 'Sign In'}
+                            {loading ? "Signing In..." : "Sign In"}
                         </button>
 
-                        <div className="login-options">
-                            <button
-                                type="button"
-                                className="mobile-login-btn"
-                                onClick={handleMobileSignIn}
-                            >
-                                Sign In With Mobile Number
-                            </button>
-
-                            <button
-                                type="button"
-                                className="google-login-btn"
-                                onClick={handleGoogleSignIn}
-                            >
-                                Sign In With Google
-                            </button>
-
-                            <Link to="/reset-password" className="forgot-password-link">
-                                Forgot Password?
-                            </Link>
-                        </div>
+                        {/* Text link for forgot password */}
+                        <Link to="/forgot-password" className="forgot-password-link">
+                            Forgot Password?
+                        </Link>
                     </form>
+
+                    <div className="login-options">
+                        <button type="button" className="mobile-login-btn">
+                            Sign In With Mobile Number
+                        </button>
+                        <button type="button" className="google-login-btn">
+                            Sign In With Google
+                        </button>
+                    </div>
                 </div>
 
                 <div className="contact-container">
                     <button
-                        type="button"
                         className="contact-us-btn"
-                        onClick={() => setContactModalOpen(true)}
+                        onClick={() => setIsContactModalOpen(true)}
                     >
                         Contact Us
                     </button>
@@ -145,8 +121,8 @@ const Login = () => {
             </div>
 
             <ContactUsModal
-                isOpen={contactModalOpen}
-                onClose={() => setContactModalOpen(false)}
+                isOpen={isContactModalOpen}
+                onClose={() => setIsContactModalOpen(false)}
             />
         </div>
     );

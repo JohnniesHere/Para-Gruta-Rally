@@ -4,8 +4,9 @@
     flex-direction: column;
     height: 100vh;
     overflow: hidden;
-    background-color: #121212;
-    color: #fff;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .dashboard-content {
@@ -18,15 +19,17 @@
     flex: 1;
     padding: 20px;
     overflow-y: auto;
-    background-color: #1e1e1e;
+    background-color: var(--bg-secondary);
+    transition: background-color 0.3s ease;
 }
 
 /* Card styles */
 .admin-dashboard .stat-card,
 .dashboard-sections > div {
-    background-color: #2d2d2d;
+    background-color: var(--bg-tertiary);
     border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 6px var(--shadow-color);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .admin-dashboard .stat-card {
@@ -34,15 +37,17 @@
 }
 
 .admin-dashboard .stat-card h3 {
-    color: #b3b3b3;
+    color: var(--text-secondary);
     margin-bottom: 10px;
     font-size: 1rem;
+    transition: color 0.3s ease;
 }
 
 .admin-dashboard .stat-card .stat-value {
-    color: #3f51b5;
+    color: var(--accent-color);
     font-size: 2.5rem;
     font-weight: bold;
+    transition: color 0.3s ease;
 }
 
 .dashboard-stats {
@@ -63,16 +68,18 @@
 }
 
 .dashboard-sections h2 {
-    color: #e0e0e0;
+    color: var(--text-primary);
     margin-bottom: 15px;
-    border-bottom: 1px solid #444;
+    border-bottom: 1px solid var(--border-color);
     padding-bottom: 10px;
+    transition: color 0.3s ease, border-color 0.3s ease;
 }
 
 /* Activity list styles */
 .activity-item {
     padding: 12px 0;
-    border-bottom: 1px solid #333;
+    border-bottom: 1px solid var(--border-color);
+    transition: border-color 0.3s ease;
 }
 
 .activity-item:last-child {
@@ -80,23 +87,27 @@
 }
 
 .activity-time {
-    color: #888;
+    color: var(--text-muted);
     font-size: 0.85rem;
     margin-bottom: 5px;
+    transition: color 0.3s ease;
 }
 
 .activity-description {
-    color: #f6c220;
+    color: var(--warning-color);
+    transition: color 0.3s ease;
 }
 
 .activity-description strong {
-    color: #64b5f6;
+    color: var(--accent-color);
+    transition: color 0.3s ease;
 }
 
 /* Events list styles */
 .event-item {
     padding: 12px 0;
-    border-bottom: 1px solid #333;
+    border-bottom: 1px solid var(--border-color);
+    transition: border-color 0.3s ease;
 }
 
 .event-item:last-child {
@@ -104,20 +115,23 @@
 }
 
 .event-date {
-    color: #888;
+    color: var(--text-muted);
     font-size: 0.85rem;
     margin-bottom: 5px;
+    transition: color 0.3s ease;
 }
 
 .event-name {
-    color: #64b5f6;
+    color: var(--accent-color);
     font-weight: bold;
     margin-bottom: 3px;
+    transition: color 0.3s ease;
 }
 
 .event-location {
-    color: #e70000;
+    color: var(--error-color);
     font-size: 0.9rem;
+    transition: color 0.3s ease;
 }
 
 /* Loading screen */
@@ -126,7 +140,8 @@
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background-color: #121212;
-    color: #fff;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
     font-size: 1.5rem;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }

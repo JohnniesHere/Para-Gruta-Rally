@@ -2,6 +2,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext.jsx';
+import { ThemeProvider } from './contexts/ThemeContext.jsx';
 import { useNavigationRefresh } from './hooks/useNavigationRefresh';
 
 // Auth Pages
@@ -31,7 +32,7 @@ import MyAccountPage from './pages/shared/MyAccountPage';
 
 // Global CSS
 import './styles/global.css';
-
+import './styles/theme.css'; // Import theme CSS
 
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles }) => {
@@ -160,13 +161,15 @@ const AppRoutes = () => {
 
 const App = () => {
     return (
-        <Router>
-            <AuthProvider>
-                <MockNotificationProvider>
-                    <AppRoutes />
-                </MockNotificationProvider>
-            </AuthProvider>
-        </Router>
+        <ThemeProvider>
+            <Router>
+                <AuthProvider>
+                    <MockNotificationProvider>
+                        <AppRoutes />
+                    </MockNotificationProvider>
+                </AuthProvider>
+            </Router>
+        </ThemeProvider>
     );
 };
 

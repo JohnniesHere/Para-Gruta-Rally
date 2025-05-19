@@ -2,10 +2,13 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext.jsx';
+import { useTheme } from '../../contexts/ThemeContext.jsx';
+import DarkModeToggle from '../common/DarkModeToggle.jsx';
 import './Navbar.css';
 
 const Navbar = ({ userRole }) => {
     const { currentUser, signOut } = useAuth();
+    const { isDark } = useTheme();
     const navigate = useNavigate();
 
     const handleSignOut = async () => {
@@ -22,7 +25,7 @@ const Navbar = ({ userRole }) => {
     };
 
     return (
-        <nav className="navbar">
+        <nav className={`navbar ${isDark ? 'dark-mode' : 'light-mode'}`}>
             <div className="logo">
                 <Link to={getDashboardLink()}>Charity Racing App</Link>
             </div>
@@ -30,6 +33,7 @@ const Navbar = ({ userRole }) => {
                 {currentUser && (
                     <>
                         <Link to="/my-account">My Account</Link>
+                        <DarkModeToggle className="navbar-theme-toggle" />
                         <button onClick={handleSignOut} className="sign-out-btn">Sign Out</button>
                     </>
                 )}

@@ -1,0 +1,60 @@
+/* src/styles/theme.css */
+:root {
+    /* Light theme variables */
+    --bg-primary: #f8f9fa;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #f1f1f1;
+    --text-primary: #2c3e50;
+    --text-secondary: #566573;
+    --text-muted: #888888;
+    --border-color: #e1e5eb;
+    --accent-color: #3498db;
+    --accent-hover: #2980b9;
+    --error-color: #e74c3c;
+    --success-color: #2ecc71;
+    --warning-color: #f39c12;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+    --card-bg: rgba(255, 255, 255, 0.7);
+    --input-bg: #f8f9fa;
+}
+
+/* Dark theme variables */
+.dark, .dark-mode {
+    --bg-primary: #121212;
+    --bg-secondary: #1e1e1e;
+    --bg-tertiary: #2d2d2d;
+    --text-primary: #e0e0e0;
+    --text-secondary: #b3b3b3;
+    --text-muted: #888888;
+    --border-color: #444444;
+    --accent-color: #4dabf7;
+    --accent-hover: #339af0;
+    --error-color: #e74c3c;
+    --success-color: #2ecc71;
+    --warning-color: #f39c12;
+    --shadow-color: rgba(0, 0, 0, 0.3);
+    --card-bg: rgba(40, 40, 40, 0.7);
+    --input-bg: #333333;
+}
+
+/* Basic elements styling */
+body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+a {
+    color: var(--accent-color);
+}
+
+a:hover {
+    color: var(--accent-hover);
+}
+
+/* Input styling */
+input, textarea, select {
+    background-color: var(--input-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}

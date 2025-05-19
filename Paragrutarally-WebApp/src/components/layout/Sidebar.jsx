@@ -1,11 +1,14 @@
 // src/components/layout/Sidebar.jsx
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import './Sidebar.css'; // Make sure this file exists
+import { useTheme } from '../../contexts/ThemeContext.jsx';
+import './Sidebar.css';
 
 const Sidebar = ({ userRole }) => {
+    const { isDarkMode } = useTheme();
+
     return (
-        <div className="sidebar">
+        <div className={`sidebar ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
             <div className="sidebar-links">
                 {/* Admin Links */}
                 {userRole === 'admin' && (
