@@ -18,9 +18,9 @@
     content: "";
     position: fixed;
     top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    left: -75px;
+    width: 108%;
+    height: 108%;
     background-image: url('../../assets/images/PGR Logo.png');
     background-repeat: no-repeat;
     background-position: center;
