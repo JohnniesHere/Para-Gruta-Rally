@@ -1,19 +1,21 @@
 // src/pages/admin/BackupSyncPage.jsx
 import React, { useEffect } from 'react';
 import Dashboard from '../../components/layout/Dashboard';
+import { useTheme } from '../../contexts/ThemeContext.jsx';
 import './BackupSyncPage.css';
 
 const BackupSyncPage = () => {
+    const { isDark } = useTheme();
+
     // This useEffect will run whenever the component mounts
     useEffect(() => {
         document.title = "Backup & Sync - Charity Racing App";
-
         // You could fetch data or initialize state here
     }, []);
 
     return (
         <Dashboard requiredRole="admin">
-            <div className="backup-sync-page">
+            <div className={`backup-sync-page ${isDark ? 'dark-mode' : 'light-mode'}`}>
                 <h1>Backup & Sync</h1>
 
                 <div className="content-section">

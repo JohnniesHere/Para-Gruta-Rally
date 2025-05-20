@@ -5,27 +5,41 @@
 
 .backup-sync-page h1 {
     margin-bottom: 25px;
-    color: rgba(255, 255, 255, 0.81);
+    color: var(--text-primary, rgba(255, 255, 255, 0.81));
+    transition: color 0.3s ease;
 }
 
 .content-section {
-    background-color: #2d2d2d;
+    background-color: var(--bg-tertiary, #2d2d2d);
     border-radius: 8px;
     padding: 20px;
     margin-bottom: 25px;
+    box-shadow: 0 4px 6px var(--shadow-color, rgba(0, 0, 0, 0.3));
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.light-mode .content-section {
+    background-color: var(--bg-secondary, white);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.dark-mode .content-section {
+    background-color: var(--bg-tertiary, #2d2d2d);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
 .content-section h2 {
-    color: #e0e0e0;
+    color: var(--text-primary, #e0e0e0);
     margin-bottom: 15px;
     padding-bottom: 10px;
-    border-bottom: 1px solid #444;
+    border-bottom: 1px solid var(--border-color, #444);
+    transition: color 0.3s ease, border-color 0.3s ease;
 }
 
 .content-section p {
-    color: #b3b3b3;
+    color: var(--text-secondary, #b3b3b3);
     margin-bottom: 20px;
+    transition: color 0.3s ease;
 }
 
 .action-buttons {
@@ -35,7 +49,7 @@
 }
 
 .primary-button {
-    background-color: #3f51b5;
+    background-color: var(--accent-color, #3f51b5);
     color: white;
     border: none;
     padding: 10px 20px;
@@ -46,13 +60,13 @@
 }
 
 .primary-button:hover {
-    background-color: #303f9f;
+    background-color: var(--accent-hover, #303f9f);
 }
 
 .secondary-button {
     background-color: transparent;
-    color: #b3b3b3;
-    border: 1px solid #5c5c5c;
+    color: var(--text-secondary, #b3b3b3);
+    border: 1px solid var(--border-color, #5c5c5c);
     padding: 10px 20px;
     border-radius: 4px;
     cursor: pointer;
@@ -60,20 +74,57 @@
     transition: all 0.3s ease;
 }
 
+.light-mode .secondary-button {
+    color: var(--text-secondary, #666);
+    border-color: #ccc;
+}
+
+.dark-mode .secondary-button {
+    color: var(--text-secondary, #b3b3b3);
+    border-color: #5c5c5c;
+}
+
 .secondary-button:hover {
+    background-color: var(--bg-hover, rgba(255, 255, 255, 0.1));
+    color: var(--text-primary, #fff);
+}
+
+.light-mode .secondary-button:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: var(--text-primary, #333);
+}
+
+.dark-mode .secondary-button:hover {
     background-color: rgba(255, 255, 255, 0.1);
-    color: #fff;
+    color: var(--text-primary, #fff);
 }
 
 .backup-history, .sync-options, .schedule-options {
     margin-top: 20px;
 }
 
+.backup-history h3 {
+    color: var(--text-primary, #e0e0e0);
+    margin-bottom: 10px;
+    transition: color 0.3s ease;
+}
+
 .empty-state {
-    background-color: rgba(0, 0, 0, 0.2);
+    background-color: var(--bg-secondary, rgba(0, 0, 0, 0.2));
     border-radius: 4px;
     padding: 15px;
     text-align: center;
+    color: var(--text-muted, #888);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.light-mode .empty-state {
+    background-color: #f5f5f5;
+    color: #777;
+}
+
+.dark-mode .empty-state {
+    background-color: rgba(0, 0, 0, 0.2);
     color: #888;
 }
 
@@ -84,14 +135,30 @@
 }
 
 .sync-option {
-    background-color: #333;
+    background-color: var(--bg-secondary, #333);
     border-radius: 6px;
     padding: 15px;
+    transition: background-color 0.3s ease;
+}
+
+.light-mode .sync-option {
+    background-color: #f5f5f5;
+}
+
+.dark-mode .sync-option {
+    background-color: #333;
 }
 
 .sync-option h3 {
-    color: #e0e0e0;
+    color: var(--text-primary, #e0e0e0);
     margin-bottom: 10px;
+    transition: color 0.3s ease;
+}
+
+.sync-option p {
+    color: var(--text-secondary, #b3b3b3);
+    margin-bottom: 15px;
+    transition: color 0.3s ease;
 }
 
 .schedule-options {
@@ -107,7 +174,23 @@
     gap: 8px;
 }
 
+.schedule-option input[type="radio"] {
+    accent-color: var(--accent-color, #3f51b5);
+}
+
 .schedule-option label {
-    color: #e0e0e0;
+    color: var(--text-primary, #e0e0e0);
     cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .action-buttons {
+        flex-direction: column;
+    }
+
+    .sync-options {
+        grid-template-columns: 1fr;
+    }
 }
