@@ -2,10 +2,12 @@
 import React, { useState } from 'react';
 import Dashboard from '../../components/layout/Dashboard';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import './GalleryPage.css';
 
 const GalleryPage = () => {
     const { userRole } = useAuth();
+    const { isDark } = useTheme();
     const [activeAlbum, setActiveAlbum] = useState('all');
 
     // Sample gallery data - in a real application, this would come from your database
@@ -35,7 +37,7 @@ const GalleryPage = () => {
 
     return (
         <Dashboard requiredRole={userRole}>
-            <div className="gallery-page">
+            <div className={`gallery-page ${isDark ? 'dark-mode' : 'light-mode'}`}>
                 <h1>Gallery</h1>
 
                 <div className="gallery-controls">

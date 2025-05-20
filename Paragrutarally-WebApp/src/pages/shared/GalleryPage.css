@@ -3,6 +3,12 @@
     padding: 20px;
 }
 
+.gallery-page h1 {
+    color: var(--text-primary, #e0e0e0);
+    margin-bottom: 25px;
+    transition: color 0.3s ease;
+}
+
 .gallery-controls {
     display: flex;
     justify-content: space-between;
@@ -19,27 +25,47 @@
 }
 
 .album-button {
-    background-color: #2d2d2d;
+    background-color: var(--bg-tertiary, #2d2d2d);
     border: none;
-    color: #b3b3b3;
+    color: var(--text-secondary, #b3b3b3);
     padding: 8px 16px;
     border-radius: 20px;
     cursor: pointer;
     transition: all 0.3s ease;
 }
 
+.light-mode .album-button {
+    background-color: #f0f0f0;
+    color: #666;
+}
+
+.dark-mode .album-button {
+    background-color: #2d2d2d;
+    color: #b3b3b3;
+}
+
 .album-button.active {
-    background-color: #3f51b5;
+    background-color: var(--accent-color, #3f51b5);
     color: white;
 }
 
 .album-button:hover:not(.active) {
+    background-color: var(--bg-hover, #3a3a3a);
+    color: var(--text-primary, #e0e0e0);
+}
+
+.light-mode .album-button:hover:not(.active) {
+    background-color: #e0e0e0;
+    color: #333;
+}
+
+.dark-mode .album-button:hover:not(.active) {
     background-color: #3a3a3a;
     color: #e0e0e0;
 }
 
 .gallery-actions .primary-button {
-    background-color: #3f51b5;
+    background-color: var(--accent-color, #3f51b5);
     color: white;
     border: none;
     padding: 8px 16px;
@@ -52,7 +78,7 @@
 }
 
 .gallery-actions .primary-button:hover {
-    background-color: #303f9f;
+    background-color: var(--accent-hover, #303f9f);
 }
 
 .gallery-actions .primary-button .icon {
@@ -68,11 +94,21 @@
 }
 
 .photo-card {
-    background-color: #2d2d2d;
+    background-color: var(--bg-tertiary, #2d2d2d);
     border-radius: 8px;
     overflow: hidden;
+    box-shadow: 0 4px 6px var(--shadow-color, rgba(0, 0, 0, 0.3));
+    transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.light-mode .photo-card {
+    background-color: white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.dark-mode .photo-card {
+    background-color: #2d2d2d;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-    transition: transform 0.3s ease;
 }
 
 .photo-card:hover {
@@ -101,25 +137,55 @@
 
 .photo-info h3 {
     margin: 0 0 5px 0;
-    color: #e0e0e0;
+    color: var(--text-primary, #e0e0e0);
     font-size: 1rem;
+    transition: color 0.3s ease;
 }
 
 .photo-date {
     margin: 0;
-    color: #888;
+    color: var(--text-muted, #888);
     font-size: 0.85rem;
+    transition: color 0.3s ease;
 }
 
 .empty-gallery {
-    background-color: #2d2d2d;
+    background-color: var(--bg-tertiary, #2d2d2d);
     border-radius: 8px;
     padding: 30px;
     text-align: center;
     margin-top: 20px;
+    transition: background-color 0.3s ease;
+}
+
+.light-mode .empty-gallery {
+    background-color: #f5f5f5;
+}
+
+.dark-mode .empty-gallery {
+    background-color: #2d2d2d;
 }
 
 .empty-gallery p {
-    color: #888;
+    color: var(--text-muted, #888);
     margin: 0;
+    transition: color 0.3s ease;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .gallery-controls {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .photo-grid {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    }
+}
+
+@media (max-width: 480px) {
+    .photo-grid {
+        grid-template-columns: 1fr;
+    }
 }
