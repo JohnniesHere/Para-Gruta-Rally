@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext.jsx';
 import { useTheme } from '../../contexts/ThemeContext.jsx';
 import DarkModeToggle from '../common/DarkModeToggle.jsx';
+import logoImage from '../../assets/images/PGR Logo.png';
 import './Navbar.css';
 
 const Navbar = ({ userRole }) => {
@@ -24,10 +25,15 @@ const Navbar = ({ userRole }) => {
         return '/dashboard';
     };
 
+    const dashboardLink = getDashboardLink();
+
     return (
         <nav className={`navbar ${isDark ? 'dark-mode' : 'light-mode'}`}>
             <div className="logo">
-                <Link to={getDashboardLink()}>Charity Racing App</Link>
+                <Link to={dashboardLink}>
+                    <img src={logoImage} alt="ParaGrutaRally Logo" />
+                    ParaGrutaRally
+                </Link>
             </div>
             <div className="nav-links">
                 {currentUser && (
