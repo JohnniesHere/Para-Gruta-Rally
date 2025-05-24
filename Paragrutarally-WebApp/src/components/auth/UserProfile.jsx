@@ -1,10 +1,12 @@
 // src/components/auth/UserProfile.jsx
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import './UserProfile.css';
 
 const UserProfile = () => {
     const { currentUser } = useAuth();
+    const { isDarkMode } = useTheme();
 
     const [activeTab, setActiveTab] = useState('profile');
     const [isEditing, setIsEditing] = useState(false);
@@ -72,7 +74,7 @@ const UserProfile = () => {
     };
 
     return (
-        <div className="user-profile">
+        <div className={`user-profile ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
             <div className="profile-header">
                 <div className="profile-avatar">
                     {profileData.displayName.charAt(0).toUpperCase()}
@@ -176,6 +178,7 @@ const UserProfile = () => {
                                         value={profileData.bio}
                                         onChange={handleProfileChange}
                                         rows="4"
+                                        placeholder="Tell us about yourself..."
                                     ></textarea>
                                 </div>
 
@@ -245,6 +248,7 @@ const UserProfile = () => {
                                         value={passwordData.currentPassword}
                                         onChange={handlePasswordChange}
                                         required
+                                        placeholder="Enter your current password"
                                     />
                                 </div>
 
@@ -257,6 +261,7 @@ const UserProfile = () => {
                                         value={passwordData.newPassword}
                                         onChange={handlePasswordChange}
                                         required
+                                        placeholder="Enter your new password"
                                     />
                                 </div>
 
@@ -269,6 +274,7 @@ const UserProfile = () => {
                                         value={passwordData.confirmPassword}
                                         onChange={handlePasswordChange}
                                         required
+                                        placeholder="Confirm your new password"
                                     />
                                 </div>
 
@@ -309,6 +315,16 @@ const UserProfile = () => {
                                         <div className="activity-time">Yesterday, 10:15 AM</div>
                                     </div>
                                 </div>
+
+                                <div className="activity-item">
+                                    <div className="activity-details">
+                                        <div className="activity-info">
+                                            <span className="device">Safari on iPhone</span>
+                                            <span className="location">Haifa, Israel</span>
+                                        </div>
+                                        <div className="activity-time">2 days ago, 3:22 PM</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -331,7 +347,7 @@ const UserProfile = () => {
                                             id="darkTheme"
                                             name="theme"
                                             value="dark"
-                                            defaultChecked
+                                            defaultChecked={isDarkMode}
                                         />
                                         <label htmlFor="darkTheme">Dark Mode</label>
                                     </div>
@@ -341,6 +357,7 @@ const UserProfile = () => {
                                             id="lightTheme"
                                             name="theme"
                                             value="light"
+                                            defaultChecked={!isDarkMode}
                                         />
                                         <label htmlFor="lightTheme">Light Mode</label>
                                     </div>
@@ -373,6 +390,14 @@ const UserProfile = () => {
                                         id="systemNotifications"
                                     />
                                     <label htmlFor="systemNotifications">System updates</label>
+                                </div>
+                                <div className="notification-option">
+                                    <input
+                                        type="checkbox"
+                                        id="weeklyDigest"
+                                        defaultChecked
+                                    />
+                                    <label htmlFor="weeklyDigest">Weekly activity digest</label>
                                 </div>
                             </div>
                         </div>

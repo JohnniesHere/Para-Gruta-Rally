@@ -1,4 +1,4 @@
-// src/components/layout/ErrorBoundary.js
+// src/components/layout/ErrorBoundary.jsx
 
 import React, { Component } from 'react';
 
@@ -60,8 +60,8 @@ class ErrorBoundary extends Component {
                                 <div className="mt-4">
                                     <h4 className="text-md font-medium text-gray-700 mb-2">Component Stack</h4>
                                     <pre className="text-xs bg-gray-100 p-2 rounded overflow-auto">
-                    {this.state.errorInfo.componentStack}
-                  </pre>
+                                        {this.state.errorInfo.componentStack}
+                                    </pre>
                                 </div>
                             )}
                         </div>

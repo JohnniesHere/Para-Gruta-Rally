@@ -5,7 +5,7 @@ import { useTheme } from '../../contexts/ThemeContext.jsx';
 import './BackupSyncPage.css';
 
 const BackupSyncPage = () => {
-    const { isDark } = useTheme();
+    const { isDarkMode } = useTheme(); // Fixed: was isDark, should be isDarkMode
 
     // This useEffect will run whenever the component mounts
     useEffect(() => {
@@ -15,7 +15,7 @@ const BackupSyncPage = () => {
 
     return (
         <Dashboard requiredRole="admin">
-            <div className={`backup-sync-page ${isDark ? 'dark-mode' : 'light-mode'}`}>
+            <div className={`backup-sync-page ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
                 <h1>Backup & Sync</h1>
 
                 <div className="content-section">

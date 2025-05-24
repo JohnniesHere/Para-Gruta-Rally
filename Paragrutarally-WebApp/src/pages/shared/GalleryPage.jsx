@@ -7,7 +7,7 @@ import './GalleryPage.css';
 
 const GalleryPage = () => {
     const { userRole } = useAuth();
-    const { isDark } = useTheme();
+    const { isDarkMode } = useTheme(); // Fixed: was isDark, should be isDarkMode
     const [activeAlbum, setActiveAlbum] = useState('all');
 
     // Sample gallery data - in a real application, this would come from your database
@@ -37,7 +37,7 @@ const GalleryPage = () => {
 
     return (
         <Dashboard requiredRole={userRole}>
-            <div className={`gallery-page ${isDark ? 'dark-mode' : 'light-mode'}`}>
+            <div className={`gallery-page ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
                 <h1>Gallery</h1>
 
                 <div className="gallery-controls">

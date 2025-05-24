@@ -9,7 +9,7 @@ import './Navbar.css';
 
 const Navbar = ({ userRole }) => {
     const { currentUser, signOut } = useAuth();
-    const { isDark } = useTheme();
+    const { isDarkMode } = useTheme(); // Fixed: changed from isDark to isDarkMode
     const navigate = useNavigate();
 
     const handleSignOut = async () => {
@@ -28,7 +28,7 @@ const Navbar = ({ userRole }) => {
     const dashboardLink = getDashboardLink();
 
     return (
-        <nav className={`navbar ${isDark ? 'dark-mode' : 'light-mode'}`}>
+        <nav className={`navbar ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
             <div className="logo">
                 <Link to={dashboardLink}>
                     <img src={logoImage} alt="ParaGrutaRally Logo" />

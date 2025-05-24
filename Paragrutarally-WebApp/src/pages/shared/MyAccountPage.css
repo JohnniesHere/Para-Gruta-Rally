@@ -1,9 +1,258 @@
 /* src/pages/shared/MyAccountPage.css */
 .my-account-page {
     padding: 20px;
+    background-color: var(--bg-primary);
+    min-height: 100vh;
+    transition: background-color 0.3s ease;
 }
 
 .my-account-page h1 {
     margin-bottom: 25px;
-    color: #e0e0e0;
+    color: var(--text-primary);
+    font-size: 2rem;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+/* Style the UserProfile component container */
+.my-account-page .user-profile {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 4px 15px var(--shadow-color);
+    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    max-width: 800px;
+}
+
+/* Form styling within the profile */
+.my-account-page .form-group {
+    margin-bottom: 20px;
+}
+
+.my-account-page .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-size: 14px;
+    transition: color 0.3s ease;
+}
+
+.my-account-page .form-group input,
+.my-account-page .form-group select,
+.my-account-page .form-group textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: var(--input-bg);
+    color: var(--text-primary);
+    font-size: 16px;
+    transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+    box-sizing: border-box;
+}
+
+.my-account-page .form-group input:focus,
+.my-account-page .form-group select:focus,
+.my-account-page .form-group textarea:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+/* Button styling */
+.my-account-page .btn,
+.my-account-page button {
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+}
+
+.my-account-page .btn-primary,
+.my-account-page button[type="submit"] {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+.my-account-page .btn-primary:hover,
+.my-account-page button[type="submit"]:hover {
+    background-color: var(--accent-hover);
+    transform: translateY(-1px);
+}
+
+.my-account-page .btn-secondary {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+.my-account-page .btn-secondary:hover {
+    background-color: var(--bg-secondary);
+    border-color: var(--text-secondary);
+}
+
+.my-account-page .btn-danger {
+    background-color: var(--error-color);
+    color: white;
+}
+
+.my-account-page .btn-danger:hover {
+    background-color: #c0392b;
+    transform: translateY(-1px);
+}
+
+/* Profile sections */
+.my-account-page .profile-section {
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+    transition: border-color 0.3s ease;
+}
+
+.my-account-page .profile-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.my-account-page .profile-section h2 {
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.my-account-page .profile-section h3 {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+/* Profile info display */
+.my-account-page .profile-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.my-account-page .profile-info-item {
+    background-color: var(--bg-tertiary);
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.my-account-page .profile-info-item label {
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.my-account-page .profile-info-item .value {
+    color: var(--text-primary);
+    font-size: 16px;
+    font-weight: 500;
+}
+
+/* Success/Error messages */
+.my-account-page .message {
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.my-account-page .message.success {
+    background-color: rgba(46, 204, 113, 0.1);
+    color: var(--success-color);
+    border: 1px solid rgba(46, 204, 113, 0.3);
+}
+
+.my-account-page .message.error {
+    background-color: rgba(231, 76, 60, 0.1);
+    color: var(--error-color);
+    border: 1px solid rgba(231, 76, 60, 0.3);
+}
+
+.my-account-page .message.warning {
+    background-color: rgba(243, 156, 18, 0.1);
+    color: var(--warning-color);
+    border: 1px solid rgba(243, 156, 18, 0.3);
+}
+
+/* Loading states */
+.my-account-page .loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    color: var(--text-secondary);
+}
+
+.my-account-page .loading::before {
+    content: "";
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--border-color);
+    border-top: 2px solid var(--accent-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-right: 10px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .my-account-page {
+        padding: 15px;
+    }
+
+    .my-account-page .user-profile {
+        padding: 20px;
+    }
+
+    .my-account-page .profile-info {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .my-account-page h1 {
+        font-size: 1.75rem;
+        margin-bottom: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .my-account-page .form-group input,
+    .my-account-page .form-group select,
+    .my-account-page .form-group textarea {
+        font-size: 16px; /* Prevent zoom on iOS */
+    }
+
+    .my-account-page .btn {
+        width: 100%;
+        margin-bottom: 10px;
+    }
 }

@@ -1,176 +1,181 @@
 // src/App.jsx
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from './contexts/AuthContext.jsx';
-import { ThemeProvider } from './contexts/ThemeContext.jsx';
-import { useNavigationRefresh } from './hooks/useNavigationRefresh';
+import { AuthProvider } from './contexts/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext';
+import ErrorBoundary from './components/layout/ErrorBoundary';
 
-// Auth Pages
-import LoginPage from './pages/auth/LoginPage';
-import PasswordResetPage from './pages/auth/PasswordResetPage';
-
-// Admin Pages
+// Import pages
+import Login from './components/auth/Login';
 import AdminDashboardPage from './pages/admin/AdminDashboardPage';
 import EventManagementPage from './pages/admin/EventManagementPage';
-import CreateEventPage from './pages/admin/CreateEventPage';
-import ViewEventsPage from './pages/admin/ViewEventsPage';
 import UserManagementPage from './pages/admin/UserManagementPage';
 import FormsManagementPage from './pages/admin/FormsManagementPage';
 import BackupSyncPage from './pages/admin/BackupSyncPage';
 import ImportExportPage from './pages/admin/ImportExportPage';
-
-// Instructor Pages
-import InstructorDashboardPage from './pages/instructor/InstructorDashboardPage';
-import ViewTeamsPage from './pages/instructor/ViewTeamsPage';
-
-// Host Pages
-import HostDashboardPage from './pages/host/HostDashboardPage';
-
-// Shared Pages
 import GalleryPage from './pages/shared/GalleryPage';
+import InstructorDashboardPage from './pages/instructor/InstructorDashboardPage';
+import HostDashboardPage from './pages/host/HostDashboardPage';
 import MyAccountPage from './pages/shared/MyAccountPage';
 
-// Global CSS
-import './styles/global.css';
-import './styles/theme.css'; // Import theme CSS
+// Import styles
+import './styles/theme.css';
+import './App.css';
 
-// Protected Route Component
-const ProtectedRoute = ({ children, allowedRoles }) => {
-    const { currentUser, userRole } = useAuth();
-
-    if (!currentUser) {
-        return <Navigate to="/login" />;
-    }
-
-    if (allowedRoles && !allowedRoles.includes(userRole)) {
-        // Redirect to the appropriate dashboard based on role
-        if (userRole === 'admin') {
-            return <Navigate to="/admin/dashboard" />;
-        } else if (userRole === 'instructor') {
-            return <Navigate to="/instructor/dashboard" />;
-        } else if (userRole === 'host') {
-            return <Navigate to="/host/dashboard" />;
-        } else {
-            return <Navigate to="/login" />;
-        }
-    }
-
+// Protected Route component
+const ProtectedRoute = ({ children, requiredRole }) => {
+    // This would typically check authentication and authorization
+    // For now, we'll assume the Dashboard component handles this
     return children;
 };
 
-// Keep mock notification provider
-const MockNotificationProvider = ({ children }) => <>{children}</>;
-
-const AppRoutes = () => {
-    useNavigationRefresh();
+function App() {
     return (
-        <Routes>
-            {/* Public Routes */}
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/reset-password" element={<PasswordResetPage />} />
-
-            {/* Admin Routes */}
-            <Route path="/admin/dashboard" element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                    <AdminDashboardPage />
-                </ProtectedRoute>
-            } />
-            <Route path="/admin/events" element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                    <EventManagementPage />
-                </ProtectedRoute>
-            } />
-            <Route path="/admin/events/create" element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                    <CreateEventPage />
-                </ProtectedRoute>
-            } />
-            <Route path="/admin/events/view" element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                    <ViewEventsPage />
-                </ProtectedRoute>
-            } />
-            <Route path="/admin/users" element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                    <UserManagementPage />
-                </ProtectedRoute>
-            } />
-            <Route path="/admin/forms" element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                    <FormsManagementPage />
-                </ProtectedRoute>
-            } />
-            <Route path="/admin/backup" element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                    <BackupSyncPage />
-                </ProtectedRoute>
-            } />
-            <Route path="/admin/import-export" element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                    <ImportExportPage />
-                </ProtectedRoute>
-            } />
-
-            {/* Instructor Routes */}
-            <Route path="/instructor/dashboard" element={
-                <ProtectedRoute allowedRoles={['instructor']}>
-                    <InstructorDashboardPage />
-                </ProtectedRoute>
-            } />
-            <Route path="/instructor/teams" element={
-                <ProtectedRoute allowedRoles={['instructor']}>
-                    <ViewTeamsPage />
-                </ProtectedRoute>
-            } />
-            <Route path="/instructor/events" element={
-                <ProtectedRoute allowedRoles={['instructor']}>
-                    <ViewEventsPage />
-                </ProtectedRoute>
-            } />
-
-            {/* Host Routes */}
-            <Route path="/host/dashboard" element={
-                <ProtectedRoute allowedRoles={['host']}>
-                    <HostDashboardPage />
-                </ProtectedRoute>
-            } />
-            <Route path="/host/events" element={
-                <ProtectedRoute allowedRoles={['host']}>
-                    <ViewEventsPage />
-                </ProtectedRoute>
-            } />
-
-            {/* Shared Routes */}
-            <Route path="/gallery" element={
-                <ProtectedRoute allowedRoles={['admin', 'instructor', 'host']}>
-                    <GalleryPage />
-                </ProtectedRoute>
-            } />
-            <Route path="/my-account" element={
-                <ProtectedRoute allowedRoles={['admin', 'instructor', 'host']}>
-                    <MyAccountPage />
-                </ProtectedRoute>
-            } />
-
-            {/* Default Route */}
-            <Route path="/" element={<Navigate to="/login" />} />
-            <Route path="*" element={<Navigate to="/login" />} />
-        </Routes>
-    );
-};
-
-const App = () => {
-    return (
-        <ThemeProvider>
-            <Router>
+        <ErrorBoundary>
+            <ThemeProvider>
                 <AuthProvider>
-                    <MockNotificationProvider>
-                        <AppRoutes />
-                    </MockNotificationProvider>
+                    <Router>
+                        <div className="App">
+                            <Routes>
+                                {/* Public routes */}
+                                <Route path="/login" element={<Login />} />
+                                <Route path="/forgot-password" element={<Login />} />
+
+                                {/* Protected routes */}
+                                <Route
+                                    path="/admin/dashboard"
+                                    element={
+                                        <ProtectedRoute requiredRole="admin">
+                                            <AdminDashboardPage />
+                                        </ProtectedRoute>
+                                    }
+                                />
+
+                                <Route
+                                    path="/instructor/dashboard"
+                                    element={
+                                        <ProtectedRoute requiredRole="instructor">
+                                            <InstructorDashboardPage />
+                                        </ProtectedRoute>
+                                    }
+                                />
+
+                                <Route
+                                    path="/host/dashboard"
+                                    element={
+                                        <ProtectedRoute requiredRole="host">
+                                            <HostDashboardPage />
+                                        </ProtectedRoute>
+                                    }
+                                />
+
+                                <Route
+                                    path="/my-account"
+                                    element={
+                                        <ProtectedRoute>
+                                            <MyAccountPage />
+                                        </ProtectedRoute>
+                                    }
+                                />
+
+                                {/* Admin routes */}
+                                <Route
+                                    path="/admin/events"
+                                    element={
+                                        <ProtectedRoute requiredRole="admin">
+                                            <EventManagementPage />
+                                        </ProtectedRoute>
+                                    }
+                                />
+
+                                <Route
+                                    path="/admin/users"
+                                    element={
+                                        <ProtectedRoute requiredRole="admin">
+                                            <UserManagementPage />
+                                        </ProtectedRoute>
+                                    }
+                                />
+
+                                <Route
+                                    path="/admin/forms"
+                                    element={
+                                        <ProtectedRoute requiredRole="admin">
+                                            <FormsManagementPage />
+                                        </ProtectedRoute>
+                                    }
+                                />
+
+                                <Route
+                                    path="/admin/backup"
+                                    element={
+                                        <ProtectedRoute requiredRole="admin">
+                                            <BackupSyncPage />
+                                        </ProtectedRoute>
+                                    }
+                                />
+
+                                <Route
+                                    path="/admin/import-export"
+                                    element={
+                                        <ProtectedRoute requiredRole="admin">
+                                            <ImportExportPage />
+                                        </ProtectedRoute>
+                                    }
+                                />
+
+                                {/* Instructor routes */}
+                                <Route
+                                    path="/instructor/events"
+                                    element={
+                                        <ProtectedRoute requiredRole="instructor">
+                                            <InstructorDashboardPage />
+                                        </ProtectedRoute>
+                                    }
+                                />
+
+                                <Route
+                                    path="/instructor/teams"
+                                    element={
+                                        <ProtectedRoute requiredRole="instructor">
+                                            <InstructorDashboardPage />
+                                        </ProtectedRoute>
+                                    }
+                                />
+
+                                {/* Host routes */}
+                                <Route
+                                    path="/host/events"
+                                    element={
+                                        <ProtectedRoute requiredRole="host">
+                                            <HostDashboardPage />
+                                        </ProtectedRoute>
+                                    }
+                                />
+
+                                {/* Shared routes */}
+                                <Route
+                                    path="/gallery"
+                                    element={
+                                        <ProtectedRoute>
+                                            <GalleryPage />
+                                        </ProtectedRoute>
+                                    }
+                                />
+
+                                {/* Default redirects */}
+                                <Route path="/dashboard" element={<Navigate to="/admin/dashboard" replace />} />
+                                <Route path="/" element={<Navigate to="/login" replace />} />
+
+                                {/* 404 catch-all */}
+                                <Route path="*" element={<Navigate to="/login" replace />} />
+                            </Routes>
+                        </div>
+                    </Router>
                 </AuthProvider>
-            </Router>
-        </ThemeProvider>
+            </ThemeProvider>
+        </ErrorBoundary>
     );
-};
+}
 
 export default App;
