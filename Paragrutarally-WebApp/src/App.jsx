@@ -3,6 +3,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { LanguageProvider } from './contexts/LanguageContext';
 import ErrorBoundary from './components/layout/ErrorBoundary';
 
 // Import pages
@@ -32,148 +33,150 @@ const ProtectedRoute = ({ children, requiredRole }) => {
 function App() {
     return (
         <ErrorBoundary>
-            <ThemeProvider>
-                <AuthProvider>
-                    <Router>
-                        <div className="App">
-                            <Routes>
-                                {/* Public routes */}
-                                <Route path="/login" element={<Login />} />
-                                <Route path="/forgot-password" element={<Login />} />
+            <LanguageProvider>
+                <ThemeProvider>
+                    <AuthProvider>
+                        <Router>
+                            <div className="App">
+                                <Routes>
+                                    {/* Public routes */}
+                                    <Route path="/login" element={<Login />} />
+                                    <Route path="/forgot-password" element={<Login />} />
 
-                                {/* Protected routes */}
-                                <Route
-                                    path="/admin/dashboard"
-                                    element={
-                                        <ProtectedRoute requiredRole="admin">
-                                            <AdminDashboardPage />
-                                        </ProtectedRoute>
-                                    }
-                                />
+                                    {/* Protected routes */}
+                                    <Route
+                                        path="/admin/dashboard"
+                                        element={
+                                            <ProtectedRoute requiredRole="admin">
+                                                <AdminDashboardPage />
+                                            </ProtectedRoute>
+                                        }
+                                    />
 
-                                <Route
-                                    path="/instructor/dashboard"
-                                    element={
-                                        <ProtectedRoute requiredRole="instructor">
-                                            <InstructorDashboardPage />
-                                        </ProtectedRoute>
-                                    }
-                                />
+                                    <Route
+                                        path="/instructor/dashboard"
+                                        element={
+                                            <ProtectedRoute requiredRole="instructor">
+                                                <InstructorDashboardPage />
+                                            </ProtectedRoute>
+                                        }
+                                    />
 
-                                <Route
-                                    path="/host/dashboard"
-                                    element={
-                                        <ProtectedRoute requiredRole="host">
-                                            <HostDashboardPage />
-                                        </ProtectedRoute>
-                                    }
-                                />
+                                    <Route
+                                        path="/host/dashboard"
+                                        element={
+                                            <ProtectedRoute requiredRole="host">
+                                                <HostDashboardPage />
+                                            </ProtectedRoute>
+                                        }
+                                    />
 
-                                <Route
-                                    path="/my-account"
-                                    element={
-                                        <ProtectedRoute>
-                                            <MyAccountPage />
-                                        </ProtectedRoute>
-                                    }
-                                />
+                                    <Route
+                                        path="/my-account"
+                                        element={
+                                            <ProtectedRoute>
+                                                <MyAccountPage />
+                                            </ProtectedRoute>
+                                        }
+                                    />
 
-                                {/* Admin routes */}
-                                <Route
-                                    path="/admin/events"
-                                    element={
-                                        <ProtectedRoute requiredRole="admin">
-                                            <EventManagementPage />
-                                        </ProtectedRoute>
-                                    }
-                                />
+                                    {/* Admin routes */}
+                                    <Route
+                                        path="/admin/events"
+                                        element={
+                                            <ProtectedRoute requiredRole="admin">
+                                                <EventManagementPage />
+                                            </ProtectedRoute>
+                                        }
+                                    />
 
-                                <Route
-                                    path="/admin/users"
-                                    element={
-                                        <ProtectedRoute requiredRole="admin">
-                                            <UserManagementPage />
-                                        </ProtectedRoute>
-                                    }
-                                />
+                                    <Route
+                                        path="/admin/users"
+                                        element={
+                                            <ProtectedRoute requiredRole="admin">
+                                                <UserManagementPage />
+                                            </ProtectedRoute>
+                                        }
+                                    />
 
-                                <Route
-                                    path="/admin/forms"
-                                    element={
-                                        <ProtectedRoute requiredRole="admin">
-                                            <FormsManagementPage />
-                                        </ProtectedRoute>
-                                    }
-                                />
+                                    <Route
+                                        path="/admin/forms"
+                                        element={
+                                            <ProtectedRoute requiredRole="admin">
+                                                <FormsManagementPage />
+                                            </ProtectedRoute>
+                                        }
+                                    />
 
-                                <Route
-                                    path="/admin/backup"
-                                    element={
-                                        <ProtectedRoute requiredRole="admin">
-                                            <BackupSyncPage />
-                                        </ProtectedRoute>
-                                    }
-                                />
+                                    <Route
+                                        path="/admin/backup"
+                                        element={
+                                            <ProtectedRoute requiredRole="admin">
+                                                <BackupSyncPage />
+                                            </ProtectedRoute>
+                                        }
+                                    />
 
-                                <Route
-                                    path="/admin/import-export"
-                                    element={
-                                        <ProtectedRoute requiredRole="admin">
-                                            <ImportExportPage />
-                                        </ProtectedRoute>
-                                    }
-                                />
+                                    <Route
+                                        path="/admin/import-export"
+                                        element={
+                                            <ProtectedRoute requiredRole="admin">
+                                                <ImportExportPage />
+                                            </ProtectedRoute>
+                                        }
+                                    />
 
-                                {/* Instructor routes */}
-                                <Route
-                                    path="/instructor/events"
-                                    element={
-                                        <ProtectedRoute requiredRole="instructor">
-                                            <InstructorDashboardPage />
-                                        </ProtectedRoute>
-                                    }
-                                />
+                                    {/* Instructor routes */}
+                                    <Route
+                                        path="/instructor/events"
+                                        element={
+                                            <ProtectedRoute requiredRole="instructor">
+                                                <InstructorDashboardPage />
+                                            </ProtectedRoute>
+                                        }
+                                    />
 
-                                <Route
-                                    path="/instructor/teams"
-                                    element={
-                                        <ProtectedRoute requiredRole="instructor">
-                                            <InstructorDashboardPage />
-                                        </ProtectedRoute>
-                                    }
-                                />
+                                    <Route
+                                        path="/instructor/teams"
+                                        element={
+                                            <ProtectedRoute requiredRole="instructor">
+                                                <InstructorDashboardPage />
+                                            </ProtectedRoute>
+                                        }
+                                    />
 
-                                {/* Host routes */}
-                                <Route
-                                    path="/host/events"
-                                    element={
-                                        <ProtectedRoute requiredRole="host">
-                                            <HostDashboardPage />
-                                        </ProtectedRoute>
-                                    }
-                                />
+                                    {/* Host routes */}
+                                    <Route
+                                        path="/host/events"
+                                        element={
+                                            <ProtectedRoute requiredRole="host">
+                                                <HostDashboardPage />
+                                            </ProtectedRoute>
+                                        }
+                                    />
 
-                                {/* Shared routes */}
-                                <Route
-                                    path="/gallery"
-                                    element={
-                                        <ProtectedRoute>
-                                            <GalleryPage />
-                                        </ProtectedRoute>
-                                    }
-                                />
+                                    {/* Shared routes */}
+                                    <Route
+                                        path="/gallery"
+                                        element={
+                                            <ProtectedRoute>
+                                                <GalleryPage />
+                                            </ProtectedRoute>
+                                        }
+                                    />
 
-                                {/* Default redirects */}
-                                <Route path="/dashboard" element={<Navigate to="/admin/dashboard" replace />} />
-                                <Route path="/" element={<Navigate to="/login" replace />} />
+                                    {/* Default redirects */}
+                                    <Route path="/dashboard" element={<Navigate to="/admin/dashboard" replace />} />
+                                    <Route path="/" element={<Navigate to="/login" replace />} />
 
-                                {/* 404 catch-all */}
-                                <Route path="*" element={<Navigate to="/login" replace />} />
-                            </Routes>
-                        </div>
-                    </Router>
-                </AuthProvider>
-            </ThemeProvider>
+                                    {/* 404 catch-all */}
+                                    <Route path="*" element={<Navigate to="/login" replace />} />
+                                </Routes>
+                            </div>
+                        </Router>
+                    </AuthProvider>
+                </ThemeProvider>
+            </LanguageProvider>
         </ErrorBoundary>
     );
 }

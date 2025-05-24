@@ -3,7 +3,9 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext.jsx';
+import { useLanguage } from '../../contexts/LanguageContext.jsx';
 import DarkModeToggle from '../common/DarkModeToggle.jsx';
+import LanguageSelector from '../common/LanguageSelector.jsx';
 import ContactUsModal from '../layout/ContactUsModal';
 import './Login.css';
 
@@ -16,6 +18,7 @@ const Login = () => {
     const [isContactModalOpen, setIsContactModalOpen] = useState(false);
     const { signIn } = useAuth();
     const { isDarkMode } = useTheme();
+    const { t } = useLanguage();
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
@@ -27,7 +30,7 @@ const Login = () => {
             await signIn(email, password);
             navigate('/dashboard');
         } catch (err) {
-            setError('Failed to sign in. Please check your credentials.');
+            setError(t('login.error', 'Failed to sign in. Please check your credentials.'));
             console.error(err);
         } finally {
             setLoading(false);
@@ -46,28 +49,29 @@ const Login = () => {
 
             <div className="login-content">
                 <div className="app-title-container">
-                    <h1 className="app-title">Paragrutarally WebApp</h1>
+                    <h1 className="app-title">{t('login.appTitle', 'Paragrutarally WebApp')}</h1>
                 </div>
 
                 <div className="login-form-box">
-                    <h2 className="login-heading">Login</h2>
+                    <h2 className="login-heading">{t('login.title', 'Login')}</h2>
 
                     {error && <div className="error-message">{error}</div>}
 
                     <form onSubmit={handleSubmit}>
                         <div className="form-group">
-                            <label htmlFor="email">Email:</label>
+                            <label htmlFor="email">{t('login.email', 'Email:')}:</label>
                             <input
                                 type="email"
                                 id="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 required
+                                placeholder={t('login.emailPlaceholder', 'Enter your email')}
                             />
                         </div>
 
                         <div className="form-group">
-                            <label htmlFor="password">Password:</label>
+                            <label htmlFor="password">{t('login.password', 'Password:')}:</label>
                             <div className="password-input-container">
                                 <input
                                     type={showPassword ? "text" : "password"}
@@ -75,13 +79,14 @@ const Login = () => {
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     required
+                                    placeholder={t('login.passwordPlaceholder', 'Enter your password')}
                                 />
                                 <button
                                     type="button"
                                     className="toggle-password-btn"
                                     onClick={togglePasswordVisibility}
                                 >
-                                    {showPassword ? "Hide" : "Show"}
+                                    {showPassword ? t('login.hide', 'Hide') : t('login.show', 'Show')}
                                 </button>
                             </div>
                         </div>
@@ -91,21 +96,21 @@ const Login = () => {
                             className="login-button"
                             disabled={loading}
                         >
-                            {loading ? "Signing In..." : "Sign In"}
+                            {loading ? t('login.signingIn', 'Signing In...') : t('login.signIn', 'Sign In')}
                         </button>
 
                         {/* Text link for forgot password */}
                         <Link to="/forgot-password" className="forgot-password-link">
-                            Forgot Password?
+                            {t('login.forgotPassword', 'Forgot Password?')}
                         </Link>
                     </form>
 
                     <div className="login-options">
                         <button type="button" className="mobile-login-btn">
-                            Sign In With Mobile Number
+                            {t('login.mobileSignIn', 'Sign In With Mobile Number')}
                         </button>
                         <button type="button" className="google-login-btn">
-                            Sign In With Google
+                            {t('login.googleSignIn', 'Sign In With Google')}
                         </button>
                     </div>
                 </div>
@@ -115,8 +120,13 @@ const Login = () => {
                         className="contact-us-btn"
                         onClick={() => setIsContactModalOpen(true)}
                     >
-                        Contact Us
+                        {t('login.contactUs', 'Contact Us')}
                     </button>
+                </div>
+
+                {/* Language selector at the bottom */}
+                <div className="login-language-selector">
+                    <LanguageSelector />
                 </div>
             </div>
 

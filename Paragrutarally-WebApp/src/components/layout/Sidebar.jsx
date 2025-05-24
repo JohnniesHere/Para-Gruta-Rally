@@ -2,10 +2,12 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 import './Sidebar.css';
 
 const Sidebar = ({ userRole }) => {
     const { isDarkMode } = useTheme();
+    const { t } = useLanguage();
     const location = useLocation();
 
     return (
@@ -19,43 +21,43 @@ const Sidebar = ({ userRole }) => {
                             className={({ isActive }) => isActive ? 'active' : ''}
                             end
                         >
-                            Dashboard
+                            {t('nav.dashboard', 'Dashboard')}
                         </NavLink>
                         <NavLink
                             to="/admin/events"
                             className={({ isActive }) => isActive ? 'active' : ''}
                         >
-                            Event Management
+                            {t('nav.eventManagement', 'Event Management')}
                         </NavLink>
                         <NavLink
                             to="/admin/users"
                             className={({ isActive }) => isActive ? 'active' : ''}
                         >
-                            User Management
+                            {t('nav.userManagement', 'User Management')}
                         </NavLink>
                         <NavLink
                             to="/admin/forms"
                             className={({ isActive }) => isActive ? 'active' : ''}
                         >
-                            Forms
+                            {t('nav.forms', 'Forms')}
                         </NavLink>
                         <NavLink
                             to="/admin/backup"
                             className={({ isActive }) => isActive ? 'active' : ''}
                         >
-                            Backup/Sync
+                            {t('nav.backupSync', 'Backup/Sync')}
                         </NavLink>
                         <NavLink
                             to="/admin/import-export"
                             className={({ isActive }) => isActive ? 'active' : ''}
                         >
-                            Import/Export Data
+                            {t('nav.importExport', 'Import/Export Data')}
                         </NavLink>
                         <NavLink
                             to="/gallery"
                             className={({ isActive }) => isActive ? 'active' : ''}
                         >
-                            Gallery
+                            {t('nav.gallery', 'Gallery')}
                         </NavLink>
                     </>
                 )}
@@ -68,25 +70,25 @@ const Sidebar = ({ userRole }) => {
                             className={({ isActive }) => isActive ? 'active' : ''}
                             end
                         >
-                            Dashboard
+                            {t('nav.dashboard', 'Dashboard')}
                         </NavLink>
                         <NavLink
                             to="/instructor/events"
                             className={({ isActive }) => isActive ? 'active' : ''}
                         >
-                            Events
+                            {t('nav.events', 'Events')}
                         </NavLink>
                         <NavLink
                             to="/instructor/teams"
                             className={({ isActive }) => isActive ? 'active' : ''}
                         >
-                            Teams
+                            {t('nav.teams', 'Teams')}
                         </NavLink>
                         <NavLink
                             to="/gallery"
                             className={({ isActive }) => isActive ? 'active' : ''}
                         >
-                            Gallery
+                            {t('nav.gallery', 'Gallery')}
                         </NavLink>
                     </>
                 )}
@@ -99,19 +101,19 @@ const Sidebar = ({ userRole }) => {
                             className={({ isActive }) => isActive ? 'active' : ''}
                             end
                         >
-                            Dashboard
+                            {t('nav.dashboard', 'Dashboard')}
                         </NavLink>
                         <NavLink
                             to="/host/events"
                             className={({ isActive }) => isActive ? 'active' : ''}
                         >
-                            Events
+                            {t('nav.events', 'Events')}
                         </NavLink>
                         <NavLink
                             to="/gallery"
                             className={({ isActive }) => isActive ? 'active' : ''}
                         >
-                            Gallery
+                            {t('nav.gallery', 'Gallery')}
                         </NavLink>
                     </>
                 )}

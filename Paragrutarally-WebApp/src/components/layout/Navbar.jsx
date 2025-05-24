@@ -3,13 +3,16 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext.jsx';
 import { useTheme } from '../../contexts/ThemeContext.jsx';
+import { useLanguage } from '../../contexts/LanguageContext.jsx';
 import DarkModeToggle from '../common/DarkModeToggle.jsx';
+import LanguageSelector from '../common/LanguageSelector.jsx';
 import logoImage from '../../assets/images/PGR Logo.png';
 import './Navbar.css';
 
 const Navbar = ({ userRole }) => {
     const { currentUser, signOut } = useAuth();
-    const { isDarkMode } = useTheme(); // Fixed: changed from isDark to isDarkMode
+    const { isDarkMode } = useTheme();
+    const { t } = useLanguage();
     const navigate = useNavigate();
 
     const handleSignOut = async () => {
@@ -32,15 +35,18 @@ const Navbar = ({ userRole }) => {
             <div className="logo">
                 <Link to={dashboardLink}>
                     <img src={logoImage} alt="ParaGrutaRally Logo" />
-                    ParaGrutaRally
+                    {t('nav.logo', 'ParaGrutaRally')}
                 </Link>
             </div>
             <div className="nav-links">
                 {currentUser && (
                     <>
-                        <Link to="/my-account">My Account</Link>
+                        <Link to="/my-account">{t('nav.myAccount', 'My Account')}</Link>
+                        <LanguageSelector />
                         <DarkModeToggle className="navbar-theme-toggle" />
-                        <button onClick={handleSignOut} className="sign-out-btn">Sign Out</button>
+                        <button onClick={handleSignOut} className="sign-out-btn">
+                            {t('nav.signOut', 'Sign Out')}
+                        </button>
                     </>
                 )}
             </div>
