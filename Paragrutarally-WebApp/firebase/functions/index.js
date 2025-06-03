@@ -4,15 +4,18 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const cors = require("cors")({ origin: true });
-const xlsx = require("xlsx");
+const ExcelJS = require("exceljs"); // Changed from xlsx to exceljs
 const fs = require("fs");
 const os = require("os");
 const path = require("path");
 
-// Initialize Firebase Admin
+// Initialize Firebase Admin ONLY HERE
 admin.initializeApp();
 const db = admin.firestore();
 const storage = admin.storage();
+
+// Import your function AFTER initialization
+const { createUserForAdmin } = require('./createUserForAdmin');
 
 // Utility functions
 const isAdmin = async (uid) => {
@@ -73,11 +76,35 @@ exports.processExcelImport = functions.storage
             await bucket.file(object.name).download({ destination: tempFilePath });
             console.log("File downloaded to", tempFilePath);
 
-            // Read the Excel file
-            const workbook = xlsx.readFile(tempFilePath);
-            const sheetName = workbook.SheetNames[0];
-            const worksheet = workbook.Sheets[sheetName];
-            const jsonData = xlsx.utils.sheet_to_json(worksheet);
+            // Read the Excel file using ExcelJS
+            const workbook = new ExcelJS.Workbook();
+            await workbook.xlsx.readFile(tempFilePath);
+            const worksheet = workbook.worksheets[0];
+
+            // Convert worksheet to JSON data
+            const jsonData = [];
+            const headerRow = worksheet.getRow(1);
+            const headers = [];
+
+            // Get headers
+            headerRow.eachCell((cell, colNumber) => {
+                headers[colNumber] = cell.value;
+            });
+
+            // Get data rows
+            worksheet.eachRow((row, rowNumber) => {
+                if (rowNumber > 1) { // Skip header row
+                    const rowData = {};
+                    row.eachCell((cell, colNumber) => {
+                        if (headers[colNumber]) {
+                            rowData[headers[colNumber]] = cell.value;
+                        }
+                    });
+                    if (Object.keys(rowData).length > 0) {
+                        jsonData.push(rowData);
+                    }
+                }
+            });
 
             if (jsonData.length === 0) {
                 throw new Error("Excel file contains no data");
@@ -451,3 +478,5 @@ exports.weeklyReportEmail = functions.pubsub
             return { success: false, error: error.message };
         }
     });
+
+exports.createUserForAdmin = createUserForAdmin;

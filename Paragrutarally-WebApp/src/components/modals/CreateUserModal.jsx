@@ -1,8 +1,10 @@
 // src/components/modals/CreateUserModal.jsx
 import React, { useState } from 'react';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { auth, db } from '../../firebase/config';
+import { initializeApp, deleteApp } from 'firebase/app';
+import { getAuth } from 'firebase/auth';
+import { db } from '../../firebase/config';
 
 const CreateUserModal = ({ isOpen, onClose, onUserCreated }) => {
     const [formData, setFormData] = useState({
@@ -69,46 +71,92 @@ const CreateUserModal = ({ isOpen, onClose, onUserCreated }) => {
 
         setIsLoading(true);
 
+        // Store current admin info
+        const { auth } = await import('../../firebase/config');
+        const currentAdmin = auth.currentUser;
+        const adminEmail = currentAdmin?.email;
+
+        if (!adminEmail) {
+            setErrors({ general: 'You must be logged in as admin to create users' });
+            setIsLoading(false);
+            return;
+        }
+
         try {
-            // Create authentication account
-            const userCredential = await createUserWithEmailAndPassword(
-                auth,
-                formData.email,
-                '123456'  // Default password
-            );
-
-            const uid = userCredential.user.uid;
-            const now = serverTimestamp();
-
-            // Create user document in Firestore
-            const userDoc = {
-                createdAt: now,
-                displayName: formData.displayName,
-                email: formData.email,
-                lastLogin: now,
-                name: formData.name,
-                phone: formData.phone,
-                role: formData.role
+            // Get Firebase config
+            const firebaseConfig = {
+                apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+                authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+                projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+                storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+                messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+                appId: import.meta.env.VITE_FIREBASE_APP_ID
             };
 
-            await setDoc(doc(db, 'users', uid), userDoc);
+            // Create secondary app instance with unique name
+            const timestamp = Date.now();
+            const secondaryApp = initializeApp(firebaseConfig, `CreateUser_${timestamp}`);
+            const secondaryAuth = getAuth(secondaryApp);
 
-            // Reset form and close modal
-            setFormData({
-                displayName: '',
-                email: '',
-                name: '',
-                phone: '',
-                role: 'parent'
-            });
-            setErrors({});
+            try {
+                // Create user with secondary auth instance
+                const userCredential = await createUserWithEmailAndPassword(
+                    secondaryAuth,
+                    formData.email,
+                    '123456'
+                );
 
-            // Notify parent component
-            if (onUserCreated) {
-                onUserCreated();
+                const uid = userCredential.user.uid;
+                const now = serverTimestamp();
+
+                // Create user document in Firestore
+                const userDoc = {
+                    createdAt: now,
+                    displayName: formData.displayName,
+                    email: formData.email,
+                    lastLogin: now,
+                    name: formData.name,
+                    phone: formData.phone,
+                    role: formData.role
+                };
+
+                await setDoc(doc(db, 'users', uid), userDoc);
+
+                // Success! Clean up and close
+                await deleteApp(secondaryApp);
+
+                // Reset form
+                setFormData({
+                    displayName: '',
+                    email: '',
+                    name: '',
+                    phone: '',
+                    role: 'parent'
+                });
+                setErrors({});
+
+                // Show success message
+                alert(
+                    `✅ SUCCESS!\n\n` +
+                    `User "${formData.displayName}" has been created successfully!\n\n` +
+                    `📧 Email: ${formData.email}\n` +
+                    `🔑 Password: 123456\n` +
+                    `👤 Role: ${formData.role}\n\n` +
+                    `✨ You remain logged in as admin!`
+                );
+
+                // Notify parent and close
+                if (onUserCreated) {
+                    onUserCreated();
+                }
+                onClose();
+
+            } catch (userCreationError) {
+                // Clean up secondary app on error
+                await deleteApp(secondaryApp);
+                throw userCreationError;
             }
 
-            onClose();
         } catch (error) {
             console.error('Error creating user:', error);
 
@@ -119,6 +167,11 @@ const CreateUserModal = ({ isOpen, onClose, onUserCreated }) => {
                 setErrors({ email: 'Invalid email address' });
             } else if (error.code === 'auth/weak-password') {
                 setErrors({ general: 'Password is too weak' });
+            } else if (error.code === 'app/duplicate-app') {
+                // If secondary app already exists, try a different approach
+                setErrors({
+                    general: 'Please wait a moment and try again. (App instance conflict)'
+                });
             } else {
                 setErrors({ general: 'Failed to create user. Please try again.' });
             }
