@@ -1,28 +1,106 @@
 // src/pages/admin/UserManagementPage.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { collection, getDocs, query, where, orderBy } from 'firebase/firestore';
 import Dashboard from '../../components/layout/Dashboard';
 import { useTheme } from '../../contexts/ThemeContext';
 import CreateUserModal from '../../components/modals/CreateUserModal';
+import ExportUsersModal from '../../components/modals/ExportUsersModal';
+import UsersTable from '../../components/tables/UsersTable';
+import { db } from '../../firebase/config';
 import './UserManagement.css';
 
 const UserManagementPage = () => {
     const { isDarkMode } = useTheme();
+    const [users, setUsers] = useState([]);
+    const [filteredUsers, setFilteredUsers] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+    const [roleFilter, setRoleFilter] = useState('all');
 
+    // Fetch users from Firestore
+    const fetchUsers = async () => {
+        setIsLoading(true);
+        try {
+            const usersQuery = query(
+                collection(db, 'users'),
+                orderBy('createdAt', 'desc')
+            );
+
+            const querySnapshot = await getDocs(usersQuery);
+            const usersData = [];
+
+            querySnapshot.forEach((doc) => {
+                usersData.push({
+                    id: doc.id,
+                    ...doc.data()
+                });
+            });
+
+            setUsers(usersData);
+            setFilteredUsers(usersData);
+        } catch (error) {
+            console.error('Error fetching users:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // Filter users by role
+    const filterUsersByRole = (role) => {
+        if (role === 'all') {
+            setFilteredUsers(users);
+        } else {
+            const filtered = users.filter(user => user.role === role);
+            setFilteredUsers(filtered);
+        }
+    };
+
+    // Handle role filter change
+    const handleRoleFilterChange = (e) => {
+        const selectedRole = e.target.value;
+        setRoleFilter(selectedRole);
+        filterUsersByRole(selectedRole);
+    };
+
+    // Modal handlers
     const handleCreateUser = () => {
         setIsCreateModalOpen(true);
     };
 
-    const handleCloseModal = () => {
+    const handleCloseCreateModal = () => {
         setIsCreateModalOpen(false);
     };
 
     const handleUserCreated = () => {
-        // You can add any additional logic here when a user is successfully created
-        // For example, refreshing a user list, showing a success message, etc.
+        // Refresh users list after creating a new user
+        fetchUsers();
         console.log('User created successfully!');
-        // If you have a user list, you might want to refresh it here
     };
+
+    const handleExportUsers = () => {
+        setIsExportModalOpen(true);
+    };
+
+    const handleCloseExportModal = () => {
+        setIsExportModalOpen(false);
+    };
+
+    const handleUpdateUser = (user) => {
+        // TODO: Implement update user functionality
+        console.log('Update user:', user);
+        // You can implement the update modal here
+    };
+
+    // Load users on component mount
+    useEffect(() => {
+        fetchUsers();
+    }, []);
+
+    // Re-filter when users change
+    useEffect(() => {
+        filterUsersByRole(roleFilter);
+    }, [users, roleFilter]);
 
     return (
         <Dashboard requiredRole="admin">
@@ -30,36 +108,56 @@ const UserManagementPage = () => {
                 <h1>User Management</h1>
 
                 <div className="user-management-container">
-                    <h2>Manage Users</h2>
-                    <p>
-                        This page contains user management functionality including:
-                    </p>
-                    <ul>
-                        <li>View all users</li>
-                        <li>Add new users</li>
-                        <li>Edit user profiles</li>
-                        <li>Manage user roles</li>
-                        <li>User permissions</li>
-                    </ul>
+                    <div className="user-management-header">
+                        <div className="user-management-actions">
+                            <button
+                                className="btn-primary"
+                                onClick={handleCreateUser}
+                            >
+                                Create User
+                            </button>
+                            <button
+                                className="btn-secondary"
+                                onClick={handleExportUsers}
+                            >
+                                Export Users
+                            </button>
+                        </div>
 
-                    <div className="user-management-actions">
-                        <button
-                            className="btn-primary"
-                            onClick={handleCreateUser}
-                        >
-                            Add New User
-                        </button>
-                        <button className="btn-secondary">
-                            Export Users
-                        </button>
+                        <div className="filter-section">
+                            <label htmlFor="roleFilter">Filter by Role:</label>
+                            <select
+                                id="roleFilter"
+                                className="filter-select"
+                                value={roleFilter}
+                                onChange={handleRoleFilterChange}
+                            >
+                                <option value="all">All Roles</option>
+                                <option value="admin">Admin</option>
+                                <option value="instructor">Instructor</option>
+                                <option value="parent">Parent</option>
+                            </select>
+                        </div>
                     </div>
+
+                    <UsersTable
+                        users={filteredUsers}
+                        isLoading={isLoading}
+                        onUpdateUser={handleUpdateUser}
+                    />
                 </div>
             </div>
 
+            {/* Modals */}
             <CreateUserModal
                 isOpen={isCreateModalOpen}
-                onClose={handleCloseModal}
+                onClose={handleCloseCreateModal}
                 onUserCreated={handleUserCreated}
+            />
+
+            <ExportUsersModal
+                isOpen={isExportModalOpen}
+                onClose={handleCloseExportModal}
             />
         </Dashboard>
     );
