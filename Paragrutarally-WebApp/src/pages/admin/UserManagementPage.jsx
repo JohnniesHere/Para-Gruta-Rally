@@ -5,6 +5,7 @@ import Dashboard from '../../components/layout/Dashboard';
 import { useTheme } from '../../contexts/ThemeContext';
 import CreateUserModal from '../../components/modals/CreateUserModal';
 import ExportUsersModal from '../../components/modals/ExportUsersModal';
+import UpdateUserModal from '../../components/modals/UpdateUserModal';
 import UsersTable from '../../components/tables/UsersTable';
 import { db } from '../../firebase/config';
 import './UserManagement.css';
@@ -16,6 +17,8 @@ const UserManagementPage = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+    const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+    const [selectedUser, setSelectedUser] = useState(null);
     const [roleFilter, setRoleFilter] = useState('all');
 
     // Fetch users from Firestore
@@ -78,6 +81,18 @@ const UserManagementPage = () => {
         console.log('User created successfully!');
     };
 
+    const handleUserUpdated = () => {
+        // Refresh users list after updating a user
+        fetchUsers();
+        setSelectedUser(null);
+        console.log('User updated successfully!');
+    };
+
+    const handleCloseUpdateModal = () => {
+        setIsUpdateModalOpen(false);
+        setSelectedUser(null);
+    };
+
     const handleExportUsers = () => {
         setIsExportModalOpen(true);
     };
@@ -87,9 +102,8 @@ const UserManagementPage = () => {
     };
 
     const handleUpdateUser = (user) => {
-        // TODO: Implement update user functionality
-        console.log('Update user:', user);
-        // You can implement the update modal here
+        setSelectedUser(user);
+        setIsUpdateModalOpen(true);
     };
 
     // Load users on component mount
@@ -158,6 +172,13 @@ const UserManagementPage = () => {
             <ExportUsersModal
                 isOpen={isExportModalOpen}
                 onClose={handleCloseExportModal}
+            />
+
+            <UpdateUserModal
+                isOpen={isUpdateModalOpen}
+                onClose={handleCloseUpdateModal}
+                user={selectedUser}
+                onUserUpdated={handleUserUpdated}
             />
         </Dashboard>
     );
