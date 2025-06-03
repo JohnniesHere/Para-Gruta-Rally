@@ -19,6 +19,16 @@ import InstructorDashboardPage from './pages/instructor/InstructorDashboardPage'
 import HostDashboardPage from './pages/host/HostDashboardPage';
 import MyAccountPage from './pages/shared/MyAccountPage';
 
+// Import new management components
+import KidsManagementPage from './pages/admin/KidsManagementPage';
+import TeamsManagementPage from './pages/admin/TeamsManagementPage';
+// Import new page components
+import AddKidPage from './pages/admin/AddKidPage';
+import EditKidPage from './pages/admin/EditKidPage';
+import ViewKidPage from './pages/admin/ViewKidPage';
+import AddTeamPage from './pages/admin/AddTeamPage';
+import EditTeamPage from './pages/admin/EditTeamPage';
+import ViewTeamPage from './pages/admin/ViewTeamPage';
 // Import styles
 import './styles/theme.css';
 import './App.css';
@@ -95,6 +105,72 @@ function App() {
                                         element={
                                             <ProtectedRoute requiredRole="admin">
                                                 <UserManagementPage />
+                                            </ProtectedRoute>
+                                        }
+                                    />
+
+
+                                    <Route
+                                        path="/admin/kids"
+                                        element={
+                                            <ProtectedRoute requiredRole="admin">
+                                                <KidsManagementPage />
+                                            </ProtectedRoute>
+                                        }
+                                    />
+                                    <Route
+                                        path="/admin/kids/add"
+                                        element={
+                                            <ProtectedRoute requiredRole="admin">
+                                                <AddKidPage />
+                                            </ProtectedRoute>
+                                        }
+                                    />
+                                    <Route
+                                        path="/admin/kids/edit/:id"
+                                        element={
+                                            <ProtectedRoute requiredRole="admin">
+                                                <EditKidPage />
+                                            </ProtectedRoute>
+                                        }
+                                    />
+                                    <Route
+                                        path="/admin/kids/view/:id"
+                                        element={
+                                            <ProtectedRoute requiredRole="admin">
+                                                <ViewKidPage />
+                                            </ProtectedRoute>
+                                        }
+                                    />
+                                    <Route
+                                        path="/admin/teams"
+                                        element={
+                                            <ProtectedRoute requiredRole="admin">
+                                                <TeamsManagementPage />
+                                            </ProtectedRoute>
+                                        }
+                                    />
+                                    <Route
+                                        path="/admin/teams/add"
+                                        element={
+                                            <ProtectedRoute requiredRole="admin">
+                                                <AddTeamPage />
+                                            </ProtectedRoute>
+                                        }
+                                    />
+                                    <Route
+                                        path="/admin/teams/edit/:id"
+                                        element={
+                                            <ProtectedRoute requiredRole="admin">
+                                                <EditTeamPage />
+                                            </ProtectedRoute>
+                                        }
+                                    />
+                                    <Route
+                                        path="/admin/teams/view/:id"
+                                        element={
+                                            <ProtectedRoute requiredRole="admin">
+                                                <ViewTeamPage />
                                             </ProtectedRoute>
                                         }
                                     />

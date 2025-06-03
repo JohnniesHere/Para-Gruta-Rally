@@ -1,4 +1,4 @@
-// src/components/layout/Sidebar.jsx
+// src/components/layout/Sidebar.jsx - Updated with Kids and Teams Management
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -34,6 +34,18 @@ const Sidebar = ({ userRole }) => {
                             className={({ isActive }) => isActive ? 'active' : ''}
                         >
                             {t('nav.userManagement', 'User Management')}
+                        </NavLink>
+                        <NavLink
+                            to="/admin/kids"
+                            className={({ isActive }) => isActive ? 'active' : ''}
+                        >
+                            {t('nav.kidsManagement', 'Kids Management')}
+                        </NavLink>
+                        <NavLink
+                            to="/admin/teams"
+                            className={({ isActive }) => isActive ? 'active' : ''}
+                        >
+                            {t('nav.teamsManagement', 'Teams Management')}
                         </NavLink>
                         <NavLink
                             to="/admin/forms"
