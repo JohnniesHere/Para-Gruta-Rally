@@ -15,11 +15,11 @@ service cloud.firestore {
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
-    function isStaff() {
+    function isInstructor() {
       return isSignedIn() &&
         exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
         (
-          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'staff' ||
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'instructor' ||
           get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
         );
     }
@@ -36,8 +36,8 @@ service cloud.firestore {
     match /users/{userId} {
       // Anyone can read their own user document
       // Admins can read all user documents
-      // Staff can read all user documents
-      allow read: if isCurrentUser(userId) || isStaff();
+      // Instructor can read all user documents
+      allow read: if isCurrentUser(userId) || isInstructor();
 
       // Only admins can create user documents
       // Users can update their own documents (but not role)
@@ -52,31 +52,31 @@ service cloud.firestore {
 
     // Kids collection
     match /kids/{kidId} {
-      // Staff and admins can read, create, update, delete
+      // Instructor and admins can read, create, update, delete
       // External partners can only read
       allow read: if isSignedIn();
-      allow create, update, delete: if isStaff();
+      allow create, update, delete: if isInstructor();
     }
 
     // Teams collection
     match /teams/{teamId} {
-      // Staff and admins can read, create, update, delete
+      // Instructor and admins can read, create, update, delete
       // External partners can only read
       allow read: if isSignedIn();
-      allow create, update, delete: if isStaff();
+      allow create, update, delete: if isInstructor();
     }
 
     // Activities collection
     match /activities/{activityId} {
-      // Staff and admins can read, create, update, delete
+      // Instructor and admins can read, create, update, delete
       // External partners can only read
       allow read: if isSignedIn();
-      allow create, update, delete: if isStaff();
+      allow create, update, delete: if isInstructor();
     }
 
     // Forms collection
     match /forms/{formId} {
-      // Staff and admins can read, create, update, delete
+      // Instructor and admins can read, create, update, delete
       // External partners can only read
       allow read: if isSignedIn();
       allow create: if isAdmin();
@@ -86,22 +86,22 @@ service cloud.firestore {
     // Form submissions collection
     match /formSubmissions/{submissionId} {
       // Users can read and create their own submissions
-      // Staff and admins can read all submissions
-      // Only staff and admins can update or delete submissions
-      allow read: if isStaff() ||
+      // Instructor and admins can read all submissions
+      // Only instructor and admins can update or delete submissions
+      allow read: if isInstructor() ||
         (isSignedIn() && resource.data.submittedBy == request.auth.uid);
       allow create: if isSignedIn();
-      allow update: if isStaff() ||
+      allow update: if isInstructor() ||
         (isSignedIn() &&
          resource.data.submittedBy == request.auth.uid &&
          resource.data.status == 'draft');
-      allow delete: if isStaff();
+      allow delete: if isInstructor();
     }
 
     // Import logs collection
     match /importLogs/{logId} {
-      // Only staff and admins can read, create, update, delete import logs
-      allow read, create, update, delete: if isStaff();
+      // Only instructor and admins can read, create, update, delete import logs
+      allow read, create, update, delete: if isInstructor();
     }
   }
 }
