@@ -117,7 +117,8 @@ const CreateUserModal = ({ isOpen, onClose, onUserCreated }) => {
                     lastLogin: now,
                     name: formData.name,
                     phone: formData.phone,
-                    role: formData.role
+                    role: formData.role,
+                    updatedAt: now // Initialize updatedAt same as createdAt
                 };
 
                 await setDoc(doc(db, 'users', uid), userDoc);

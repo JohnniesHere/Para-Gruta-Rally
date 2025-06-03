@@ -75,12 +75,14 @@ const UpdateUserModal = ({ isOpen, onClose, user, onUserUpdated }) => {
 
         try {
             // Update user document in Firestore
+            const { serverTimestamp } = await import('firebase/firestore');
             const userDocRef = doc(db, 'users', user.id);
             await updateDoc(userDocRef, {
                 displayName: formData.displayName,
                 name: formData.name,
                 phone: formData.phone,
-                role: formData.role
+                role: formData.role,
+                updatedAt: serverTimestamp() // Add timestamp for tracking updates
             });
 
             // Reset errors

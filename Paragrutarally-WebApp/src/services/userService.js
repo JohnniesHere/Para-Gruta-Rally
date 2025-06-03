@@ -11,11 +11,14 @@ import { db, auth } from '../firebase/config';
  */
 export const updateUserProfile = async (userId, userData) => {
     try {
+        const { serverTimestamp } = await import('firebase/firestore');
+
         const userDocRef = doc(db, 'users', userId);
         await updateDoc(userDocRef, {
             displayName: userData.displayName,
             name: userData.name,
             phone: userData.phone,
+            updatedAt: serverTimestamp(), // Add timestamp for tracking updates
             ...(userData.role && { role: userData.role }) // Only update role if provided
         });
 

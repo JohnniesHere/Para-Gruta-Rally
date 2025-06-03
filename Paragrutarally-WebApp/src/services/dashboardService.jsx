@@ -103,59 +103,141 @@ export const getRecentActivities = async () => {
     try {
         const activities = [];
 
-        // Get recent users (last 5)
+        // Get recent users (last 15 to account for both creates and updates)
         const recentUsersQuery = query(
             collection(db, 'users'),
-            orderBy('createdAt', 'desc'),
-            limit(5)
+            orderBy('updatedAt', 'desc'),
+            limit(15)
         );
-        const usersSnapshot = await getDocs(recentUsersQuery);
+
+        // Fallback query if updatedAt doesn't exist
+        let usersSnapshot;
+        try {
+            usersSnapshot = await getDocs(recentUsersQuery);
+        } catch (error) {
+            // If updatedAt field doesn't exist, fall back to createdAt
+            const fallbackQuery = query(
+                collection(db, 'users'),
+                orderBy('createdAt', 'desc'),
+                limit(15)
+            );
+            usersSnapshot = await getDocs(fallbackQuery);
+        }
 
         usersSnapshot.forEach((doc) => {
             const userData = doc.data();
+            const createdAt = userData.createdAt?.toDate?.();
+            const updatedAt = userData.updatedAt?.toDate?.();
+
+            // Determine if this was a creation or update
+            let isUpdate = false;
+            let activityTimestamp = createdAt || new Date();
+
+            if (updatedAt && createdAt) {
+                // If updatedAt is more than 10 seconds after createdAt, consider it an update
+                const timeDiff = Math.abs(updatedAt.getTime() - createdAt.getTime());
+                if (timeDiff > 10000) { // 10 seconds threshold
+                    isUpdate = true;
+                    activityTimestamp = updatedAt;
+                }
+            } else if (updatedAt && !createdAt) {
+                // If only updatedAt exists, it's likely an update
+                isUpdate = true;
+                activityTimestamp = updatedAt;
+            }
+
             activities.push({
-                type: 'user_created',
-                timestamp: userData.createdAt?.toDate?.() || new Date(),
-                description: `New user ${userData.displayName || userData.name || 'Unknown'} was added.`,
-                icon: '👤'
+                type: isUpdate ? 'user_updated' : 'user_created',
+                timestamp: activityTimestamp,
+                description: isUpdate
+                    ? `User <strong>${userData.displayName || userData.name || 'Unknown'}</strong> was updated.`
+                    : `New user <strong>${userData.displayName || userData.name || 'Unknown'}</strong> was added.`,
+                icon: isUpdate ? '✏️' : '👤',
+                details: {
+                    email: userData.email,
+                    role: userData.role,
+                    action: isUpdate ? 'updated' : 'created'
+                }
             });
         });
 
-        // Get recent events (last 3)
-        const recentEventsQuery = query(
-            collection(db, 'events'),
-            orderBy('createdAt', 'desc'),
-            limit(3)
-        );
-        const eventsSnapshot = await getDocs(recentEventsQuery);
+        // Get recent events (last 5)
+        try {
+            const recentEventsQuery = query(
+                collection(db, 'events'),
+                orderBy('createdAt', 'desc'),
+                limit(5)
+            );
+            const eventsSnapshot = await getDocs(recentEventsQuery);
 
-        eventsSnapshot.forEach((doc) => {
-            const eventData = doc.data();
-            activities.push({
-                type: 'event_created',
-                timestamp: eventData.createdAt?.toDate?.() || new Date(),
-                description: `Event ${eventData.name || eventData.title || 'Unnamed Event'} was created.`,
-                icon: '📅'
+            eventsSnapshot.forEach((doc) => {
+                const eventData = doc.data();
+                activities.push({
+                    type: 'event_created',
+                    timestamp: eventData.createdAt?.toDate?.() || new Date(),
+                    description: `Event <strong>${eventData.name || eventData.title || 'Unnamed Event'}</strong> was created.`,
+                    icon: '📅',
+                    details: {
+                        location: eventData.location,
+                        date: eventData.date
+                    }
+                });
             });
-        });
+        } catch (eventsError) {
+            console.log('Events collection may not exist yet:', eventsError.message);
+        }
 
-        // Get recent kids registrations (last 3)
-        const recentKidsQuery = query(
-            collection(db, 'kids'),
-            orderBy('createdAt', 'desc'),
-            limit(3)
-        );
-        const kidsSnapshot = await getDocs(recentKidsQuery);
+        // Get recent kids registrations (last 5)
+        try {
+            const recentKidsQuery = query(
+                collection(db, 'kids'),
+                orderBy('createdAt', 'desc'),
+                limit(5)
+            );
+            const kidsSnapshot = await getDocs(recentKidsQuery);
 
-        kidsSnapshot.forEach((doc) => {
-            const kidData = doc.data();
-            activities.push({
-                type: 'kid_registered',
-                timestamp: kidData.createdAt?.toDate?.() || new Date(),
-                description: `${kidData.firstName} ${kidData.lastName || ''} was registered.`,
-                icon: '👶'
+            kidsSnapshot.forEach((doc) => {
+                const kidData = doc.data();
+                activities.push({
+                    type: 'kid_registered',
+                    timestamp: kidData.createdAt?.toDate?.() || new Date(),
+                    description: `<strong>${kidData.firstName} ${kidData.lastName || ''}</strong> was registered.`,
+                    icon: '👶',
+                    details: {
+                        age: kidData.age,
+                        team: kidData.teamId
+                    }
+                });
             });
-        });
+        } catch (kidsError) {
+            console.log('Kids collection may not exist yet:', kidsError.message);
+        }
+
+        // Get recent teams (last 3)
+        try {
+            const recentTeamsQuery = query(
+                collection(db, 'teams'),
+                orderBy('createdAt', 'desc'),
+                limit(3)
+            );
+            const teamsSnapshot = await getDocs(recentTeamsQuery);
+
+            teamsSnapshot.forEach((doc) => {
+                const teamData = doc.data();
+                activities.push({
+                    type: 'team_created',
+                    timestamp: teamData.createdAt?.toDate?.() || new Date(),
+                    description: `Team <strong>${teamData.name || 'Unnamed Team'}</strong> was created.`,
+                    icon: '👥',
+                    details: {
+                        instructor: teamData.instructorId,
+                        capacity: teamData.maxCapacity
+                    }
+                });
+            });
+        } catch (teamsError) {
+            console.log('Teams collection may not exist yet:', teamsError.message);
+        }
 
         // Sort all activities by timestamp (most recent first)
         activities.sort((a, b) => b.timestamp - a.timestamp);
@@ -165,6 +247,7 @@ export const getRecentActivities = async () => {
 
     } catch (error) {
         console.error('Error getting recent activities:', error);
+        // Return empty array instead of failing completely
         return [];
     }
 };
