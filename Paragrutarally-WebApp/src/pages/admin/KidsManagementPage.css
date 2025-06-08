@@ -1,4 +1,4 @@
-/* src/pages/admin/TeamsManagementPage.css */
+/* src/pages/admin/KidsManagementPage.css */
 
 /* Main Layout - matches existing AdminDashboardPage.css */
 .admin-dashboard {
@@ -183,6 +183,18 @@
     border-bottom: none;
 }
 
+/* Kid info styling */
+.kid-name {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.parent-name {
+    color: var(--text-secondary);
+    font-size: 12px;
+    margin-top: 2px;
+}
+
 /* Status badges */
 .status-badge {
     display: inline-block;
@@ -206,6 +218,16 @@
 .status-pending {
     background-color: #fef3c7;
     color: #92400e;
+}
+
+/* Team assignment styling */
+.team-assignment {
+    color: var(--text-primary);
+}
+
+.no-team {
+    color: var(--text-secondary);
+    font-style: italic;
 }
 
 /* Action buttons */
