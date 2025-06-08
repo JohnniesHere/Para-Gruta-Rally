@@ -2,6 +2,7 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
+import './ViewTeamPage.css';
 
 const ViewTeamPage = () => {
     const { id } = useParams();

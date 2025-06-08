@@ -1,6 +1,7 @@
 // src/pages/admin/AddKidPage.jsx
 import React from 'react';
 import Dashboard from '../../components/layout/Dashboard';
+import './AddKidPage.css';
 
 const AddKidPage = () => {
     return (

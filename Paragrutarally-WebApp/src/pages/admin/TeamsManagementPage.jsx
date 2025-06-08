@@ -1,6 +1,7 @@
 // src/pages/admin/TeamsManagementPage.jsx
 import React from 'react';
 import Dashboard from '../../components/layout/Dashboard';
+import './TeamsManagementPage.css';
 
 const TeamsManagementPage = () => {
     return (
