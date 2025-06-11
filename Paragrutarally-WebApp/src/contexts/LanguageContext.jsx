@@ -410,14 +410,14 @@ export const LanguageProvider = ({ children }) => {
 
     const [currentLanguage, setCurrentLanguage] = useState(getInitialLanguage);
 
-    // Function to apply RTL/LTR direction to document
+    // Function to apply an RTL/LTR direction to a document
     const applyDirection = (language) => {
         if (typeof document !== 'undefined') {
             const isRTL = language === LANGUAGES.HEBREW;
             document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
             document.documentElement.lang = language;
 
-            // Add/remove RTL class to body for additional styling
+            // Add/remove RTL class to a body for additional styling
             if (isRTL) {
                 document.body.classList.add('rtl');
                 document.body.classList.remove('ltr');

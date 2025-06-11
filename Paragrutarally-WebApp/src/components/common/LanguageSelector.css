@@ -288,7 +288,7 @@
 }
 
 /* High contrast mode support */
-@media (prefers-contrast: high) {
+@media (prefers-contrast: no-preference) {
     .language-button {
         border-width: 2px;
     }
