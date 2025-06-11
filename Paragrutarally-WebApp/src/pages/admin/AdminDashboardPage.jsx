@@ -1,10 +1,12 @@
 // src/pages/admin/AdminDashboardPage.jsx
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
 import { getDashboardData, formatTimeAgo, formatEventDate } from '../../services/dashboardService';
 import './AdminDashboardPage.css';
 
 const AdminDashboardPage = () => {
+    const navigate = useNavigate();
     const [dashboardData, setDashboardData] = useState({
         stats: {
             totalUsers: 0,
@@ -17,6 +19,23 @@ const AdminDashboardPage = () => {
     });
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
+
+    // Navigation handlers for stat cards
+    const handleNavigateToUsers = () => {
+        navigate('/admin/users');
+    };
+
+    const handleNavigateToEvents = () => {
+        navigate('/admin/events');
+    };
+
+    const handleNavigateToKids = () => {
+        navigate('/admin/kids');
+    };
+
+    const handleNavigateToTeams = () => {
+        navigate('/admin/teams');
+    };
 
     // Load dashboard data on component mount
     useEffect(() => {
@@ -77,7 +96,13 @@ const AdminDashboardPage = () => {
                 <h1>Admin Dashboard</h1>
 
                 <div className="dashboard-stats">
-                    <div className={`stat-card ${isLoading ? 'loading' : ''}`}>
+                    <div
+                        className={`stat-card clickable ${isLoading ? 'loading' : ''}`}
+                        onClick={handleNavigateToUsers}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => e.key === 'Enter' && handleNavigateToUsers()}
+                    >
                         <h3>Total Users</h3>
                         <div className="stat-value">
                             {isLoading ? (
@@ -88,7 +113,13 @@ const AdminDashboardPage = () => {
                         </div>
                     </div>
 
-                    <div className={`stat-card ${isLoading ? 'loading' : ''}`}>
+                    <div
+                        className={`stat-card clickable ${isLoading ? 'loading' : ''}`}
+                        onClick={handleNavigateToEvents}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => e.key === 'Enter' && handleNavigateToEvents()}
+                    >
                         <h3>Upcoming Events</h3>
                         <div className="stat-value">
                             {isLoading ? (
@@ -99,7 +130,13 @@ const AdminDashboardPage = () => {
                         </div>
                     </div>
 
-                    <div className={`stat-card ${isLoading ? 'loading' : ''}`}>
+                    <div
+                        className={`stat-card clickable ${isLoading ? 'loading' : ''}`}
+                        onClick={handleNavigateToKids}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => e.key === 'Enter' && handleNavigateToKids()}
+                    >
                         <h3>Total Kids</h3>
                         <div className="stat-value">
                             {isLoading ? (
@@ -110,7 +147,13 @@ const AdminDashboardPage = () => {
                         </div>
                     </div>
 
-                    <div className={`stat-card ${isLoading ? 'loading' : ''}`}>
+                    <div
+                        className={`stat-card clickable ${isLoading ? 'loading' : ''}`}
+                        onClick={handleNavigateToTeams}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => e.key === 'Enter' && handleNavigateToTeams()}
+                    >
                         <h3>Active Teams</h3>
                         <div className="stat-value">
                             {isLoading ? (

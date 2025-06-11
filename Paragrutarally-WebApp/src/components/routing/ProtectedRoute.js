@@ -9,19 +9,19 @@ export function RequireAuth({ children }) {
     const { currentUser } = useAuth();
 
     if (!currentUser) {
-        // Redirect to login if not authenticated
+        // Redirect to log in if not authenticated
         return <Navigate to="/login" />;
     }
 
     return children || <Outlet />;
 }
 
-// Component to protect routes that require admin role
+// Component to protect routes that require an admin role
 export function RequireAdmin({ children }) {
     const { currentUser, isAdmin } = useAuth();
 
     if (!currentUser) {
-        // Redirect to login if not authenticated
+        // Redirect to log in if not authenticated
         return <Navigate to="/login" />;
     }
 
@@ -33,12 +33,12 @@ export function RequireAdmin({ children }) {
     return children || <Outlet />;
 }
 
-// Component to protect routes that require staff role (staff or admin)
+// Component to protect routes that require a staff role (staff or admin)
 export function RequireStaff({ children }) {
     const { currentUser, isStaff } = useAuth();
 
     if (!currentUser) {
-        // Redirect to login if not authenticated
+        // Redirect to log in if not authenticated
         return <Navigate to="/login" />;
     }
 

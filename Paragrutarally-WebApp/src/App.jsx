@@ -34,7 +34,7 @@ import './styles/theme.css';
 import './App.css';
 
 // Protected Route component
-const ProtectedRoute = ({ children, requiredRole }) => {
+const ProtectedRoute = ({ children }) => {
     // This would typically check authentication and authorization
     // For now, we'll assume the Dashboard component handles this
     return children;

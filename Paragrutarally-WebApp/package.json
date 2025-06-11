@@ -10,11 +10,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@tabler/icons-react": "^3.34.0",
+    "brace-expansion": "^4.0.1",
     "dotenv": "^16.5.0",
     "exceljs": "^4.4.0",
     "firebase": "^11.7.1",
     "firebase-admin": "^13.4.0",
     "firebase-functions": "^6.3.2",
+    "lucide-react": "^0.514.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.6.0"

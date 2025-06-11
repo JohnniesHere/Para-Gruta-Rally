@@ -1,6 +1,6 @@
-// src/pages/admin/UserManagementPage.jsx
-import React, { useState, useEffect } from 'react';
-import { collection, getDocs, query, where, orderBy } from 'firebase/firestore';
+// src/pages/admin/UserManagementPage.jsx - Fun & Reorganized
+import React, {useState, useEffect, useCallback} from 'react';
+import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import Dashboard from '../../components/layout/Dashboard';
 import { useTheme } from '../../contexts/ThemeContext';
 import CreateUserModal from '../../components/modals/CreateUserModal';
@@ -8,6 +8,19 @@ import ExportUsersModal from '../../components/modals/ExportUsersModal';
 import UpdateUserModal from '../../components/modals/UpdateUserModal';
 import UsersTable from '../../components/tables/UsersTable';
 import { db } from '../../firebase/config';
+import {
+    IconUsers as Users,
+    IconUserPlus as UserPlus,
+    IconDownload as Download,
+    IconCrown as Crown,
+    IconCar as Car,
+    IconUserCheck as UserCheck,
+    IconSearch as Search,
+    IconTag as Tag,
+    IconEraser as Eraser,
+    IconFile as FileSpreadsheet,
+    IconX as X
+} from '@tabler/icons-react';
 import './UserManagement.css';
 
 const UserManagementPage = () => {
@@ -20,8 +33,9 @@ const UserManagementPage = () => {
     const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
     const [roleFilter, setRoleFilter] = useState('all');
+    const [searchTerm, setSearchTerm] = useState('');
 
-    // Fetch users from Firestore
+    // Fetch users from the Firestore
     const fetchUsers = async () => {
         setIsLoading(true);
         try {
@@ -49,21 +63,39 @@ const UserManagementPage = () => {
         }
     };
 
-    // Filter users by role
-    const filterUsersByRole = (role) => {
-        if (role === 'all') {
-            setFilteredUsers(users);
-        } else {
-            const filtered = users.filter(user => user.role === role);
-            setFilteredUsers(filtered);
+    // Filter users by role and search
+    const filterUsers = useCallback(() => {
+        let filtered = users;
+
+        // Filter by role
+        if (roleFilter !== 'all') {
+            filtered = filtered.filter(user => user.role === roleFilter);
         }
+
+        // Filter by search term
+        if (searchTerm.trim() !== '') {
+            filtered = filtered.filter(user =>
+                user.displayName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                user.fullName?.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+        }
+
+        setFilteredUsers(filtered);
+    }, [users, roleFilter, searchTerm]);
+
+    // Handle filter changes
+    const handleRoleFilterChange = (e) => {
+        setRoleFilter(e.target.value);
     };
 
-    // Handle role filter change
-    const handleRoleFilterChange = (e) => {
-        const selectedRole = e.target.value;
-        setRoleFilter(selectedRole);
-        filterUsersByRole(selectedRole);
+    const handleSearchChange = (e) => {
+        setSearchTerm(e.target.value);
+    };
+
+    const handleClearFilters = () => {
+        setRoleFilter('all');
+        setSearchTerm('');
     };
 
     // Modal handlers
@@ -76,13 +108,11 @@ const UserManagementPage = () => {
     };
 
     const handleUserCreated = () => {
-        // Refresh users list after creating a new user
         fetchUsers();
         console.log('User created successfully!');
     };
 
     const handleUserUpdated = () => {
-        // Refresh users list after updating a user
         fetchUsers();
         setSelectedUser(null);
         console.log('User updated successfully!');
@@ -108,50 +138,136 @@ const UserManagementPage = () => {
 
     // Load users on component mount
     useEffect(() => {
-        fetchUsers();
+        const fetchData = async () => {
+            await fetchUsers();
+        };
+        fetchData();
     }, []);
 
-    // Re-filter when users change
+    // Re-filter when filters change
     useEffect(() => {
-        filterUsersByRole(roleFilter);
-    }, [users, roleFilter]);
+        const applyFilters = async () => {
+            await filterUsers();
+        };
+        applyFilters();
+    }, [filterUsers]);
+
+    // Calculate stats
+    const stats = {
+        totalUsers: users.length,
+        admins: users.filter(u => u.role === 'admin').length,
+        instructors: users.filter(u => u.role === 'instructor').length,
+        parents: users.filter(u => u.role === 'parent').length,
+        hosts: users.filter(u => u.role === 'host').length
+    };
 
     return (
         <Dashboard requiredRole="admin">
             <div className={`user-management-page ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
-                <h1>User Management</h1>
+                <h1><Users size={32} className="page-title-icon" /> User Management</h1>
 
                 <div className="user-management-container">
-                    <div className="user-management-header">
-                        <div className="user-management-actions">
-                            <button
-                                className="btn-primary"
-                                onClick={handleCreateUser}
-                            >
-                                Create User
-                            </button>
-                            <button
-                                className="btn-secondary"
-                                onClick={handleExportUsers}
-                            >
-                                Export Users
-                            </button>
+                    {/* Header with Export in top-right */}
+                    <div className="page-header">
+                        <button
+                            className="btn-primary"
+                            onClick={handleCreateUser}
+                        >
+                            <UserPlus className="btn-icon" size={18} />
+                            Create New User
+                        </button>
+
+                        <button
+                            className="btn-export"
+                            onClick={handleExportUsers}
+                        >
+                            <Download className="btn-icon" size={18} />
+                            Export Users
+                        </button>
+                    </div>
+
+                    {/* Fun Stats Cards */}
+                    <div className="stats-grid">
+                        <div className="stat-card total">
+                            <Users className="stat-icon" size={40} />
+                            <div className="stat-content">
+                                <h3>Total Users</h3>
+                                <div className="stat-value">{stats.totalUsers}</div>
+                            </div>
+                        </div>
+                        <div className="stat-card admins">
+                            <Crown className="stat-icon" size={40} />
+                            <div className="stat-content">
+                                <h3>Admins</h3>
+                                <div className="stat-value">{stats.admins}</div>
+                            </div>
+                        </div>
+                        <div className="stat-card instructors">
+                            <Car className="stat-icon" size={40} />
+                            <div className="stat-content">
+                                <h3>Instructors</h3>
+                                <div className="stat-value">{stats.instructors}</div>
+                            </div>
+                        </div>
+                        <div className="stat-card parents">
+                            <UserCheck className="stat-icon" size={40} />
+                            <div className="stat-content">
+                                <h3>Parents</h3>
+                                <div className="stat-value">{stats.parents}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Search and Filters - Side by Side */}
+                    <div className="search-filter-section">
+                        <div className="search-container">
+                            <div className="search-input-wrapper">
+                                <Search className="search-icon" size={18} />
+                                <input
+                                    type="text"
+                                    placeholder="Search users by name or email..."
+                                    className="search-input"
+                                    value={searchTerm}
+                                    onChange={handleSearchChange}
+                                />
+                                {searchTerm && (
+                                    <button className="clear-search" onClick={() => setSearchTerm('')}>
+                                        <X size={14} />
+                                    </button>
+                                )}
+                            </div>
                         </div>
 
-                        <div className="filter-section">
-                            <label htmlFor="roleFilter">Filter by Role:</label>
+                        <div className="filter-container">
+                            <label className="filter-label">
+                                <Tag className="filter-icon" size={16} />
+                                Filter by Role
+                            </label>
                             <select
-                                id="roleFilter"
                                 className="filter-select"
                                 value={roleFilter}
                                 onChange={handleRoleFilterChange}
                             >
-                                <option value="all">All Roles</option>
-                                <option value="admin">Admin</option>
-                                <option value="instructor">Instructor</option>
-                                <option value="parent">Parent</option>
+                                <option value="all">⭐ All Roles</option>
+                                <option value="admin">👑 Admin</option>
+                                <option value="instructor">🏎️ Instructor</option>
+                                <option value="parent">👨‍👩‍👧‍👦 Parent</option>
+                                <option value="host">🏠 Host</option>
                             </select>
                         </div>
+
+                        <button className="btn-clear" onClick={handleClearFilters}>
+                            <Eraser className="btn-icon" size={18} />
+                            Clear Filters
+                        </button>
+                    </div>
+
+                    {/* Results Info */}
+                    <div className="results-info">
+                        <FileSpreadsheet className="results-icon" size={18} />
+                        Showing {filteredUsers.length} of {users.length} users
+                        {roleFilter !== 'all' && <span className="filter-applied"> • Filtered by: {roleFilter}</span>}
+                        {searchTerm && <span className="search-applied"> • Searching: "{searchTerm}"</span>}
                     </div>
 
                     <UsersTable

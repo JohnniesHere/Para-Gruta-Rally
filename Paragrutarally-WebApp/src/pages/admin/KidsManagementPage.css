@@ -1,154 +1,435 @@
-/* src/pages/admin/KidsManagementPage.css */
+/* src/pages/admin/KidsManagementPage.css - Fun & Priority Design */
 
-/* Main Layout - matches existing AdminDashboardPage.css */
-.admin-dashboard {
+/* Main page styling */
+.kids-management-page {
     padding: 20px;
-    background-color: var(--bg-primary);
+    background: linear-gradient(135deg, #FFF9E6 0%, #FFFFFF 100%);
     min-height: 100vh;
 }
 
-.admin-dashboard h1 {
+.kids-management-page h1 {
+    color: #2D3748;
     margin-bottom: 30px;
-    color: var(--text-primary);
-    transition: color 0.3s ease;
+    font-size: 2.5rem;
+    font-weight: 700;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    gap: 15px;
 }
 
-/* Stats Dashboard - exactly like AdminDashboardPage.css */
-.dashboard-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 20px;
+.page-title-icon {
+    color: #FFD700;
+    filter: drop-shadow(0 2px 4px rgba(255, 215, 0, 0.3));
+}
+
+.kids-management-container {
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    border: 3px solid #FFD700;
+    box-shadow: 0 10px 30px rgba(255, 215, 0, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.kids-management-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, #FFD700, #FFA500, #FFD700);
+    z-index: 1;
+}
+
+/* Header with Actions */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 30px;
+    padding: 20px 0;
+}
+
+.header-actions {
+    display: flex;
+    gap: 12px;
+}
+
+/* Enhanced Button Styles */
+.btn-primary {
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    color: #2D3748;
+    border: none;
+    padding: 15px 25px;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 215, 0, 0.6);
+    background: linear-gradient(135deg, #FFA500 0%, #FFD700 100%);
+}
+
+.btn-secondary {
+    background: linear-gradient(135deg, #6B7280 0%, #9CA3AF 100%);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 50px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(107, 114, 128, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(107, 114, 128, 0.4);
+}
+
+.btn-export {
+    background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 50px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-export:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.6);
+}
+
+.btn-icon {
+    font-size: 18px;
+}
+
+/* Priority Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
 }
 
 .stat-card {
-    background-color: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 2px 10px var(--shadow-color);
-    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    background: white;
+    border-radius: 20px;
+    padding: 25px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
 }
 
-.stat-card h3 {
-    margin-top: 0;
-    color: var(--text-secondary);
-    font-size: 16px;
-    font-weight: 500;
-    transition: color 0.3s ease;
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--card-color) 0%, var(--card-color-light) 100%);
+    opacity: 0.1;
+    transition: opacity 0.3s ease;
+}
+
+.stat-card:hover::before {
+    opacity: 0.2;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    border-color: var(--card-color);
+}
+
+/* PRIORITY: Kids without Teams - First and Most Important */
+.stat-card.priority-warning {
+    --card-color: #FFD700;
+    --card-color-light: #FFF9E6;
+    border: 3px solid #FFD700;
+    background: linear-gradient(135deg, #FFF9E6 0%, #FFFBEF 100%);
+    cursor: pointer;
+    position: relative;
+}
+
+.stat-card.priority-warning::after {
+    content: '🔥 PRIORITY';
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    font-size: 10px;
+    font-weight: 700;
+    color: #D97706;
+    background: #FED7AA;
+    padding: 2px 6px;
+    border-radius: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.stat-card.priority-warning:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 15px 40px rgba(255, 215, 0, 0.4);
+    border-color: #F59E0B;
+}
+
+.stat-card.priority-warning.clickable:hover .stat-subtitle {
+    color: #D97706;
+    font-weight: 600;
+}
+
+.stat-card.total {
+    --card-color: #3B82F6;
+    --card-color-light: #EFF6FF;
+}
+
+.stat-card.active {
+    --card-color: #10B981;
+    --card-color-light: #ECFDF5;
+}
+
+.stat-card.with-teams {
+    --card-color: #8B5CF6;
+    --card-color-light: #F3E8FF;
+}
+
+.stat-icon {
+    color: var(--card-color);
+    opacity: 0.9;
+    flex-shrink: 0;
+    filter: drop-shadow(0 2px 4px rgba(var(--card-color-rgb, 0, 0, 0), 0.2));
+}
+
+.stat-icon.warning {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+.stat-content h3 {
+    margin: 0 0 8px 0;
+    color: #4B5563;
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .stat-value {
     font-size: 32px;
-    font-weight: bold;
-    color: var(--accent-color);
-    margin-top: 10px;
-    transition: color 0.3s ease;
+    font-weight: 700;
+    color: var(--card-color);
+    margin: 0 0 5px 0;
 }
 
-/* Main content section - matches existing pattern */
-.recent-activities {
-    background-color: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 2px 10px var(--shadow-color);
-    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-/* Search and filters section */
-.filters-section {
-    margin-bottom: 20px;
-    padding: 20px 0;
-}
-
-.filters-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 16px;
-    align-items: end;
-}
-
-.filter-group {
-    display: flex;
-    flex-direction: column;
-}
-
-.filter-label {
-    display: block;
-    color: var(--text-primary);
-    font-size: 14px;
+.stat-subtitle {
+    font-size: 12px;
+    color: #6B7280;
     font-weight: 500;
-    margin-bottom: 6px;
-    transition: color 0.3s ease;
-}
-
-.filter-input,
-.filter-select {
-    width: 100%;
-    padding: 10px 12px;
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    background-color: var(--bg-primary);
-    color: var(--text-primary);
-    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
     transition: all 0.3s ease;
 }
 
-.filter-input:focus,
-.filter-select:focus {
-    outline: none;
-    border-color: var(--accent-color);
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+/* Search and Filter Section */
+.search-filter-section {
+    background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);
+    border-radius: 20px;
+    padding: 25px;
+    margin-bottom: 30px;
+    border: 2px solid #E2E8F0;
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr auto;
+    gap: 20px;
+    align-items: end;
 }
 
-.filter-input::placeholder {
-    color: var(--text-secondary);
+/* Search Container */
+.search-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
-.search-input-container {
+.search-input-wrapper {
     position: relative;
+    display: flex;
+    align-items: center;
 }
 
 .search-icon {
     position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--text-secondary);
-    width: 16px;
-    height: 16px;
-    pointer-events: none;
+    left: 15px;
+    font-size: 18px;
+    z-index: 2;
 }
 
-.btn-clear {
-    background-color: var(--bg-secondary);
-    color: var(--text-primary);
-    border: 1px solid var(--border-color);
-    padding: 10px 16px;
-    border-radius: 6px;
+.search-input {
+    width: 100%;
+    padding: 15px 20px 15px 50px;
+    border: 2px solid #E2E8F0;
+    border-radius: 50px;
+    font-size: 16px;
+    background: white;
+    color: #2D3748;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #FFD700;
+    box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.2);
+    transform: translateY(-1px);
+}
+
+.search-input::placeholder {
+    color: #9CA3AF;
+}
+
+.clear-search {
+    position: absolute;
+    right: 15px;
+    background: none;
+    border: none;
+    cursor: pointer;
     font-size: 14px;
-    font-weight: 500;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+}
+
+.clear-search:hover {
+    opacity: 1;
+}
+
+/* Filter Containers */
+.filter-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.filter-label {
+    color: #4B5563;
+    font-weight: 600;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.filter-icon {
+    font-size: 16px;
+}
+
+.filter-select {
+    padding: 15px 20px;
+    border: 2px solid #E2E8F0;
+    border-radius: 50px;
+    font-size: 16px;
+    background: white;
+    color: #2D3748;
     cursor: pointer;
     transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: #FFD700;
+    box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.2);
+}
+
+/* Clear Button */
+.btn-clear {
+    background: linear-gradient(135deg, #6B7280 0%, #9CA3AF 100%);
+    color: white;
+    border: none;
+    padding: 15px 20px;
+    border-radius: 50px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(107, 114, 128, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 8px;
     white-space: nowrap;
 }
 
 .btn-clear:hover {
-    background-color: var(--bg-tertiary);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(107, 114, 128, 0.4);
 }
 
-/* Table section */
-.table-section {
-    margin-top: 20px;
+/* Results Info */
+.results-info {
+    background: linear-gradient(135deg, #EBF8FF 0%, #DBEAFE 100%);
+    border: 2px solid #93C5FD;
+    border-radius: 15px;
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    color: #1E40AF;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
+.results-icon {
+    font-size: 18px;
+}
+
+.priority-filter {
+    color: #D97706;
+    font-weight: 700;
+    background: #FED7AA;
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+.filter-applied,
+.search-applied {
+    color: #7C3AED;
+    font-weight: 700;
+}
+
+/* Enhanced Table */
 .table-container {
-    background-color: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
+    background: white;
+    border-radius: 20px;
     overflow: hidden;
-    box-shadow: 0 2px 10px var(--shadow-color);
+    border: 2px solid #E2E8F0;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
 }
 
 .data-table {
@@ -157,214 +438,303 @@
 }
 
 .data-table th {
-    background-color: var(--bg-tertiary);
-    color: var(--text-primary);
-    font-weight: 600;
+    background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);
+    color: #374151;
+    font-weight: 700;
     font-size: 14px;
-    padding: 16px 12px;
+    padding: 20px 16px;
     text-align: left;
-    border-bottom: 1px solid var(--border-color);
-    transition: all 0.3s ease;
+    border-bottom: 2px solid #E5E7EB;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .data-table td {
-    padding: 16px 12px;
-    color: var(--text-primary);
+    color: #4B5563;
     font-size: 14px;
-    border-bottom: 1px solid var(--border-color);
-    transition: all 0.3s ease;
+    padding: 16px;
+    border-bottom: 1px solid #F3F4F6;
+    transition: all 0.2s ease;
+}
+
+.data-table tbody tr {
+    transition: all 0.2s ease;
 }
 
 .data-table tbody tr:hover {
-    background-color: var(--bg-tertiary);
+    background: linear-gradient(135deg, #FFF9E6 0%, #FFFBEF 100%);
+    transform: scale(1.01);
+}
+
+/* Priority Row for Kids without Teams */
+.data-table tbody tr.priority-row {
+    background: linear-gradient(135deg, #FFF9E6 0%, #FFFBEF 100%);
+    border-left: 4px solid #FFD700;
+}
+
+.data-table tbody tr.priority-row:hover {
+    background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+    transform: scale(1.02);
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
 }
 
 .data-table tbody tr:last-child td {
     border-bottom: none;
 }
 
-/* Kid info styling */
-.kid-name {
-    font-weight: 600;
-    color: var(--text-primary);
-}
-
-.parent-name {
-    color: var(--text-secondary);
-    font-size: 12px;
-    margin-top: 2px;
-}
-
-/* Status badges */
-.status-badge {
-    display: inline-block;
-    padding: 4px 8px;
-    font-size: 12px;
-    font-weight: 500;
-    border-radius: 4px;
-    text-transform: uppercase;
-}
-
-.status-active {
-    background-color: #d1fae5;
-    color: #065f46;
-}
-
-.status-inactive {
-    background-color: #fee2e2;
-    color: #991b1b;
-}
-
-.status-pending {
-    background-color: #fef3c7;
-    color: #92400e;
-}
-
-/* Team assignment styling */
-.team-assignment {
-    color: var(--text-primary);
-}
-
-.no-team {
-    color: var(--text-secondary);
-    font-style: italic;
-}
-
-/* Action buttons */
-.table-actions {
+/* Kid Info Styling */
+.kid-info {
     display: flex;
-    gap: 8px;
-}
-
-.btn-sm {
-    padding: 6px 12px;
-    font-size: 12px;
-    border-radius: 4px;
-    border: none;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
+    flex-direction: column;
     gap: 4px;
 }
 
-.btn-view {
-    background-color: #3b82f6;
+.kid-name {
+    font-weight: 600;
+    color: #2D3748;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.priority-indicator {
+    font-size: 16px;
+    animation: pulse 2s infinite;
+}
+
+.parent-name {
+    color: #6B7280;
+    font-size: 12px;
+}
+
+/* Team and Status Badges */
+.team-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.team-badge.no-team {
+    background: linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%);
+    color: #DC2626;
+    border: 1px solid #F87171;
+    animation: pulse 2s infinite;
+}
+
+.team-badge.with-team {
+    background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+    color: #2563EB;
+    border: 1px solid #60A5FA;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    min-width: 80px;
+    justify-content: center;
+}
+
+.status-badge.status-active {
+    background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%);
+    color: #059669;
+    border: 1px solid #34D399;
+}
+
+.status-badge.status-inactive {
+    background: linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%);
+    color: #DC2626;
+    border: 1px solid #F87171;
+}
+
+.status-badge.status-pending {
+    background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+    color: #D97706;
+    border: 1px solid #FBBF24;
+}
+
+/* Enhanced Action Buttons */
+.action-buttons-enhanced {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.btn-action {
+    width: 35px;
+    height: 35px;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.btn-action:hover {
+    transform: translateY(-2px) scale(1.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.btn-action.view {
+    background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
     color: white;
 }
 
-.btn-view:hover {
-    background-color: #2563eb;
+.btn-action.assign-team.priority {
+    background: linear-gradient(135deg, #FFD700 0%, #F59E0B 100%);
+    color: #2D3748;
+    animation: pulse 2s infinite;
+    border: 2px solid #D97706;
 }
 
-.btn-edit {
-    background-color: #f59e0b;
+.btn-action.change-team {
+    background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
     color: white;
 }
 
-.btn-edit:hover {
-    background-color: #d97706;
-}
-
-.btn-delete {
-    background-color: #ef4444;
+.btn-action.edit {
+    background: linear-gradient(135deg, #10B981 0%, #059669 100%);
     color: white;
 }
 
-.btn-delete:hover {
-    background-color: #dc2626;
+.btn-action.delete {
+    background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+    color: white;
 }
 
-/* Empty state */
+/* Loading and Empty States */
+.loading-cell {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.loading-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    color: #6B7280;
+}
+
+.loading-spinner {
+    font-size: 30px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
 .empty-state {
     text-align: center;
     padding: 60px 20px;
-    color: var(--text-secondary);
+    color: #6B7280;
+}
+
+.empty-icon {
+    font-size: 60px;
+    margin-bottom: 20px;
 }
 
 .empty-state h3 {
-    color: var(--text-primary);
-    font-size: 18px;
-    font-weight: 500;
-    margin-bottom: 8px;
-    transition: color 0.3s ease;
+    color: #374151;
+    margin-bottom: 10px;
+    font-size: 20px;
 }
 
 .empty-state p {
-    color: var(--text-secondary);
-    font-size: 14px;
-    margin-bottom: 24px;
-    transition: color 0.3s ease;
+    margin-bottom: 20px;
+    font-size: 16px;
 }
 
-/* Results info */
-.results-info {
-    margin-bottom: 16px;
-    color: var(--text-secondary);
-    font-size: 14px;
-}
-
-/* Hover effects */
-.stat-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px var(--shadow-color);
-}
-
-/* Responsive design */
+/* Responsive Design */
 @media (max-width: 768px) {
-    .admin-dashboard {
+    .kids-management-page {
         padding: 15px;
     }
 
-    .dashboard-stats {
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    .kids-management-container {
+        padding: 20px;
+        border-radius: 15px;
+    }
+
+    .page-header {
+        flex-direction: column;
+        gap: 15px;
+        align-items: stretch;
+    }
+
+    .header-actions {
+        justify-content: space-between;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
         gap: 15px;
     }
 
-    .filters-grid {
+    .search-filter-section {
         grid-template-columns: 1fr;
+        gap: 20px;
+        padding: 20px;
     }
 
-    .table-actions {
+    .data-table {
+        font-size: 12px;
+    }
+
+    .data-table th,
+    .data-table td {
+        padding: 12px 8px;
+    }
+
+    .action-buttons-enhanced {
         flex-direction: column;
         gap: 4px;
     }
 
-    .table-container {
-        overflow-x: auto;
-    }
-
-    .data-table {
-        min-width: 600px;
-    }
-
-    .stat-card,
-    .recent-activities {
-        padding: 15px;
+    .btn-action {
+        width: 30px;
+        height: 30px;
+        font-size: 14px;
     }
 }
 
 @media (max-width: 480px) {
-    .dashboard-stats {
+    .kids-management-page h1 {
+        font-size: 2rem;
+    }
+
+    .stats-grid {
         grid-template-columns: 1fr;
     }
 
-    .admin-dashboard h1 {
-        font-size: 24px;
-        margin-bottom: 20px;
-    }
-}
-
-/* Dark mode adjustments */
-@media (prefers-color-scheme: dark) {
-    .filter-input,
-    .filter-select {
-        background-color: var(--bg-primary);
-        color: var(--text-primary);
+    .btn-primary,
+    .btn-secondary,
+    .btn-export {
+        width: 100%;
+        justify-content: center;
     }
 
-    .filter-input::placeholder {
-        color: var(--text-secondary);
+    .header-actions {
+        flex-direction: column;
+        gap: 10px;
     }
 }
