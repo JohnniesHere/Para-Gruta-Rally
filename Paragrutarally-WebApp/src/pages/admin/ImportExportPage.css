@@ -1,46 +1,24 @@
-/* src/pages/admin/ImportExportPage.css */
+/* src/pages/admin/ImportExportPage.css - Page-specific styles only */
+@import url('./../../styles/global.css');
+
+/* ========================================
+   IMPORT EXPORT PAGE SPECIFIC STYLES
+   ======================================== */
+
+/* Page uses .admin-page class from global.css */
 .import-export-page {
-    padding: 20px;
-    background-color: var(--bg-primary);
-    min-height: 100vh;
-    transition: background-color 0.3s ease;
+    /* No additional styles needed - inherits from .admin-page */
 }
 
-.import-export-page h1 {
-    margin-bottom: 30px;
-    color: var(--text-primary);
-    font-size: 2rem;
-    font-weight: 600;
-    transition: color 0.3s ease;
-}
-
+/* Content sections use .form-section structure from global.css */
 .content-section {
-    background-color: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 25px;
-    margin-bottom: 25px;
-    box-shadow: 0 2px 10px var(--shadow-color);
-    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    /* Inherits from .form-section in global.css */
 }
 
-.content-section h2 {
-    margin-top: 0;
-    margin-bottom: 15px;
-    color: var(--text-primary);
-    font-size: 1.25rem;
-    font-weight: 600;
-    transition: color 0.3s ease;
-}
+/* ========================================
+   IMPORT/EXPORT SPECIFIC COMPONENTS
+   ======================================== */
 
-.content-section p {
-    color: var(--text-secondary);
-    margin-bottom: 20px;
-    line-height: 1.5;
-    transition: color 0.3s ease;
-}
-
-/* Form styling */
 .import-form,
 .export-form {
     display: flex;
@@ -48,53 +26,12 @@
     gap: 20px;
 }
 
-.form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.form-group label {
-    color: var(--text-secondary);
-    font-weight: 500;
-    font-size: 14px;
-    transition: color 0.3s ease;
-}
-
-.select-input {
-    padding: 12px 16px;
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    background-color: var(--input-bg);
-    color: var(--text-primary);
-    font-size: 14px;
-    transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
-}
-
-.select-input:focus {
-    outline: none;
-    border-color: var(--accent-color);
-    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
-}
-
 .file-input {
-    padding: 12px 16px;
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    background-color: var(--input-bg);
-    color: var(--text-primary);
-    font-size: 14px;
-    transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+    /* Inherits most styles from .form-input in global.css */
     cursor: pointer;
 }
 
-.file-input:focus {
-    outline: none;
-    border-color: var(--accent-color);
-    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
-}
-
-/* File info */
+/* File info display */
 .file-info {
     background-color: var(--bg-tertiary);
     border: 1px solid var(--border-color);
@@ -110,7 +47,10 @@
     font-size: 14px;
 }
 
-/* Options styling */
+/* ========================================
+   OPTIONS STYLING
+   ======================================== */
+
 .import-options,
 .export-options {
     display: flex;
@@ -146,7 +86,10 @@
     transition: color 0.3s ease;
 }
 
-/* Format options */
+/* ========================================
+   FORMAT OPTIONS
+   ======================================== */
+
 .format-options {
     display: flex;
     gap: 20px;
@@ -174,33 +117,10 @@
     transition: color 0.3s ease;
 }
 
-/* Buttons */
-.primary-button {
-    background-color: var(--accent-color);
-    color: white;
-    border: none;
-    padding: 12px 20px;
-    border-radius: 6px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-size: 14px;
-    align-self: flex-start;
-}
+/* ========================================
+   ACTIVITY LIST
+   ======================================== */
 
-.primary-button:hover:not(:disabled) {
-    background-color: var(--accent-hover);
-    transform: translateY(-1px);
-}
-
-.primary-button:disabled {
-    background-color: var(--text-muted);
-    cursor: not-allowed;
-    transform: none;
-    opacity: 0.6;
-}
-
-/* Activity list */
 .activity-list {
     display: flex;
     flex-direction: column;
@@ -295,16 +215,11 @@
     transition: color 0.3s ease;
 }
 
-/* Responsive design */
+/* ========================================
+   RESPONSIVE OVERRIDES
+   ======================================== */
+
 @media (max-width: 768px) {
-    .import-export-page {
-        padding: 15px;
-    }
-
-    .content-section {
-        padding: 20px;
-    }
-
     .format-options {
         flex-direction: column;
         gap: 10px;
@@ -317,20 +232,5 @@
 
     .activity-meta {
         justify-content: center;
-    }
-}
-
-@media (max-width: 480px) {
-    .import-export-page h1 {
-        font-size: 1.75rem;
-        margin-bottom: 20px;
-    }
-
-    .content-section {
-        padding: 15px;
-    }
-
-    .primary-button {
-        width: 100%;
     }
 }

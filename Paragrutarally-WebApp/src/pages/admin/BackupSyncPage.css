@@ -1,19 +1,16 @@
-/* src/pages/admin/BackupSyncPage.css */
+/* src/pages/admin/BackupSyncPage.css - Page-specific styles only */
+@import url('./../../styles/global.css');
+
+/* ========================================
+   BACKUP SYNC PAGE SPECIFIC STYLES
+   ======================================== */
+
+/* Page uses .admin-page class from global.css */
 .backup-sync-page {
-    padding: 20px;
-    background-color: var(--bg-primary);
-    min-height: 100vh;
-    transition: background-color 0.3s ease;
+    /* No additional styles needed - inherits from .admin-page */
 }
 
-.backup-sync-page h1 {
-    margin-bottom: 30px;
-    color: var(--text-primary);
-    font-size: 2rem;
-    font-weight: 600;
-    transition: color 0.3s ease;
-}
-
+/* Content sections use similar structure to .form-section from global.css */
 .content-section {
     background-color: var(--bg-secondary);
     border: 1px solid var(--border-color);
@@ -48,69 +45,11 @@
     transition: color 0.3s ease;
 }
 
-/* Action buttons */
-.action-buttons {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 25px;
-    flex-wrap: wrap;
-}
+/* ========================================
+   BACKUP/SYNC SPECIFIC COMPONENTS
+   ======================================== */
 
-.primary-button {
-    background-color: var(--accent-color);
-    color: white;
-    border: none;
-    padding: 12px 20px;
-    border-radius: 6px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-size: 14px;
-}
-
-.primary-button:hover {
-    background-color: var(--accent-hover);
-    transform: translateY(-1px);
-}
-
-.secondary-button {
-    background-color: var(--bg-tertiary);
-    color: var(--text-primary);
-    border: 1px solid var(--border-color);
-    padding: 12px 20px;
-    border-radius: 6px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-size: 14px;
-}
-
-.secondary-button:hover {
-    background-color: var(--bg-quaternary);
-    border-color: var(--accent-color);
-}
-
-/* Backup history */
-.backup-history {
-    margin-top: 20px;
-}
-
-.empty-state {
-    text-align: center;
-    padding: 40px 20px;
-    background-color: var(--bg-tertiary);
-    border-radius: 6px;
-    border: 1px solid var(--border-color);
-    transition: background-color 0.3s ease, border-color 0.3s ease;
-}
-
-.empty-state p {
-    color: var(--text-secondary);
-    font-style: italic;
-    margin: 0;
-}
-
-/* Sync options */
+/* Sync options grid */
 .sync-options {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -144,7 +83,10 @@
     font-size: 14px;
 }
 
-/* Schedule options */
+/* ========================================
+   SCHEDULE OPTIONS
+   ======================================== */
+
 .schedule-options {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -184,40 +126,16 @@
     user-select: none;
 }
 
-/* Responsive design */
+/* ========================================
+   RESPONSIVE OVERRIDES
+   ======================================== */
+
 @media (max-width: 768px) {
-    .backup-sync-page {
-        padding: 15px;
-    }
-
-    .content-section {
-        padding: 20px;
-    }
-
-    .action-buttons {
-        flex-direction: column;
-    }
-
-    .action-buttons button {
-        width: 100%;
-    }
-
     .sync-options {
         grid-template-columns: 1fr;
     }
 
     .schedule-options {
         grid-template-columns: 1fr;
-    }
-}
-
-@media (max-width: 480px) {
-    .backup-sync-page h1 {
-        font-size: 1.75rem;
-        margin-bottom: 20px;
-    }
-
-    .content-section {
-        padding: 15px;
     }
 }

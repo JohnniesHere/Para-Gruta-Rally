@@ -1,382 +1,28 @@
-/* src/pages/admin/UserManagement.css - Fun & Colorful */
+/* src/pages/admin/UserManagement.css - Page-specific styles only */
+@import url('./../../styles/global.css');
 
-/* Main page styling */
+/* ========================================
+   USER MANAGEMENT SPECIFIC STYLES
+   ======================================== */
+
+/* Page uses .admin-page class from global.css */
 .user-management-page {
-    padding: 20px;
-    background: linear-gradient(135deg, #FFF9E6 0%, #FFFFFF 100%);
-    min-height: 100vh;
+    /* No additional styles needed - inherits from .admin-page */
 }
 
-.user-management-page h1 {
-    color: #2D3748;
-    margin-bottom: 30px;
-    font-size: 2.5rem;
-    font-weight: 700;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-.page-title-icon {
-    color: #FFD700;
-    filter: drop-shadow(0 2px 4px rgba(255, 215, 0, 0.3));
-}
-
+/* Container uses .admin-container class from global.css */
 .user-management-container {
-    background: white;
-    padding: 30px;
-    border-radius: 20px;
-    border: 3px solid #FFD700;
-    box-shadow: 0 10px 30px rgba(255, 215, 0, 0.2);
-    position: relative;
-    overflow: hidden;
+    /* No additional styles needed - inherits from .admin-container */
 }
 
-.user-management-container::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 6px;
-    background: linear-gradient(90deg, #FFD700, #FFA500, #FFD700);
-    z-index: 1;
-}
+/* ========================================
+   USER ROLE MANAGEMENT
+   ======================================== */
 
-/* Header with Create and Export */
-.page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
-    padding: 20px 0;
-}
-
-.btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(255, 215, 0, 0.6);
-    background: linear-gradient(135deg, #FFA500 0%, #FFD700 100%);
-}
-
-.btn-export {
-    background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
-    color: white;
-    border: none;
-    padding: 12px 20px;
-    border-radius: 50px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.btn-export:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(79, 70, 229, 0.6);
-}
-
-.btn-icon {
-    color: currentColor;
-    flex-shrink: 0;
-}
-
-/* Fun Stats Grid */
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 20px;
-    margin-bottom: 40px;
-}
-
-.stat-card {
-    background: white;
-    border-radius: 20px;
-    padding: 25px;
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    border: 2px solid transparent;
-    transition: all 0.3s ease;
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-}
-
-.stat-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, var(--card-color) 0%, var(--card-color-light) 100%);
-    opacity: 0.1;
-    transition: opacity 0.3s ease;
-}
-
-.stat-card:hover::before {
-    opacity: 0.2;
-}
-
-.stat-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-    border-color: var(--card-color);
-}
-
-.stat-card.total {
-    --card-color: #FFD700;
-    --card-color-light: #FFF9E6;
-    border-color: #FFD700;
-}
-
-.stat-card.admins {
-    --card-color: #EF4444;
-    --card-color-light: #FEF2F2;
-}
-
-.stat-card.instructors {
-    --card-color: #3B82F6;
-    --card-color-light: #EFF6FF;
-}
-
-.stat-card.parents {
-    --card-color: #10B981;
-    --card-color-light: #ECFDF5;
-}
-
-.stat-icon {
-    color: var(--card-color);
-    opacity: 0.9;
-    flex-shrink: 0;
-    filter: drop-shadow(0 2px 4px rgba(var(--card-color-rgb, 0, 0, 0), 0.2));
-}
-
-.stat-content h3 {
-    margin: 0 0 8px 0;
-    color: #4B5563;
-    font-size: 14px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.stat-value {
-    font-size: 32px;
-    font-weight: 700;
-    color: var(--card-color);
-    margin: 0;
-}
-
-/* Search and Filter Section */
-.search-filter-section {
-    background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);
-    border-radius: 20px;
-    padding: 25px;
-    margin-bottom: 30px;
-    border: 2px solid #E2E8F0;
-    display: grid;
-    grid-template-columns: 2fr 1fr auto;
-    gap: 20px;
-    align-items: end;
-}
-
-/* Search Container */
-.search-container {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.search-input-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-}
-
-.search-icon {
-    position: absolute;
-    left: 15px;
-    font-size: 18px;
-    z-index: 2;
-}
-
-.search-input {
-    width: 100%;
-    padding: 15px 20px 15px 50px;
-    border: 2px solid #E2E8F0;
-    border-radius: 50px;
-    font-size: 16px;
-    background: white;
-    color: #2D3748;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.search-input:focus {
-    outline: none;
-    border-color: #FFD700;
-    box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.2);
-    transform: translateY(-1px);
-}
-
-.search-input::placeholder {
-    color: #9CA3AF;
-}
-
-.clear-search {
-    position: absolute;
-    right: 15px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 14px;
-    opacity: 0.7;
-    transition: opacity 0.2s ease;
-}
-
-.clear-search:hover {
-    opacity: 1;
-}
-
-/* Filter Container */
-.filter-container {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.filter-label {
-    color: #4B5563;
-    font-weight: 600;
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-
-.filter-icon {
-    font-size: 16px;
-}
-
-.filter-select {
-    padding: 15px 20px;
-    border: 2px solid #E2E8F0;
-    border-radius: 50px;
-    font-size: 16px;
-    background: white;
-    color: #2D3748;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.filter-select:focus {
-    outline: none;
-    border-color: #FFD700;
-    box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.2);
-}
-
-
-.btn-clear:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(107, 114, 128, 0.4);
-}
-
-
-.results-icon {
-    font-size: 18px;
-}
-
-.filter-applied,
-.search-applied {
-    color: #7C3AED;
-    font-weight: 700;
-}
-
-/* Table Improvements */
-.users-table-container {
-    background: white;
-    border-radius: 20px;
-    overflow: hidden;
-    border: 2px solid #E2E8F0;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-}
-
-.users-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.users-table th {
-    background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);
-    color: #374151;
-    font-weight: 700;
-    font-size: 14px;
-    padding: 20px 16px;
-    text-align: left;
-    border-bottom: 2px solid #E5E7EB;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.users-table td {
-    color: #4B5563;
-    font-size: 14px;
-    padding: 16px;
-    border-bottom: 1px solid #F3F4F6;
-    transition: background-color 0.2s ease;
-}
-
-.users-table tbody tr:hover {
-    background: linear-gradient(135deg, #FFF9E6 0%, #FFFBEF 100%);
-    transform: scale(1.01);
-    transition: all 0.2s ease;
-}
-
-.users-table tbody tr:last-child td {
-    border-bottom: none;
-}
-
-/* Enhanced Role Badges */
-.role-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.role-badge.admin {
-    background: linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%);
-    color: #DC2626;
-    border: 1px solid #F87171;
-}
-
-.role-badge.instructor {
-    background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
-    color: #2563EB;
-    border: 1px solid #60A5FA;
-}
-
-.role-badge.parent {
-    background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%);
-    color: #059669;
-    border: 1px solid #34D399;
-}
-
-/* Update Button */
+/* Role update button - specific styling for user management */
 .btn-update {
-    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-    color: #2D3748;
+    background: linear-gradient(135deg, var(--racing-gold) 0%, var(--racing-orange) 100%);
+    color: var(--text-primary);
     padding: 8px 16px;
     border: none;
     border-radius: 20px;
@@ -392,133 +38,103 @@
     box-shadow: 0 4px 12px rgba(255, 215, 0, 0.5);
 }
 
-/* Loading and Empty States */
-.loading-container,
-.empty-state {
-    text-align: center;
-    padding: 60px 20px;
-    color: #6B7280;
+/* ========================================
+   USER CREATION MODAL
+   ======================================== */
+
+/* Modal uses general modal classes, only specific form layouts here */
+.user-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
 }
 
-.empty-state h3 {
-    color: #374151;
-    margin-bottom: 10px;
-    font-size: 20px;
+.user-form-group {
+    /* Inherits from .form-group */
 }
 
-/* Modal Enhancements */
-.modal-overlay {
-    background-color: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(4px);
+.user-form-group.full-width {
+    grid-column: 1 / -1;
 }
 
-.modal-content {
-    background: white;
-    border-radius: 20px;
-    border: 3px solid #FFD700;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+/* Role selection specific styling */
+.role-selection {
+    display: flex;
+    gap: 15px;
+    margin-top: 10px;
 }
 
-.modal-header h3 {
-    color: #2D3748;
-    font-weight: 700;
-}
-
-.modal-close {
-    background: #F3F4F6;
-    border-radius: 50%;
-    transition: all 0.2s ease;
-}
-
-.modal-close:hover {
-    background: #FFD700;
-    transform: scale(1.1);
-}
-
-/* Form Improvements */
-.form-group input,
-.form-group select {
-    border: 2px solid #E5E7EB;
+.role-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 15px;
+    background: var(--bg-tertiary);
+    border: 2px solid var(--border-color);
     border-radius: 12px;
-    padding: 15px;
+    cursor: pointer;
     transition: all 0.3s ease;
 }
 
-.form-group input:focus,
-.form-group select:focus {
-    border-color: #FFD700;
-    box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.2);
-    transform: translateY(-1px);
+.role-option:hover {
+    border-color: var(--racing-gold);
+    background: var(--bg-quaternary);
 }
 
-.form-group label {
-    color: #374151;
-    font-weight: 600;
-    margin-bottom: 10px;
+.role-option.selected {
+    border-color: var(--success-color);
+    background: linear-gradient(135deg, var(--success-light) 0%, #D1FAE5 100%);
 }
 
-/* Responsive Design */
+.role-option input[type="radio"] {
+    accent-color: var(--success-color);
+    width: 16px;
+    height: 16px;
+}
+
+.role-option label {
+    color: var(--text-primary);
+    cursor: pointer;
+    font-weight: 500;
+    user-select: none;
+}
+
+/* ========================================
+   EXPORT FUNCTIONALITY
+   ======================================== */
+
+.export-button {
+    /* Uses general .btn-info class with additional styling */
+    background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
+}
+
+.export-button:hover {
+    box-shadow: 0 6px 20px rgba(79, 70, 229, 0.6);
+}
+
+/* ========================================
+   RESPONSIVE OVERRIDES
+   ======================================== */
+
 @media (max-width: 768px) {
-    .user-management-page {
-        padding: 15px;
-    }
-
-    .user-management-container {
-        padding: 20px;
-        border-radius: 15px;
-    }
-
-    .page-header {
-        flex-direction: column;
-        gap: 15px;
-        align-items: stretch;
-    }
-
-    .stats-grid {
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: 15px;
-    }
-
-    .search-filter-section {
+    .user-form-grid {
         grid-template-columns: 1fr;
-        gap: 20px;
-        padding: 20px;
     }
 
-    .users-table {
-        font-size: 12px;
+    .role-selection {
+        flex-direction: column;
+        gap: 10px;
     }
 
-    .users-table th,
-    .users-table td {
-        padding: 12px 8px;
-    }
-
-    .stat-card {
-        padding: 20px;
-    }
-
-    .stat-icon {
-        font-size: 30px;
-    }
-
-    .stat-value {
-        font-size: 24px;
+    .role-option {
+        justify-content: flex-start;
     }
 }
 
 @media (max-width: 480px) {
-    .user-management-page h1 {
-        font-size: 2rem;
-    }
-
-    .stats-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .btn-primary,
-    .btn-export,
-    .btn-clear {
+    .export-button {
         width: 100%;
         justify-content: center;
     }

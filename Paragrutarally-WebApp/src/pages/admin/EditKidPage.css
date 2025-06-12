@@ -1,85 +1,32 @@
-/* src/pages/admin/EditKidPage.css */
+/* src/pages/admin/EditKidPage.css - Page-specific styles only */
+@import url('./../../styles/global.css');
+
+/* ========================================
+   EDIT KID PAGE SPECIFIC STYLES
+   ======================================== */
+
+/* Page uses .admin-page class from global.css */
 .admin-dashboard {
-    padding: 20px;
-    background-color: var(--bg-primary);
-    min-height: 100vh;
+    /* No additional styles needed - inherits from .admin-page */
 }
 
+/* Form container uses .admin-container from global.css */
 .admin-form-container {
     max-width: 4xl;
     margin: 0 auto;
     padding: 1.5rem;
 }
 
+/* Form sections use .form-section from global.css */
 .admin-form-section {
-    background-color: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 24px;
-    margin-bottom: 24px;
-    box-shadow: 0 2px 10px var(--shadow-color);
-    transition: background-color 0.3s ease, border-color 0.3s ease;
+    /* No additional styles needed - inherits from .form-section */
 }
 
-.admin-form-section h2 {
-    color: var(--text-primary);
-    font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 8px;
-    transition: color 0.3s ease;
-}
+/* Form elements use global classes: .form-input, .form-select, .form-textarea */
 
-.admin-form-section p {
-    color: var(--text-secondary);
-    font-size: 14px;
-    margin-bottom: 20px;
-    transition: color 0.3s ease;
-}
-
-.form-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 20px;
-}
-
-.form-group {
-    margin-bottom: 20px;
-}
-
-.form-label {
-    display: block;
-    color: var(--text-primary);
-    font-size: 14px;
-    font-weight: 500;
-    margin-bottom: 6px;
-    transition: color 0.3s ease;
-}
-
-.form-input,
-.form-select,
-.form-textarea {
-    width: 100%;
-    padding: 10px 12px;
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    background-color: var(--bg-primary);
-    color: var(--text-primary);
-    font-size: 14px;
-    transition: all 0.3s ease;
-}
-
-.form-input:focus,
-.form-select:focus,
-.form-textarea:focus {
-    outline: none;
-    border-color: var(--accent-color);
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-}
-
-.form-textarea {
-    min-height: 80px;
-    resize: vertical;
-}
+/* ========================================
+   EDIT-SPECIFIC FORM FEATURES
+   ======================================== */
 
 .form-button-group {
     display: flex;
@@ -89,76 +36,10 @@
     border-top: 1px solid var(--border-color);
 }
 
-.btn-primary {
-    background-color: var(--accent-color);
-    color: white;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
+/* ========================================
+   STATUS INDICATORS FOR EDIT FORMS
+   ======================================== */
 
-.btn-primary:hover {
-    background-color: #4f46e5;
-}
-
-.btn-secondary {
-    background-color: var(--bg-secondary);
-    color: var(--text-primary);
-    border: 1px solid var(--border-color);
-    padding: 12px 24px;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.btn-secondary:hover {
-    background-color: var(--bg-tertiary);
-}
-
-.btn-danger {
-    background-color: #ef4444;
-    color: white;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.btn-danger:hover {
-    background-color: #dc2626;
-}
-
-/* Loading states for edit forms */
-.loading-spinner {
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    border: 3px solid var(--border-color);
-    border-radius: 50%;
-    border-top-color: var(--accent-color);
-    animation: spin 1s ease-in-out infinite;
-    margin-right: 8px;
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-.loading-form {
-    opacity: 0.6;
-    pointer-events: none;
-}
-
-/* Status indicators for edit forms */
 .edit-status-indicator {
     display: flex;
     align-items: center;
@@ -170,28 +51,36 @@
 }
 
 .edit-status-indicator.saved {
-    background-color: #d1fae5;
+    background-color: var(--success-light);
     color: #065f46;
 }
 
 .edit-status-indicator.modified {
-    background-color: #fef3c7;
+    background-color: var(--warning-light);
     color: #92400e;
 }
 
 .edit-status-indicator.error {
-    background-color: #fee2e2;
+    background-color: var(--error-light);
     color: #991b1b;
 }
 
-/* Responsive Design */
+/* ========================================
+   LOADING STATES FOR EDIT FORMS
+   ======================================== */
+
+.loading-form {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* ========================================
+   RESPONSIVE OVERRIDES
+   ======================================== */
+
 @media (max-width: 768px) {
     .admin-form-container {
         padding: 1rem;
-    }
-
-    .form-grid {
-        grid-template-columns: 1fr;
     }
 
     .form-button-group {
@@ -202,21 +91,5 @@
 @media (max-width: 480px) {
     .admin-form-section {
         padding: 16px;
-    }
-}
-
-/* Dark mode specific adjustments */
-@media (prefers-color-scheme: dark) {
-    .form-input,
-    .form-select,
-    .form-textarea {
-        background-color: var(--bg-primary);
-        color: var(--text-primary);
-    }
-
-    .form-input::placeholder,
-    .form-select::placeholder,
-    .form-textarea::placeholder {
-        color: var(--text-secondary);
     }
 }

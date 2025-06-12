@@ -1,83 +1,25 @@
-/* src/pages/admin/ViewTeamPage.css - Fun Racing Theme View Team */
+/* src/pages/admin/ViewTeamPage.css - Page-specific styles only */
+@import url('./../../styles/global.css');
 
-/* Main page styling */
+/* ========================================
+   VIEW TEAM PAGE SPECIFIC STYLES
+   ======================================== */
+
+/* Page uses .admin-page class from global.css */
 .view-team-page {
-    padding: 20px;
-    background: linear-gradient(135deg, #FFF9E6 0%, #FFFFFF 100%);
-    min-height: 100vh;
+    /* No additional styles needed - inherits from .admin-page */
 }
 
-/* Racing Header */
-.racing-header {
-    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-    border-radius: 20px;
-    padding: 30px;
-    margin-bottom: 30px;
-    border: 3px solid #F59E0B;
-    box-shadow: 0 10px 30px rgba(255, 215, 0, 0.3);
-    position: relative;
-    overflow: hidden;
+/* Container uses .admin-container class from global.css */
+.view-team-container {
+    /* No additional styles needed - inherits from .admin-container */
 }
 
-.racing-header::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 6px;
-    background: linear-gradient(90deg, #DC2626, #FFD700, #DC2626);
-    z-index: 1;
-}
-
-.header-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 20px;
-}
-
-.back-button {
-    background: rgba(255, 255, 255, 0.9);
-    color: #2D3748;
-    border: 2px solid #F59E0B;
-    padding: 12px 20px;
-    border-radius: 50px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-}
-
-.back-button:hover {
-    background: white;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
-}
-
-.title-section {
-    text-align: center;
-    flex: 1;
-}
-
-.title-section h1 {
-    color: #2D3748;
-    margin: 0 0 10px 0;
-    font-size: 2.5rem;
-    font-weight: 700;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 15px;
-}
+/* ========================================
+   RACING ANIMATIONS SPECIFIC TO VIEW TEAM
+   ======================================== */
 
 .page-title-icon {
-    color: #DC2626;
-    filter: drop-shadow(0 2px 4px rgba(220, 38, 38, 0.3));
     animation: trophy-glow 3s ease-in-out infinite;
 }
 
@@ -96,111 +38,12 @@
     100% { transform: scale(1.2) rotate(180deg); opacity: 0.7; }
 }
 
-.subtitle {
-    color: #4B5563;
-    font-size: 18px;
-    font-weight: 500;
-    margin: 0;
-}
+/* ========================================
+   HERO SECTION
+   ======================================== */
 
-.header-actions {
-    display: flex;
-    gap: 12px;
-}
-
-.edit-button {
-    background: linear-gradient(135deg, #10B981 0%, #059669 100%);
-    color: white;
-    border: none;
-    padding: 12px 20px;
-    border-radius: 50px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
-}
-
-.edit-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
-    background: linear-gradient(135deg, #059669 0%, #047857 100%);
-}
-
-.delete-button {
-    background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
-    color: white;
-    border: none;
-    padding: 12px 20px;
-    border-radius: 50px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
-}
-
-.delete-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
-    background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
-}
-
-/* Success Alert */
-.success-alert {
-    background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%);
-    color: #065F46;
-    padding: 20px;
-    border-radius: 15px;
-    margin-bottom: 25px;
-    border: 2px solid #34D399;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-weight: 600;
-    box-shadow: 0 4px 15px rgba(52, 211, 153, 0.2);
-    animation: slideInFromTop 0.5s ease-out;
-}
-
-@keyframes slideInFromTop {
-    from {
-        opacity: 0;
-        transform: translateY(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Main Container */
-.view-team-container {
-    background: white;
-    border-radius: 20px;
-    border: 3px solid #FFD700;
-    box-shadow: 0 10px 30px rgba(255, 215, 0, 0.2);
-    position: relative;
-    overflow: hidden;
-}
-
-.view-team-container::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 6px;
-    background: linear-gradient(90deg, #FFD700, #FFA500, #FFD700);
-    z-index: 1;
-}
-
-/* Hero Section */
 .hero-section {
-    background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+    background: linear-gradient(135deg, var(--racing-purple) 0%, #7C3AED 100%);
     color: white;
     padding: 40px 30px;
     position: relative;
@@ -298,10 +141,13 @@
 }
 
 .stat-icon {
-    color: #FFD700;
+    color: var(--racing-gold);
 }
 
-/* Content Grid */
+/* ========================================
+   CONTENT GRID
+   ======================================== */
+
 .content-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
@@ -313,88 +159,10 @@
     grid-column: 1 / -1;
 }
 
-/* Info Sections */
-.info-section {
-    background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);
-    border-radius: 20px;
-    padding: 25px;
-    border: 2px solid #E2E8F0;
-    transition: all 0.3s ease;
-    animation: slideInUp 0.6s ease-out;
-}
+/* ========================================
+   INFO GRIDS
+   ======================================== */
 
-.info-section:hover {
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-    transform: translateY(-2px);
-}
-
-/* Section-specific colors */
-.team-info-section {
-    border-color: #3B82F6;
-}
-
-.team-info-section:hover {
-    border-color: #2563EB;
-    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.2);
-}
-
-.instructors-section {
-    border-color: #10B981;
-}
-
-.instructors-section:hover {
-    border-color: #059669;
-    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.2);
-}
-
-.racers-section {
-    border-color: #8B5CF6;
-}
-
-.racers-section:hover {
-    border-color: #7C3AED;
-    box-shadow: 0 8px 25px rgba(139, 92, 246, 0.2);
-}
-
-@keyframes slideInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Section Headers */
-.section-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 20px;
-    padding-bottom: 15px;
-    border-bottom: 2px solid #E5E7EB;
-}
-
-.section-icon {
-    color: #FFD700;
-    background: rgba(255, 215, 0, 0.1);
-    padding: 8px;
-    border-radius: 12px;
-    border: 2px solid #FBBF24;
-}
-
-.section-header h3 {
-    color: #2D3748;
-    margin: 0;
-    font-size: 18px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-/* Info Grids */
 .info-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -413,7 +181,7 @@
 
 .info-item label {
     font-weight: 600;
-    color: #4B5563;
+    color: var(--text-secondary);
     font-size: 14px;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -423,8 +191,8 @@
     background: white;
     padding: 12px 16px;
     border-radius: 12px;
-    border: 1px solid #E5E7EB;
-    color: #2D3748;
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
     font-weight: 500;
     min-height: 44px;
     display: flex;
@@ -433,20 +201,23 @@
 }
 
 .info-value:hover {
-    border-color: #FFD700;
+    border-color: var(--racing-gold);
     box-shadow: 0 2px 8px rgba(255, 215, 0, 0.2);
 }
 
-/* Capacity Display */
+/* ========================================
+   CAPACITY DISPLAY
+   ======================================== */
+
 .capacity-display {
     font-weight: 700;
-    color: #8B5CF6;
+    color: var(--racing-purple);
 }
 
 .capacity-bar {
     width: 100%;
     height: 8px;
-    background: #E5E7EB;
+    background: var(--border-color);
     border-radius: 4px;
     overflow: hidden;
     margin-top: 8px;
@@ -454,39 +225,17 @@
 
 .capacity-fill {
     height: 100%;
-    background: linear-gradient(90deg, #8B5CF6, #7C3AED);
+    background: linear-gradient(90deg, var(--racing-purple), #7C3AED);
     border-radius: 4px;
     transition: width 0.5s ease;
 }
 
-/* Status Badges */
-.status-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
+/* ========================================
+   TEAM LEADER CARD
+   ======================================== */
 
-.status-badge.success {
-    background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%);
-    color: #065F46;
-    border: 1px solid #34D399;
-}
-
-.status-badge.secondary {
-    background: linear-gradient(135deg, #F3F4F6 0%, #E5E7EB 100%);
-    color: #374151;
-    border: 1px solid #9CA3AF;
-}
-
-/* Team Leader Card */
 .team-leader-card {
-    background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+    background: linear-gradient(135deg, var(--warning-light) 0%, #FDE68A 100%);
     border: 2px solid #FBBF24;
     border-radius: 15px;
     padding: 20px;
@@ -538,7 +287,10 @@
     margin-bottom: 5px;
 }
 
-/* Instructors Grid */
+/* ========================================
+   INSTRUCTORS GRID
+   ======================================== */
+
 .instructors-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -547,7 +299,7 @@
 
 .instructor-card {
     background: white;
-    border: 2px solid #E5E7EB;
+    border: 2px solid var(--border-color);
     border-radius: 15px;
     padding: 15px;
     transition: all 0.3s ease;
@@ -555,8 +307,8 @@
 
 .instructor-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-    border-color: #10B981;
+    box-shadow: 0 6px 20px var(--shadow-color);
+    border-color: var(--success-color);
 }
 
 .instructor-header {
@@ -567,15 +319,18 @@
 }
 
 .instructor-icon {
-    color: #6B7280;
+    color: var(--text-muted);
 }
 
 .instructor-name {
     font-weight: 600;
-    color: #2D3748;
+    color: var(--text-primary);
 }
 
-/* Racers Stats */
+/* ========================================
+   RACERS STATS
+   ======================================== */
+
 .racers-stats {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -583,35 +338,19 @@
     margin-bottom: 30px;
 }
 
-.stat-card {
-    background: white;
-    border-radius: 15px;
-    padding: 20px;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    border: 2px solid #E5E7EB;
-    transition: all 0.3s ease;
-}
-
 .stat-card.ready {
-    border-color: #10B981;
-    background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%);
+    border-color: var(--success-color);
+    background: linear-gradient(135deg, var(--success-light) 0%, #D1FAE5 100%);
 }
 
 .stat-card.pending {
-    border-color: #F59E0B;
-    background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%);
+    border-color: var(--warning-color);
+    background: linear-gradient(135deg, var(--warning-light) 0%, #FEF3C7 100%);
 }
 
 .stat-card.total {
-    border-color: #8B5CF6;
+    border-color: var(--racing-purple);
     background: linear-gradient(135deg, #F3E8FF 0%, #E9D5FF 100%);
-}
-
-.stat-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
 }
 
 .stat-info {
@@ -623,18 +362,21 @@
 .stat-number {
     font-size: 24px;
     font-weight: 700;
-    color: #2D3748;
+    color: var(--text-primary);
 }
 
 .stat-label {
     font-size: 12px;
     font-weight: 600;
-    color: #6B7280;
+    color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 1px;
 }
 
-/* Racers Grid */
+/* ========================================
+   RACERS GRID
+   ======================================== */
+
 .racers-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -643,7 +385,7 @@
 
 .racer-card {
     background: white;
-    border: 2px solid #E5E7EB;
+    border: 2px solid var(--border-color);
     border-radius: 15px;
     padding: 20px;
     cursor: pointer;
@@ -654,8 +396,8 @@
 
 .racer-card:hover {
     transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-    border-color: #8B5CF6;
+    box-shadow: 0 8px 25px var(--shadow-hover);
+    border-color: var(--racing-purple);
 }
 
 .racer-header {
@@ -666,11 +408,11 @@
 }
 
 .racer-icon {
-    color: #8B5CF6;
+    color: var(--racing-purple);
 }
 
 .race-number {
-    background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+    background: linear-gradient(135deg, var(--racing-purple) 0%, #7C3AED 100%);
     color: white;
     padding: 4px 12px;
     border-radius: 12px;
@@ -686,19 +428,19 @@
 }
 
 .status-dot.completed {
-    background: #10B981;
+    background: var(--success-color);
 }
 
 .status-dot.pending {
-    background: #F59E0B;
+    background: var(--warning-color);
 }
 
 .status-dot.cancelled {
-    background: #EF4444;
+    background: var(--error-color);
 }
 
 .racer-name {
-    color: #2D3748;
+    color: var(--text-primary);
     margin: 0 0 10px 0;
     font-size: 16px;
     font-weight: 600;
@@ -711,42 +453,23 @@
 }
 
 .parent-info {
-    color: #6B7280;
+    color: var(--text-muted);
     font-size: 14px;
 }
 
 .status-info {
-    color: #8B5CF6;
+    color: var(--racing-purple);
     font-size: 12px;
     font-weight: 600;
     text-transform: uppercase;
 }
 
-/* Empty State */
-.empty-state {
-    text-align: center;
-    padding: 40px 20px;
-    color: #6B7280;
-    grid-column: 1 / -1;
-}
-
-.empty-icon {
-    margin-bottom: 15px;
-    opacity: 0.6;
-}
-
-.empty-state h4 {
-    margin: 0 0 10px 0;
-    color: #4B5563;
-    font-size: 18px;
-}
-
-.empty-state p {
-    margin: 0 0 20px 0;
-}
+/* ========================================
+   ASSIGN KIDS BUTTON
+   ======================================== */
 
 .assign-kids-button {
-    background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+    background: linear-gradient(135deg, var(--racing-purple) 0%, #7C3AED 100%);
     color: white;
     border: none;
     padding: 12px 20px;
@@ -765,74 +488,11 @@
     box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
 }
 
-/* Loading and Error States */
-.loading-container, .error-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 400px;
-    text-align: center;
-    color: #6B7280;
-}
+/* ========================================
+   RESPONSIVE OVERRIDES
+   ======================================== */
 
-.loading-spinner {
-    width: 40px;
-    height: 40px;
-    border: 4px solid #E5E7EB;
-    border-top: 4px solid #FFD700;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin-bottom: 20px;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-.error-container h3 {
-    color: #DC2626;
-    margin-bottom: 15px;
-    font-size: 24px;
-}
-
-.error-container p {
-    margin-bottom: 25px;
-    font-size: 16px;
-}
-
-/* Button Icons */
-.btn-icon {
-    font-size: 18px;
-    transition: transform 0.3s ease;
-}
-
-.edit-button:hover .btn-icon,
-.delete-button:hover .btn-icon {
-    transform: scale(1.1);
-}
-
-/* Responsive Design */
 @media (max-width: 768px) {
-    .view-team-page {
-        padding: 15px;
-    }
-
-    .racing-header {
-        padding: 20px;
-        border-radius: 15px;
-    }
-
-    .header-content {
-        flex-direction: column;
-        gap: 15px;
-    }
-
-    .title-section h1 {
-        font-size: 2rem;
-    }
-
     .hero-content {
         flex-direction: column;
         text-align: center;
@@ -871,35 +531,11 @@
 }
 
 @media (max-width: 480px) {
-    .view-team-page {
-        padding: 10px;
-    }
-
-    .racing-header {
-        padding: 15px;
-    }
-
-    .title-section h1 {
-        font-size: 1.8rem;
-        flex-direction: column;
-        gap: 10px;
-    }
-
     .hero-section {
         padding: 30px 20px;
     }
 
     .team-name {
         font-size: 1.8rem;
-    }
-
-    .header-actions {
-        flex-direction: column;
-        width: 100%;
-    }
-
-    .edit-button, .delete-button {
-        width: 100%;
-        justify-content: center;
     }
 }
