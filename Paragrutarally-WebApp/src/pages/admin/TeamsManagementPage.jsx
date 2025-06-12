@@ -1,7 +1,18 @@
-// src/pages/admin/TeamsManagementPage.jsx - Fun & Open Instructors
+// src/pages/admin/TeamsManagementPage.jsx - Integrated with Permission System
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
 import { useTheme } from '../../contexts/ThemeContext';
+import { usePermissions } from '../../hooks/usePermissions';
+import {
+    getAllTeams,
+    getTeamsByInstructor,
+    deleteTeam,
+    searchTeams,
+    getTeamsSummary
+} from '../../services/teamService';
+import { getDocs, collection, query, where } from 'firebase/firestore';
+import { db } from '../../firebase/config';
 import {
     IconUsers as UsersGroup,
     IconPlus as Plus,
@@ -24,38 +35,110 @@ import {
 import './TeamsManagementPage.css';
 
 const TeamsManagementPage = () => {
+    const navigate = useNavigate();
     const { isDarkMode } = useTheme();
+    const { permissions, userRole, userData } = usePermissions();
+
     const [teams, setTeams] = useState([]);
     const [filteredTeams, setFilteredTeams] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [instructorFilter, setInstructorFilter] = useState('all');
     const [statusFilter, setStatusFilter] = useState('all');
+    const [instructors, setInstructors] = useState([]);
 
-    // Mock data - replace it with actual API call
+    // Load teams and instructors based on user role
     useEffect(() => {
-        setTimeout(() => {
-            const mockTeams = [
-                // Currently empty - matches the "0" values shown in images
-            ];
-            setTeams(mockTeams);
-            setFilteredTeams(mockTeams);
+        loadTeamsAndInstructors();
+    }, [userRole, userData]);
+
+    // Filter teams when search term or filters change
+    useEffect(() => {
+        filterTeams();
+    }, [teams, searchTerm, instructorFilter, statusFilter]);
+
+    const loadTeamsAndInstructors = async () => {
+        if (!permissions) return;
+
+        setIsLoading(true);
+        setError(null);
+
+        try {
+            let teamsData = [];
+            let instructorsData = [];
+
+            // Load teams based on user role
+            switch (userRole) {
+                case 'admin':
+                    teamsData = await getAllTeams();
+                    break;
+
+                case 'instructor':
+                    if (userData?.instructorId) {
+                        teamsData = await getTeamsByInstructor(userData.instructorId);
+                    }
+                    break;
+
+                case 'parent':
+                case 'guest':
+                    // Limited access - show teams but with restricted info
+                    teamsData = await getAllTeams();
+                    break;
+
+                default:
+                    teamsData = [];
+            }
+
+            // Load instructors for statistics
+            const instructorsQuery = query(collection(db, 'instructors'));
+            const instructorsSnapshot = await getDocs(instructorsQuery);
+            instructorsData = instructorsSnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+
+            // Transform teams data to match current design
+            const transformedTeams = teamsData.map(team => ({
+                id: team.id,
+                name: team.name || 'Unnamed Team',
+                description: team.description || '',
+                instructor: team.teamLeaderId ?
+                    instructorsData.find(i => i.id === team.teamLeaderId)?.name || 'Unknown' :
+                    null,
+                instructorId: team.teamLeaderId,
+                kidsCount: team.kidIds?.length || 0,
+                status: team.active === false ? 'inactive' : 'active',
+                maxCapacity: team.maxCapacity || 15,
+                createdAt: team.createdAt,
+                originalData: team
+            }));
+
+            setTeams(transformedTeams);
+            setInstructors(instructorsData);
+        } catch (err) {
+            console.error('Error loading teams and instructors:', err);
+            setError('Failed to load teams. Please try again.');
+        } finally {
             setIsLoading(false);
-        }, 1000);
-    }, []);
+        }
+    };
 
-    // Filter teams based on search and filters
-    useEffect(() => {
+    const filterTeams = () => {
         let filtered = teams.filter(team => {
             const matchesSearch = team.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 team.description?.toLowerCase().includes(searchTerm.toLowerCase());
-            const matchesInstructor = instructorFilter === 'all' || team.instructor === instructorFilter;
+
+            const matchesInstructor = instructorFilter === 'all' ||
+                (instructorFilter === 'assigned' && team.instructor) ||
+                (instructorFilter === 'unassigned' && !team.instructor);
+
             const matchesStatus = statusFilter === 'all' || team.status === statusFilter;
 
             return matchesSearch && matchesInstructor && matchesStatus;
         });
         setFilteredTeams(filtered);
-    }, [searchTerm, instructorFilter, statusFilter, teams]);
+    };
 
     const handleClearFilters = () => {
         setSearchTerm('');
@@ -63,60 +146,91 @@ const TeamsManagementPage = () => {
         setStatusFilter('all');
     };
 
-    // Handle action buttons
+    const handleDeleteTeam = async (team) => {
+        if (userRole !== 'admin') {
+            alert('Only administrators can delete teams.');
+            return;
+        }
+
+        if (window.confirm(`Are you sure you want to delete team "${team.name}"? This action cannot be undone.`)) {
+            try {
+                await deleteTeam(team.id);
+                setTeams(teams.filter(t => t.id !== team.id));
+            } catch (err) {
+                console.error('Error deleting team:', err);
+                alert('Failed to delete team. Please try again.');
+            }
+        }
+    };
+
     const handleViewTeam = (team) => {
-        console.log('View team:', team);
-        // Navigate to the team details page
+        navigate(`/admin/teams/view/${team.id}`);
     };
 
     const handleEditTeam = (team) => {
-        console.log('Edit team:', team);
-        // Open edit modal
+        navigate(`/admin/teams/edit/${team.id}`);
     };
 
-    const handleDeleteTeam = (team) => {
-        console.log('Delete team:', team);
-        // Show confirmation and delete
+    const handleAddTeam = () => {
+        navigate('/admin/teams/add');
     };
 
     const handleAssignInstructor = (team) => {
-        console.log('Assign instructor to team:', team);
-        // Open instructor assignment modal
+        navigate(`/admin/teams/edit/${team.id}`, {
+            state: { focusInstructor: true }
+        });
     };
 
     const handleManageKids = (team) => {
-        console.log('Manage kids for team:', team);
-        // Navigate to kids management for this team
+        navigate(`/admin/teams/edit/${team.id}`, {
+            state: { focusKids: true }
+        });
     };
 
-    // Mock instructor data for demonstration
-    const mockInstructors = [
-        { id: 1, name: 'John Doe', hasTeam: false },
-        { id: 2, name: 'Jane Smith', hasTeam: true },
-        { id: 3, name: 'Mike Johnson', hasTeam: false },
-    ];
-
+    // Calculate statistics
     const stats = {
         totalTeams: teams.length,
-        openInstructors: mockInstructors.filter(i => !i.hasTeam).length, // Instructors without teams
-        avgKidsPerTeam: teams.length > 0 ? Math.round(teams.reduce((sum, t) => sum + (t.kidsCount || 0), 0) / teams.length) : 0
+        openInstructors: instructors.filter(instructor =>
+            !teams.some(team => team.instructorId === instructor.id)
+        ).length,
+        avgKidsPerTeam: teams.length > 0 ?
+            Math.round(teams.reduce((sum, t) => sum + t.kidsCount, 0) / teams.length) : 0
     };
 
+    if (error) {
+        return (
+            <Dashboard requiredRole={userRole}>
+                <div className={`teams-management-page ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
+                    <div className="error-container">
+                        <h3>Error</h3>
+                        <p>{error}</p>
+                        <button onClick={loadTeamsAndInstructors} className="btn-primary">
+                            <RefreshCw className="btn-icon" size={18} />
+                            Try Again
+                        </button>
+                    </div>
+                </div>
+            </Dashboard>
+        );
+    }
+
     return (
-        <Dashboard requiredRole="admin">
+        <Dashboard requiredRole={userRole}>
             <div className={`teams-management-page ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
                 <h1><UsersGroup size={32} className="page-title-icon" /> Teams Management</h1>
 
                 <div className="teams-management-container">
                     {/* Header with Actions */}
                     <div className="page-header">
-                        <button className="btn-primary">
-                            <Plus className="btn-icon" size={18} />
-                            Add New Team
-                        </button>
+                        {(userRole === 'admin' || userRole === 'instructor') && (
+                            <button className="btn-primary" onClick={handleAddTeam}>
+                                <Plus className="btn-icon" size={18} />
+                                Add New Team
+                            </button>
+                        )}
 
                         <div className="header-actions">
-                            <button className="btn-secondary">
+                            <button className="btn-secondary" onClick={loadTeamsAndInstructors}>
                                 <RefreshCw className="btn-icon" size={18} />
                                 Refresh
                             </button>
@@ -154,7 +268,6 @@ const TeamsManagementPage = () => {
                             </div>
                         </div>
                     </div>
-
                     {/* Search and Filters */}
                     <div className="search-filter-section">
                         <div className="search-container">
@@ -236,10 +349,12 @@ const TeamsManagementPage = () => {
                                 <h3>Ready to Create Amazing Teams!</h3>
                                 <p>No teams yet, but that's about to change! Let's get these kids racing! 🏎️</p>
                                 <div className="empty-actions">
-                                    <button className="btn-primary" style={{ marginRight: '10px' }}>
-                                        <Plus className="btn-icon" size={18} />
-                                        Create First Team
-                                    </button>
+                                    {(userRole === 'admin' || userRole === 'instructor') && (
+                                        <button className="btn-primary" style={{ marginRight: '10px' }} onClick={handleAddTeam}>
+                                            <Plus className="btn-icon" size={18} />
+                                            Create First Team
+                                        </button>
+                                    )}
                                     <button className="btn-secondary">
                                         <Users className="btn-icon" size={18} />
                                         View Available Instructors ({stats.openInstructors})
@@ -275,7 +390,14 @@ const TeamsManagementPage = () => {
                                         <td>
                                             <div className="team-info">
                                                 <div className="team-name">{team.name}</div>
-                                                <div className="team-description">{team.description}</div>
+                                                {team.description && (
+                                                    <div className="team-description">
+                                                        {team.description.length > 60
+                                                            ? `${team.description.slice(0, 60)}...`
+                                                            : team.description
+                                                        }
+                                                    </div>
+                                                )}
                                             </div>
                                         </td>
                                         <td>
@@ -296,7 +418,7 @@ const TeamsManagementPage = () => {
                                         <td>
                                                 <span className="kids-count">
                                                     <Baby size={14} style={{ marginRight: '4px' }} />
-                                                    {team.kidsCount || 0}
+                                                    {team.kidsCount} / {team.maxCapacity}
                                                 </span>
                                         </td>
                                         <td>
@@ -332,20 +454,24 @@ const TeamsManagementPage = () => {
                                                         <Baby size={16} />
                                                     </button>
                                                 )}
-                                                <button
-                                                    className="btn-action edit"
-                                                    onClick={() => handleEditTeam(team)}
-                                                    title="Edit Team"
-                                                >
-                                                    <Edit size={16} />
-                                                </button>
-                                                <button
-                                                    className="btn-action delete"
-                                                    onClick={() => handleDeleteTeam(team)}
-                                                    title="Delete Team"
-                                                >
-                                                    <Trash2 size={16} />
-                                                </button>
+                                                {(userRole === 'admin' || userRole === 'instructor') && (
+                                                    <button
+                                                        className="btn-action edit"
+                                                        onClick={() => handleEditTeam(team)}
+                                                        title="Edit Team"
+                                                    >
+                                                        <Edit size={16} />
+                                                    </button>
+                                                )}
+                                                {userRole === 'admin' && (
+                                                    <button
+                                                        className="btn-action delete"
+                                                        onClick={() => handleDeleteTeam(team)}
+                                                        title="Delete Team"
+                                                    >
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                )}
                                             </div>
                                         </td>
                                     </tr>
