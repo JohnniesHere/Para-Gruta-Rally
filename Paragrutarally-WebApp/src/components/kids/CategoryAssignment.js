@@ -23,7 +23,7 @@ const CategoryAssignment = () => {
                 setLoading(true);
 
                 // Fetch kid data
-                const kidDoc = await getDoc(doc(db, 'children', kidId));
+                const kidDoc = await getDoc(doc(db, 'kids', kidId));
                 if (!kidDoc.exists()) {
                     throw new Error('Child not found');
                 }
@@ -79,7 +79,7 @@ const CategoryAssignment = () => {
                 }));
 
             // Update child document with selected categories
-            await FirestoreService.saveDocument('children', {
+            await FirestoreService.saveDocument('kids', {
                 ...kid,
                 categories: selectedCategoryObjects
             }, kidId);
