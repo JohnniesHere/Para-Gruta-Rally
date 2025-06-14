@@ -1,6 +1,8 @@
 // src/pages/admin/EventManagementPage.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { collection, getDocs, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
+import { db } from '../../firebase/config';
 import Dashboard from '../../components/layout/Dashboard';
 import { useTheme } from '../../contexts/ThemeContext.jsx';
 import { usePermissions } from '../../hooks/usePermissions.jsx';
@@ -45,87 +47,53 @@ const EventManagementPage = () => {
     // Pagination settings
     const eventsPerPage = 4;
 
-    // Mock data - in a real app, this would come from an API
-    useEffect(() => {
-        // Simulate API call with setTimeout
-        setTimeout(() => {
-            const mockEvents = [
-                {
-                    id: 1,
-                    name: 'Summer Race 2025',
-                    date: 'May 20, 2025',
-                    location: 'Jerusalem City Park',
-                    participants: 32,
-                    status: 'upcoming',
-                    description: 'Annual summer racing event in the beautiful Jerusalem City Park.',
-                    image: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400'
-                },
-                {
-                    id: 2,
-                    name: 'Beach Racing Day',
-                    date: 'June 15, 2025',
-                    location: 'Tel Aviv Beach',
-                    participants: 28,
-                    status: 'upcoming',
-                    description: 'Exciting beach racing event with ocean views.',
-                    image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400'
-                },
-                {
-                    id: 3,
-                    name: 'Spring Race 2025',
-                    date: 'April 10, 2025',
-                    location: 'Haifa Park',
-                    participants: 45,
-                    status: 'completed',
-                    description: 'Spring racing event in the scenic Haifa Park.',
-                    image: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400'
-                },
-                {
-                    id: 4,
-                    name: 'Winter Challenge',
-                    date: 'January 25, 2025',
-                    location: 'Eilat Beachfront',
-                    participants: 36,
-                    status: 'completed',
-                    description: 'Winter challenge race at the beautiful Eilat beachfront.',
-                    image: 'https://images.unsplash.com/photo-1439066615861-d1af74d74000?w=400'
-                },
-                {
-                    id: 5,
-                    name: 'Mountain Trail Run',
-                    date: 'July 8, 2025',
-                    location: 'Golan Heights',
-                    participants: 52,
-                    status: 'upcoming',
-                    description: 'Challenging mountain trail run in the Golan Heights.',
-                    image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400'
-                },
-                {
-                    id: 6,
-                    name: 'Desert Marathon',
-                    date: 'September 15, 2025',
-                    location: 'Negev Desert',
-                    participants: 67,
-                    status: 'upcoming',
-                    description: 'Epic desert marathon through the Negev Desert.',
-                    image: 'https://images.unsplash.com/photo-1547036967-23d11aacaee0?w=400'
-                },
-                {
-                    id: 7,
-                    name: 'Urban Race Challenge',
-                    date: 'March 3, 2025',
-                    location: 'Tel Aviv Downtown',
-                    participants: 89,
-                    status: 'completed',
-                    description: 'Urban racing challenge through Tel Aviv downtown.',
-                    image: 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400'
-                }
-            ];
+    // Fetch events from Firestore
+    const fetchEvents = async () => {
+        setIsLoading(true);
+        setError(null);
 
-            setEvents(mockEvents);
-            setFilteredEvents(mockEvents);
+        try {
+            const eventsQuery = query(
+                collection(db, 'events'),
+                orderBy('createdAt', 'desc')
+            );
+
+            const querySnapshot = await getDocs(eventsQuery);
+            const eventsData = [];
+
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                eventsData.push({
+                    id: doc.id,
+                    name: data.name || 'Unnamed Event',
+                    description: data.description || 'No description available',
+                    location: data.location || 'Location TBD',
+                    date: data.date || 'Date TBD',
+                    participants: data.attendees || 0,
+                    status: data.status || 'upcoming',
+                    notes: data.notes || '',
+                    participatingTeams: data.participatingTeams || [],
+                    createdAt: data.createdAt,
+                    updatedAt: data.updatedAt,
+                    // Use uploaded image or default image
+                    image: data.image || 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400'
+                });
+            });
+
+            setEvents(eventsData);
+            setFilteredEvents(eventsData);
+            console.log('Fetched events:', eventsData);
+        } catch (error) {
+            console.error('Error fetching events:', error);
+            setError('Failed to load events. Please try again.');
+        } finally {
             setIsLoading(false);
-        }, 800);
+        }
+    };
+
+    // Load events on component mount
+    useEffect(() => {
+        fetchEvents();
     }, []);
 
     // Filter events based on search term and filters
@@ -197,9 +165,38 @@ const EventManagementPage = () => {
     };
 
     // Handle delete event
-    const handleDeleteEvent = (eventId) => {
+    const handleDeleteEvent = async (eventId) => {
         if (window.confirm('Are you sure you want to delete this event?')) {
-            setEvents(events.filter(event => event.id !== eventId));
+            try {
+                await deleteDoc(doc(db, 'events', eventId));
+                // Remove from local state
+                setEvents(events.filter(event => event.id !== eventId));
+                console.log('Event deleted successfully');
+            } catch (error) {
+                console.error('Error deleting event:', error);
+                alert('Failed to delete event. Please try again.');
+            }
+        }
+    };
+
+    // Handle refresh
+    const handleRefresh = () => {
+        fetchEvents();
+    };
+
+    // Format date for display
+    const formatDate = (dateString) => {
+        if (!dateString || dateString === 'Date TBD') return dateString;
+
+        try {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        } catch (error) {
+            return dateString;
         }
     };
 
@@ -213,8 +210,27 @@ const EventManagementPage = () => {
     const stats = {
         totalEvents: events.length,
         upcomingEvents: events.filter(e => e.status === 'upcoming').length,
-        completedEvents: events.filter(e => e.status === 'completed').length,
-        totalParticipants: events.reduce((sum, e) => sum + e.participants, 0)
+        completedEvents: events.filter(e => e.status === 'completed').length
+    };
+
+    // Handle stat card clicks to filter events
+    const handleStatCardClick = (filterType) => {
+        switch (filterType) {
+            case 'total':
+                setStatusFilter('all');
+                break;
+            case 'upcoming':
+                setStatusFilter('upcoming');
+                break;
+            case 'completed':
+                setStatusFilter('completed');
+                break;
+            default:
+                break;
+        }
+        // Clear other filters when clicking stat cards
+        setSearchTerm('');
+        setLocationFilter('all');
     };
 
     if (error) {
@@ -224,7 +240,7 @@ const EventManagementPage = () => {
                     <div className="error-container">
                         <h3>Error</h3>
                         <p>{error}</p>
-                        <button onClick={() => window.location.reload()} className="btn-primary">
+                        <button onClick={handleRefresh} className="btn-primary">
                             <RefreshCw className="btn-icon" size={18} />
                             Try Again
                         </button>
@@ -248,7 +264,7 @@ const EventManagementPage = () => {
                         </button>
 
                         <div className="header-actions">
-                            <button className="btn-secondary" onClick={() => window.location.reload()}>
+                            <button className="btn-secondary" onClick={handleRefresh}>
                                 <RefreshCw className="btn-icon" size={18} />
                                 Refresh
                             </button>
@@ -261,7 +277,11 @@ const EventManagementPage = () => {
 
                     {/* Stats Cards */}
                     <div className="stats-grid">
-                        <div className="stat-card total">
+                        <div
+                            className={`stat-card total ${statusFilter === 'all' ? 'active' : ''}`}
+                            onClick={() => handleStatCardClick('total')}
+                            style={{ cursor: 'pointer' }}
+                        >
                             <Calendar className="stat-icon" size={40} />
                             <div className="stat-content">
                                 <h3>Total Events</h3>
@@ -269,35 +289,33 @@ const EventManagementPage = () => {
                             </div>
                         </div>
 
-                        <div className="stat-card upcoming">
+                        <div
+                            className={`stat-card upcoming ${statusFilter === 'upcoming' ? 'active' : ''}`}
+                            onClick={() => handleStatCardClick('upcoming')}
+                            style={{ cursor: 'pointer' }}
+                        >
                             <Trophy className="stat-icon" size={40} />
                             <div className="stat-content">
                                 <h3>Upcoming Events</h3>
                                 <div className="stat-value">{stats.upcomingEvents}</div>
-                                <div className="stat-subtitle">Ready to race</div>
                             </div>
                         </div>
 
-                        <div className="stat-card completed">
+                        <div
+                            className={`stat-card completed ${statusFilter === 'completed' ? 'active' : ''}`}
+                            onClick={() => handleStatCardClick('completed')}
+                            style={{ cursor: 'pointer' }}
+                        >
                             <Check className="stat-icon" size={40} />
                             <div className="stat-content">
                                 <h3>Completed Events</h3>
                                 <div className="stat-value">{stats.completedEvents}</div>
                             </div>
                         </div>
-
-                        <div className="stat-card participants">
-                            <Users className="stat-icon" size={40} />
-                            <div className="stat-content">
-                                <h3>Total Participants</h3>
-                                <div className="stat-value">{stats.totalParticipants}</div>
-                                <div className="stat-subtitle">Growing fast</div>
-                            </div>
-                        </div>
                     </div>
 
-                    {/* Search and Filters */}
-                    <div className="search-filter-section">
+                    {/* Search and Filters - All in one row */}
+                    <div className="search-filter-section-row">
                         <div className="search-container">
                             <div className="search-input-wrapper">
                                 <Search className="search-icon" size={18} />
@@ -317,10 +335,6 @@ const EventManagementPage = () => {
                         </div>
 
                         <div className="filter-container">
-                            <label className="filter-label">
-                                <Filter className="filter-icon" size={16} />
-                                Status
-                            </label>
                             <select
                                 className="filter-select"
                                 value={statusFilter}
@@ -333,10 +347,6 @@ const EventManagementPage = () => {
                         </div>
 
                         <div className="filter-container">
-                            <label className="filter-label">
-                                <MapPin className="filter-icon" size={16} />
-                                Location
-                            </label>
                             <select
                                 className="filter-select"
                                 value={locationFilter}
@@ -394,10 +404,15 @@ const EventManagementPage = () => {
                                         <div className="empty-state">
                                             <Calendar className="empty-icon" size={60} />
                                             <h3>No events found</h3>
-                                            <p>Try adjusting your search or filters</p>
+                                            <p>
+                                                {events.length === 0
+                                                    ? 'No events have been created yet. Start by creating your first event!'
+                                                    : 'Try adjusting your search or filters'
+                                                }
+                                            </p>
                                             <button className="btn-primary" style={{ marginTop: '15px' }} onClick={handleCreateEvent}>
                                                 <Plus className="btn-icon" size={18} />
-                                                Create First Event
+                                                {events.length === 0 ? 'Create First Event' : 'Create New Event'}
                                             </button>
                                         </div>
                                     </td>
@@ -410,11 +425,16 @@ const EventManagementPage = () => {
                                                 <img src={event.image} alt={event.name} className="event-image" />
                                                 <div className="event-details">
                                                     <div className="event-name">{event.name}</div>
-                                                    <div className="event-description">{event.description.substring(0, 50)}...</div>
+                                                    <div className="event-description">
+                                                        {event.description.length > 50
+                                                            ? `${event.description.substring(0, 50)}...`
+                                                            : event.description
+                                                        }
+                                                    </div>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td>{event.date}</td>
+                                        <td>{formatDate(event.date)}</td>
                                         <td>{event.location}</td>
                                         <td>{event.participants}</td>
                                         <td>
@@ -512,7 +532,7 @@ const EventManagementPage = () => {
                                 <div className="event-modal-details">
                                     <div className="event-detail-item">
                                         <strong>Date:</strong>
-                                        <p>{selectedEvent.date}</p>
+                                        <p>{formatDate(selectedEvent.date)}</p>
                                     </div>
                                     <div className="event-detail-item">
                                         <strong>Location:</strong>
@@ -532,6 +552,18 @@ const EventManagementPage = () => {
                                         <strong>Description:</strong>
                                         <p>{selectedEvent.description}</p>
                                     </div>
+                                    {selectedEvent.notes && (
+                                        <div className="event-detail-item">
+                                            <strong>Notes:</strong>
+                                            <p>{selectedEvent.notes}</p>
+                                        </div>
+                                    )}
+                                    {selectedEvent.participatingTeams && selectedEvent.participatingTeams.length > 0 && (
+                                        <div className="event-detail-item">
+                                            <strong>Participating Teams:</strong>
+                                            <p>{selectedEvent.participatingTeams.length} teams registered</p>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>

@@ -1,6 +1,9 @@
-// src/pages/admin/CreateEventPage.jsx - Racing Theme Event Creation
+// src/pages/admin/CreateEventPage.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { db, storage } from '../../firebase/config';
 import Dashboard from '../../components/layout/Dashboard';
 import { useTheme } from '../../contexts/ThemeContext';
 import { usePermissions } from '../../hooks/usePermissions.jsx';
@@ -20,14 +23,15 @@ import {
     IconDeviceFloppy as Save,
     IconEye as Eye,
     IconMinus as Minus,
-    IconPlus as Plus
+    IconPlus as Plus,
+    IconX as X
 } from '@tabler/icons-react';
 import './CreateEventPage.css';
 
 const CreateEventPage = () => {
     const navigate = useNavigate();
     const { isDarkMode, appliedTheme } = useTheme();
-    const { permissions, userRole } = usePermissions();
+    const { permissions, userRole, userData, user, loading } = usePermissions();
 
     // Form state
     const [formData, setFormData] = useState({
@@ -41,67 +45,48 @@ const CreateEventPage = () => {
         maxParticipants: 50,
         image: null,
         organizer: '',
-        requirements: '',
-        prizes: '',
-        entryFee: ''
+        requirements: ''
     });
 
-    const [selectedParticipants, setSelectedParticipants] = useState([]);
-    const [validationErrors, setValidationErrors] = useState([]);
+    const [fieldErrors, setFieldErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isUploadingImage, setIsUploadingImage] = useState(false);
     const [imagePreview, setImagePreview] = useState(null);
-
-    // Mock participants data
-    const [availableParticipants] = useState([
-        { id: '1', name: 'John Doe', email: 'john@example.com', team: 'Speed Demons' },
-        { id: '2', name: 'Jane Smith', email: 'jane@example.com', team: 'Racing Eagles' },
-        { id: '3', name: 'Mike Johnson', email: 'mike@example.com', team: 'Thunder Bolts' },
-        { id: '4', name: 'Sarah Wilson', email: 'sarah@example.com', team: 'Lightning Fast' },
-        { id: '5', name: 'Tom Brown', email: 'tom@example.com', team: 'Speed Demons' }
-    ]);
+    const [showPreview, setShowPreview] = useState(false);
 
     const eventTypes = [
         {
             id: 'race',
-            name: 'Racing Competition',
+            name: 'Race Event',
             description: 'Competitive racing event with winners',
-            icon: '🏁'
+            icon: '🏁🏎️'
         },
         {
-            id: 'practice',
-            name: 'Practice Session',
-            description: 'Training and skill development',
-            icon: '🎯'
-        },
-        {
-            id: 'workshop',
-            name: 'Educational Workshop',
-            description: 'Learning and safety training',
-            icon: '🎓'
-        },
-        {
-            id: 'social',
-            name: 'Social Event',
-            description: 'Team building and community',
-            icon: '🎉'
+            id: 'newcomers',
+            name: 'New Families Event',
+            description: 'Welcome new families with a fun racing day',
+            icon: '👨‍👩‍👧‍👦'
         }
     ];
 
     // Check permissions on load
     useEffect(() => {
-        if (permissions && !permissions.canCreate) {
+        if (!loading && permissions && !permissions.canCreate) {
             navigate('/admin/events');
         }
-    }, [permissions, navigate]);
+    }, [permissions, navigate, loading]);
 
     const handleInputChange = (field, value) => {
         setFormData(prev => ({
             ...prev,
             [field]: value
         }));
-        // Clear validation errors when user starts typing
-        if (validationErrors.length > 0) {
-            setValidationErrors([]);
+        // Clear field error when user starts typing
+        if (fieldErrors[field]) {
+            setFieldErrors(prev => ({
+                ...prev,
+                [field]: false
+            }));
         }
     };
 
@@ -122,17 +107,6 @@ const CreateEventPage = () => {
         setImagePreview(null);
     };
 
-    const handleParticipantToggle = (participant) => {
-        setSelectedParticipants(prev => {
-            const isSelected = prev.find(p => p.id === participant.id);
-            if (isSelected) {
-                return prev.filter(p => p.id !== participant.id);
-            } else {
-                return [...prev, participant];
-            }
-        });
-    };
-
     const adjustCapacity = (increment) => {
         const newValue = formData.maxParticipants + increment;
         if (newValue >= 1 && newValue <= 500) {
@@ -141,25 +115,25 @@ const CreateEventPage = () => {
     };
 
     const validateForm = () => {
-        const errors = [];
+        const errors = {};
 
-        if (!formData.name.trim()) errors.push('Event name is required');
-        if (!formData.description.trim()) errors.push('Event description is required');
-        if (!formData.date) errors.push('Event date is required');
-        if (!formData.time) errors.push('Event time is required');
-        if (!formData.location.trim()) errors.push('Location is required');
-        if (!formData.address.trim()) errors.push('Address is required');
-        if (!formData.organizer.trim()) errors.push('Organizer name is required');
-        if (formData.maxParticipants < 1) errors.push('Maximum participants must be at least 1');
+        if (!formData.name.trim()) errors.name = true;
+        if (!formData.description.trim()) errors.description = true;
+        if (!formData.date) errors.date = true;
+        if (!formData.time) errors.time = true;
+        if (!formData.location.trim()) errors.location = true;
+        if (!formData.address.trim()) errors.address = true;
+        if (!formData.organizer.trim()) errors.organizer = true;
+        if (formData.maxParticipants < 1) errors.maxParticipants = true;
 
         // Check if date is in the future
         const eventDateTime = new Date(`${formData.date}T${formData.time}`);
-        if (eventDateTime <= new Date()) {
-            errors.push('Event date and time must be in the future');
+        if (formData.date && formData.time && eventDateTime <= new Date()) {
+            errors.dateTime = true;
         }
 
-        setValidationErrors(errors);
-        return errors.length === 0;
+        setFieldErrors(errors);
+        return Object.keys(errors).length === 0;
     };
 
     const handleSubmit = async (e) => {
@@ -172,19 +146,55 @@ const CreateEventPage = () => {
         setIsSubmitting(true);
 
         try {
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            let imageUrl = null;
 
-            console.log('Event created:', {
-                ...formData,
-                participants: selectedParticipants
-            });
+            // Upload image to Firebase Storage if one was selected
+            if (formData.image) {
+                try {
+                    // Create a unique filename
+                    const timestamp = Date.now();
+                    const fileName = `events/${timestamp}_${formData.image.name}`;
+                    const storageRef = ref(storage, fileName);
+
+                    // Upload the file
+                    console.log('Uploading image...');
+                    const snapshot = await uploadBytes(storageRef, formData.image);
+
+                    // Get the download URL
+                    imageUrl = await getDownloadURL(snapshot.ref);
+                    console.log('Image uploaded successfully:', imageUrl);
+                } catch (imageError) {
+                    console.error('Error uploading image:', imageError);
+                    alert('Warning: Failed to upload image, but event will be created without it.');
+                }
+            }
+
+            // Create event document structure matching Firestore
+            const eventDoc = {
+                name: formData.name,
+                description: formData.description,
+                location: formData.location,
+                date: formData.date,
+                notes: formData.requirements || "Additional notes about the event",
+                status: "upcoming", // Default status for new events
+                attendees: 0, // Start with 0 attendees
+                participatingTeams: [], // Empty array for team references
+                image: imageUrl, // Add the uploaded image URL
+                createdAt: serverTimestamp(),
+                updatedAt: serverTimestamp()
+            };
+
+            // Add document to Firestore
+            const docRef = await addDoc(collection(db, 'events'), eventDoc);
+
+            console.log('Event created with ID:', docRef.id);
+            alert('Event created successfully!');
 
             // Navigate back to events list
             navigate('/admin/events');
         } catch (error) {
             console.error('Error creating event:', error);
-            setValidationErrors(['Failed to create event. Please try again.']);
+            alert('Error creating event: ' + error.message);
         } finally {
             setIsSubmitting(false);
         }
@@ -192,11 +202,13 @@ const CreateEventPage = () => {
 
     const handlePreview = () => {
         if (validateForm()) {
-            console.log('Preview event:', formData);
-            // In a real app, this might open a preview modal
+            setShowPreview(true);
         }
     };
 
+    const handleClosePreview = () => {
+        setShowPreview(false);
+    };
 
     // Show loading if permissions not loaded yet
     if (!permissions) {
@@ -214,6 +226,17 @@ const CreateEventPage = () => {
         );
     }
 
+    // Format date for display
+    const formatEventDate = () => {
+        if (!formData.date) return 'Not set';
+        const date = new Date(formData.date);
+        return date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    };
+
     return (
         <Dashboard>
             <div className={`create-event-page admin-page ${appliedTheme}-mode`}>
@@ -221,7 +244,7 @@ const CreateEventPage = () => {
                 <div className="page-header">
                     <button
                         onClick={() => navigate('/admin/events')}
-                        className="back-button"
+                        className={`back-button ${appliedTheme}-back-button`}
                     >
                         <ArrowLeft size={20} />
                         Back to Events
@@ -241,29 +264,15 @@ const CreateEventPage = () => {
                             <div className="title-section">
                                 <h2>
                                     <Flag size={28} className="page-title-icon" />
-                                    Racing Event Control Center
+                                    Event Control Center
+                                    <Flag size={28} className="page-title-icon" />
                                 </h2>
-                                <p className="subtitle">Create an amazing racing experience! 🏁</p>
+                                <p className="subtitle">Choose one of the event types below 🏁</p>
                             </div>
                         </div>
                     </div>
 
-                    {/* Validation Errors */}
-                    {validationErrors.length > 0 && (
-                        <div className="validation-summary">
-                            <div className="validation-title">
-                                <AlertTriangle size={20} />
-                                Please fix the following issues:
-                            </div>
-                            <ul className="validation-list">
-                                {validationErrors.map((error, index) => (
-                                    <li key={index} className="validation-item">
-                                        <span>•</span> {error}
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    )}
+                    {/* Validation Errors - REMOVED */}
 
                     <form onSubmit={handleSubmit} className="create-event-form">
                         {/* Event Basic Information */}
@@ -277,11 +286,12 @@ const CreateEventPage = () => {
                                 <label className="form-label">Event Name *</label>
                                 <input
                                     type="text"
-                                    className="form-input"
+                                    className={`form-input ${fieldErrors.name ? 'error' : ''}`}
                                     placeholder="e.g., Summer Racing Championship 2025"
                                     value={formData.name}
                                     onChange={(e) => handleInputChange('name', e.target.value)}
                                 />
+                                {fieldErrors.name && <div className="field-error">*Required field</div>}
                             </div>
 
                             <div className="form-group">
@@ -307,23 +317,25 @@ const CreateEventPage = () => {
                             <div className="form-group">
                                 <label className="form-label">Description *</label>
                                 <textarea
-                                    className="form-textarea"
+                                    className={`form-textarea ${fieldErrors.description ? 'error' : ''}`}
                                     rows="4"
                                     placeholder="Describe your racing event in detail..."
                                     value={formData.description}
                                     onChange={(e) => handleInputChange('description', e.target.value)}
                                 />
+                                {fieldErrors.description && <div className="field-error">*Required field</div>}
                             </div>
 
                             <div className="form-group">
                                 <label className="form-label">Organizer *</label>
                                 <input
                                     type="text"
-                                    className="form-input"
+                                    className={`form-input ${fieldErrors.organizer ? 'error' : ''}`}
                                     placeholder="Event organizer name"
                                     value={formData.organizer}
                                     onChange={(e) => handleInputChange('organizer', e.target.value)}
                                 />
+                                {fieldErrors.organizer && <div className="field-error">*Required field</div>}
                             </div>
                         </div>
 
@@ -339,23 +351,26 @@ const CreateEventPage = () => {
                                     <label className="form-label">Event Date *</label>
                                     <input
                                         type="date"
-                                        className="date-input"
+                                        className={`date-input ${fieldErrors.date ? 'error' : ''}`}
                                         value={formData.date}
                                         onChange={(e) => handleInputChange('date', e.target.value)}
                                         min={new Date().toISOString().split('T')[0]}
                                     />
+                                    {fieldErrors.date && <div className="field-error">*Required field</div>}
                                 </div>
 
                                 <div className="form-group">
                                     <label className="form-label">Event Time *</label>
                                     <input
                                         type="time"
-                                        className="time-input"
+                                        className={`time-input ${fieldErrors.time ? 'error' : ''}`}
                                         value={formData.time}
                                         onChange={(e) => handleInputChange('time', e.target.value)}
                                     />
+                                    {fieldErrors.time && <div className="field-error">*Required field</div>}
                                 </div>
                             </div>
+                            {fieldErrors.dateTime && <div className="field-error">*Event date and time must be in the future</div>}
                         </div>
 
                         {/* Location */}
@@ -366,84 +381,27 @@ const CreateEventPage = () => {
                             </div>
 
                             <div className="form-group">
-                                <label className="form-label">Venue Name *</label>
+                                <label className="form-label">Location Name *</label>
                                 <input
                                     type="text"
-                                    className="form-input"
+                                    className={`form-input ${fieldErrors.location ? 'error' : ''}`}
                                     placeholder="e.g., Jerusalem Racing Park"
                                     value={formData.location}
                                     onChange={(e) => handleInputChange('location', e.target.value)}
                                 />
+                                {fieldErrors.location && <div className="field-error">*Required field</div>}
                             </div>
 
                             <div className="form-group">
                                 <label className="form-label">Full Address *</label>
                                 <input
                                     type="text"
-                                    className="form-input"
-                                    placeholder="Complete address with city and postal code"
+                                    className={`form-input ${fieldErrors.address ? 'error' : ''}`}
+                                    placeholder="Complete address of the event"
                                     value={formData.address}
                                     onChange={(e) => handleInputChange('address', e.target.value)}
                                 />
-                            </div>
-                        </div>
-
-                        {/* Participants */}
-                        <div className="form-section event-participants-section">
-                            <div className="section-header">
-                                <Users className="section-icon" size={24} />
-                                <h3>👥 Participants</h3>
-                            </div>
-
-                            <div className="form-group">
-                                <label className="form-label">Maximum Participants</label>
-                                <div className="capacity-controls">
-                                    <button
-                                        type="button"
-                                        className="capacity-button"
-                                        onClick={() => adjustCapacity(-5)}
-                                        disabled={formData.maxParticipants <= 5}
-                                    >
-                                        <Minus size={16} />
-                                    </button>
-                                    <span className="capacity-display">{formData.maxParticipants}</span>
-                                    <button
-                                        type="button"
-                                        className="capacity-button"
-                                        onClick={() => adjustCapacity(5)}
-                                        disabled={formData.maxParticipants >= 500}
-                                    >
-                                        <Plus size={16} />
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div className="form-group">
-                                <label className="form-label">
-                                    Pre-select Participants (Optional)
-                                    <span className="selected-count">
-                                        {selectedParticipants.length} selected
-                                    </span>
-                                </label>
-                                <div className="participants-grid">
-                                    {availableParticipants.map(participant => (
-                                        <div
-                                            key={participant.id}
-                                            className={`participant-card ${
-                                                selectedParticipants.find(p => p.id === participant.id) ? 'selected' : ''
-                                            }`}
-                                            onClick={() => handleParticipantToggle(participant)}
-                                        >
-                                            <div className="participant-name">{participant.name}</div>
-                                            <div className="participant-details">
-                                                {participant.email} • {participant.team}
-                                            </div>
-                                            {selectedParticipants.find(p => p.id === participant.id) && (
-                                                <Check className="selected-indicator" size={16} />
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
+                                {fieldErrors.address && <div className="field-error">*Required field</div>}
                             </div>
                         </div>
 
@@ -455,35 +413,13 @@ const CreateEventPage = () => {
                             </div>
 
                             <div className="form-group">
-                                <label className="form-label">Entry Fee (Optional)</label>
-                                <input
-                                    type="text"
-                                    className="form-input"
-                                    placeholder="e.g., $50 or Free"
-                                    value={formData.entryFee}
-                                    onChange={(e) => handleInputChange('entryFee', e.target.value)}
-                                />
-                            </div>
-
-                            <div className="form-group">
-                                <label className="form-label">Requirements (Optional)</label>
+                                <label className="form-label">Notes (Optional)</label>
                                 <textarea
                                     className="form-textarea"
                                     rows="3"
-                                    placeholder="Special requirements, equipment needed, etc."
+                                    placeholder="Additional notes about the event..."
                                     value={formData.requirements}
                                     onChange={(e) => handleInputChange('requirements', e.target.value)}
-                                />
-                            </div>
-
-                            <div className="form-group">
-                                <label className="form-label">Prizes & Rewards (Optional)</label>
-                                <textarea
-                                    className="form-textarea"
-                                    rows="3"
-                                    placeholder="Describe prizes, trophies, or recognition..."
-                                    value={formData.prizes}
-                                    onChange={(e) => handleInputChange('prizes', e.target.value)}
                                 />
                             </div>
 
@@ -546,12 +482,12 @@ const CreateEventPage = () => {
                             <button
                                 type="submit"
                                 className="btn-primary"
-                                disabled={isSubmitting}
+                                disabled={isSubmitting || isUploadingImage}
                             >
                                 {isSubmitting ? (
                                     <>
                                         <Clock className="loading-spinner" size={16} />
-                                        Creating Event...
+                                        {isUploadingImage ? 'Uploading Image...' : 'Creating Event...'}
                                     </>
                                 ) : (
                                     <>
@@ -563,6 +499,75 @@ const CreateEventPage = () => {
                         </div>
                     </form>
                 </div>
+
+                {/* Preview Modal */}
+                {showPreview && (
+                    <div className="modal-overlay" onClick={handleClosePreview}>
+                        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                            <div className="modal-header">
+                                <h2>{formData.name || 'Event Preview'}</h2>
+                                <button
+                                    className="modal-close"
+                                    onClick={handleClosePreview}
+                                >
+                                    <X size={20} />
+                                </button>
+                            </div>
+                            <div className="modal-body">
+                                {imagePreview && (
+                                    <img
+                                        src={imagePreview}
+                                        alt={formData.name}
+                                        className="event-modal-image"
+                                    />
+                                )}
+                                {!imagePreview && (
+                                    <img
+                                        src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400"
+                                        alt="Default event"
+                                        className="event-modal-image"
+                                        style={{ opacity: 0.6 }}
+                                    />
+                                )}
+                                <div className="event-modal-details">
+                                    <div className="event-detail-item">
+                                        <strong>Date:</strong>
+                                        <p>{formatEventDate()}</p>
+                                    </div>
+                                    <div className="event-detail-item">
+                                        <strong>Location:</strong>
+                                        <p>{formData.location || 'Not specified'}</p>
+                                    </div>
+                                    <div className="event-detail-item">
+                                        <strong>Address:</strong>
+                                        <p>{formData.address || 'Not specified'}</p>
+                                    </div>
+                                    <div className="event-detail-item">
+                                        <strong>Organizer:</strong>
+                                        <p>{formData.organizer || 'Not specified'}</p>
+                                    </div>
+                                    <div className="event-detail-item">
+                                        <strong>Status:</strong>
+                                        <span className="status-badge status-upcoming">
+                                            <Trophy size={14} style={{ marginRight: '4px' }} />
+                                            Upcoming
+                                        </span>
+                                    </div>
+                                    <div className="event-detail-item">
+                                        <strong>Description:</strong>
+                                        <p>{formData.description || 'No description provided'}</p>
+                                    </div>
+                                    {formData.requirements && (
+                                        <div className="event-detail-item">
+                                            <strong>Notes:</strong>
+                                            <p>{formData.requirements}</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </Dashboard>
     );

@@ -2,15 +2,189 @@
 @import url('./../../styles/global.css');
 
 /* ========================================
+   CSS VARIABLES FIX
+   ======================================== */
+
+:root {
+    --primary-color: #3b82f6;
+}
+
+[data-theme="dark"],
+.dark-mode,
+.dark {
+    --primary-color: #60a5fa;
+}
+
+/* ========================================
+   FORCE SINGLE ROW SEARCH/FILTER LAYOUT
+   ======================================== */
+
+.search-filter-section-row {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 15px !important;
+    margin-bottom: 20px;
+    padding: 15px 20px;
+    background: var(--bg-secondary);
+    border-radius: 15px;
+    border: 1px solid var(--border-color);
+    flex-wrap: nowrap !important;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.search-filter-section-row .search-container {
+    flex: 1 !important;
+    min-width: 200px !important;
+    max-width: none !important;
+}
+
+.search-filter-section-row .search-input-wrapper {
+    width: 100% !important;
+}
+
+.search-filter-section-row .filter-container {
+    flex: 0 0 150px !important;
+    min-width: 150px !important;
+    max-width: 150px !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.search-filter-section-row .filter-select {
+    width: 100% !important;
+    padding: 12px 16px !important;
+    border: 2px solid var(--border-color) !important;
+    border-radius: 8px !important;
+    background: var(--bg-primary) !important;
+    color: var(--text-primary) !important;
+    font-size: 14px !important;
+    cursor: pointer !important;
+}
+
+.search-filter-section-row .btn-clear {
+    flex: 0 0 auto !important;
+    white-space: nowrap !important;
+    padding: 12px 16px !important;
+    background: linear-gradient(135deg, #6B7280 0%, #9CA3AF 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    font-size: 14px !important;
+}
+
+.search-filter-section-row .btn-clear:hover {
+    transform: translateY(-1px);
+    background: linear-gradient(135deg, #4B5563 0%, #6B7280 100%);
+}
+
+/* Hide any old search-filter-section */
+.search-filter-section {
+    display: none !important;
+}
+
+/* ========================================
+   CLICKABLE STAT CARDS
+   ======================================== */
+
+.stat-card {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.stat-card:hover::before {
+    opacity: 1;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.stat-card.active {
+    border: 2px solid #3b82f6;
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+    transform: translateY(-2px);
+}
+
+.stat-card.active::before {
+    opacity: 1;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%);
+}
+
+/* Active state colors for different card types */
+.stat-card.total.active {
+    border-color: #3b82f6;
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+}
+
+.stat-card.upcoming.active {
+    border-color: #f59e0b;
+    box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3);
+}
+
+.stat-card.completed.active {
+    border-color: #10b981;
+    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+}
+
+/* Override the generic active state for specific card types */
+.stat-card.total.active {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3) !important;
+}
+
+.stat-card.upcoming.active {
+    border-color: #f59e0b !important;
+    box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3) !important;
+}
+
+.stat-card.completed.active {
+    border-color: #10b981 !important;
+    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3) !important;
+}
+
+/* ========================================
+   STATS GRID ADJUSTMENTS
+   ======================================== */
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+/* ========================================
    EVENT MANAGEMENT SPECIFIC STYLES
    ======================================== */
 
-/* Page uses .admin-page class from global.css */
 .event-management-page {
     /* No additional styles needed - inherits from .admin-page */
 }
 
-/* Container uses .admin-container class from global.css */
 .event-management-container {
     /* No additional styles needed - inherits from .admin-container */
 }
@@ -166,7 +340,6 @@
     --card-color-light: var(--warning-light);
 }
 
-/* Dark mode override for upcoming cards */
 [data-theme="dark"] .stat-card.upcoming,
 .dark-mode .stat-card.upcoming,
 .dark .stat-card.upcoming {
@@ -176,18 +349,6 @@
 .stat-card.completed {
     --card-color: var(--success-color);
     --card-color-light: var(--success-light);
-}
-
-.stat-card.participants {
-    --card-color: var(--racing-purple);
-    --card-color-light: #F3E8FF;
-}
-
-/* Dark mode override for participants cards */
-[data-theme="dark"] .stat-card.participants,
-.dark-mode .stat-card.participants,
-.dark .stat-card.participants {
-    --card-color-light: rgba(139, 92, 246, 0.15);
 }
 
 /* ========================================
@@ -422,37 +583,21 @@
 }
 
 /* ========================================
-   CLEAR BUTTON (matching Kids Management)
-   ======================================== */
-
-.btn-clear {
-    background: linear-gradient(135deg, #6B7280 0%, #9CA3AF 100%);
-    color: white;
-    border: none;
-    padding: 15px 20px;
-    border-radius: 50px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(107, 114, 128, 0.3);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 14px;
-    white-space: nowrap;
-}
-
-.btn-clear:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(107, 114, 128, 0.4);
-    background: linear-gradient(135deg, #4B5563 0%, #6B7280 100%);
-}
-
-/* ========================================
-   RESPONSIVE OVERRIDES
+   RESPONSIVE OVERRIDES - MAINTAIN SINGLE ROW
    ======================================== */
 
 @media (max-width: 1200px) {
+    .search-filter-section-row {
+        gap: 12px !important;
+        padding: 12px 15px !important;
+    }
+
+    .search-filter-section-row .filter-container {
+        flex: 0 0 130px !important;
+        min-width: 130px !important;
+        max-width: 130px !important;
+    }
+
     .data-table th:nth-child(4),
     .data-table td:nth-child(4) {
         display: none;
@@ -460,10 +605,39 @@
 }
 
 @media (max-width: 768px) {
-    .search-filter-section {
+    .search-filter-section-row {
+        gap: 8px !important;
+        padding: 10px 12px !important;
+        overflow-x: auto !important;
+        min-width: 100% !important;
+    }
+
+    .search-filter-section-row .search-container {
+        min-width: 150px !important;
+    }
+
+    .search-filter-section-row .filter-container {
+        flex: 0 0 110px !important;
+        min-width: 110px !important;
+        max-width: 110px !important;
+    }
+
+    .search-filter-section-row .filter-label {
+        font-size: 10px !important;
+    }
+
+    .search-filter-section-row .filter-select {
+        padding: 6px 8px !important;
+        font-size: 12px !important;
+    }
+
+    .search-filter-section-row .btn-clear {
+        padding: 8px 12px !important;
+        font-size: 12px !important;
+    }
+
+    .stats-grid {
         grid-template-columns: 1fr;
-        gap: 20px;
-        padding: 20px;
     }
 
     .page-header {
@@ -518,6 +692,16 @@
 }
 
 @media (max-width: 576px) {
+    .search-filter-section-row .search-container {
+        min-width: 120px !important;
+    }
+
+    .search-filter-section-row .filter-container {
+        flex: 0 0 90px !important;
+        min-width: 90px !important;
+        max-width: 90px !important;
+    }
+
     .data-table th:nth-child(2),
     .data-table td:nth-child(2) {
         display: none;

@@ -6,59 +6,55 @@ import { useAuth } from '../contexts/AuthContext';
 
 const PermissionContext = createContext();
 
-// SIMPLE ROLE-BASED PERMISSIONS - Much cleaner!
+// SIMPLE ROLE-BASED PERMISSIONS
 const createRolePermissions = (userRole = 'guest') => {
     switch (userRole) {
         case 'admin':
             return {
-                // Admin can do EVERYTHING
                 canCreate: true,
                 canEdit: true,
                 canDelete: true,
                 canViewAll: true,
-                canViewKid: () => true,        // Can view any kid
-                canViewField: () => true,      // Can view any field
-                canEditField: () => true,      // Can edit any field
+                canViewKid: () => true,
+                canViewField: () => true,
+                canEditField: () => true,
                 role: 'admin'
             };
 
         case 'parent':
             return {
-                // Parent can only see their own kids
-                canCreate: false,              // Cannot create new kids
-                canEdit: false,                // Cannot edit kids (admins handle this)
-                canDelete: false,              // Cannot delete kids
-                canViewAll: false,             // Cannot see all kids
-                canViewKid: (kid, userId) => kid.parentInfo?.parentId === userId, // Only their own kids
-                canViewField: () => true,      // Can see all fields of their own kids
-                canEditField: () => false,     // Cannot edit any fields
+                canCreate: false,
+                canEdit: false,
+                canDelete: false,
+                canViewAll: false,
+                canViewKid: (kid, userId) => kid.parentInfo?.parentId === userId,
+                canViewField: () => true,
+                canEditField: () => false,
                 role: 'parent'
             };
 
         case 'instructor':
             return {
-                // Instructor can see kids assigned to them
-                canCreate: false,              // Cannot create kids
-                canEdit: true,                 // Can edit assigned kids
-                canDelete: false,              // Cannot delete kids
-                canViewAll: false,             // Cannot see all kids
-                canViewKid: (kid, userData) => kid.instructorId === userData?.instructorId, // Only assigned kids
-                canViewField: () => true,      // Can see all fields of assigned kids
-                canEditField: () => true,      // Can edit assigned kids
+                canCreate: false,
+                canEdit: true,
+                canDelete: false,
+                canViewAll: false,
+                canViewKid: (kid, userData) => kid.instructorId === userData?.instructorId,
+                canViewField: () => true,
+                canEditField: () => true,
                 role: 'instructor'
             };
 
         case 'guest':
         default:
             return {
-                // Guest has very limited access
                 canCreate: false,
                 canEdit: false,
                 canDelete: false,
                 canViewAll: false,
-                canViewKid: () => false,       // Cannot view any kids
-                canViewField: () => false,     // Cannot view any fields
-                canEditField: () => false,     // Cannot edit anything
+                canViewKid: () => false,
+                canViewField: () => false,
+                canEditField: () => false,
                 role: 'guest'
             };
     }
@@ -66,7 +62,11 @@ const createRolePermissions = (userRole = 'guest') => {
 
 export const PermissionProvider = ({ children }) => {
     const authContext = useAuth();
-    const { user, userRole, loading: authLoading } = authContext;
+
+    // Extract auth values with fallbacks
+    const authUser = authContext?.currentUser || authContext?.user || null;
+    const authUserRole = authContext?.userRole || null;
+    const authLoading = authContext?.loading || false;
 
     const [userData, setUserData] = useState(null);
     const [permissions, setPermissions] = useState(null);
@@ -82,60 +82,85 @@ export const PermissionProvider = ({ children }) => {
         try {
             setError(null);
 
-            if (!user) {
-                console.log('No user - setting guest permissions');
+            if (!authUser) {
                 setPermissions(createRolePermissions('guest'));
                 setUserData(null);
             } else {
-                console.log('Loading user data for:', user.uid);
+                // Use auth role as primary source, Firestore as fallback
+                if (authUserRole) {
+                    const authBasedData = {
+                        role: authUserRole,
+                        email: authUser.email,
+                        displayName: authUser.displayName || '',
+                        source: 'authContext'
+                    };
+                    setUserData(authBasedData);
+                    setPermissions(createRolePermissions(authUserRole));
+                } else {
+                    // Fallback to Firestore if auth role is missing
+                    try {
+                        const userDoc = await getDoc(doc(db, 'users', authUser.uid));
 
-                // Try to get user data from Firestore
-                try {
-                    const userDoc = await getDoc(doc(db, 'users', user.uid));
+                        if (userDoc.exists()) {
+                            const data = userDoc.data();
+                            const role = data.role || 'admin';
 
-                    if (userDoc.exists()) {
-                        const data = userDoc.data();
-                        setUserData(data);
-                        const role = data.role || userRole || 'admin';
-                        setPermissions(createRolePermissions(role));
-                        console.log('✅ User permissions set for role:', role);
-                    } else {
-                        // No user doc - default to admin for development
-                        const defaultData = { role: userRole || 'admin' };
-                        setUserData(defaultData);
-                        setPermissions(createRolePermissions(userRole || 'admin'));
-                        console.log('✅ Default admin permissions set');
+                            setUserData({ ...data, source: 'firestore' });
+                            setPermissions(createRolePermissions(role));
+                        } else {
+                            // No Firestore doc - default to admin for development
+                            const defaultData = {
+                                role: 'admin',
+                                email: authUser.email,
+                                displayName: authUser.displayName || '',
+                                source: 'default'
+                            };
+                            setUserData(defaultData);
+                            setPermissions(createRolePermissions('admin'));
+                        }
+                    } catch (firestoreError) {
+                        // Firestore error - fall back to admin
+                        const fallbackData = {
+                            role: 'admin',
+                            email: authUser.email,
+                            displayName: authUser.displayName || '',
+                            source: 'fallback'
+                        };
+                        setUserData(fallbackData);
+                        setPermissions(createRolePermissions('admin'));
                     }
-                } catch (firestoreError) {
-                    // Firestore error - fall back to auth role
-                    console.warn('Firestore error, using auth role:', firestoreError);
-                    const fallbackData = { role: userRole || 'admin' };
-                    setUserData(fallbackData);
-                    setPermissions(createRolePermissions(userRole || 'admin'));
                 }
             }
         } catch (error) {
-            console.error('Error in loadUserData:', error);
             setError(error.message);
-            // Even on error, provide some permissions
-            const fallbackData = { role: userRole || 'admin' };
-            setUserData(fallbackData);
-            setPermissions(createRolePermissions(userRole || 'admin'));
+            // Even on error, provide admin permissions for development
+            const errorData = {
+                role: 'admin',
+                email: authUser?.email || '',
+                displayName: authUser?.displayName || '',
+                source: 'error'
+            };
+            setUserData(errorData);
+            setPermissions(createRolePermissions('admin'));
         } finally {
             setLoading(false);
             setHasInitialized(true);
         }
-    }, [user, userRole, authLoading, hasInitialized]);
+    }, [authUser, authUserRole, authLoading, hasInitialized]);
 
     useEffect(() => {
         loadUserData();
     }, [loadUserData]);
 
+    // Priority order for role determination
+    const finalUserRole = userData?.role || authUserRole || 'guest';
+    const finalPermissions = permissions || createRolePermissions(finalUserRole);
+
     const contextValue = {
-        permissions: permissions || createRolePermissions('guest'),
-        userRole: userData?.role || userRole || 'guest',
+        permissions: finalPermissions,
+        userRole: finalUserRole,
         userData,
-        user,
+        user: authUser,
         loading,
         error
     };
@@ -151,7 +176,6 @@ export const usePermissions = () => {
     const context = useContext(PermissionContext);
 
     if (!context) {
-        console.warn('usePermissions used outside provider - returning admin fallback');
         return {
             permissions: createRolePermissions('admin'),
             userRole: 'admin',
@@ -162,13 +186,6 @@ export const usePermissions = () => {
         };
     }
 
-    if (!context.permissions) {
-        return {
-            ...context,
-            permissions: createRolePermissions(context.userRole || 'guest')
-        };
-    }
-
     return context;
 };
 
@@ -176,31 +193,31 @@ export const usePermissions = () => {
 export const canUserAccessKid = (userRole, kid, userData, user) => {
     switch (userRole) {
         case 'admin':
-            return true; // Admin can access any kid
+            return true;
 
         case 'parent':
-            return kid.parentInfo?.parentId === user?.uid; // Only their own kids
+            return kid.parentInfo?.parentId === user?.uid;
 
         case 'instructor':
-            return kid.instructorId === userData?.instructorId; // Only assigned kids
+            return kid.instructorId === userData?.instructorId;
 
         case 'guest':
         default:
-            return false; // No access
+            return false;
     }
 };
 
 export const canUserEditKid = (userRole, kid, userData, user) => {
     switch (userRole) {
         case 'admin':
-            return true; // Admin can edit any kid
+            return true;
 
         case 'instructor':
-            return kid.instructorId === userData?.instructorId; // Only assigned kids
+            return kid.instructorId === userData?.instructorId;
 
         case 'parent':
         case 'guest':
         default:
-            return false; // No editing
+            return false;
     }
 };
