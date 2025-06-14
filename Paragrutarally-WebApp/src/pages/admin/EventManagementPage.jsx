@@ -96,6 +96,19 @@ const EventManagementPage = () => {
         fetchEvents();
     }, []);
 
+    // Get unique locations from events for the filter dropdown
+    const getUniqueLocations = () => {
+        const locations = events
+            .map(event => event.location)
+            .filter(location => location && location !== 'Location TBD')
+            .filter((location, index, array) => array.indexOf(location) === index) // Remove duplicates
+            .sort(); // Sort alphabetically
+
+        return locations;
+    };
+
+    const uniqueLocations = getUniqueLocations();
+
     // Filter events based on search term and filters
     useEffect(() => {
         const results = events.filter(event => {
@@ -110,7 +123,7 @@ const EventManagementPage = () => {
 
             const matchesLocation =
                 locationFilter === 'all' ||
-                event.location.toLowerCase().includes(locationFilter.toLowerCase());
+                event.location.toLowerCase() === locationFilter.toLowerCase();
 
             return matchesSearch && matchesStatus && matchesLocation;
         });
@@ -353,10 +366,11 @@ const EventManagementPage = () => {
                                 onChange={(e) => setLocationFilter(e.target.value)}
                             >
                                 <option value="all">📍 All Locations</option>
-                                <option value="jerusalem">🏛️ Jerusalem</option>
-                                <option value="tel-aviv">🏖️ Tel Aviv</option>
-                                <option value="haifa">⛰️ Haifa</option>
-                                <option value="eilat">🌊 Eilat</option>
+                                {uniqueLocations.map((location, index) => (
+                                    <option key={index} value={location.toLowerCase()}>
+                                        📍 {location}
+                                    </option>
+                                ))}
                             </select>
                         </div>
 

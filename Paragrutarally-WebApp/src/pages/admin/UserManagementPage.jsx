@@ -1,4 +1,4 @@
-// src/pages/admin/UserManagementPage.jsx - Fun & Reorganized
+// src/pages/admin/UserManagementPage.jsx - Fun & Reorganized with Clickable Stats
 import React, {useState, useEffect, useCallback} from 'react';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import Dashboard from '../../components/layout/Dashboard';
@@ -98,6 +98,28 @@ const UserManagementPage = () => {
         setSearchTerm('');
     };
 
+    // Handle stat card clicks to filter users
+    const handleStatCardClick = (filterType) => {
+        switch (filterType) {
+            case 'total':
+                setRoleFilter('all');
+                break;
+            case 'admin':
+                setRoleFilter('admin');
+                break;
+            case 'instructor':
+                setRoleFilter('instructor');
+                break;
+            case 'parent':
+                setRoleFilter('parent');
+                break;
+            default:
+                break;
+        }
+        // Clear search when clicking stat cards
+        setSearchTerm('');
+    };
+
     // Modal handlers
     const handleCreateUser = () => {
         setIsCreateModalOpen(true);
@@ -186,30 +208,49 @@ const UserManagementPage = () => {
                         </button>
                     </div>
 
-                    {/* Fun Stats Cards */}
+                    {/* Clickable Stats Cards */}
                     <div className="stats-grid">
-                        <div className="stat-card total">
+                        <div
+                            className={`stat-card total ${roleFilter === 'all' ? 'active' : ''}`}
+                            onClick={() => handleStatCardClick('total')}
+                            style={{ cursor: 'pointer' }}
+                        >
                             <Users className="stat-icon" size={40} />
                             <div className="stat-content">
                                 <h3>Total Users</h3>
                                 <div className="stat-value">{stats.totalUsers}</div>
                             </div>
                         </div>
-                        <div className="stat-card admins">
+
+                        <div
+                            className={`stat-card admins ${roleFilter === 'admin' ? 'active' : ''}`}
+                            onClick={() => handleStatCardClick('admin')}
+                            style={{ cursor: 'pointer' }}
+                        >
                             <Crown className="stat-icon" size={40} />
                             <div className="stat-content">
                                 <h3>Admins</h3>
                                 <div className="stat-value">{stats.admins}</div>
                             </div>
                         </div>
-                        <div className="stat-card instructors">
+
+                        <div
+                            className={`stat-card instructors ${roleFilter === 'instructor' ? 'active' : ''}`}
+                            onClick={() => handleStatCardClick('instructor')}
+                            style={{ cursor: 'pointer' }}
+                        >
                             <Car className="stat-icon" size={40} />
                             <div className="stat-content">
                                 <h3>Instructors</h3>
                                 <div className="stat-value">{stats.instructors}</div>
                             </div>
                         </div>
-                        <div className="stat-card parents">
+
+                        <div
+                            className={`stat-card parents ${roleFilter === 'parent' ? 'active' : ''}`}
+                            onClick={() => handleStatCardClick('parent')}
+                            style={{ cursor: 'pointer' }}
+                        >
                             <UserCheck className="stat-icon" size={40} />
                             <div className="stat-content">
                                 <h3>Parents</h3>

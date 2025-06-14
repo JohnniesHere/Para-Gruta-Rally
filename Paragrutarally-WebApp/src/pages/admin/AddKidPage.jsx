@@ -1,4 +1,4 @@
-// src/pages/admin/AddKidPage.jsx - Updated for Global Theme System
+// src/pages/admin/AddKidPage.jsx - Fixed with Proper Error Handling & Validation
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
@@ -6,7 +6,6 @@ import ProtectedField from '../../hooks/ProtectedField';
 import { useTheme } from '../../contexts/ThemeContext';
 import { usePermissions } from '../../hooks/usePermissions.jsx';
 import { addKid, getNextParticipantNumber } from '../../services/kidService';
-import { getAllTeams } from '../../services/teamService';
 import { getDocs, collection, query, where } from 'firebase/firestore';
 import { db } from '../../firebase/config';
 import {
@@ -70,7 +69,9 @@ const AddKidPage = () => {
         additionalComments: ''
     });
     const [errors, setErrors] = useState({});
+    const [fieldErrors, setFieldErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [loadingError, setLoadingError] = useState(null);
 
     useEffect(() => {
         loadInitialData();
@@ -78,41 +79,86 @@ const AddKidPage = () => {
 
     const loadInitialData = async () => {
         try {
-            const [nextNumber, teamsData] = await Promise.all([
-                getNextParticipantNumber(),
-                getAllTeams({ active: true })
-            ]);
+            setIsLoading(true);
+            setLoadingError(null);
 
-            setFormData(prev => ({
-                ...prev,
-                participantNumber: nextNumber
-            }));
-            setTeams(teamsData);
+            // Load participant number first
+            try {
+                const nextNumber = await getNextParticipantNumber();
+                setFormData(prev => ({
+                    ...prev,
+                    participantNumber: nextNumber
+                }));
+            } catch (error) {
+                console.error('Error loading participant number:', error);
+                // Set a default if service fails
+                setFormData(prev => ({
+                    ...prev,
+                    participantNumber: '001'
+                }));
+            }
+
+            // Load teams with better error handling
+            try {
+                console.log('Loading teams...');
+                // Simple query without filters that might require indexes
+                const teamsQuery = collection(db, 'teams');
+                const teamsSnapshot = await getDocs(teamsQuery);
+
+                const teamsData = teamsSnapshot.docs
+                    .map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }))
+                    .filter(team => team.active !== false); // Filter active teams in memory
+
+                console.log('Teams loaded successfully:', teamsData);
+                setTeams(teamsData);
+            } catch (teamsError) {
+                console.error('Error loading teams:', teamsError);
+                setTeams([]); // Continue without teams
+            }
 
             // Load instructors
-            const instructorsQuery = query(collection(db, 'instructors'));
-            const instructorsSnapshot = await getDocs(instructorsQuery);
-            const instructorsData = instructorsSnapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            }));
-            setInstructors(instructorsData);
+            try {
+                console.log('Loading instructors...');
+                const instructorsQuery = collection(db, 'instructors');
+                const instructorsSnapshot = await getDocs(instructorsQuery);
+                const instructorsData = instructorsSnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+                console.log('Instructors loaded successfully:', instructorsData);
+                setInstructors(instructorsData);
+            } catch (instructorsError) {
+                console.error('Error loading instructors:', instructorsError);
+                setInstructors([]); // Continue without instructors
+            }
 
             // Load parents (users with parent role)
-            const parentsQuery = query(
-                collection(db, 'users'),
-                where('role', '==', 'parent')
-            );
-            const parentsSnapshot = await getDocs(parentsQuery);
-            const parentsData = parentsSnapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            }));
-            setParents(parentsData);
+            try {
+                console.log('Loading parents...');
+                const parentsQuery = query(
+                    collection(db, 'users'),
+                    where('role', '==', 'parent')
+                );
+                const parentsSnapshot = await getDocs(parentsQuery);
+                const parentsData = parentsSnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+                console.log('Parents loaded successfully:', parentsData);
+                setParents(parentsData);
+            } catch (parentsError) {
+                console.error('Error loading parents:', parentsError);
+                setParents([]); // Continue without parents
+            }
 
         } catch (error) {
             console.error('Error loading initial data:', error);
-            setErrors({ general: 'Failed to load form data. Please refresh and try again.' });
+            setLoadingError('Some form data failed to load, but you can still create a kid. Please check your internet connection.');
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -134,6 +180,12 @@ const AddKidPage = () => {
         });
 
         // Clear specific error when user starts typing
+        if (fieldErrors[path]) {
+            setFieldErrors(prev => ({
+                ...prev,
+                [path]: false
+            }));
+        }
         if (errors[path]) {
             setErrors(prev => ({
                 ...prev,
@@ -144,28 +196,35 @@ const AddKidPage = () => {
 
     const validateForm = () => {
         const newErrors = {};
+        const newFieldErrors = {};
 
         // Required field validations
         if (!formData.participantNumber) {
             newErrors.participantNumber = 'Participant number is required';
+            newFieldErrors.participantNumber = true;
         }
 
         if (!formData.personalInfo.dateOfBirth) {
             newErrors['personalInfo.dateOfBirth'] = 'Date of birth is required';
+            newFieldErrors['personalInfo.dateOfBirth'] = true;
         }
 
         if (!formData.parentInfo.name) {
             newErrors['parentInfo.name'] = 'Parent name is required';
+            newFieldErrors['parentInfo.name'] = true;
         }
 
         if (!formData.parentInfo.email) {
             newErrors['parentInfo.email'] = 'Parent email is required';
+            newFieldErrors['parentInfo.email'] = true;
         } else if (!/\S+@\S+\.\S+/.test(formData.parentInfo.email)) {
             newErrors['parentInfo.email'] = 'Please enter a valid email address';
+            newFieldErrors['parentInfo.email'] = true;
         }
 
         if (!formData.parentInfo.phone) {
             newErrors['parentInfo.phone'] = 'Parent phone is required';
+            newFieldErrors['parentInfo.phone'] = true;
         }
 
         // Validate date of birth
@@ -174,10 +233,12 @@ const AddKidPage = () => {
             const today = new Date();
             if (birthDate >= today) {
                 newErrors['personalInfo.dateOfBirth'] = 'Date of birth must be in the past';
+                newFieldErrors['personalInfo.dateOfBirth'] = true;
             }
         }
 
         setErrors(newErrors);
+        setFieldErrors(newFieldErrors);
         return Object.keys(newErrors).length === 0;
     };
 
@@ -256,6 +317,13 @@ const AddKidPage = () => {
                         </div>
                     )}
 
+                    {loadingError && (
+                        <div className="alert warning-alert">
+                            <AlertTriangle size={20} />
+                            {loadingError}
+                        </div>
+                    )}
+
                     <form onSubmit={handleSubmit} className="add-kid-form">
                         {/* Basic Info Section */}
                         <div className="form-section racing-section">
@@ -265,37 +333,36 @@ const AddKidPage = () => {
                             </div>
                             <div className="form-grid">
                                 <div className="form-group">
-                                    <ProtectedField
-                                        field="participantNumber"
-                                        label="🏁 Race Number"
-                                        value={formData.participantNumber}
-                                        onChange={(value) => handleInputChange('participantNumber', value)}
+                                    <label className="form-label">🏁 Race Number *</label>
+                                    <input
+                                        type="text"
+                                        className={`form-input ${fieldErrors.participantNumber ? 'error' : ''}`}
                                         placeholder="001"
-                                        kidData={formData}
+                                        value={formData.participantNumber}
+                                        onChange={(e) => handleInputChange('participantNumber', e.target.value)}
                                     />
                                     {errors.participantNumber && <span className="error-text">{errors.participantNumber}</span>}
                                 </div>
 
                                 <div className="form-group">
-                                    <ProtectedField
-                                        field="personalInfo.dateOfBirth"
-                                        label="🎂 Birthday"
+                                    <label className="form-label">🎂 Birthday *</label>
+                                    <input
                                         type="date"
+                                        className={`form-input ${fieldErrors['personalInfo.dateOfBirth'] ? 'error' : ''}`}
                                         value={formData.personalInfo.dateOfBirth}
-                                        onChange={(value) => handleInputChange('personalInfo.dateOfBirth', value)}
-                                        kidData={formData}
+                                        onChange={(e) => handleInputChange('personalInfo.dateOfBirth', e.target.value)}
                                     />
                                     {errors['personalInfo.dateOfBirth'] && <span className="error-text">{errors['personalInfo.dateOfBirth']}</span>}
                                 </div>
 
                                 <div className="form-group full-width">
-                                    <ProtectedField
-                                        field="personalInfo.address"
-                                        label="🏠 Home Base Location"
-                                        value={formData.personalInfo.address}
-                                        onChange={(value) => handleInputChange('personalInfo.address', value)}
+                                    <label className="form-label">🏠 Home Base Location</label>
+                                    <input
+                                        type="text"
+                                        className="form-input"
                                         placeholder="Where our racer calls home"
-                                        kidData={formData}
+                                        value={formData.personalInfo.address}
+                                        onChange={(e) => handleInputChange('personalInfo.address', e.target.value)}
                                     />
                                 </div>
                             </div>
@@ -309,26 +376,24 @@ const AddKidPage = () => {
                             </div>
                             <div className="form-grid">
                                 <div className="form-group full-width">
-                                    <ProtectedField
-                                        field="personalInfo.capabilities"
-                                        label="🌟 Amazing Abilities"
-                                        value={formData.personalInfo.capabilities}
-                                        onChange={(value) => handleInputChange('personalInfo.capabilities', value)}
+                                    <label className="form-label">🌟 Amazing Abilities</label>
+                                    <textarea
+                                        className="form-textarea"
                                         placeholder="Tell us about this racer's awesome skills and abilities!"
-                                        multiline
-                                        kidData={formData}
+                                        value={formData.personalInfo.capabilities}
+                                        onChange={(e) => handleInputChange('personalInfo.capabilities', e.target.value)}
+                                        rows="3"
                                     />
                                 </div>
 
                                 <div className="form-group full-width">
-                                    <ProtectedField
-                                        field="personalInfo.announcersNotes"
-                                        label="📢 Announcer's Special Notes"
-                                        value={formData.personalInfo.announcersNotes}
-                                        onChange={(value) => handleInputChange('personalInfo.announcersNotes', value)}
+                                    <label className="form-label">📢 Announcer's Special Notes</label>
+                                    <textarea
+                                        className="form-textarea"
                                         placeholder="Fun facts to share during the race!"
-                                        multiline
-                                        kidData={formData}
+                                        value={formData.personalInfo.announcersNotes}
+                                        onChange={(e) => handleInputChange('personalInfo.announcersNotes', e.target.value)}
+                                        rows="3"
                                     />
                                 </div>
                             </div>
@@ -342,39 +407,37 @@ const AddKidPage = () => {
                             </div>
                             <div className="form-grid">
                                 <div className="form-group">
-                                    <ProtectedField
-                                        field="parentInfo.name"
-                                        label="👤 Parent/Guardian Name"
-                                        value={formData.parentInfo.name}
-                                        onChange={(value) => handleInputChange('parentInfo.name', value)}
+                                    <label className="form-label">👤 Parent/Guardian Name *</label>
+                                    <input
+                                        type="text"
+                                        className={`form-input ${fieldErrors['parentInfo.name'] ? 'error' : ''}`}
                                         placeholder="Racing coach's name"
-                                        kidData={formData}
+                                        value={formData.parentInfo.name}
+                                        onChange={(e) => handleInputChange('parentInfo.name', e.target.value)}
                                     />
                                     {errors['parentInfo.name'] && <span className="error-text">{errors['parentInfo.name']}</span>}
                                 </div>
 
                                 <div className="form-group">
-                                    <ProtectedField
-                                        field="parentInfo.email"
-                                        label="📧 Email Address"
+                                    <label className="form-label">📧 Email Address *</label>
+                                    <input
                                         type="email"
-                                        value={formData.parentInfo.email}
-                                        onChange={(value) => handleInputChange('parentInfo.email', value)}
+                                        className={`form-input ${fieldErrors['parentInfo.email'] ? 'error' : ''}`}
                                         placeholder="parent@racingfamily.com"
-                                        kidData={formData}
+                                        value={formData.parentInfo.email}
+                                        onChange={(e) => handleInputChange('parentInfo.email', e.target.value)}
                                     />
                                     {errors['parentInfo.email'] && <span className="error-text">{errors['parentInfo.email']}</span>}
                                 </div>
 
                                 <div className="form-group">
-                                    <ProtectedField
-                                        field="parentInfo.phone"
-                                        label="📱 Phone Number"
+                                    <label className="form-label">📱 Phone Number *</label>
+                                    <input
                                         type="tel"
-                                        value={formData.parentInfo.phone}
-                                        onChange={(value) => handleInputChange('parentInfo.phone', value)}
+                                        className={`form-input ${fieldErrors['parentInfo.phone'] ? 'error' : ''}`}
                                         placeholder="Racing hotline"
-                                        kidData={formData}
+                                        value={formData.parentInfo.phone}
+                                        onChange={(e) => handleInputChange('parentInfo.phone', e.target.value)}
                                     />
                                     {errors['parentInfo.phone'] && <span className="error-text">{errors['parentInfo.phone']}</span>}
                                 </div>
@@ -401,25 +464,24 @@ const AddKidPage = () => {
                                 </div>
 
                                 <div className="form-group">
-                                    <ProtectedField
-                                        field="parentInfo.grandparentsInfo.names"
-                                        label="👵👴 Grandparents Names"
-                                        value={formData.parentInfo.grandparentsInfo.names}
-                                        onChange={(value) => handleInputChange('parentInfo.grandparentsInfo.names', value)}
+                                    <label className="form-label">👵👴 Grandparents Names</label>
+                                    <input
+                                        type="text"
+                                        className="form-input"
                                         placeholder="Racing legends in the family"
-                                        kidData={formData}
+                                        value={formData.parentInfo.grandparentsInfo.names}
+                                        onChange={(e) => handleInputChange('parentInfo.grandparentsInfo.names', e.target.value)}
                                     />
                                 </div>
 
                                 <div className="form-group">
-                                    <ProtectedField
-                                        field="parentInfo.grandparentsInfo.phone"
-                                        label="☎️ Grandparents Phone"
+                                    <label className="form-label">☎️ Grandparents Phone</label>
+                                    <input
                                         type="tel"
-                                        value={formData.parentInfo.grandparentsInfo.phone}
-                                        onChange={(value) => handleInputChange('parentInfo.grandparentsInfo.phone', value)}
+                                        className="form-input"
                                         placeholder="Backup racing support"
-                                        kidData={formData}
+                                        value={formData.parentInfo.grandparentsInfo.phone}
+                                        onChange={(e) => handleInputChange('parentInfo.grandparentsInfo.phone', e.target.value)}
                                     />
                                 </div>
                             </div>
@@ -503,15 +565,14 @@ const AddKidPage = () => {
                                 </div>
 
                                 <div className="form-group">
-                                    <ProtectedField
-                                        field="signedDeclaration"
-                                        label="Racing Safety Declaration"
-                                        type="checkbox"
-                                        value={formData.signedDeclaration}
-                                        onChange={(value) => handleInputChange('signedDeclaration', value)}
-                                        placeholder="Parent has signed the racing safety agreement 🛡️"
-                                        kidData={formData}
-                                    />
+                                    <label className="form-label checkbox-label">
+                                        <input
+                                            type="checkbox"
+                                            checked={formData.signedDeclaration}
+                                            onChange={(e) => handleInputChange('signedDeclaration', e.target.checked)}
+                                        />
+                                        🛡️ Racing Safety Declaration Signed
+                                    </label>
                                 </div>
                             </div>
                         </div>
@@ -524,14 +585,13 @@ const AddKidPage = () => {
                             </div>
                             <div className="form-grid">
                                 <div className="form-group full-width">
-                                    <ProtectedField
-                                        field="additionalComments"
-                                        label="🗒️ Additional Racing Notes"
-                                        value={formData.additionalComments}
-                                        onChange={(value) => handleInputChange('additionalComments', value)}
+                                    <label className="form-label">🗒️ Additional Racing Notes</label>
+                                    <textarea
+                                        className="form-textarea"
                                         placeholder="Any special notes about our new racing star!"
-                                        multiline
-                                        kidData={formData}
+                                        value={formData.additionalComments}
+                                        onChange={(e) => handleInputChange('additionalComments', e.target.value)}
+                                        rows="3"
                                     />
                                 </div>
                             </div>

@@ -1,8 +1,9 @@
-// src/pages/admin/KidsManagementPage.jsx - WITH TEAM CHANGE MODAL
+// src/pages/admin/KidsManagementPage.jsx - WITH EDIT KID MODAL
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
 import TeamChangeModal from '../../components/modals/TeamChangeModal.jsx';
+import EditKidModal from '../../components/modals/EditKidModal.jsx';
 import { useTheme } from '../../contexts/ThemeContext';
 import { usePermissions, canUserAccessKid } from '../../hooks/usePermissions.jsx';
 import {
@@ -51,6 +52,10 @@ const KidsManagementPage = () => {
     // TEAM CHANGE MODAL STATE
     const [teamModalOpen, setTeamModalOpen] = useState(false);
     const [selectedKidForTeamChange, setSelectedKidForTeamChange] = useState(null);
+
+    // EDIT KID MODAL STATE
+    const [editModalOpen, setEditModalOpen] = useState(false);
+    const [selectedKidForEdit, setSelectedKidForEdit] = useState(null);
 
     // Load kids based on user role
     useEffect(() => {
@@ -161,6 +166,36 @@ const KidsManagementPage = () => {
         setFilteredKids(filtered);
     };
 
+    // Handle stat card clicks to filter kids
+    const handleStatCardClick = (filterType) => {
+        switch (filterType) {
+            case 'total':
+                setTeamFilter('all');
+                setStatusFilter('all');
+                setShowingKidsWithoutTeams(false);
+                break;
+            case 'without-teams':
+                setTeamFilter('no-team');
+                setStatusFilter('all');
+                setShowingKidsWithoutTeams(true);
+                break;
+            case 'active':
+                setTeamFilter('all');
+                setStatusFilter('active');
+                setShowingKidsWithoutTeams(false);
+                break;
+            case 'with-teams':
+                setTeamFilter('with-team');
+                setStatusFilter('all');
+                setShowingKidsWithoutTeams(false);
+                break;
+            default:
+                break;
+        }
+        // Clear search when clicking stat cards
+        setSearchTerm('');
+    };
+
     const handleClearFilters = () => {
         setSearchTerm('');
         setTeamFilter('all');
@@ -169,8 +204,7 @@ const KidsManagementPage = () => {
     };
 
     const handleShowKidsWithoutTeams = () => {
-        setTeamFilter('no-team');
-        setShowingKidsWithoutTeams(true);
+        handleStatCardClick('without-teams');
     };
 
     const handleDeleteKid = async (kid) => {
@@ -224,11 +258,43 @@ const KidsManagementPage = () => {
         alert(`✅ ${kidName} has been ${newTeamId ? 'assigned to' : 'removed from'} ${teamName}`);
     };
 
+    // EDIT KID MODAL HANDLERS
     const handleEditKid = (kid) => {
-        // For now, show an alert that this would open an edit form
-        // You can implement a proper edit modal or navigate to a simplified edit page
-        alert(`Edit functionality for ${kid.name} would go here. You could create an EditKidModal similar to the TeamChangeModal.`);
-        // navigate(`/admin/kids/edit/${kid.id}`); // Remove this to avoid the permission error
+        setSelectedKidForEdit(kid);
+        setEditModalOpen(true);
+    };
+
+    const handleKidUpdated = (kidId, updatedData) => {
+        // Update the kid in the local state
+        setKids(prevKids =>
+            prevKids.map(kid =>
+                kid.id === kidId
+                    ? {
+                        ...kid,
+                        name: userRole === 'admin'
+                            ? updatedData.participantNumber ? `Kid #${updatedData.participantNumber}` : 'Unnamed Kid'
+                            : kid.name,
+                        parentName: userRole === 'admin' || userRole === 'instructor'
+                            ? updatedData.parentInfo?.name || 'N/A'
+                            : kid.parentName,
+                        age: updatedData.personalInfo?.dateOfBirth ? calculateAge(updatedData.personalInfo.dateOfBirth) : 'N/A',
+                        team: updatedData.teamId ? `Team ${updatedData.teamId.slice(0, 8)}...` : 'No Team',
+                        teamId: updatedData.teamId,
+                        status: updatedData.signedFormStatus?.toLowerCase() || 'pending',
+                        participantNumber: updatedData.participantNumber,
+                        originalData: { ...kid.originalData, ...updatedData }
+                    }
+                    : kid
+            )
+        );
+
+        // Close modal
+        setEditModalOpen(false);
+        setSelectedKidForEdit(null);
+
+        // Show success message
+        const kidName = kids.find(k => k.id === kidId)?.name;
+        alert(`✅ ${kidName} has been updated successfully! 🏎️`);
     };
 
     const handleAddKid = () => {
@@ -320,15 +386,16 @@ const KidsManagementPage = () => {
                         </div>
                     </div>
 
-                    {/* Stats */}
+                    {/* Clickable Stats Cards */}
                     <div className="stats-grid">
                         {(userRole === 'admin' || userRole === 'instructor') && (
                             <div
-                                className="stat-card priority-warning clickable"
-                                onClick={handleShowKidsWithoutTeams}
+                                className={`stat-card priority-warning clickable ${showingKidsWithoutTeams ? 'active' : ''}`}
+                                onClick={() => handleStatCardClick('without-teams')}
                                 role="button"
                                 tabIndex={0}
-                                onKeyDown={(e) => e.key === 'Enter' && handleShowKidsWithoutTeams()}
+                                onKeyDown={(e) => e.key === 'Enter' && handleStatCardClick('without-teams')}
+                                style={{ cursor: 'pointer' }}
                             >
                                 <AlertTriangle className="stat-icon warning" size={45} />
                                 <div className="stat-content">
@@ -339,7 +406,11 @@ const KidsManagementPage = () => {
                             </div>
                         )}
 
-                        <div className="stat-card total">
+                        <div
+                            className={`stat-card total ${teamFilter === 'all' && statusFilter === 'all' && !showingKidsWithoutTeams ? 'active' : ''}`}
+                            onClick={() => handleStatCardClick('total')}
+                            style={{ cursor: 'pointer' }}
+                        >
                             <Users className="stat-icon" size={40} />
                             <div className="stat-content">
                                 <h3>{userRole === 'parent' ? 'Your Kids' : 'Total Kids'}</h3>
@@ -347,7 +418,11 @@ const KidsManagementPage = () => {
                             </div>
                         </div>
 
-                        <div className="stat-card active">
+                        <div
+                            className={`stat-card active ${statusFilter === 'active' ? 'active' : ''}`}
+                            onClick={() => handleStatCardClick('active')}
+                            style={{ cursor: 'pointer' }}
+                        >
                             <Check className="stat-icon" size={40} />
                             <div className="stat-content">
                                 <h3>Active Kids</h3>
@@ -355,7 +430,11 @@ const KidsManagementPage = () => {
                             </div>
                         </div>
 
-                        <div className="stat-card with-teams">
+                        <div
+                            className={`stat-card with-teams ${teamFilter === 'with-team' ? 'active' : ''}`}
+                            onClick={() => handleStatCardClick('with-teams')}
+                            style={{ cursor: 'pointer' }}
+                        >
                             <Car className="stat-icon" size={40} />
                             <div className="stat-content">
                                 <h3>Kids with Teams</h3>
@@ -424,13 +503,23 @@ const KidsManagementPage = () => {
                         </button>
                     </div>
 
-                    {/* Results Info */}
+                    {/* Results Info with Reset Button */}
                     <div className="results-info">
-                        <FileSpreadsheet className="results-icon" size={18} />
-                        Showing {filteredKids.length} of {kids.length} kids
-                        {showingKidsWithoutTeams && <span className="priority-filter"> • 🚨 PRIORITY: Kids without teams</span>}
-                        {teamFilter !== 'all' && !showingKidsWithoutTeams && <span className="filter-applied"> • Team: {teamFilter}</span>}
-                        {searchTerm && <span className="search-applied"> • Search: "{searchTerm}"</span>}
+                        <div className="results-content">
+                            <FileSpreadsheet className="results-icon" size={18} />
+                            Showing {filteredKids.length} of {kids.length} kids
+                            {showingKidsWithoutTeams && <span className="priority-filter"> • 🚨 PRIORITY: Kids without teams</span>}
+                            {teamFilter !== 'all' && !showingKidsWithoutTeams && <span className="filter-applied"> • Team: {teamFilter}</span>}
+                            {statusFilter !== 'all' && <span className="filter-applied"> • Status: {statusFilter}</span>}
+                            {searchTerm && <span className="search-applied"> • Search: "{searchTerm}"</span>}
+                        </div>
+
+                        {(teamFilter !== 'all' || statusFilter !== 'all' || searchTerm || showingKidsWithoutTeams) && (
+                            <button className="btn-reset" onClick={handleClearFilters} title="Reset all filters">
+                                <RefreshCw className="btn-icon" size={16} />
+                                Reset
+                            </button>
+                        )}
                     </div>
 
                     {/* Enhanced Table */}
@@ -534,7 +623,7 @@ const KidsManagementPage = () => {
                                                     </button>
                                                 )}
 
-                                                {/* Edit - Placeholder for now */}
+                                                {/* EDIT BUTTON - Opens modal instead of navigating */}
                                                 {(userRole === 'admin' || userRole === 'instructor') && (
                                                     <button
                                                         className="btn-action edit"
@@ -574,6 +663,17 @@ const KidsManagementPage = () => {
                         setSelectedKidForTeamChange(null);
                     }}
                     onTeamChanged={handleTeamChanged}
+                />
+
+                {/* EDIT KID MODAL */}
+                <EditKidModal
+                    kid={selectedKidForEdit}
+                    isOpen={editModalOpen}
+                    onClose={() => {
+                        setEditModalOpen(false);
+                        setSelectedKidForEdit(null);
+                    }}
+                    onKidUpdated={handleKidUpdated}
                 />
             </div>
         </Dashboard>

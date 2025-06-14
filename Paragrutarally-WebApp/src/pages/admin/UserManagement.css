@@ -2,6 +2,91 @@
 @import url('./../../styles/global.css');
 
 /* ========================================
+   CLICKABLE STAT CARDS - USER MANAGEMENT
+   ======================================== */
+
+.stat-card {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    border: 2px solid transparent !important; /* Force transparent border by default */
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.stat-card:hover::before {
+    opacity: 1;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Active state - only show border when card is active */
+.stat-card.active {
+    transform: translateY(-2px);
+}
+
+.stat-card.active::before {
+    opacity: 1;
+}
+
+/* DISABLE any default borders that might be inherited */
+.stat-card:not(.active) {
+    border: 2px solid transparent !important;
+}
+
+/* Specific active state colors for User Management card types */
+.stat-card.total.active {
+    border: 2px solid #3b82f6 !important;
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3) !important;
+}
+
+.stat-card.total.active::before {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%) !important;
+}
+
+.stat-card.admins.active {
+    border: 2px solid #ef4444 !important;
+    box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3) !important;
+}
+
+.stat-card.admins.active::before {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.05) 100%) !important;
+}
+
+.stat-card.instructors.active {
+    border: 2px solid #3b82f6 !important;
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3) !important;
+}
+
+.stat-card.instructors.active::before {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%) !important;
+}
+
+.stat-card.parents.active {
+    border: 2px solid #10b981 !important;
+    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3) !important;
+}
+
+.stat-card.parents.active::before {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%) !important;
+}
+
+/* ========================================
    USER MANAGEMENT SPECIFIC STYLES
    ======================================== */
 

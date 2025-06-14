@@ -1,4 +1,4 @@
-// src/services/teamService.js - CLEANED VERSION (fixes ESLint warnings)
+// src/services/teamService.js
 import {
     collection,
     doc,

@@ -91,7 +91,7 @@
 }
 
 /* ========================================
-   CLICKABLE STAT CARDS
+   CLICKABLE STAT CARDS - CLEANED UP
    ======================================== */
 
 .stat-card {
@@ -99,6 +99,7 @@
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
+    border: 2px solid transparent !important; /* Force transparent border by default */
 }
 
 .stat-card::before {
@@ -123,47 +124,47 @@
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
+/* Active state - only show border when card is active */
 .stat-card.active {
-    border: 2px solid #3b82f6;
-    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
     transform: translateY(-2px);
+    /* Remove any default border here */
+}
+
+/* DISABLE any default borders that might be inherited */
+.stat-card:not(.active) {
+    border: 2px solid transparent !important;
 }
 
 .stat-card.active::before {
     opacity: 1;
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%);
 }
 
-/* Active state colors for different card types */
+/* Specific active state colors for different card types */
 .stat-card.total.active {
-    border-color: #3b82f6;
-    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
-}
-
-.stat-card.upcoming.active {
-    border-color: #f59e0b;
-    box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3);
-}
-
-.stat-card.completed.active {
-    border-color: #10b981;
-    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
-}
-
-/* Override the generic active state for specific card types */
-.stat-card.total.active {
-    border-color: #3b82f6 !important;
+    border: 2px solid #3b82f6 !important;
     box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3) !important;
 }
 
+.stat-card.total.active::before {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%) !important;
+}
+
 .stat-card.upcoming.active {
-    border-color: #f59e0b !important;
+    border: 2px solid #f59e0b !important;
     box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3) !important;
 }
 
+.stat-card.upcoming.active::before {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(245, 158, 11, 0.05) 100%) !important;
+}
+
 .stat-card.completed.active {
-    border-color: #10b981 !important;
+    border: 2px solid #10b981 !important;
     box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3) !important;
+}
+
+.stat-card.completed.active::before {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%) !important;
 }
 
 /* ========================================
@@ -329,6 +330,30 @@
 .btn-action.delete {
     background: linear-gradient(135deg, var(--error-color) 0%, var(--error-hover) 100%);
     color: white;
+}
+
+/* ========================================
+   GLOBAL STAT CARD FIXES - PREVENT PURPLE BACKGROUND
+   ======================================== */
+
+/* Ensure total cards NEVER get purple/lavender background */
+.stat-card.total {
+    background: var(--bg-secondary) !important;
+}
+
+/* Override any generic stat card backgrounds that might cause purple */
+.stat-card {
+    background: var(--bg-secondary) !important;
+}
+
+/* Ensure the ::before pseudo-element doesn't cause color bleeding */
+.stat-card::before {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%) !important;
+}
+
+/* Specific total card pseudo-element fix */
+.stat-card.total::before {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 215, 0, 0.05) 100%) !important;
 }
 
 /* ========================================
