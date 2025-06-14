@@ -30,7 +30,7 @@ const EditTeamPage = () => {
     const navigate = useNavigate();
     const { id } = useParams();
     const location = useLocation();
-    const { isDarkMode } = useTheme();
+    const { isDarkMode, appliedTheme } = useTheme();
     const { permissions, userRole } = usePermissions();
 
     const [isLoading, setIsLoading] = useState(true);
@@ -191,7 +191,7 @@ const EditTeamPage = () => {
     if (isLoading) {
         return (
             <Dashboard requiredRole={userRole}>
-                <div className={`add-team-page ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
+                <div className={`add-team-page ${appliedTheme}-mode`}>
                     <div className="loading-container">
                         <div className="loading-spinner"></div>
                         <p>Loading team data...</p>
@@ -204,7 +204,7 @@ const EditTeamPage = () => {
     if (errors.general && !originalData) {
         return (
             <Dashboard requiredRole={userRole}>
-                <div className={`add-team-page ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
+                <div className={`add-team-page ${appliedTheme}-mode`}>
                     <div className="error-container">
                         <h3>Error</h3>
                         <p>{errors.general}</p>
@@ -222,7 +222,7 @@ const EditTeamPage = () => {
 
     return (
         <Dashboard requiredRole={userRole}>
-            <div className={`add-team-page ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
+            <div className={`add-team-page ${appliedTheme}-mode`}>
                 {/* Racing Theme Header */}
                 <div className="racing-header">
                     <div className="header-content">

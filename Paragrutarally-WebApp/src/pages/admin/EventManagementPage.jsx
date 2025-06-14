@@ -6,7 +6,7 @@ import { useTheme } from '../../contexts/ThemeContext.jsx';
 import './EventManagementPage.css';
 
 const EventManagementPage = () => {
-    const { isDarkMode } = useTheme(); // Fixed: was isDark, should be isDarkMode
+    const { isDarkMode, appliedTheme } = useTheme(); // Fixed: was isDark, should be isDarkMode
 
     // State for handling events and pagination
     const [events, setEvents] = useState([]);
@@ -173,7 +173,7 @@ const EventManagementPage = () => {
 
     return (
         <Dashboard requiredRole="admin">
-            <div className={`event-management ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
+            <div className={`event-management ${appliedTheme}-mode`}>
                 {/* FIXED: Title moved outside the container like UserManagement */}
                 <h1>Event Management</h1>
 

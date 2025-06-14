@@ -1,4 +1,4 @@
-// src/pages/admin/AddTeamPage.jsx - Fun Racing Theme Add Team Form
+// src/pages/admin/AddTeamPage.jsx - Updated for Global Theme System
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
@@ -27,7 +27,7 @@ import './AddTeamPage.css';
 
 const AddTeamPage = () => {
     const navigate = useNavigate();
-    const { isDarkMode } = useTheme();
+    const { isDarkMode, appliedTheme } = useTheme();
     const { permissions, userRole } = usePermissions();
 
     const [isLoading, setIsLoading] = useState(false);
@@ -162,7 +162,7 @@ const AddTeamPage = () => {
     if (isLoading) {
         return (
             <Dashboard requiredRole={userRole}>
-                <div className={`add-team-page ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
+                <div className={`admin-page add-team-page ${appliedTheme}-mode`}>
                     <div className="loading-container">
                         <div className="loading-spinner"></div>
                         <p>Loading team setup...</p>
@@ -174,28 +174,31 @@ const AddTeamPage = () => {
 
     return (
         <Dashboard requiredRole={userRole}>
-            <div className={`add-team-page ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
-                {/* Racing Theme Header */}
-                <div className="racing-header">
-                    <div className="header-content">
-                        <button onClick={handleCancel} className="back-button">
-                            <ArrowLeft className="btn-icon" size={20} />
-                            Back to Teams
-                        </button>
-                        <div className="title-section">
-                            <h1>
-                                <UsersGroup size={32} className="page-title-icon" />
-                                Create Racing Team!
-                                <Trophy size={24} className="trophy-icon" />
-                            </h1>
-                            <p className="subtitle">Let's build the ultimate racing squad! 🏁</p>
+            <div className={`admin-page add-team-page ${appliedTheme}-mode`}>
+                {/* Page Title - Outside container */}
+                <h1>
+                    <UsersGroup size={32} className="page-title-icon" />
+                    Create Racing Team!
+                    <Trophy size={24} className="trophy-icon" />
+                </h1>
+
+                {/* Main Container */}
+                <div className="admin-container add-team-container">
+                    {/* Racing Theme Header */}
+                    <div className="racing-header">
+                        <div className="header-content">
+                            <button onClick={handleCancel} className="back-button">
+                                <ArrowLeft className="btn-icon" size={20} />
+                                Back to Teams
+                            </button>
+                            <div className="title-section">
+                                <p className="subtitle">Let's build the ultimate racing squad! 🏁</p>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div className="add-team-container">
                     {errors.general && (
-                        <div className="error-alert">
+                        <div className="alert error-alert">
                             <AlertTriangle size={20} />
                             {errors.general}
                         </div>
@@ -220,7 +223,7 @@ const AddTeamPage = () => {
                                             value={formData.name}
                                             onChange={(e) => handleInputChange('name', e.target.value)}
                                             placeholder="Thunder Racers, Speed Demons, Lightning Bolts..."
-                                            className="form-input racing-input"
+                                            className="form-input"
                                         />
                                         {errors.name && <span className="error-text">{errors.name}</span>}
                                     </div>
@@ -238,7 +241,7 @@ const AddTeamPage = () => {
                                             max="50"
                                             value={formData.maxCapacity}
                                             onChange={(e) => handleInputChange('maxCapacity', parseInt(e.target.value) || 15)}
-                                            className="form-input racing-input"
+                                            className="form-input"
                                         />
                                         {errors.maxCapacity && <span className="error-text">{errors.maxCapacity}</span>}
                                     </div>
@@ -254,7 +257,7 @@ const AddTeamPage = () => {
                                             value={formData.description}
                                             onChange={(e) => handleInputChange('description', e.target.value)}
                                             placeholder="What makes this team special? Their racing spirit, teamwork, or special skills..."
-                                            className="form-textarea racing-textarea"
+                                            className="form-textarea"
                                             rows={3}
                                         />
                                     </div>
@@ -269,7 +272,7 @@ const AddTeamPage = () => {
                                         <select
                                             value={formData.active ? 'active' : 'inactive'}
                                             onChange={(e) => handleInputChange('active', e.target.value === 'active')}
-                                            className="form-select racing-select"
+                                            className="form-select"
                                         >
                                             <option value="active">✅ Active & Ready to Race</option>
                                             <option value="inactive">⏸️ Inactive (Prep Mode)</option>
@@ -295,18 +298,18 @@ const AddTeamPage = () => {
                                     instructors.map(instructor => (
                                         <div
                                             key={instructor.id}
-                                            className={`instructor-card ${formData.instructorIds.includes(instructor.id) ? 'selected' : ''}`}
+                                            className={`instructor-card card selectable ${formData.instructorIds.includes(instructor.id) ? 'selected' : ''}`}
                                             onClick={() => handleInstructorToggle(instructor.id)}
                                         >
                                             <div className="card-header">
                                                 <User className="card-icon" size={20} />
-                                                <span className="instructor-name">{instructor.name}</span>
+                                                <span className="instructor-name card-title">{instructor.name}</span>
                                                 {formData.instructorIds.includes(instructor.id) && (
                                                     <Check className="selected-icon" size={16} />
                                                 )}
                                             </div>
                                             {instructor.phone && (
-                                                <div className="instructor-details">
+                                                <div className="instructor-details card-body">
                                                     📱 {instructor.phone}
                                                 </div>
                                             )}
@@ -325,7 +328,7 @@ const AddTeamPage = () => {
                                         <select
                                             value={formData.teamLeaderId}
                                             onChange={(e) => handleInputChange('teamLeaderId', e.target.value)}
-                                            className="form-select racing-select"
+                                            className="form-select"
                                         >
                                             <option value="">🎯 Choose Team Leader</option>
                                             {formData.instructorIds.map(instructorId => {
@@ -367,19 +370,19 @@ const AddTeamPage = () => {
                                     availableKids.map(kid => (
                                         <div
                                             key={kid.id}
-                                            className={`kid-card ${formData.kidIds.includes(kid.id) ? 'selected' : ''}`}
+                                            className={`kid-card card selectable ${formData.kidIds.includes(kid.id) ? 'selected' : ''}`}
                                             onClick={() => handleKidToggle(kid.id)}
                                         >
                                             <div className="card-header">
                                                 <Baby className="card-icon" size={20} />
-                                                <span className="kid-name">
+                                                <span className="kid-name card-title">
                                                     {kid.personalInfo?.firstName || 'Unknown'} {kid.personalInfo?.lastName || ''}
                                                 </span>
                                                 {formData.kidIds.includes(kid.id) && (
                                                     <Check className="selected-icon" size={16} />
                                                 )}
                                             </div>
-                                            <div className="kid-details">
+                                            <div className="kid-details card-body">
                                                 <div>🏁 #{kid.participantNumber}</div>
                                                 {kid.parentInfo?.name && (
                                                     <div>👨‍👩‍👧‍👦 {kid.parentInfo.name}</div>
@@ -408,7 +411,7 @@ const AddTeamPage = () => {
                                             value={formData.notes}
                                             onChange={(e) => handleInputChange('notes', e.target.value)}
                                             placeholder="Team strategy, special requirements, or any other important notes..."
-                                            className="form-textarea racing-textarea"
+                                            className="form-textarea"
                                             rows={4}
                                         />
                                     </div>
@@ -417,15 +420,15 @@ const AddTeamPage = () => {
                         </div>
 
                         {/* Racing Action Buttons */}
-                        <div className="form-actions racing-actions">
-                            <button type="button" onClick={handleCancel} className="btn-cancel">
+                        <div className="racing-actions">
+                            <button type="button" onClick={handleCancel} className="btn btn-cancel">
                                 <ArrowLeft className="btn-icon" size={18} />
                                 Cancel
                             </button>
                             <button
                                 type="submit"
                                 disabled={isSubmitting}
-                                className="btn-submit racing-submit"
+                                className="btn btn-submit racing-submit"
                             >
                                 {isSubmitting ? (
                                     <>

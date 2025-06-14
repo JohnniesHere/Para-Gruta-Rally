@@ -36,7 +36,7 @@ import './TeamsManagementPage.css';
 
 const TeamsManagementPage = () => {
     const navigate = useNavigate();
-    const { isDarkMode } = useTheme();
+    const { isDarkMode, appliedTheme } = useTheme();
     const { permissions, userRole, userData } = usePermissions();
 
     const [teams, setTeams] = useState([]);
@@ -200,7 +200,7 @@ const TeamsManagementPage = () => {
     if (error) {
         return (
             <Dashboard requiredRole={userRole}>
-                <div className={`teams-management-page ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
+                <div className={`teams-management-page ${appliedTheme}-mode`}>
                     <div className="error-container">
                         <h3>Error</h3>
                         <p>{error}</p>
@@ -216,7 +216,7 @@ const TeamsManagementPage = () => {
 
     return (
         <Dashboard requiredRole={userRole}>
-            <div className={`teams-management-page ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
+            <div className={`teams-management-page ${appliedTheme}-mode`}>
                 <h1><UsersGroup size={32} className="page-title-icon" /> Teams Management</h1>
 
                 <div className="teams-management-container">

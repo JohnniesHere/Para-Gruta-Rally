@@ -24,7 +24,7 @@ import {
 import './UserManagement.css';
 
 const UserManagementPage = () => {
-    const { isDarkMode } = useTheme();
+    const { isDarkMode, appliedTheme } = useTheme();
     const [users, setUsers] = useState([]);
     const [filteredUsers, setFilteredUsers] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -163,7 +163,7 @@ const UserManagementPage = () => {
 
     return (
         <Dashboard requiredRole="admin">
-            <div className={`user-management-page ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
+            <div className={`user-management-page ${appliedTheme}-mode`}>
                 <h1><Users size={32} className="page-title-icon" /> User Management</h1>
 
                 <div className="user-management-container">

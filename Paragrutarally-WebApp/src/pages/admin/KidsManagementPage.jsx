@@ -37,7 +37,7 @@ import './KidsManagementPage.css';
 
 const KidsManagementPage = () => {
     const navigate = useNavigate();
-    const { isDarkMode } = useTheme();
+    const { isDarkMode, appliedTheme } = useTheme();
     const { permissions, userRole, userData, user } = usePermissions();
 
     const [kids, setKids] = useState([]);
@@ -208,7 +208,7 @@ const KidsManagementPage = () => {
     if (error) {
         return (
             <Dashboard requiredRole={userRole}>
-                <div className={`kids-management-page ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
+                <div className={`kids-management-page ${appliedTheme}-mode`}>
                     <div className="error-container">
                         <h3>Error</h3>
                         <p>{error}</p>
@@ -224,7 +224,7 @@ const KidsManagementPage = () => {
 
     return (
         <Dashboard requiredRole={userRole}>
-            <div className={`kids-management-page ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
+            <div className={`kids-management-page ${appliedTheme}-mode`}>
                 <h1><Baby size={32} className="page-title-icon" /> Kids Management</h1>
 
                 <div className="kids-management-container">

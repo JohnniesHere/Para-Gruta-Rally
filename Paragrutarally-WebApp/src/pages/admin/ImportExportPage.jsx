@@ -5,7 +5,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 import './ImportExportPage.css';
 
 const ImportExportPage = () => {
-    const { isDarkMode } = useTheme(); // Added theme integration
+    const { isDarkMode, appliedTheme } = useTheme(); // Added theme integration
     const [selectedImportType, setSelectedImportType] = useState('users');
     const [selectedExportType, setSelectedExportType] = useState('users');
     const [importFile, setImportFile] = useState(null);
@@ -38,7 +38,7 @@ const ImportExportPage = () => {
 
     return (
         <Dashboard requiredRole="admin">
-            <div className={`import-export-page ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
+            <div className={`import-export-page ${appliedTheme}-mode`}>
                 <h1>Import/Export Data</h1>
 
                 <div className="content-section">

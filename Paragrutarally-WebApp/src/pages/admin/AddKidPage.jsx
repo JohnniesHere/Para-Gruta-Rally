@@ -1,4 +1,4 @@
-// src/pages/admin/AddKidPage.jsx - Fun Racing Theme Add Kid Form
+// src/pages/admin/AddKidPage.jsx - Updated for Global Theme System
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
@@ -30,7 +30,7 @@ import './AddKidPage.css';
 
 const AddKidPage = () => {
     const navigate = useNavigate();
-    const { isDarkMode } = useTheme();
+    const { isDarkMode, appliedTheme } = useTheme();
     const { permissions, userRole } = usePermissions();
 
     const [isLoading, setIsLoading] = useState(false);
@@ -214,7 +214,7 @@ const AddKidPage = () => {
     if (!permissions) {
         return (
             <Dashboard requiredRole={userRole}>
-                <div className={`add-kid-page ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
+                <div className={`admin-page add-kid-page ${appliedTheme}-mode`}>
                     <div className="loading-container">
                         <div className="loading-spinner"></div>
                         <p>Loading permissions...</p>
@@ -226,28 +226,31 @@ const AddKidPage = () => {
 
     return (
         <Dashboard requiredRole={userRole}>
-            <div className={`add-kid-page ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
-                {/* Racing Theme Header */}
-                <div className="racing-header">
-                    <div className="header-content">
-                        <button onClick={handleCancel} className="back-button">
-                            <ArrowLeft className="btn-icon" size={20} />
-                            Back to Kids
-                        </button>
-                        <div className="title-section">
-                            <h1>
-                                <Baby size={32} className="page-title-icon" />
-                                Add New Racing Star!
-                                <Sparkles size={24} className="sparkle-icon" />
-                            </h1>
-                            <p className="subtitle">Let's get this future champion on the track! 🏁</p>
+            <div className={`admin-page add-kid-page ${appliedTheme}-mode`}>
+                {/* Page Title - Outside container */}
+                <h1>
+                    <Baby size={32} className="page-title-icon" />
+                    Add New Racing Star!
+                    <Sparkles size={24} className="sparkle-icon" />
+                </h1>
+
+                {/* Main Container */}
+                <div className="admin-container add-kid-container">
+                    {/* Racing Theme Header */}
+                    <div className="racing-header">
+                        <div className="header-content">
+                            <button onClick={handleCancel} className="back-button">
+                                <ArrowLeft className="btn-icon" size={20} />
+                                Back to Kids
+                            </button>
+                            <div className="title-section">
+                                <p className="subtitle">Let's get this future champion on the track! 🏁</p>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div className="add-kid-container">
                     {errors.general && (
-                        <div className="error-alert">
+                        <div className="alert error-alert">
                             <AlertTriangle size={20} />
                             {errors.general}
                         </div>
@@ -385,7 +388,7 @@ const AddKidPage = () => {
                                         <select
                                             value={formData.parentInfo.parentId}
                                             onChange={(e) => handleInputChange('parentInfo.parentId', e.target.value)}
-                                            className="form-select racing-select"
+                                            className="form-select"
                                         >
                                             <option value="">🔗 Choose Parent Account (Optional)</option>
                                             {parents.map(parent => (
@@ -438,7 +441,7 @@ const AddKidPage = () => {
                                         <select
                                             value={formData.teamId}
                                             onChange={(e) => handleInputChange('teamId', e.target.value)}
-                                            className="form-select racing-select"
+                                            className="form-select"
                                         >
                                             <option value="">🚫 No Team Assigned (Yet!)</option>
                                             {teams.map(team => (
@@ -459,7 +462,7 @@ const AddKidPage = () => {
                                         <select
                                             value={formData.instructorId}
                                             onChange={(e) => handleInputChange('instructorId', e.target.value)}
-                                            className="form-select racing-select"
+                                            className="form-select"
                                         >
                                             <option value="">👨‍🏫 No Instructor Assigned</option>
                                             {instructors.map(instructor => (
@@ -489,7 +492,7 @@ const AddKidPage = () => {
                                         <select
                                             value={formData.signedFormStatus}
                                             onChange={(e) => handleInputChange('signedFormStatus', e.target.value)}
-                                            className="form-select racing-select"
+                                            className="form-select"
                                         >
                                             <option value="Pending">⏳ Pending - Getting Ready</option>
                                             <option value="Completed">✅ Completed - Ready to Race!</option>
@@ -535,15 +538,15 @@ const AddKidPage = () => {
                         </div>
 
                         {/* Racing Action Buttons */}
-                        <div className="form-actions racing-actions">
-                            <button type="button" onClick={handleCancel} className="btn-cancel">
+                        <div className="racing-actions">
+                            <button type="button" onClick={handleCancel} className="btn btn-cancel">
                                 <ArrowLeft className="btn-icon" size={18} />
                                 Cancel
                             </button>
                             <button
                                 type="submit"
                                 disabled={isSubmitting}
-                                className="btn-submit racing-submit"
+                                className="btn btn-submit racing-submit"
                             >
                                 {isSubmitting ? (
                                     <>
