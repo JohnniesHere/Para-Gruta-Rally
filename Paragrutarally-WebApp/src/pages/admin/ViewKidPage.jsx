@@ -4,7 +4,7 @@ import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
 import ProtectedField from '../../hooks/ProtectedField';
 import { useTheme } from '../../contexts/ThemeContext';
-import { usePermissions } from '../../hooks/usePermissions';
+import { usePermissions } from '../../hooks/usePermissions.jsx';
 import { getKidById, deleteKid } from '../../services/kidService';
 import { getTeamById } from '../../services/teamService';
 import {

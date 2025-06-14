@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
 import { useTheme } from '../../contexts/ThemeContext';
-import { usePermissions } from '../../hooks/usePermissions';
+import { usePermissions } from '../../hooks/usePermissions.jsx';
 import { getTeamById, updateTeam } from '../../services/teamService';
 import { getAllKids } from '../../services/kidService';
 import { getDocs, collection, query, where } from 'firebase/firestore';

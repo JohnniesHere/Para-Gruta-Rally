@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
 import { useTheme } from '../../contexts/ThemeContext';
-import { usePermissions } from '../../hooks/usePermissions';
+import { usePermissions } from '../../hooks/usePermissions.jsx';
 import { getTeamWithDetails, deleteTeam } from '../../services/teamService';
 import {
     IconUsers as UsersGroup,

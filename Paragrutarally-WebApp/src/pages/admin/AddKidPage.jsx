@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
 import ProtectedField from '../../hooks/ProtectedField';
 import { useTheme } from '../../contexts/ThemeContext';
-import { usePermissions } from '../../hooks/usePermissions';
+import { usePermissions } from '../../hooks/usePermissions.jsx';
 import { addKid, getNextParticipantNumber } from '../../services/kidService';
 import { getAllTeams } from '../../services/teamService';
 import { getDocs, collection, query, where } from 'firebase/firestore';

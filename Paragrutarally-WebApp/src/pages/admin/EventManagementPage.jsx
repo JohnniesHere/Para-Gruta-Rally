@@ -1,12 +1,35 @@
 // src/pages/admin/EventManagementPage.jsx
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
 import { useTheme } from '../../contexts/ThemeContext.jsx';
+import { usePermissions } from '../../hooks/usePermissions';
+import {
+    IconPlus as Plus,
+    IconRefresh as RefreshCw,
+    IconDownload as Download,
+    IconFilter as Filter,
+    IconSearch as Search,
+    IconEye as Eye,
+    IconEdit as Edit,
+    IconTrash as Trash2,
+    IconCalendarEvent as Calendar,
+    IconEraser as Eraser,
+    IconFile as FileSpreadsheet,
+    IconX as X,
+    IconClock as Clock,
+    IconCheck as Check,
+    IconAlertTriangle as AlertTriangle,
+    IconTrophy as Trophy,
+    IconMapPin as MapPin,
+    IconUsers as Users
+} from '@tabler/icons-react';
 import './EventManagementPage.css';
 
 const EventManagementPage = () => {
-    const { isDarkMode, appliedTheme } = useTheme(); // Fixed: was isDark, should be isDarkMode
+    const navigate = useNavigate();
+    const { isDarkMode, appliedTheme } = useTheme();
+    const { permissions } = usePermissions();
 
     // State for handling events and pagination
     const [events, setEvents] = useState([]);
@@ -17,6 +40,7 @@ const EventManagementPage = () => {
     const [locationFilter, setLocationFilter] = useState('all');
     const [isLoading, setIsLoading] = useState(true);
     const [selectedEvent, setSelectedEvent] = useState(null);
+    const [error, setError] = useState(null);
 
     // Pagination settings
     const eventsPerPage = 4;
@@ -107,18 +131,15 @@ const EventManagementPage = () => {
     // Filter events based on search term and filters
     useEffect(() => {
         const results = events.filter(event => {
-            // Match search term
             const matchesSearch =
                 event.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 event.location.toLowerCase().includes(searchTerm.toLowerCase());
 
-            // Match status filter
             const matchesStatus =
                 statusFilter === 'all' ||
                 (statusFilter === 'upcoming' && event.status === 'upcoming') ||
-                (statusFilter === 'past' && event.status === 'completed');
+                (statusFilter === 'completed' && event.status === 'completed');
 
-            // Match location filter
             const matchesLocation =
                 locationFilter === 'all' ||
                 event.location.toLowerCase().includes(locationFilter.toLowerCase());
@@ -127,7 +148,6 @@ const EventManagementPage = () => {
         });
 
         setFilteredEvents(results);
-        // Reset to first page when filters change
         setCurrentPage(1);
     }, [searchTerm, statusFilter, locationFilter, events]);
 
@@ -144,15 +164,16 @@ const EventManagementPage = () => {
         setCurrentPage(pageNumber);
     };
 
-    // Handle search
-    const handleSearch = (e) => {
-        e.preventDefault();
-        // The search is already handled by the useEffect above
-    };
-
     // Handle search input change
     const handleSearchChange = (e) => {
         setSearchTerm(e.target.value);
+    };
+
+    // Clear all filters
+    const handleClearFilters = () => {
+        setSearchTerm('');
+        setStatusFilter('all');
+        setLocationFilter('all');
     };
 
     // Handle view event
@@ -165,95 +186,231 @@ const EventManagementPage = () => {
         setSelectedEvent(null);
     };
 
+    // Handle create event
+    const handleCreateEvent = () => {
+        navigate('/admin/events/create');
+    };
+
+    // Handle edit event
+    const handleEditEvent = (eventId) => {
+        navigate(`/admin/events/edit/${eventId}`);
+    };
+
+    // Handle delete event
+    const handleDeleteEvent = (eventId) => {
+        if (window.confirm('Are you sure you want to delete this event?')) {
+            setEvents(events.filter(event => event.id !== eventId));
+        }
+    };
+
     // Generate page numbers
     const pageNumbers = [];
     for (let i = 1; i <= totalPages; i++) {
         pageNumbers.push(i);
     }
 
+    // Calculate stats
+    const stats = {
+        totalEvents: events.length,
+        upcomingEvents: events.filter(e => e.status === 'upcoming').length,
+        completedEvents: events.filter(e => e.status === 'completed').length,
+        totalParticipants: events.reduce((sum, e) => sum + e.participants, 0)
+    };
+
+    if (error) {
+        return (
+            <Dashboard requiredRole="admin">
+                <div className={`event-management-page ${appliedTheme}-mode`}>
+                    <div className="error-container">
+                        <h3>Error</h3>
+                        <p>{error}</p>
+                        <button onClick={() => window.location.reload()} className="btn-primary">
+                            <RefreshCw className="btn-icon" size={18} />
+                            Try Again
+                        </button>
+                    </div>
+                </div>
+            </Dashboard>
+        );
+    }
+
     return (
         <Dashboard requiredRole="admin">
-            <div className={`event-management ${appliedTheme}-mode`}>
-                {/* FIXED: Title moved outside the container like UserManagement */}
-                <h1>Event Management</h1>
+            <div className={`event-management-page ${appliedTheme}-mode`}>
+                <h1><Calendar size={32} className="page-title-icon" /> Event Management</h1>
 
                 <div className="event-management-container">
+                    {/* Header with Actions */}
                     <div className="page-header">
-                        <Link to="/admin/events/create" className="create-button">
-                            Create New Event
-                        </Link>
+                        <button className="btn-primary" onClick={handleCreateEvent}>
+                            <Plus className="btn-icon" size={18} />
+                            Add New Event
+                        </button>
+
+                        <div className="header-actions">
+                            <button className="btn-secondary" onClick={() => window.location.reload()}>
+                                <RefreshCw className="btn-icon" size={18} />
+                                Refresh
+                            </button>
+                            <button className="btn-export">
+                                <Download className="btn-icon" size={18} />
+                                Export Events
+                            </button>
+                        </div>
                     </div>
 
-                    <div className="event-actions">
-                        <div className="event-search">
-                            <input
-                                type="text"
-                                placeholder="Search events..."
-                                className="search-input"
-                                value={searchTerm}
-                                onChange={handleSearchChange}
-                            />
-                            <button className="search-button" onClick={handleSearch}>Search</button>
+                    {/* Stats Cards */}
+                    <div className="stats-grid">
+                        <div className="stat-card total">
+                            <Calendar className="stat-icon" size={40} />
+                            <div className="stat-content">
+                                <h3>Total Events</h3>
+                                <div className="stat-value">{stats.totalEvents}</div>
+                            </div>
                         </div>
 
-                        <div className="event-filters">
+                        <div className="stat-card upcoming">
+                            <Trophy className="stat-icon" size={40} />
+                            <div className="stat-content">
+                                <h3>Upcoming Events</h3>
+                                <div className="stat-value">{stats.upcomingEvents}</div>
+                                <div className="stat-subtitle">Ready to race</div>
+                            </div>
+                        </div>
+
+                        <div className="stat-card completed">
+                            <Check className="stat-icon" size={40} />
+                            <div className="stat-content">
+                                <h3>Completed Events</h3>
+                                <div className="stat-value">{stats.completedEvents}</div>
+                            </div>
+                        </div>
+
+                        <div className="stat-card participants">
+                            <Users className="stat-icon" size={40} />
+                            <div className="stat-content">
+                                <h3>Total Participants</h3>
+                                <div className="stat-value">{stats.totalParticipants}</div>
+                                <div className="stat-subtitle">Growing fast</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Search and Filters */}
+                    <div className="search-filter-section">
+                        <div className="search-container">
+                            <div className="search-input-wrapper">
+                                <Search className="search-icon" size={18} />
+                                <input
+                                    type="text"
+                                    placeholder="Search by event name or location..."
+                                    className="search-input"
+                                    value={searchTerm}
+                                    onChange={handleSearchChange}
+                                />
+                                {searchTerm && (
+                                    <button className="clear-search" onClick={() => setSearchTerm('')}>
+                                        <X size={14} />
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="filter-container">
+                            <label className="filter-label">
+                                <Filter className="filter-icon" size={16} />
+                                Status
+                            </label>
                             <select
                                 className="filter-select"
                                 value={statusFilter}
                                 onChange={(e) => setStatusFilter(e.target.value)}
                             >
-                                <option value="all">All Events</option>
-                                <option value="upcoming">Upcoming Events</option>
-                                <option value="past">Past Events</option>
+                                <option value="all">🌈 All Events</option>
+                                <option value="upcoming">🏁 Upcoming</option>
+                                <option value="completed">✅ Completed</option>
                             </select>
+                        </div>
 
+                        <div className="filter-container">
+                            <label className="filter-label">
+                                <MapPin className="filter-icon" size={16} />
+                                Location
+                            </label>
                             <select
                                 className="filter-select"
                                 value={locationFilter}
                                 onChange={(e) => setLocationFilter(e.target.value)}
                             >
-                                <option value="all">All Locations</option>
-                                <option value="jerusalem">Jerusalem</option>
-                                <option value="tel-aviv">Tel Aviv</option>
-                                <option value="haifa">Haifa</option>
-                                <option value="eilat">Eilat</option>
+                                <option value="all">📍 All Locations</option>
+                                <option value="jerusalem">🏛️ Jerusalem</option>
+                                <option value="tel-aviv">🏖️ Tel Aviv</option>
+                                <option value="haifa">⛰️ Haifa</option>
+                                <option value="eilat">🌊 Eilat</option>
                             </select>
                         </div>
+
+                        <button className="btn-clear" onClick={handleClearFilters}>
+                            <Eraser className="btn-icon" size={18} />
+                            Clear All
+                        </button>
                     </div>
 
-                    <div className="events-table-container">
-                        <table className="events-table">
+                    {/* Results Info */}
+                    <div className="results-info">
+                        <FileSpreadsheet className="results-icon" size={18} />
+                        Showing {filteredEvents.length} of {events.length} events
+                        {statusFilter !== 'all' && <span className="filter-applied"> • Status: {statusFilter}</span>}
+                        {locationFilter !== 'all' && <span className="filter-applied"> • Location: {locationFilter}</span>}
+                        {searchTerm && <span className="search-applied"> • Search: "{searchTerm}"</span>}
+                    </div>
+
+                    {/* Events Table */}
+                    <div className="table-container">
+                        <table className="data-table">
                             <thead>
                             <tr>
-                                <th>Event Name</th>
-                                <th>Date</th>
-                                <th>Location</th>
-                                <th>Participants</th>
-                                <th>Status</th>
-                                <th>Actions</th>
+                                <th><Calendar size={16} style={{ marginRight: '8px' }} />Event Info</th>
+                                <th>📅 Date</th>
+                                <th><MapPin size={16} style={{ marginRight: '8px' }} />Location</th>
+                                <th>👥 Participants</th>
+                                <th>📊 Status</th>
+                                <th>⚡ Actions</th>
                             </tr>
                             </thead>
                             <tbody>
                             {isLoading ? (
                                 <tr>
-                                    <td colSpan="6" style={{ justifyContent: 'center' }}>Loading events...</td>
+                                    <td colSpan="6" className="loading-cell">
+                                        <div className="loading-content">
+                                            <Clock className="loading-spinner" size={30} />
+                                            Loading events...
+                                        </div>
+                                    </td>
                                 </tr>
-                            ) : currentEvents.length === 0 ? (
+                            ) : filteredEvents.length === 0 ? (
                                 <tr>
-                                    <td colSpan="6" style={{ justifyContent: 'center' }}>No events found</td>
+                                    <td colSpan="6">
+                                        <div className="empty-state">
+                                            <Calendar className="empty-icon" size={60} />
+                                            <h3>No events found</h3>
+                                            <p>Try adjusting your search or filters</p>
+                                            <button className="btn-primary" style={{ marginTop: '15px' }} onClick={handleCreateEvent}>
+                                                <Plus className="btn-icon" size={18} />
+                                                Create First Event
+                                            </button>
+                                        </div>
+                                    </td>
                                 </tr>
                             ) : (
                                 currentEvents.map(event => (
                                     <tr key={event.id}>
                                         <td>
-                                            <div
-                                                className="event-name-hover"
-                                                title={event.description}
-                                            >
-                                                {event.name}
-                                                <div className="event-preview-card">
-                                                    <img src={event.image} alt={event.name} />
-                                                    <p>{event.description}</p>
+                                            <div className="event-info">
+                                                <img src={event.image} alt={event.name} className="event-image" />
+                                                <div className="event-details">
+                                                    <div className="event-name">{event.name}</div>
+                                                    <div className="event-description">{event.description.substring(0, 50)}...</div>
                                                 </div>
                                             </div>
                                         </td>
@@ -261,19 +418,36 @@ const EventManagementPage = () => {
                                         <td>{event.location}</td>
                                         <td>{event.participants}</td>
                                         <td>
-                                            <span className={`status-badge ${event.status}`}>
+                                            <span className={`status-badge status-${event.status}`}>
+                                                {event.status === 'upcoming' && <Trophy size={14} style={{ marginRight: '4px' }} />}
+                                                {event.status === 'completed' && <Check size={14} style={{ marginRight: '4px' }} />}
                                                 {event.status.charAt(0).toUpperCase() + event.status.slice(1)}
                                             </span>
                                         </td>
-                                        <td className="action-buttons">
-                                            <button className="edit-button">Edit</button>
-                                            <button
-                                                className="view-button"
-                                                onClick={() => handleViewEvent(event)}
-                                            >
-                                                View
-                                            </button>
-                                            <button className="delete-button">Delete</button>
+                                        <td>
+                                            <div className="action-buttons-enhanced">
+                                                <button
+                                                    className="btn-action view"
+                                                    onClick={() => handleViewEvent(event)}
+                                                    title="View Details"
+                                                >
+                                                    <Eye size={16} />
+                                                </button>
+                                                <button
+                                                    className="btn-action edit"
+                                                    onClick={() => handleEditEvent(event.id)}
+                                                    title="Edit Event"
+                                                >
+                                                    <Edit size={16} />
+                                                </button>
+                                                <button
+                                                    className="btn-action delete"
+                                                    onClick={() => handleDeleteEvent(event.id)}
+                                                    title="Delete Event"
+                                                >
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))
@@ -282,7 +456,8 @@ const EventManagementPage = () => {
                         </table>
                     </div>
 
-                    {totalPages > 0 && (
+                    {/* Pagination */}
+                    {totalPages > 1 && (
                         <div className="pagination">
                             <button
                                 className="pagination-button"
@@ -317,18 +492,18 @@ const EventManagementPage = () => {
 
                 {/* Event Details Modal */}
                 {selectedEvent && (
-                    <div className="event-modal-overlay" onClick={handleCloseEventDetails}>
-                        <div className="event-modal" onClick={(e) => e.stopPropagation()}>
-                            <div className="event-modal-header">
+                    <div className="modal-overlay" onClick={handleCloseEventDetails}>
+                        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                            <div className="modal-header">
                                 <h2>{selectedEvent.name}</h2>
                                 <button
-                                    className="close-modal"
+                                    className="modal-close"
                                     onClick={handleCloseEventDetails}
                                 >
                                     ×
                                 </button>
                             </div>
-                            <div className="event-modal-content">
+                            <div className="modal-body">
                                 <img
                                     src={selectedEvent.image}
                                     alt={selectedEvent.name}
@@ -336,17 +511,20 @@ const EventManagementPage = () => {
                                 />
                                 <div className="event-modal-details">
                                     <div className="event-detail-item">
-                                        <strong>Date:</strong> {selectedEvent.date}
+                                        <strong>Date:</strong>
+                                        <p>{selectedEvent.date}</p>
                                     </div>
                                     <div className="event-detail-item">
-                                        <strong>Location:</strong> {selectedEvent.location}
+                                        <strong>Location:</strong>
+                                        <p>{selectedEvent.location}</p>
                                     </div>
                                     <div className="event-detail-item">
-                                        <strong>Participants:</strong> {selectedEvent.participants}
+                                        <strong>Participants:</strong>
+                                        <p>{selectedEvent.participants}</p>
                                     </div>
                                     <div className="event-detail-item">
                                         <strong>Status:</strong>
-                                        <span className={`status-badge ${selectedEvent.status}`}>
+                                        <span className={`status-badge status-${selectedEvent.status}`}>
                                             {selectedEvent.status.charAt(0).toUpperCase() + selectedEvent.status.slice(1)}
                                         </span>
                                     </div>

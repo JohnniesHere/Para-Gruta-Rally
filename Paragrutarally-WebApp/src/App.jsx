@@ -11,6 +11,8 @@ import ErrorBoundary from './components/layout/ErrorBoundary';
 import Login from './components/auth/Login';
 import AdminDashboardPage from './pages/admin/AdminDashboardPage';
 import EventManagementPage from './pages/admin/EventManagementPage';
+import CreateEventPage from './pages/admin/CreateEventPage';
+import ViewEventsPage from './pages/admin/ViewEventsPage';
 import UserManagementPage from './pages/admin/UserManagementPage';
 import FormsManagementPage from './pages/admin/FormsManagementPage';
 import BackupSyncPage from './pages/admin/BackupSyncPage';
@@ -103,6 +105,43 @@ function App() {
                                             element={
                                                 <ProtectedRoute requiredRole="admin">
                                                     <EventManagementPage />
+                                                </ProtectedRoute>
+                                            }
+                                        />
+
+                                        {/* NEW: Event management routes */}
+                                        <Route
+                                            path="/admin/events/create"
+                                            element={
+                                                <ProtectedRoute requiredRole="admin">
+                                                    <CreateEventPage />
+                                                </ProtectedRoute>
+                                            }
+                                        />
+
+                                        <Route
+                                            path="/admin/events/view"
+                                            element={
+                                                <ProtectedRoute requiredRole="admin">
+                                                    <ViewEventsPage />
+                                                </ProtectedRoute>
+                                            }
+                                        />
+
+                                        <Route
+                                            path="/admin/events/edit/:id"
+                                            element={
+                                                <ProtectedRoute requiredRole="admin">
+                                                    <CreateEventPage />
+                                                </ProtectedRoute>
+                                            }
+                                        />
+
+                                        <Route
+                                            path="/admin/events/view/:id"
+                                            element={
+                                                <ProtectedRoute requiredRole="admin">
+                                                    <ViewEventsPage />
                                                 </ProtectedRoute>
                                             }
                                         />

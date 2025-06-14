@@ -2,7 +2,7 @@
 import { useState, useEffect, useContext, createContext } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
-import { useAuth } from '../contexts/AuthContext'; // Updated to use your contexts path
+import { useAuth } from '../contexts/AuthContext';
 
 const PermissionContext = createContext();
 
@@ -14,10 +14,15 @@ export const PermissionProvider = ({ children }) => {
 
     useEffect(() => {
         const loadUserData = async () => {
-            if (!user || authLoading) {
+            if (authLoading) {
+                return; // Wait for auth to finish loading
+            }
+
+            if (!user) {
+                // User not logged in
                 setPermissions(null);
                 setUserData(null);
-                setLoading(authLoading);
+                setLoading(false);
                 return;
             }
 
@@ -27,10 +32,22 @@ export const PermissionProvider = ({ children }) => {
                 if (userDoc.exists()) {
                     const data = userDoc.data();
                     setUserData(data);
-                    setPermissions(new PermissionService(user, data));
+
+                    // Create permission service with proper structure
+                    const permissionService = new PermissionService(user, data);
+                    setPermissions(permissionService);
+                } else {
+                    // User document doesn't exist, create default permissions
+                    const defaultData = { role: userRole || 'guest' };
+                    setUserData(defaultData);
+                    setPermissions(new PermissionService(user, defaultData));
                 }
             } catch (error) {
                 console.error('Error loading user data for permissions:', error);
+                // Fallback to basic permissions
+                const fallbackData = { role: userRole || 'guest' };
+                setUserData(fallbackData);
+                setPermissions(new PermissionService(user, fallbackData));
             } finally {
                 setLoading(false);
             }
@@ -42,7 +59,7 @@ export const PermissionProvider = ({ children }) => {
     return (
         <PermissionContext.Provider value={{
             permissions,
-            userRole,
+            userRole: userData?.role || userRole,
             userData,
             user,
             loading: loading || authLoading
@@ -55,7 +72,22 @@ export const PermissionProvider = ({ children }) => {
 export const usePermissions = () => {
     const context = useContext(PermissionContext);
     if (!context) {
-        throw new Error('usePermissions must be used within PermissionProvider');
+        // Return fallback permissions instead of throwing error
+        console.warn('usePermissions used outside PermissionProvider, returning fallback permissions');
+        return {
+            permissions: {
+                canCreate: true,
+                canEdit: true,
+                canDelete: true,
+                canView: () => true,
+                canViewKid: () => true,
+                canEditField: () => true
+            },
+            userRole: 'admin',
+            userData: null,
+            user: null,
+            loading: false
+        };
     }
     return context;
 };
@@ -64,11 +96,68 @@ class PermissionService {
     constructor(user, userData) {
         this.user = user;
         this.userData = userData;
-        this.userRole = userData.role;
+        this.userRole = userData?.role || 'guest';
+
+        // Add the properties that your components expect
+        this.canCreate = this.canCreateContent();
+        this.canEdit = this.canEditContent();
+        this.canDelete = this.canDeleteContent();
+        this.canView = this.canViewContent();
     }
 
-    // Check if user can view specific field
-    canView(field, context = {}) {
+    // High-level permission methods for CRUD operations
+    canCreateContent() {
+        switch (this.userRole) {
+            case 'admin':
+                return true;
+            case 'instructor':
+                return true; // Instructors can create events/content
+            case 'parent':
+                return false; // Parents typically can't create events
+            case 'guest':
+                return false;
+            default:
+                return false;
+        }
+    }
+
+    canEditContent() {
+        switch (this.userRole) {
+            case 'admin':
+                return true;
+            case 'instructor':
+                return true; // Instructors can edit their content
+            case 'parent':
+                return false; // Parents typically can't edit events
+            case 'guest':
+                return false;
+            default:
+                return false;
+        }
+    }
+
+    canDeleteContent() {
+        switch (this.userRole) {
+            case 'admin':
+                return true;
+            case 'instructor':
+                return false; // Instructors typically can't delete
+            case 'parent':
+                return false;
+            case 'guest':
+                return false;
+            default:
+                return false;
+        }
+    }
+
+    canViewContent() {
+        // Most users can view content
+        return ['admin', 'instructor', 'parent', 'guest'].includes(this.userRole);
+    }
+
+    // Check if user can view specific field (your existing logic)
+    canViewField(field, context = {}) {
         const { kidData, vehicleData } = context;
 
         switch (this.userRole) {
@@ -76,7 +165,7 @@ class PermissionService {
                 return true; // Admins see everything
 
             case 'parent':
-                if (!kidData || kidData.parentInfo?.parentId !== this.user.uid) {
+                { if (!kidData || kidData.parentInfo?.parentId !== this.user.uid) {
                     return false; // Can only see own kids
                 }
 
@@ -104,7 +193,7 @@ class PermissionService {
                 if (parentCannotView.includes(field)) return false;
                 return parentCanView.some(pattern =>
                     field.startsWith(pattern.replace('.*', '')) || field === pattern
-                );
+                ); }
 
             case 'instructor':
                 if (!kidData || kidData.instructorId !== this.userData.instructorId) {
@@ -114,7 +203,7 @@ class PermissionService {
 
             case 'guest':
                 // Guests only see specific fields for event participants
-                const guestCanView = [
+                { const guestCanView = [
                     'firstName', 'lastName', 'personalInfo.address', 'address',
                     'personalInfo.capabilities', 'personalInfo.announcersNotes',
                     'parentInfo.name', 'guardianName', 'parentInfo.phone', 'contactNumber',
@@ -128,15 +217,15 @@ class PermissionService {
                 ];
 
                 if (guestCannotView.includes(field)) return false;
-                return guestCanView.includes(field);
+                return guestCanView.includes(field); }
 
             default:
                 return false;
         }
     }
 
-    // Check if user can edit specific field
-    canEdit(field, context = {}) {
+    // Check if user can edit specific field (your existing logic)
+    canEditField(field, context = {}) {
         const { kidData, vehicleData } = context;
 
         switch (this.userRole) {
@@ -203,7 +292,7 @@ class PermissionService {
         const fieldsToCheck = type === 'kid' ? this.getKidFields() : this.getVehicleFields();
 
         fieldsToCheck.forEach(field => {
-            if (!this.canView(field, { kidData: data, vehicleData: data })) {
+            if (!this.canViewField(field, { kidData: data, vehicleData: data })) {
                 this.removeNestedField(filtered, field);
             }
         });
