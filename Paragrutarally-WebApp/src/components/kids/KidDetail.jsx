@@ -1,509 +1,497 @@
-// src/components/kids/KidForm.js
-
+// src/components/kids/KidDetail.jsx - READ-ONLY VIEW COMPONENT
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { doc, getDoc, setDoc, collection, addDoc, serverTimestamp, getDocs } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../firebase/config';
-import { usePermissions } from '../../hooks/usePermissions.jsx';
-import ProtectedField from '../../hooks/ProtectedField';
+import { usePermissions } from '../../hooks/usePermissions.jsx'; // FIXED: Removed extension
+import ProtectedField from '../../hooks/protectedField.jsx'; // FIXED: Correct path
+import {
+    IconArrowLeft as ArrowLeft,
+    IconEdit as Edit,
+    IconUserCircle as UserCircle,
+    IconMapPin as MapPin,
+    IconUsers as Users,
+    IconClock as Clock
+} from '@tabler/icons-react';
 
-function KidForm() {
+function KidDetailView() {
     const { kidId } = useParams();
     const navigate = useNavigate();
-    const isEditMode = !!kidId;
-    const { userRole, permissions } = usePermissions();
+    const { userRole, permissions, loading: permissionsLoading, error: permissionsError } = usePermissions();
 
-    // Form state - simplified structure
-    const [formData, setFormData] = useState({
-        firstName: '',
-        lastName: '',
-        age: '',
-        gender: '',
-        teamId: '',
-        personalInfo: {
-            dateOfBirth: '',
-            address: '',
-            capabilities: '',
-            announcersNotes: '',
-            photo: ''
-        },
-        parentInfo: {
-            name: '',
-            email: '',
-            phone: '',
-            grandparentsInfo: {
-                names: '',
-                phone: ''
-            }
-        },
-        comments: {
-            parent: '',
-            organization: '',
-            teamLeader: '',
-            familyContact: ''
-        },
-        emergencyContact: '',
-        emergencyPhone: '',
-        notes: '',
-        participantNumber: '',
-        signedDeclaration: false
-    });
-
-    const [loading, setLoading] = useState(false);
-    const [fetchingData, setFetchingData] = useState(isEditMode);
+    const [kidData, setKidData] = useState(null);
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [teams, setTeams] = useState([]);
 
-    // Fetch data effect
     useEffect(() => {
-        const fetchData = async () => {
-            if (!permissions) return;
+        const fetchKidData = async () => {
+            // Wait for permissions to load
+            if (permissionsLoading) {
+                console.log('⏳ Waiting for permissions...');
+                return;
+            }
+
+            if (!permissions) {
+                console.log('❌ No permissions available');
+                setError('Permissions not available');
+                setLoading(false);
+                return;
+            }
 
             try {
-                // Fetch teams
-                const teamsSnapshot = await getDocs(collection(db, 'teams'));
-                const teamsData = teamsSnapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                }));
-                setTeams(teamsData);
+                console.log('🔄 Fetching kid details for:', kidId);
+                const kidDoc = await getDoc(doc(db, 'kids', kidId));
 
-                // If editing, fetch kid data
-                if (isEditMode) {
-                    const kidDoc = await getDoc(doc(db, 'kids', kidId));
-                    if (kidDoc.exists()) {
-                        const kidData = kidDoc.data();
+                if (kidDoc.exists()) {
+                    const data = kidDoc.data();
+                    console.log('📄 Kid data found:', data);
 
-                        // Check permissions
-                        if (!permissions?.canViewKid(kidData) && userRole !== 'admin') {
-                            setError('Access denied: You cannot edit this kid\'s information');
-                            return;
-                        }
-
-                        // Map existing data to form structure
-                        setFormData({
-                            firstName: kidData.firstName || '',
-                            lastName: kidData.lastName || '',
-                            age: kidData.age ? kidData.age.toString() : '',
-                            gender: kidData.gender || '',
-                            teamId: kidData.teamId || '',
-                            personalInfo: {
-                                dateOfBirth: kidData.personalInfo?.dateOfBirth || kidData.dateOfBirth || '',
-                                address: kidData.personalInfo?.address || kidData.address || '',
-                                capabilities: kidData.personalInfo?.capabilities || '',
-                                announcersNotes: kidData.personalInfo?.announcersNotes || '',
-                                photo: kidData.personalInfo?.photo || ''
-                            },
-                            parentInfo: {
-                                name: kidData.parentInfo?.name || kidData.guardianName || '',
-                                email: kidData.parentInfo?.email || kidData.email || '',
-                                phone: kidData.parentInfo?.phone || kidData.contactNumber || '',
-                                grandparentsInfo: {
-                                    names: kidData.parentInfo?.grandparentsInfo?.names || '',
-                                    phone: kidData.parentInfo?.grandparentsInfo?.phone || ''
-                                }
-                            },
-                            comments: {
-                                parent: kidData.comments?.parent || '',
-                                organization: kidData.comments?.organization || '',
-                                teamLeader: kidData.comments?.teamLeader || '',
-                                familyContact: kidData.comments?.familyContact || ''
-                            },
-                            emergencyContact: kidData.emergencyContact || '',
-                            emergencyPhone: kidData.emergencyPhone || '',
-                            notes: kidData.notes || '',
-                            participantNumber: kidData.participantNumber || '',
-                            signedDeclaration: kidData.signedDeclaration || false
-                        });
-                    } else {
-                        setError('Kid not found');
+                    // Check if user can view this kid
+                    if (!permissions.canViewKid(data)) {
+                        setError('Access denied: You cannot view this kid\'s information');
+                        setLoading(false);
+                        return;
                     }
+
+                    setKidData({ id: kidDoc.id, ...data });
+                    console.log('✅ Kid data set successfully');
+                } else {
+                    setError('Kid not found');
                 }
             } catch (err) {
-                console.error('Error fetching data:', err);
-                setError('Failed to load data. Please try again later.');
+                console.error('💥 Error fetching kid:', err);
+                setError('Failed to load kid details. Please try again later.');
             } finally {
-                setFetchingData(false);
+                setLoading(false);
             }
         };
 
-        fetchData(); // No need to await here since we handle errors inside
-    }, [kidId, isEditMode, permissions, userRole]);
+        fetchKidData();
+    }, [kidId, permissions, permissionsLoading]);
 
-    // Simple field update handlers
-    const updateField = (field, value) => {
-        setFormData(prev => ({ ...prev, [field]: value }));
+    const calculateAge = (dateOfBirth) => {
+        if (!dateOfBirth) return 'N/A';
+        const today = new Date();
+        const birthDate = new Date(dateOfBirth);
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+        }
+
+        return age.toString();
     };
 
-    const updateNestedField = (parent, field, value) => {
-        setFormData(prev => ({
-            ...prev,
-            [parent]: { ...prev[parent], [field]: value }
-        }));
-    };
+    const canEdit = () => {
+        if (!permissions || !kidData) return false;
 
-    const updateDoubleNestedField = (parent, child, field, value) => {
-        setFormData(prev => ({
-            ...prev,
-            [parent]: {
-                ...prev[parent],
-                [child]: { ...prev[parent][child], [field]: value }
-            }
-        }));
-    };
-
-    // Form submission
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        setError('');
-
-        try {
-            if (!formData.firstName || !formData.lastName) {
-                throw new Error('First name and last name are required');
-            }
-
-            const processedData = {
-                ...formData,
-                age: formData.age ? parseInt(formData.age, 10) : null,
-                updatedAt: serverTimestamp(),
-                parentInfo: {
-                    ...formData.parentInfo,
-                    parentId: formData.parentInfo.parentId || ''
-                }
-            };
-
-            if (isEditMode) {
-                await setDoc(doc(db, 'kids', kidId), processedData, { merge: true });
-            } else {
-                processedData.createdAt = serverTimestamp();
-                await addDoc(collection(db, 'kids'), processedData);
-            }
-
-            navigate('/admin/kids');
-        } catch (err) {
-            console.error('Error saving kid:', err);
-            setError(err.message || 'Failed to save. Please try again.');
-        } finally {
-            setLoading(false);
+        // Check if user can edit this specific kid
+        switch (userRole) {
+            case 'admin':
+                return true;
+            case 'instructor':
+                return kidData.instructorId === permissions.userData?.instructorId;
+            case 'parent':
+                return kidData.parentInfo?.parentId === permissions.user?.uid;
+            default:
+                return false;
         }
     };
 
-    if (fetchingData) {
+    // Show permissions loading
+    if (permissionsLoading) {
         return (
-            <div className="flex justify-center items-center h-96">
-                <svg className="animate-spin h-8 w-8 text-indigo-500" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                </svg>
-                <span className="text-gray-600 ml-3">Loading...</span>
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                    <Clock className="animate-spin h-8 w-8 text-indigo-500 mx-auto mb-4" />
+                    <p className="text-gray-600">Loading permissions...</p>
+                </div>
             </div>
         );
     }
 
+    // Show permissions error
+    if (permissionsError) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md">
+                    <h3 className="text-lg font-medium text-red-800 mb-2">Permission Error</h3>
+                    <p className="text-red-700 mb-4">{permissionsError}</p>
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="bg-red-100 hover:bg-red-200 px-4 py-2 rounded text-sm font-medium"
+                    >
+                        Reload Page
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    // Show loading state
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                    <Clock className="animate-spin h-8 w-8 text-indigo-500 mx-auto mb-4" />
+                    <p className="text-gray-600">Loading kid details...</p>
+                </div>
+            </div>
+        );
+    }
+
+    // Show error state
+    if (error) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md text-center">
+                    <h3 className="text-lg font-medium text-red-800 mb-2">Error</h3>
+                    <p className="text-red-700 mb-4">{error}</p>
+                    <div className="space-x-3">
+                        <button
+                            onClick={() => navigate('/admin/kids')}
+                            className="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded text-sm font-medium"
+                        >
+                            Back to Kids
+                        </button>
+                        <button
+                            onClick={() => window.location.reload()}
+                            className="bg-red-100 hover:bg-red-200 px-4 py-2 rounded text-sm font-medium"
+                        >
+                            Retry
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (!kidData) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <p className="text-gray-600">No kid data available</p>
+            </div>
+        );
+    }
+
+    const fullName = `${kidData.personalInfo?.firstName || kidData.firstName || ''} ${kidData.personalInfo?.lastName || kidData.lastName || ''}`.trim();
+    const age = calculateAge(kidData.personalInfo?.dateOfBirth || kidData.dateOfBirth);
+
     return (
-        <div>
+        <div className="min-h-screen bg-gray-50">
+            {/* Header */}
             <header className="bg-white shadow">
                 <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center">
-                        <div>
-                            <h1 className="text-3xl font-bold text-gray-900">
-                                {isEditMode ? 'Edit Kid' : 'Add New Kid'}
-                            </h1>
-                            <p className="text-sm text-gray-600 mt-1">
-                                Editing as: <span className="font-medium capitalize">{userRole}</span>
-                            </p>
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-4">
+                            <button
+                                onClick={() => navigate('/admin/kids')}
+                                className="flex items-center text-gray-600 hover:text-gray-900 transition-colors"
+                            >
+                                <ArrowLeft size={20} className="mr-2" />
+                                Back to Kids
+                            </button>
+                            <div className="border-l border-gray-300 h-6"></div>
+                            <div>
+                                <h1 className="text-3xl font-bold text-gray-900 flex items-center">
+                                    <UserCircle size={32} className="mr-3 text-indigo-600" />
+                                    {fullName || 'Kid Details'}
+                                </h1>
+                                <p className="text-sm text-gray-600 mt-1">
+                                    Viewing as: <span className="font-medium capitalize">{userRole}</span>
+                                    {kidData.participantNumber && (
+                                        <span className="ml-4">
+                                            Participant #: <span className="font-medium">{kidData.participantNumber}</span>
+                                        </span>
+                                    )}
+                                </p>
+                            </div>
                         </div>
+                        {canEdit() && (
+                            <button
+                                onClick={() => navigate(`/admin/kids/edit/${kidId}`)}
+                                className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
+                            >
+                                <Edit size={18} className="mr-2" />
+                                Edit Kid
+                            </button>
+                        )}
                     </div>
                 </div>
             </header>
 
+            {/* Content */}
             <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
                 <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-                    <form onSubmit={handleSubmit}>
-                        <div className="px-4 py-5 sm:p-6">
-                            {error && (
-                                <div className="rounded-md bg-red-50 p-4 mb-6">
-                                    <div className="flex">
-                                        <div className="flex-shrink-0">
-                                            <svg className="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                                            </svg>
-                                        </div>
-                                        <div className="ml-3">
-                                            <p className="text-sm font-medium text-red-800">{error}</p>
+                    <div className="px-4 py-5 sm:p-6">
+                        <div className="space-y-8">
+                            {/* Basic Information */}
+                            <div>
+                                <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                                    <UserCircle size={20} className="mr-2 text-indigo-600" />
+                                    Basic Information
+                                </h3>
+                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                                    <ProtectedField
+                                        field="participantNumber"
+                                        value={kidData.participantNumber}
+                                        kidData={kidData}
+                                        label="Participant Number"
+                                        disabled={true}
+                                    />
+
+                                    <ProtectedField
+                                        field="firstName"
+                                        value={kidData.personalInfo?.firstName || kidData.firstName}
+                                        kidData={kidData}
+                                        label="First Name"
+                                        disabled={true}
+                                    />
+
+                                    <ProtectedField
+                                        field="lastName"
+                                        value={kidData.personalInfo?.lastName || kidData.lastName}
+                                        kidData={kidData}
+                                        label="Last Name"
+                                        disabled={true}
+                                    />
+
+                                    <ProtectedField
+                                        field="personalInfo.dateOfBirth"
+                                        value={kidData.personalInfo?.dateOfBirth || kidData.dateOfBirth}
+                                        kidData={kidData}
+                                        label="Date of Birth"
+                                        disabled={true}
+                                    />
+
+                                    <div className="space-y-1">
+                                        <label className="block text-sm font-medium text-gray-700">Age</label>
+                                        <div className="text-gray-700 bg-gray-50 px-3 py-2 rounded border">
+                                            {age} years old
                                         </div>
                                     </div>
-                                </div>
-                            )}
 
-                            <div className="space-y-8">
-                                {/* Basic Information */}
-                                <div>
-                                    <h3 className="text-lg font-medium text-gray-900 mb-4">Basic Information</h3>
-                                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-
-                                        <ProtectedField
-                                            field="participantNumber"
-                                            value={formData.participantNumber}
-                                            kidData={formData}
-                                            label="Participant Number"
-                                            onChange={(value) => updateField('participantNumber', value)}
-                                        />
-
-                                        <ProtectedField
-                                            field="firstName"
-                                            value={formData.firstName}
-                                            kidData={formData}
-                                            label="First Name *"
-                                            onChange={(value) => updateField('firstName', value)}
-                                        />
-
-                                        <ProtectedField
-                                            field="lastName"
-                                            value={formData.lastName}
-                                            kidData={formData}
-                                            label="Last Name *"
-                                            onChange={(value) => updateField('lastName', value)}
-                                        />
-
-                                        <ProtectedField
-                                            field="personalInfo.dateOfBirth"
-                                            value={formData.personalInfo.dateOfBirth}
-                                            kidData={formData}
-                                            label="Date of Birth"
-                                            type="date"
-                                            onChange={(value) => updateNestedField('personalInfo', 'dateOfBirth', value)}
-                                        />
-
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Age</label>
-                                            <input
-                                                type="number"
-                                                value={formData.age}
-                                                onChange={(e) => updateField('age', e.target.value)}
-                                                min="0"
-                                                max="100"
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                            />
+                                    <div className="space-y-1">
+                                        <label className="block text-sm font-medium text-gray-700">Gender</label>
+                                        <div className="text-gray-700 bg-gray-50 px-3 py-2 rounded border">
+                                            {kidData.gender ? kidData.gender.charAt(0).toUpperCase() + kidData.gender.slice(1) : 'Not specified'}
                                         </div>
+                                    </div>
 
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Gender</label>
-                                            <select
-                                                value={formData.gender}
-                                                onChange={(e) => updateField('gender', e.target.value)}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                            >
-                                                <option value="">Select Gender</option>
-                                                <option value="male">Male</option>
-                                                <option value="female">Female</option>
-                                                <option value="other">Other</option>
-                                                <option value="prefer-not-to-say">Prefer not to say</option>
-                                            </select>
-                                        </div>
-
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Team</label>
-                                            <select
-                                                value={formData.teamId}
-                                                onChange={(e) => updateField('teamId', e.target.value)}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                            >
-                                                <option value="">No Team</option>
-                                                {teams.map(team => (
-                                                    <option key={team.id} value={team.id}>
-                                                        {team.name}
-                                                    </option>
-                                                ))}
-                                            </select>
+                                    <div className="space-y-1">
+                                        <label className="block text-sm font-medium text-gray-700">Team</label>
+                                        <div className="text-gray-700 bg-gray-50 px-3 py-2 rounded border">
+                                            {kidData.teamId ? `Team ${kidData.teamId.slice(0, 8)}...` : 'No Team Assigned'}
                                         </div>
                                     </div>
                                 </div>
+                            </div>
 
-                                {/* Personal Information */}
-                                <div>
-                                    <h3 className="text-lg font-medium text-gray-900 mb-4">Personal Information</h3>
-                                    <div className="space-y-4">
+                            {/* Personal Information */}
+                            <div>
+                                <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                                    <MapPin size={20} className="mr-2 text-indigo-600" />
+                                    Personal Information
+                                </h3>
+                                <div className="space-y-4">
+                                    <ProtectedField
+                                        field="personalInfo.address"
+                                        value={kidData.personalInfo?.address || kidData.address}
+                                        kidData={kidData}
+                                        label="Address"
+                                        disabled={true}
+                                    />
 
-                                        <ProtectedField
-                                            field="personalInfo.address"
-                                            value={formData.personalInfo.address}
-                                            kidData={formData}
-                                            label="Address"
-                                            onChange={(value) => updateNestedField('personalInfo', 'address', value)}
-                                        />
+                                    <ProtectedField
+                                        field="personalInfo.capabilities"
+                                        value={kidData.personalInfo?.capabilities}
+                                        kidData={kidData}
+                                        label="Capabilities & Challenges"
+                                        disabled={true}
+                                    />
 
-                                        <ProtectedField
-                                            field="personalInfo.capabilities"
-                                            value={formData.personalInfo.capabilities}
-                                            kidData={formData}
-                                            label="Capabilities & Challenges"
-                                            multiline={true}
-                                            onChange={(value) => updateNestedField('personalInfo', 'capabilities', value)}
-                                        />
-
-                                        <ProtectedField
-                                            field="personalInfo.announcersNotes"
-                                            value={formData.personalInfo.announcersNotes}
-                                            kidData={formData}
-                                            label="Announcer Notes"
-                                            multiline={true}
-                                            onChange={(value) => updateNestedField('personalInfo', 'announcersNotes', value)}
-                                        />
-                                    </div>
+                                    <ProtectedField
+                                        field="personalInfo.announcersNotes"
+                                        value={kidData.personalInfo?.announcersNotes}
+                                        kidData={kidData}
+                                        label="Announcer Notes"
+                                        disabled={true}
+                                    />
                                 </div>
+                            </div>
 
-                                {/* Parent Information */}
-                                <div>
-                                    <h3 className="text-lg font-medium text-gray-900 mb-4">Parent/Guardian Information</h3>
-                                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            {/* Parent Information */}
+                            <div>
+                                <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                                    <Users size={20} className="mr-2 text-indigo-600" />
+                                    Parent/Guardian Information
+                                </h3>
+                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                    <ProtectedField
+                                        field="parentInfo.name"
+                                        value={kidData.parentInfo?.name || kidData.guardianName}
+                                        kidData={kidData}
+                                        label="Parent/Guardian Name"
+                                        disabled={true}
+                                    />
 
-                                        <ProtectedField
-                                            field="parentInfo.name"
-                                            value={formData.parentInfo.name}
-                                            kidData={formData}
-                                            label="Parent/Guardian Name"
-                                            onChange={(value) => updateNestedField('parentInfo', 'name', value)}
-                                        />
+                                    <ProtectedField
+                                        field="parentInfo.email"
+                                        value={kidData.parentInfo?.email || kidData.email}
+                                        kidData={kidData}
+                                        label="Parent Email"
+                                        disabled={true}
+                                    />
 
-                                        <ProtectedField
-                                            field="parentInfo.email"
-                                            value={formData.parentInfo.email}
-                                            kidData={formData}
-                                            label="Parent Email"
-                                            type="email"
-                                            onChange={(value) => updateNestedField('parentInfo', 'email', value)}
-                                        />
+                                    <ProtectedField
+                                        field="parentInfo.phone"
+                                        value={kidData.parentInfo?.phone || kidData.contactNumber}
+                                        kidData={kidData}
+                                        label="Parent Phone"
+                                        disabled={true}
+                                    />
 
-                                        <ProtectedField
-                                            field="parentInfo.phone"
-                                            value={formData.parentInfo.phone}
-                                            kidData={formData}
-                                            label="Parent Phone"
-                                            type="tel"
-                                            onChange={(value) => updateNestedField('parentInfo', 'phone', value)}
-                                        />
+                                    <ProtectedField
+                                        field="parentInfo.grandparentsInfo.names"
+                                        value={kidData.parentInfo?.grandparentsInfo?.names}
+                                        kidData={kidData}
+                                        label="Grandparents Names"
+                                        disabled={true}
+                                    />
 
-                                        <ProtectedField
-                                            field="parentInfo.grandparentsInfo.names"
-                                            value={formData.parentInfo.grandparentsInfo.names}
-                                            kidData={formData}
-                                            label="Grandparents Names"
-                                            onChange={(value) => updateDoubleNestedField('parentInfo', 'grandparentsInfo', 'names', value)}
-                                        />
+                                    <ProtectedField
+                                        field="emergencyContact"
+                                        value={kidData.emergencyContact}
+                                        kidData={kidData}
+                                        label="Emergency Contact"
+                                        disabled={true}
+                                    />
 
-                                        <ProtectedField
-                                            field="emergencyContact"
-                                            value={formData.emergencyContact}
-                                            kidData={formData}
-                                            label="Emergency Contact (Restricted)"
-                                            onChange={(value) => updateField('emergencyContact', value)}
-                                        />
-
-                                        <ProtectedField
-                                            field="emergencyPhone"
-                                            value={formData.emergencyPhone}
-                                            kidData={formData}
-                                            label="Emergency Phone (Restricted)"
-                                            type="tel"
-                                            onChange={(value) => updateField('emergencyPhone', value)}
-                                        />
-                                    </div>
+                                    <ProtectedField
+                                        field="emergencyPhone"
+                                        value={kidData.emergencyPhone}
+                                        kidData={kidData}
+                                        label="Emergency Phone"
+                                        disabled={true}
+                                    />
                                 </div>
+                            </div>
 
-                                {/* Comments Section */}
-                                <div>
-                                    <h3 className="text-lg font-medium text-gray-900 mb-4">Comments (Role-Based Access)</h3>
-                                    <div className="space-y-4">
+                            {/* Comments Section */}
+                            <div>
+                                <h3 className="text-lg font-medium text-gray-900 mb-4">Comments</h3>
+                                <div className="space-y-4">
+                                    <ProtectedField
+                                        field="comments.parent"
+                                        value={kidData.comments?.parent}
+                                        kidData={kidData}
+                                        label="Parent Comments"
+                                        disabled={true}
+                                    />
 
-                                        <ProtectedField
-                                            field="comments.parent"
-                                            value={formData.comments.parent}
-                                            kidData={formData}
-                                            label="Parent Comments"
-                                            multiline={true}
-                                            onChange={(value) => updateNestedField('comments', 'parent', value)}
-                                        />
+                                    <ProtectedField
+                                        field="comments.teamLeader"
+                                        value={kidData.comments?.teamLeader}
+                                        kidData={kidData}
+                                        label="Team Leader Comments"
+                                        disabled={true}
+                                    />
 
-                                        <ProtectedField
-                                            field="comments.teamLeader"
-                                            value={formData.comments.teamLeader}
-                                            kidData={formData}
-                                            label="Team Leader Comments"
-                                            multiline={true}
-                                            onChange={(value) => updateNestedField('comments', 'teamLeader', value)}
-                                        />
+                                    <ProtectedField
+                                        field="comments.organization"
+                                        value={kidData.comments?.organization}
+                                        kidData={kidData}
+                                        label="Organization Comments"
+                                        disabled={true}
+                                    />
 
-                                        <ProtectedField
-                                            field="comments.organization"
-                                            value={formData.comments.organization}
-                                            kidData={formData}
-                                            label="Organization Comments"
-                                            multiline={true}
-                                            onChange={(value) => updateNestedField('comments', 'organization', value)}
-                                        />
-
-                                        <ProtectedField
-                                            field="comments.familyContact"
-                                            value={formData.comments.familyContact}
-                                            kidData={formData}
-                                            label="Family Contact Comments (Restricted)"
-                                            multiline={true}
-                                            onChange={(value) => updateNestedField('comments', 'familyContact', value)}
-                                        />
-                                    </div>
+                                    <ProtectedField
+                                        field="comments.familyContact"
+                                        value={kidData.comments?.familyContact}
+                                        kidData={kidData}
+                                        label="Family Contact Comments"
+                                        disabled={true}
+                                    />
                                 </div>
+                            </div>
 
-                                {/* Additional Information */}
-                                <div>
-                                    <h3 className="text-lg font-medium text-gray-900 mb-4">Additional Information</h3>
-                                    <div className="space-y-4">
+                            {/* Additional Information */}
+                            <div>
+                                <h3 className="text-lg font-medium text-gray-900 mb-4">Additional Information</h3>
+                                <div className="space-y-4">
+                                    <ProtectedField
+                                        field="signedDeclaration"
+                                        value={kidData.signedDeclaration}
+                                        kidData={kidData}
+                                        label="Signed Declaration"
+                                        type="checkbox"
+                                        disabled={true}
+                                    />
 
-                                        <ProtectedField
-                                            field="signedDeclaration"
-                                            value={formData.signedDeclaration}
-                                            kidData={formData}
-                                            label="Signed Declaration"
-                                            type="checkbox"
-                                            placeholder="Declaration has been signed"
-                                            onChange={(value) => updateField('signedDeclaration', value)}
-                                        />
+                                    <ProtectedField
+                                        field="notes"
+                                        value={kidData.notes}
+                                        kidData={kidData}
+                                        label="General Notes"
+                                        disabled={true}
+                                    />
 
-                                        <ProtectedField
-                                            field="notes"
-                                            value={formData.notes}
-                                            kidData={formData}
-                                            label="General Notes"
-                                            multiline={true}
-                                            onChange={(value) => updateField('notes', value)}
-                                        />
+                                    {/* Status Information */}
+                                    <div className="space-y-1">
+                                        <label className="block text-sm font-medium text-gray-700">Form Status</label>
+                                        <div className="text-gray-700 bg-gray-50 px-3 py-2 rounded border">
+                                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                                kidData.signedFormStatus === 'completed' ? 'bg-green-100 text-green-800' :
+                                                    kidData.signedFormStatus === 'active' ? 'bg-blue-100 text-blue-800' :
+                                                        kidData.signedFormStatus === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                                                            'bg-gray-100 text-gray-800'
+                                            }`}>
+                                                {kidData.signedFormStatus?.charAt(0).toUpperCase() + kidData.signedFormStatus?.slice(1) || 'Pending'}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <div className="px-4 py-3 bg-gray-50 text-right sm:px-6 space-x-3">
-                            <button
-                                type="button"
-                                onClick={() => navigate('/admin/kids')}
-                                className="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-                            >
-                                {loading ? 'Saving...' : (isEditMode ? 'Update' : 'Save')}
-                            </button>
+                    {/* Footer */}
+                    <div className="px-4 py-3 bg-gray-50 sm:px-6">
+                        <div className="flex justify-between items-center">
+                            <div className="text-sm text-gray-500">
+                                {kidData.createdAt && (
+                                    <span>Created: {new Date(kidData.createdAt.seconds * 1000).toLocaleDateString()}</span>
+                                )}
+                                {kidData.updatedAt && (
+                                    <span className="ml-4">
+                                        Last Updated: {new Date(kidData.updatedAt.seconds * 1000).toLocaleDateString()}
+                                    </span>
+                                )}
+                            </div>
+                            <div className="space-x-3">
+                                <button
+                                    onClick={() => navigate('/admin/kids')}
+                                    className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                >
+                                    Back to Kids List
+                                </button>
+                                {canEdit() && (
+                                    <button
+                                        onClick={() => navigate(`/admin/kids/edit/${kidId}`)}
+                                        className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                    >
+                                        <Edit size={16} className="mr-2" />
+                                        Edit Kid
+                                    </button>
+                                )}
+                            </div>
                         </div>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>
     );
 }
 
-export default KidForm;
+export default KidDetailView;

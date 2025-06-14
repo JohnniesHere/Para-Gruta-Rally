@@ -1,8 +1,7 @@
-// src/pages/admin/ViewKidPage.jsx - Fun Racing Theme View Kid Page
+// src/pages/admin/ViewKidPage.jsx - COLLAPSIBLE SECTIONS VERSION
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
-import ProtectedField from '../../hooks/ProtectedField';
 import { useTheme } from '../../contexts/ThemeContext';
 import { usePermissions } from '../../hooks/usePermissions.jsx';
 import { getKidById, deleteKid } from '../../services/kidService';
@@ -10,23 +9,18 @@ import { getTeamById } from '../../services/teamService';
 import {
     IconUserCircle as Baby,
     IconEdit as Edit,
-    IconTrash as TFrash2,
+    IconTrash as Trash2,
     IconArrowLeft as ArrowLeft,
     IconCheck as Check,
-    IconAlertTriangle as AlertTriangle,
     IconCar as Car,
-    IconUser as User,
-    IconUsers as Users,
     IconHeart as Heart,
-    IconPhone as Phone,
-    IconMail as Mail,
-    IconMapPin as MapPin,
     IconCalendar as Calendar,
     IconNotes as FileText,
-    IconSparkles as Sparkles,
     IconTrophy as Trophy,
     IconStar as Star,
-    IconFlag as Flag
+    IconFlag as Flag,
+    IconChevronDown as ChevronDown,
+    IconChevronRight as ChevronRight
 } from '@tabler/icons-react';
 import './ViewKidPage.css';
 
@@ -34,8 +28,8 @@ const ViewKidPage = () => {
     const navigate = useNavigate();
     const { id } = useParams();
     const location = useLocation();
-    const { isDarkMode, appliedTheme } = useTheme();
-    const { permissions, userRole } = usePermissions();
+    const { appliedTheme } = useTheme();
+    const { userRole } = usePermissions();
 
     const [kidData, setKidData] = useState(null);
     const [teamData, setTeamData] = useState(null);
@@ -43,36 +37,45 @@ const ViewKidPage = () => {
     const [error, setError] = useState(null);
     const [successMessage, setSuccessMessage] = useState('');
 
+    // COLLAPSIBLE SECTIONS STATE
+    const [collapsedSections, setCollapsedSections] = useState({
+        personal: false,
+        family: false,
+        team: false,
+        comments: false
+    });
+
     useEffect(() => {
-        // Check for success message from location state
         if (location.state?.message) {
             setSuccessMessage(location.state.message);
-            // Clear message after 5 seconds
             setTimeout(() => setSuccessMessage(''), 5000);
         }
-        loadKidData();
-    }, [id]);
+
+        const loadData = async () => {
+            await loadKidData();
+        };
+
+        loadData();
+    }, [id, location.state?.message]);
 
     const loadKidData = async () => {
         try {
             setIsLoading(true);
 
-            // Load kid data
             const kid = await getKidById(id);
             if (!kid) {
                 setError('Kid not found!');
                 return;
             }
 
-            // Check permissions
-            if (!permissions?.canViewKid(kid)) {
+            // SIMPLIFIED: Role-based access
+            if (userRole !== 'admin') {
                 setError('You do not have permission to view this kid.');
                 return;
             }
 
             setKidData(kid);
 
-            // Load team data if kid has a team
             if (kid.teamId) {
                 try {
                     const team = await getTeamById(kid.teamId);
@@ -90,17 +93,25 @@ const ViewKidPage = () => {
         }
     };
 
+    // TOGGLE SECTION COLLAPSE
+    const toggleSection = (sectionName) => {
+        setCollapsedSections(prev => ({
+            ...prev,
+            [sectionName]: !prev[sectionName]
+        }));
+    };
+
     const handleEdit = () => {
         navigate(`/admin/kids/edit/${id}`);
     };
 
     const handleDelete = async () => {
-        if (!permissions?.canEdit('delete', { kidData })) {
+        if (userRole !== 'admin') {
             alert('You do not have permission to delete this kid.');
             return;
         }
 
-        const kidName = kidData.personalInfo?.firstName || 'this kid';
+        const kidName = kidData.personalInfo?.firstName || kidData.participantNumber || 'this kid';
         if (window.confirm(`Are you sure you want to delete ${kidName}? This action cannot be undone.`)) {
             try {
                 await deleteKid(id);
@@ -179,7 +190,6 @@ const ViewKidPage = () => {
     return (
         <Dashboard requiredRole={userRole}>
             <div className={`view-kid-page ${appliedTheme}-mode`}>
-                {/* Racing Theme Header */}
                 <div className="racing-header">
                     <div className="header-content">
                         <button onClick={handleBack} className="back-button">
@@ -195,7 +205,7 @@ const ViewKidPage = () => {
                             <p className="subtitle">Meet our amazing racer! 🏁</p>
                         </div>
                         <div className="header-actions">
-                            {permissions?.canEdit('participantNumber', { kidData }) && (
+                            {userRole === 'admin' && (
                                 <button onClick={handleEdit} className="edit-button">
                                     <Edit className="btn-icon" size={18} />
                                     Edit
@@ -211,7 +221,6 @@ const ViewKidPage = () => {
                     </div>
                 </div>
 
-                {/* Success Message */}
                 {successMessage && (
                     <div className="success-alert">
                         <Check size={20} />
@@ -220,7 +229,6 @@ const ViewKidPage = () => {
                 )}
 
                 <div className="view-kid-container">
-                    {/* Racer Hero Section */}
                     <div className="hero-section">
                         <div className="hero-content">
                             <div className="racer-avatar">
@@ -229,8 +237,8 @@ const ViewKidPage = () => {
                             </div>
                             <div className="hero-info">
                                 <h2 className="racer-name">
-                                    {permissions.canView('personalInfo.firstName', { kidData })
-                                        ? `${kidData.personalInfo?.firstName || ''} ${kidData.personalInfo?.lastName || ''}`.trim() || 'Racing Star'
+                                    {userRole === 'admin'
+                                        ? `${kidData.personalInfo?.firstName || ''} ${kidData.personalInfo?.lastName || ''}`.trim() || `Kid #${kidData.participantNumber}`
                                         : 'Name Restricted'
                                     }
                                 </h2>
@@ -257,215 +265,227 @@ const ViewKidPage = () => {
                     </div>
 
                     <div className="content-grid">
-                        {/* Personal Information */}
+                        {/* COLLAPSIBLE Personal Information */}
                         <div className="info-section personal-section">
-                            <div className="section-header">
-                                <Baby className="section-icon" size={24} />
-                                <h3>🏎️ Racer Profile</h3>
-                            </div>
-                            <div className="info-grid">
-                                <div className="info-item">
-                                    <label>🏁 Race Number</label>
-                                    <div className="info-value">{kidData.participantNumber}</div>
+                            <div
+                                className="section-header clickable"
+                                onClick={() => toggleSection('personal')}
+                                style={{ cursor: 'pointer', userSelect: 'none' }}
+                            >
+                                <div className="section-header-content">
+                                    <Baby className="section-icon" size={24} />
+                                    <h3>🏎️ Racer Profile</h3>
                                 </div>
-
-                                <div className="info-item">
-                                    <label>🎂 Date of Birth</label>
-                                    <ProtectedField
-                                        field="personalInfo.dateOfBirth"
-                                        value={kidData.personalInfo?.dateOfBirth}
-                                        kidData={kidData}
-                                        type="display"
-                                        className="info-value"
-                                    />
-                                </div>
-
-                                <div className="info-item full-width">
-                                    <label>🏠 Home Base</label>
-                                    <ProtectedField
-                                        field="personalInfo.address"
-                                        value={kidData.personalInfo?.address}
-                                        kidData={kidData}
-                                        type="display"
-                                        className="info-value"
-                                    />
-                                </div>
-
-                                <div className="info-item full-width">
-                                    <label>🌟 Super Powers & Abilities</label>
-                                    <ProtectedField
-                                        field="personalInfo.capabilities"
-                                        value={kidData.personalInfo?.capabilities}
-                                        kidData={kidData}
-                                        type="display"
-                                        className="info-value"
-                                    />
-                                </div>
-
-                                <div className="info-item full-width">
-                                    <label>📢 Announcer Notes</label>
-                                    <ProtectedField
-                                        field="personalInfo.announcersNotes"
-                                        value={kidData.personalInfo?.announcersNotes}
-                                        kidData={kidData}
-                                        type="display"
-                                        className="info-value"
-                                    />
+                                <div className="collapse-indicator">
+                                    {collapsedSections.personal ?
+                                        <ChevronRight size={20} className="collapse-icon" /> :
+                                        <ChevronDown size={20} className="collapse-icon" />
+                                    }
                                 </div>
                             </div>
+
+                            {!collapsedSections.personal && (
+                                <div className="info-grid">
+                                    <div className="info-item">
+                                        <label>🏁 Race Number</label>
+                                        <div className="info-value">{kidData.participantNumber}</div>
+                                    </div>
+
+                                    <div className="info-item">
+                                        <label>🎂 Date of Birth</label>
+                                        <div className="info-value">
+                                            {kidData.personalInfo?.dateOfBirth || 'N/A'}
+                                        </div>
+                                    </div>
+
+                                    <div className="info-item full-width">
+                                        <label>🏠 Home Base</label>
+                                        <div className="info-value">
+                                            {kidData.personalInfo?.address || 'N/A'}
+                                        </div>
+                                    </div>
+
+                                    <div className="info-item full-width">
+                                        <label>🌟 Super Powers & Abilities</label>
+                                        <div className="info-value">
+                                            {kidData.personalInfo?.capabilities || 'N/A'}
+                                        </div>
+                                    </div>
+
+                                    <div className="info-item full-width">
+                                        <label>📢 Announcer Notes</label>
+                                        <div className="info-value">
+                                            {kidData.personalInfo?.announcersNotes || 'N/A'}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
-                        {/* Family Information */}
+                        {/* COLLAPSIBLE Family Information */}
                         <div className="info-section family-section">
-                            <div className="section-header">
-                                <Heart className="section-icon" size={24} />
-                                <h3>👨‍👩‍👧‍👦 Racing Family</h3>
-                            </div>
-                            <div className="info-grid">
-                                <div className="info-item">
-                                    <label>👤 Parent/Guardian</label>
-                                    <ProtectedField
-                                        field="parentInfo.name"
-                                        value={kidData.parentInfo?.name}
-                                        kidData={kidData}
-                                        type="display"
-                                        className="info-value"
-                                    />
+                            <div
+                                className="section-header clickable"
+                                onClick={() => toggleSection('family')}
+                                style={{ cursor: 'pointer', userSelect: 'none' }}
+                            >
+                                <div className="section-header-content">
+                                    <Heart className="section-icon" size={24} />
+                                    <h3>👨‍👩‍👧‍👦 Racing Family</h3>
                                 </div>
-
-                                <div className="info-item">
-                                    <label>📧 Email</label>
-                                    <ProtectedField
-                                        field="parentInfo.email"
-                                        value={kidData.parentInfo?.email}
-                                        kidData={kidData}
-                                        type="display"
-                                        className="info-value"
-                                    />
-                                </div>
-
-                                <div className="info-item">
-                                    <label>📱 Phone</label>
-                                    <ProtectedField
-                                        field="parentInfo.phone"
-                                        value={kidData.parentInfo?.phone}
-                                        kidData={kidData}
-                                        type="display"
-                                        className="info-value"
-                                    />
-                                </div>
-
-                                <div className="info-item">
-                                    <label>👵👴 Grandparents</label>
-                                    <ProtectedField
-                                        field="parentInfo.grandparentsInfo.names"
-                                        value={kidData.parentInfo?.grandparentsInfo?.names}
-                                        kidData={kidData}
-                                        type="display"
-                                        className="info-value"
-                                    />
-                                </div>
-
-                                <div className="info-item">
-                                    <label>☎️ Grandparents Phone</label>
-                                    <ProtectedField
-                                        field="parentInfo.grandparentsInfo.phone"
-                                        value={kidData.parentInfo?.grandparentsInfo?.phone}
-                                        kidData={kidData}
-                                        type="display"
-                                        className="info-value"
-                                    />
+                                <div className="collapse-indicator">
+                                    {collapsedSections.family ?
+                                        <ChevronRight size={20} className="collapse-icon" /> :
+                                        <ChevronDown size={20} className="collapse-icon" />
+                                    }
                                 </div>
                             </div>
+
+                            {!collapsedSections.family && (
+                                <div className="info-grid">
+                                    <div className="info-item">
+                                        <label>👤 Parent/Guardian</label>
+                                        <div className="info-value">
+                                            {kidData.parentInfo?.name || 'N/A'}
+                                        </div>
+                                    </div>
+
+                                    <div className="info-item">
+                                        <label>📧 Email</label>
+                                        <div className="info-value">
+                                            {kidData.parentInfo?.email || 'N/A'}
+                                        </div>
+                                    </div>
+
+                                    <div className="info-item">
+                                        <label>📱 Phone</label>
+                                        <div className="info-value">
+                                            {kidData.parentInfo?.phone || 'N/A'}
+                                        </div>
+                                    </div>
+
+                                    <div className="info-item">
+                                        <label>👵👴 Grandparents</label>
+                                        <div className="info-value">
+                                            {kidData.parentInfo?.grandparentsInfo?.names || 'N/A'}
+                                        </div>
+                                    </div>
+
+                                    <div className="info-item">
+                                        <label>☎️ Grandparents Phone</label>
+                                        <div className="info-value">
+                                            {kidData.parentInfo?.grandparentsInfo?.phone || 'N/A'}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
-                        {/* Team & Racing Info */}
+                        {/* COLLAPSIBLE Team & Racing Info */}
                         <div className="info-section team-section">
-                            <div className="section-header">
-                                <Car className="section-icon" size={24} />
-                                <h3>🏎️ Racing Team</h3>
+                            <div
+                                className="section-header clickable"
+                                onClick={() => toggleSection('team')}
+                                style={{ cursor: 'pointer', userSelect: 'none' }}
+                            >
+                                <div className="section-header-content">
+                                    <Car className="section-icon" size={24} />
+                                    <h3>🏎️ Racing Team</h3>
+                                </div>
+                                <div className="collapse-indicator">
+                                    {collapsedSections.team ?
+                                        <ChevronRight size={20} className="collapse-icon" /> :
+                                        <ChevronDown size={20} className="collapse-icon" />
+                                    }
+                                </div>
                             </div>
-                            <div className="info-grid">
-                                <div className="info-item">
-                                    <label>🏁 Team</label>
-                                    <div className="info-value">
-                                        {teamData ? (
-                                            <span className="team-link" onClick={() => navigate(`/admin/teams/view/${teamData.id}`)}>
-                                                {teamData.name}
+
+                            {!collapsedSections.team && (
+                                <div className="info-grid">
+                                    <div className="info-item">
+                                        <label>🏁 Team</label>
+                                        <div className="info-value">
+                                            {teamData ? (
+                                                <span className="team-link" onClick={() => navigate(`/admin/teams/view/${teamData.id}`)}>
+                                                    {teamData.name}
+                                                </span>
+                                            ) : (
+                                                <span className="no-team">No Team Assigned</span>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div className="info-item">
+                                        <label>📋 Form Status</label>
+                                        <div className="info-value">
+                                            <span className={`status-badge ${getStatusColor(kidData.signedFormStatus)}`}>
+                                                {kidData.signedFormStatus || 'Pending'}
                                             </span>
-                                        ) : (
-                                            <span className="no-team">No Team Assigned</span>
-                                        )}
+                                        </div>
                                     </div>
-                                </div>
 
-                                <div className="info-item">
-                                    <label>📋 Form Status</label>
-                                    <div className="info-value">
-                                        <span className={`status-badge ${getStatusColor(kidData.signedFormStatus)}`}>
-                                            {kidData.signedFormStatus || 'Pending'}
-                                        </span>
+                                    <div className="info-item">
+                                        <label>🛡️ Safety Declaration</label>
+                                        <div className="info-value">
+                                            <span className={`declaration-badge ${kidData.signedDeclaration ? 'signed' : 'pending'}`}>
+                                                {kidData.signedDeclaration ? '✅ Signed' : '⏳ Pending'}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
-
-                                <div className="info-item">
-                                    <label>🛡️ Safety Declaration</label>
-                                    <div className="info-value">
-                                        <span className={`declaration-badge ${kidData.signedDeclaration ? 'signed' : 'pending'}`}>
-                                            {kidData.signedDeclaration ? '✅ Signed' : '⏳ Pending'}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
+                            )}
                         </div>
 
-                        {/* Comments & Notes */}
+                        {/* COLLAPSIBLE Comments & Notes */}
                         <div className="info-section comments-section full-width">
-                            <div className="section-header">
-                                <FileText className="section-icon" size={24} />
-                                <h3>💬 Racing Notes & Comments</h3>
+                            <div
+                                className="section-header clickable"
+                                onClick={() => toggleSection('comments')}
+                                style={{ cursor: 'pointer', userSelect: 'none' }}
+                            >
+                                <div className="section-header-content">
+                                    <FileText className="section-icon" size={24} />
+                                    <h3>💬 Racing Notes & Comments</h3>
+                                </div>
+                                <div className="collapse-indicator">
+                                    {collapsedSections.comments ?
+                                        <ChevronRight size={20} className="collapse-icon" /> :
+                                        <ChevronDown size={20} className="collapse-icon" />
+                                    }
+                                </div>
                             </div>
-                            <div className="comments-grid">
-                                <div className="comment-item">
-                                    <label>👨‍👩‍👧‍👦 Parent Comments</label>
-                                    <ProtectedField
-                                        field="comments.parent"
-                                        value={kidData.comments?.parent}
-                                        kidData={kidData}
-                                        type="display"
-                                        className="comment-value"
-                                    />
-                                </div>
 
-                                <div className="comment-item">
-                                    <label>🏢 Organization Comments</label>
-                                    <ProtectedField
-                                        field="comments.organization"
-                                        value={kidData.comments?.organization}
-                                        kidData={kidData}
-                                        type="display"
-                                        className="comment-value"
-                                    />
-                                </div>
+                            {!collapsedSections.comments && (
+                                <div className="comments-grid">
+                                    <div className="comment-item">
+                                        <label>👨‍👩‍👧‍👦 Parent Comments</label>
+                                        <div className="comment-value">
+                                            {kidData.comments?.parent || 'No comments'}
+                                        </div>
+                                    </div>
 
-                                <div className="comment-item">
-                                    <label>👨‍🏫 Team Leader Comments</label>
-                                    <ProtectedField
-                                        field="comments.teamLeader"
-                                        value={kidData.comments?.teamLeader}
-                                        kidData={kidData}
-                                        type="display"
-                                        className="comment-value"
-                                    />
-                                </div>
+                                    <div className="comment-item">
+                                        <label>🏢 Organization Comments</label>
+                                        <div className="comment-value">
+                                            {kidData.comments?.organization || 'No comments'}
+                                        </div>
+                                    </div>
 
-                                <div className="comment-item">
-                                    <label>🗒️ Additional Notes</label>
-                                    <div className="comment-value">
-                                        {kidData.additionalComments || 'No additional notes'}
+                                    <div className="comment-item">
+                                        <label>👨‍🏫 Team Leader Comments</label>
+                                        <div className="comment-value">
+                                            {kidData.comments?.teamLeader || 'No comments'}
+                                        </div>
+                                    </div>
+
+                                    <div className="comment-item">
+                                        <label>🗒️ Additional Notes</label>
+                                        <div className="comment-value">
+                                            {kidData.additionalComments || 'No additional notes'}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+                            )}
                         </div>
                     </div>
                 </div>

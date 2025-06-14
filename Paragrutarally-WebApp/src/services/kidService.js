@@ -17,6 +17,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../firebase/config';
 
+
 /**
  * Get all kids with optional filtering
  * @param {Object} filters - Optional filters for querying
@@ -237,6 +238,23 @@ export const updateKid = async (kidId, updateData) => {
     } catch (error) {
         console.error('Error updating kid:', error);
         throw new Error(`Failed to update kid: ${error.message}`);
+    }
+};
+
+export const updateKidTeam = async (kidId, teamId) => {
+    try {
+        const kidRef = doc(db, 'kids', kidId);
+
+        await updateDoc(kidRef, {
+            teamId: teamId || null, // null if removing from team
+            updatedAt: new Date()
+        });
+
+        console.log(`✅ Updated kid ${kidId} team to ${teamId || 'no team'}`);
+        return true;
+    } catch (error) {
+        console.error('Error updating kid team:', error);
+        throw error;
     }
 };
 

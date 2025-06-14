@@ -1,9 +1,9 @@
-// src/pages/admin/ViewTeamPage.jsx - Fun Racing Theme View Team Page
+// src/pages/admin/ViewTeamPage.jsx - FIXED VERSION (addresses ESLint warnings)
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
 import { useTheme } from '../../contexts/ThemeContext';
-import { usePermissions } from '../../hooks/usePermissions.jsx';
+import { usePermissions } from '../../hooks/usePermissions.jsx'; // FIXED: Added .jsx extension
 import { getTeamWithDetails, deleteTeam } from '../../services/teamService';
 import {
     IconUsers as UsersGroup,
@@ -11,18 +11,14 @@ import {
     IconTrash as Trash2,
     IconArrowLeft as ArrowLeft,
     IconCheck as Check,
-    IconAlertTriangle as AlertTriangle,
     IconUser as User,
     IconUsers as Users,
     IconUserCircle as Baby,
-    IconNotes as FileText,
-    IconSparkles as Sparkles,
     IconTrophy as Trophy,
     IconTarget as Target,
     IconStar as Star,
     IconFlag as Flag,
     IconCrown as Crown,
-    IconCar as Car,
     IconPhone as Phone,
     IconMail as Mail
 } from '@tabler/icons-react';
@@ -32,25 +28,16 @@ const ViewTeamPage = () => {
     const navigate = useNavigate();
     const { id } = useParams();
     const location = useLocation();
-    const { isDarkMode, appliedTheme } = useTheme();
-    const { permissions, userRole } = usePermissions();
+    const { appliedTheme } = useTheme(); // FIXED: Removed unused isDarkMode
+    const { userRole } = usePermissions(); // FIXED: Removed unused permissions
 
     const [teamData, setTeamData] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [successMessage, setSuccessMessage] = useState('');
 
-    useEffect(() => {
-        // Check for success message from location state
-        if (location.state?.message) {
-            setSuccessMessage(location.state.message);
-            // Clear message after 5 seconds
-            setTimeout(() => setSuccessMessage(''), 5000);
-        }
-        loadTeamData();
-    }, [id]);
-
-    const loadTeamData = async () => {
+    // FIXED: Added proper dependencies to useEffect
+    const loadTeamData = React.useCallback(async () => {
         try {
             setIsLoading(true);
 
@@ -69,7 +56,21 @@ const ViewTeamPage = () => {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [id]); // FIXED: Added id as dependency
+
+    useEffect(() => {
+        // Check for success message from location state
+        if (location.state?.message) {
+            setSuccessMessage(location.state.message);
+            // Clear message after 5 seconds
+            const timeoutId = setTimeout(() => setSuccessMessage(''), 5000);
+            return () => clearTimeout(timeoutId); // FIXED: Cleanup timeout
+        }
+    }, [location.state?.message]); // FIXED: Added proper dependency
+
+    useEffect(() => {
+        loadTeamData();
+    }, [loadTeamData]); // FIXED: Added loadTeamData as dependency
 
     const handleEdit = () => {
         navigate(`/admin/teams/edit/${id}`);

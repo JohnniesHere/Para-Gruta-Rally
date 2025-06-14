@@ -1,17 +1,16 @@
-// src/components/kids/KidForm.js
-
+// src/components/kids/KidForm.js - CORRECTED VERSION
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { doc, getDoc, setDoc, collection, addDoc, serverTimestamp, getDocs } from 'firebase/firestore';
 import { db } from '../../firebase/config';
-import { usePermissions } from '../../hooks/usePermissions.jsx';
-import ProtectedField from '../../hooks/ProtectedField';
+import { usePermissions } from '../../hooks/usePermissions.jsx'; // FIXED: Removed .js extension
+import ProtectedField from '../../hooks/ProtectedField.jsx'; // FIXED: Correct path
 
 function KidForm() {
     const { kidId } = useParams();
     const navigate = useNavigate();
     const isEditMode = !!kidId;
-    const { userRole, permissions } = usePermissions();
+    const { userRole, permissions, loading: permissionsLoading, error: permissionsError } = usePermissions();
 
     // Form state - simplified structure
     const [formData, setFormData] = useState({
@@ -57,9 +56,22 @@ function KidForm() {
     // Fetch data effect
     useEffect(() => {
         const fetchData = async () => {
-            if (!permissions) return;
+            // FIXED: Wait for permissions to load
+            if (permissionsLoading) {
+                console.log('⏳ Waiting for permissions...');
+                return;
+            }
+
+            if (!permissions) {
+                console.log('❌ No permissions available');
+                setError('Permissions not available');
+                setFetchingData(false);
+                return;
+            }
 
             try {
+                console.log('🔄 Fetching form data...');
+
                 // Fetch teams
                 const teamsSnapshot = await getDocs(collection(db, 'teams'));
                 const teamsData = teamsSnapshot.docs.map(doc => ({
@@ -67,23 +79,28 @@ function KidForm() {
                     ...doc.data()
                 }));
                 setTeams(teamsData);
+                console.log('✅ Teams loaded:', teamsData.length);
 
                 // If editing, fetch kid data
                 if (isEditMode) {
+                    console.log('📄 Fetching kid data for editing...');
                     const kidDoc = await getDoc(doc(db, 'kids', kidId));
+
                     if (kidDoc.exists()) {
                         const kidData = kidDoc.data();
+                        console.log('📄 Kid data found:', kidData);
 
                         // Check permissions
                         if (!permissions?.canViewKid(kidData) && userRole !== 'admin') {
                             setError('Access denied: You cannot edit this kid\'s information');
+                            setFetchingData(false);
                             return;
                         }
 
                         // Map existing data to form structure
                         setFormData({
-                            firstName: kidData.firstName || '',
-                            lastName: kidData.lastName || '',
+                            firstName: kidData.firstName || kidData.personalInfo?.firstName || '',
+                            lastName: kidData.lastName || kidData.personalInfo?.lastName || '',
                             age: kidData.age ? kidData.age.toString() : '',
                             gender: kidData.gender || '',
                             teamId: kidData.teamId || '',
@@ -115,20 +132,21 @@ function KidForm() {
                             participantNumber: kidData.participantNumber || '',
                             signedDeclaration: kidData.signedDeclaration || false
                         });
+                        console.log('✅ Form data set from existing kid');
                     } else {
                         setError('Kid not found');
                     }
                 }
             } catch (err) {
-                console.error('Error fetching data:', err);
+                console.error('💥 Error fetching data:', err);
                 setError('Failed to load data. Please try again later.');
             } finally {
                 setFetchingData(false);
             }
         };
 
-        fetchData(); // No need to await here since we handle errors inside
-    }, [kidId, isEditMode, permissions, userRole]);
+        fetchData();
+    }, [kidId, isEditMode, permissions, userRole, permissionsLoading]);
 
     // Simple field update handlers
     const updateField = (field, value) => {
@@ -175,19 +193,52 @@ function KidForm() {
 
             if (isEditMode) {
                 await setDoc(doc(db, 'kids', kidId), processedData, { merge: true });
+                console.log('✅ Kid updated successfully');
             } else {
                 processedData.createdAt = serverTimestamp();
-                await addDoc(collection(db, 'kids'), processedData);
+                const docRef = await addDoc(collection(db, 'kids'), processedData);
+                console.log('✅ Kid created successfully:', docRef.id);
             }
 
             navigate('/admin/kids');
         } catch (err) {
-            console.error('Error saving kid:', err);
+            console.error('💥 Error saving kid:', err);
             setError(err.message || 'Failed to save. Please try again.');
         } finally {
             setLoading(false);
         }
     };
+
+    // Show permissions loading
+    if (permissionsLoading) {
+        return (
+            <div className="flex justify-center items-center h-96">
+                <svg className="animate-spin h-8 w-8 text-indigo-500" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+                <span className="text-gray-600 ml-3">Loading permissions...</span>
+            </div>
+        );
+    }
+
+    // Show permissions error
+    if (permissionsError) {
+        return (
+            <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+                <div className="bg-red-50 border border-red-200 rounded-md p-4">
+                    <h3 className="text-lg font-medium text-red-800">Permission Error</h3>
+                    <p className="text-red-700">{permissionsError}</p>
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="mt-2 bg-red-100 hover:bg-red-200 px-3 py-1 rounded text-sm"
+                    >
+                        Reload Page
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     if (fetchingData) {
         return (
@@ -196,7 +247,7 @@ function KidForm() {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                 </svg>
-                <span className="text-gray-600 ml-3">Loading...</span>
+                <span className="text-gray-600 ml-3">Loading form data...</span>
             </div>
         );
     }

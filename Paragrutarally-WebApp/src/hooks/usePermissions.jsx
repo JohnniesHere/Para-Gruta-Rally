@@ -1,69 +1,147 @@
-// src/hooks/usePermissions.jsx
-import { useState, useEffect, useContext, createContext } from 'react';
+// src/hooks/usePermissions.jsx - SIMPLIFIED ROLE-BASED PERMISSIONS
+import { useState, useEffect, useContext, createContext, useCallback } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { useAuth } from '../contexts/AuthContext';
 
 const PermissionContext = createContext();
 
+// SIMPLE ROLE-BASED PERMISSIONS - Much cleaner!
+const createRolePermissions = (userRole = 'guest') => {
+    switch (userRole) {
+        case 'admin':
+            return {
+                // Admin can do EVERYTHING
+                canCreate: true,
+                canEdit: true,
+                canDelete: true,
+                canViewAll: true,
+                canViewKid: () => true,        // Can view any kid
+                canViewField: () => true,      // Can view any field
+                canEditField: () => true,      // Can edit any field
+                role: 'admin'
+            };
+
+        case 'parent':
+            return {
+                // Parent can only see their own kids
+                canCreate: false,              // Cannot create new kids
+                canEdit: false,                // Cannot edit kids (admins handle this)
+                canDelete: false,              // Cannot delete kids
+                canViewAll: false,             // Cannot see all kids
+                canViewKid: (kid, userId) => kid.parentInfo?.parentId === userId, // Only their own kids
+                canViewField: () => true,      // Can see all fields of their own kids
+                canEditField: () => false,     // Cannot edit any fields
+                role: 'parent'
+            };
+
+        case 'instructor':
+            return {
+                // Instructor can see kids assigned to them
+                canCreate: false,              // Cannot create kids
+                canEdit: true,                 // Can edit assigned kids
+                canDelete: false,              // Cannot delete kids
+                canViewAll: false,             // Cannot see all kids
+                canViewKid: (kid, userData) => kid.instructorId === userData?.instructorId, // Only assigned kids
+                canViewField: () => true,      // Can see all fields of assigned kids
+                canEditField: () => true,      // Can edit assigned kids
+                role: 'instructor'
+            };
+
+        case 'guest':
+        default:
+            return {
+                // Guest has very limited access
+                canCreate: false,
+                canEdit: false,
+                canDelete: false,
+                canViewAll: false,
+                canViewKid: () => false,       // Cannot view any kids
+                canViewField: () => false,     // Cannot view any fields
+                canEditField: () => false,     // Cannot edit anything
+                role: 'guest'
+            };
+    }
+};
+
 export const PermissionProvider = ({ children }) => {
-    const { user, userRole, loading: authLoading } = useAuth();
+    const authContext = useAuth();
+    const { user, userRole, loading: authLoading } = authContext;
+
     const [userData, setUserData] = useState(null);
     const [permissions, setPermissions] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [hasInitialized, setHasInitialized] = useState(false);
 
-    useEffect(() => {
-        const loadUserData = async () => {
-            if (authLoading) {
-                return; // Wait for auth to finish loading
-            }
+    const loadUserData = useCallback(async () => {
+        if (hasInitialized || authLoading) {
+            return;
+        }
+
+        try {
+            setError(null);
 
             if (!user) {
-                // User not logged in
-                setPermissions(null);
+                console.log('No user - setting guest permissions');
+                setPermissions(createRolePermissions('guest'));
                 setUserData(null);
-                setLoading(false);
-                return;
-            }
+            } else {
+                console.log('Loading user data for:', user.uid);
 
-            try {
-                // Get full user data from Firestore
-                const userDoc = await getDoc(doc(db, 'users', user.uid));
-                if (userDoc.exists()) {
-                    const data = userDoc.data();
-                    setUserData(data);
+                // Try to get user data from Firestore
+                try {
+                    const userDoc = await getDoc(doc(db, 'users', user.uid));
 
-                    // Create permission service with proper structure
-                    const permissionService = new PermissionService(user, data);
-                    setPermissions(permissionService);
-                } else {
-                    // User document doesn't exist, create default permissions
-                    const defaultData = { role: userRole || 'guest' };
-                    setUserData(defaultData);
-                    setPermissions(new PermissionService(user, defaultData));
+                    if (userDoc.exists()) {
+                        const data = userDoc.data();
+                        setUserData(data);
+                        const role = data.role || userRole || 'admin';
+                        setPermissions(createRolePermissions(role));
+                        console.log('✅ User permissions set for role:', role);
+                    } else {
+                        // No user doc - default to admin for development
+                        const defaultData = { role: userRole || 'admin' };
+                        setUserData(defaultData);
+                        setPermissions(createRolePermissions(userRole || 'admin'));
+                        console.log('✅ Default admin permissions set');
+                    }
+                } catch (firestoreError) {
+                    // Firestore error - fall back to auth role
+                    console.warn('Firestore error, using auth role:', firestoreError);
+                    const fallbackData = { role: userRole || 'admin' };
+                    setUserData(fallbackData);
+                    setPermissions(createRolePermissions(userRole || 'admin'));
                 }
-            } catch (error) {
-                console.error('Error loading user data for permissions:', error);
-                // Fallback to basic permissions
-                const fallbackData = { role: userRole || 'guest' };
-                setUserData(fallbackData);
-                setPermissions(new PermissionService(user, fallbackData));
-            } finally {
-                setLoading(false);
             }
-        };
+        } catch (error) {
+            console.error('Error in loadUserData:', error);
+            setError(error.message);
+            // Even on error, provide some permissions
+            const fallbackData = { role: userRole || 'admin' };
+            setUserData(fallbackData);
+            setPermissions(createRolePermissions(userRole || 'admin'));
+        } finally {
+            setLoading(false);
+            setHasInitialized(true);
+        }
+    }, [user, userRole, authLoading, hasInitialized]);
 
+    useEffect(() => {
         loadUserData();
-    }, [user, userRole, authLoading]);
+    }, [loadUserData]);
+
+    const contextValue = {
+        permissions: permissions || createRolePermissions('guest'),
+        userRole: userData?.role || userRole || 'guest',
+        userData,
+        user,
+        loading,
+        error
+    };
 
     return (
-        <PermissionContext.Provider value={{
-            permissions,
-            userRole: userData?.role || userRole,
-            userData,
-            user,
-            loading: loading || authLoading
-        }}>
+        <PermissionContext.Provider value={contextValue}>
             {children}
         </PermissionContext.Provider>
     );
@@ -71,262 +149,58 @@ export const PermissionProvider = ({ children }) => {
 
 export const usePermissions = () => {
     const context = useContext(PermissionContext);
+
     if (!context) {
-        // Return fallback permissions instead of throwing error
-        console.warn('usePermissions used outside PermissionProvider, returning fallback permissions');
+        console.warn('usePermissions used outside provider - returning admin fallback');
         return {
-            permissions: {
-                canCreate: true,
-                canEdit: true,
-                canDelete: true,
-                canView: () => true,
-                canViewKid: () => true,
-                canEditField: () => true
-            },
+            permissions: createRolePermissions('admin'),
             userRole: 'admin',
-            userData: null,
+            userData: { role: 'admin' },
             user: null,
-            loading: false
+            loading: false,
+            error: 'Used outside provider'
         };
     }
+
+    if (!context.permissions) {
+        return {
+            ...context,
+            permissions: createRolePermissions(context.userRole || 'guest')
+        };
+    }
+
     return context;
 };
 
-class PermissionService {
-    constructor(user, userData) {
-        this.user = user;
-        this.userData = userData;
-        this.userRole = userData?.role || 'guest';
+// UTILITY FUNCTIONS for easy permission checking
+export const canUserAccessKid = (userRole, kid, userData, user) => {
+    switch (userRole) {
+        case 'admin':
+            return true; // Admin can access any kid
 
-        // Add the properties that your components expect
-        this.canCreate = this.canCreateContent();
-        this.canEdit = this.canEditContent();
-        this.canDelete = this.canDeleteContent();
-        this.canView = this.canViewContent();
+        case 'parent':
+            return kid.parentInfo?.parentId === user?.uid; // Only their own kids
+
+        case 'instructor':
+            return kid.instructorId === userData?.instructorId; // Only assigned kids
+
+        case 'guest':
+        default:
+            return false; // No access
     }
+};
 
-    // High-level permission methods for CRUD operations
-    canCreateContent() {
-        switch (this.userRole) {
-            case 'admin':
-                return true;
-            case 'instructor':
-                return true; // Instructors can create events/content
-            case 'parent':
-                return false; // Parents typically can't create events
-            case 'guest':
-                return false;
-            default:
-                return false;
-        }
+export const canUserEditKid = (userRole, kid, userData, user) => {
+    switch (userRole) {
+        case 'admin':
+            return true; // Admin can edit any kid
+
+        case 'instructor':
+            return kid.instructorId === userData?.instructorId; // Only assigned kids
+
+        case 'parent':
+        case 'guest':
+        default:
+            return false; // No editing
     }
-
-    canEditContent() {
-        switch (this.userRole) {
-            case 'admin':
-                return true;
-            case 'instructor':
-                return true; // Instructors can edit their content
-            case 'parent':
-                return false; // Parents typically can't edit events
-            case 'guest':
-                return false;
-            default:
-                return false;
-        }
-    }
-
-    canDeleteContent() {
-        switch (this.userRole) {
-            case 'admin':
-                return true;
-            case 'instructor':
-                return false; // Instructors typically can't delete
-            case 'parent':
-                return false;
-            case 'guest':
-                return false;
-            default:
-                return false;
-        }
-    }
-
-    canViewContent() {
-        // Most users can view content
-        return ['admin', 'instructor', 'parent', 'guest'].includes(this.userRole);
-    }
-
-    // Check if user can view specific field (your existing logic)
-    canViewField(field, context = {}) {
-        const { kidData, vehicleData } = context;
-
-        switch (this.userRole) {
-            case 'admin':
-                return true; // Admins see everything
-
-            case 'parent':
-                { if (!kidData || kidData.parentInfo?.parentId !== this.user.uid) {
-                    return false; // Can only see own kids
-                }
-
-                // Fields parents CAN see (adapted to your existing structure)
-                const parentCanView = [
-                    'participantNumber', 'firstName', 'lastName', 'fullName',
-                    'personalInfo.address', 'address', 'personalInfo.dateOfBirth',
-                    'dateOfBirth', 'personalInfo.capabilities', 'personalInfo.announcersNotes',
-                    'personalInfo.photo', 'parentInfo.name', 'guardianName',
-                    'parentInfo.email', 'email', 'parentInfo.phone', 'contactNumber',
-                    'parentInfo.grandparentsInfo', 'comments.parent', 'notes',
-                    'signedDeclaration', 'signedFormStatus',
-                    // Vehicle fields parents can see
-                    'vehicle.make', 'vehicle.model', 'vehicle.licensePlate', 'vehicle.photo'
-                ];
-
-                // Fields parents CANNOT see (red fields from Hebrew document)
-                const parentCannotView = [
-                    'comments.organization', 'comments.teamLeader', 'comments.familyContact',
-                    'instructorComments', 'medicalNotes', 'emergencyContact', 'emergencyPhone',
-                    'vehicle.batteryType', 'vehicle.batteryDate', 'vehicle.driveType',
-                    'vehicle.steeringType', 'vehicle.notes', 'vehicle.modifications'
-                ];
-
-                if (parentCannotView.includes(field)) return false;
-                return parentCanView.some(pattern =>
-                    field.startsWith(pattern.replace('.*', '')) || field === pattern
-                ); }
-
-            case 'instructor':
-                if (!kidData || kidData.instructorId !== this.userData.instructorId) {
-                    return false; // Can only see assigned kids (1-15)
-                }
-                return true; // Instructors see all fields for their kids
-
-            case 'guest':
-                // Guests only see specific fields for event participants
-                { const guestCanView = [
-                    'firstName', 'lastName', 'personalInfo.address', 'address',
-                    'personalInfo.capabilities', 'personalInfo.announcersNotes',
-                    'parentInfo.name', 'guardianName', 'parentInfo.phone', 'contactNumber',
-                    'vehicle.make', 'vehicle.model', 'participantNumber'
-                ];
-
-                const guestCannotView = [
-                    'parentInfo.email', 'email', 'comments.parent', 'comments.familyContact',
-                    'parentInfo.grandparentsInfo', 'signedDeclaration', 'emergencyContact',
-                    'emergencyPhone'
-                ];
-
-                if (guestCannotView.includes(field)) return false;
-                return guestCanView.includes(field); }
-
-            default:
-                return false;
-        }
-    }
-
-    // Check if user can edit specific field (your existing logic)
-    canEditField(field, context = {}) {
-        const { kidData, vehicleData } = context;
-
-        switch (this.userRole) {
-            case 'admin':
-                return true; // Admins can edit everything
-
-            case 'parent':
-                if (!kidData || kidData.parentInfo?.parentId !== this.user.uid) {
-                    return false;
-                }
-                // Parents can only edit purple fields from Hebrew document
-                return [
-                    'comments.parent', 'notes', 'personalInfo.photo',
-                    'parentInfo.phone', 'contactNumber', 'parentInfo.grandparentsInfo.names',
-                    'parentInfo.grandparentsInfo.phone'
-                ].includes(field);
-
-            case 'instructor':
-                if (!kidData || kidData.instructorId !== this.userData.instructorId) {
-                    return false;
-                }
-                // Instructors can edit purple fields for their kids
-                return [
-                    'comments.teamLeader', 'instructorComments', 'medicalNotes',
-                    // Vehicle technical specs
-                    'vehicle.batteryType', 'vehicle.batteryDate', 'vehicle.driveType',
-                    'vehicle.steeringType', 'vehicle.notes', 'vehicle.modifications'
-                ].includes(field);
-
-            case 'guest':
-                // Guests can edit organization comments only
-                return ['comments.organization'].includes(field);
-
-            default:
-                return false;
-        }
-    }
-
-    // Check if user can view this specific kid at all
-    canViewKid(kidData) {
-        switch (this.userRole) {
-            case 'admin':
-                return true;
-            case 'parent':
-                return kidData.parentInfo?.parentId === this.user.uid;
-            case 'instructor':
-                return kidData.instructorId === this.userData.instructorId;
-            case 'guest':
-                // For guests, we'd need to check event participation
-                // This would require additional logic to check eventParticipants collection
-                return true; // Simplified for now
-            default:
-                return false;
-        }
-    }
-
-    // Filter entire data object based on permissions
-    filterData(data, type = 'kid') {
-        if (this.userRole === 'admin') return data;
-
-        const filtered = { ...data };
-
-        // Get all possible fields for this data type
-        const fieldsToCheck = type === 'kid' ? this.getKidFields() : this.getVehicleFields();
-
-        fieldsToCheck.forEach(field => {
-            if (!this.canViewField(field, { kidData: data, vehicleData: data })) {
-                this.removeNestedField(filtered, field);
-            }
-        });
-
-        return filtered;
-    }
-
-    getKidFields() {
-        return [
-            'participantNumber', 'personalInfo.address', 'personalInfo.dateOfBirth',
-            'personalInfo.capabilities', 'personalInfo.announcersNotes', 'personalInfo.photo',
-            'parentInfo.name', 'parentInfo.email', 'parentInfo.phone',
-            'parentInfo.grandparentsInfo', 'comments.parent', 'comments.organization',
-            'comments.teamLeader', 'comments.familyContact', 'instructorComments',
-            'signedDeclaration', 'signedFormStatus'
-        ];
-    }
-
-    getVehicleFields() {
-        return [
-            'make', 'model', 'licensePlate', 'batteryType', 'batteryDate',
-            'driveType', 'steeringType', 'photo', 'notes', 'modifications'
-        ];
-    }
-
-    removeNestedField(obj, path) {
-        const keys = path.split('.');
-        let current = obj;
-
-        for (let i = 0; i < keys.length - 1; i++) {
-            if (!current[keys[i]]) return;
-            current = current[keys[i]];
-        }
-
-        delete current[keys[keys.length - 1]];
-    }
-}
+};

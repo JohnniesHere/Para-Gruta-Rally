@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { doc, getDoc, setDoc, Timestamp, collection } from 'firebase/firestore';
+import { doc, getDoc, setDoc, Timestamp } from 'firebase/firestore';
 import {
     getAuth,
     createUserWithEmailAndPassword,
     updateProfile,
     sendPasswordResetEmail,
-    EmailAuthProvider,
-    reauthenticateWithCredential
+    EmailAuthProvider
 } from 'firebase/auth';
 import { db } from '../../firebase';
 import Spinner from '../common/Spinner';
@@ -33,7 +32,6 @@ const UserForm = () => {
     const [saving, setSaving] = useState(false);
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [currentPassword, setCurrentPassword] = useState('');
     const [sendResetEmail, setSendResetEmail] = useState(false);
     const [currentUser, setCurrentUser] = useState(null);
 

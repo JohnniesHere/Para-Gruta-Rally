@@ -197,6 +197,7 @@ const CreateEventPage = () => {
         }
     };
 
+
     // Show loading if permissions not loaded yet
     if (!permissions) {
         return (

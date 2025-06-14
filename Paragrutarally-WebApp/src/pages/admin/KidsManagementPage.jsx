@@ -1,15 +1,15 @@
-// src/pages/admin/KidsManagementPage.jsx - Integrated with Permission System
+// src/pages/admin/KidsManagementPage.jsx - WITH TEAM CHANGE MODAL
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
+import TeamChangeModal from '../../components/modals/TeamChangeModal.jsx';
 import { useTheme } from '../../contexts/ThemeContext';
-import { usePermissions } from '../../hooks/usePermissions.jsx';
+import { usePermissions, canUserAccessKid } from '../../hooks/usePermissions.jsx';
 import {
     getAllKids,
     getKidsByInstructor,
     getKidsByParent,
-    deleteKid,
-    searchKids
+    deleteKid
 } from '../../services/kidService';
 import {
     IconUserCircle as Baby,
@@ -27,7 +27,6 @@ import {
     IconFile as FileSpreadsheet,
     IconX as X,
     IconEye as Eye,
-    IconTarget as Target,
     IconEdit as Edit,
     IconTrash as Trash2,
     IconClock as Clock,
@@ -37,8 +36,8 @@ import './KidsManagementPage.css';
 
 const KidsManagementPage = () => {
     const navigate = useNavigate();
-    const { isDarkMode, appliedTheme } = useTheme();
-    const { permissions, userRole, userData, user } = usePermissions();
+    const { appliedTheme } = useTheme();
+    const { permissions, userRole, userData, user, loading: permissionsLoading, error: permissionsError } = usePermissions();
 
     const [kids, setKids] = useState([]);
     const [filteredKids, setFilteredKids] = useState([]);
@@ -49,10 +48,16 @@ const KidsManagementPage = () => {
     const [statusFilter, setStatusFilter] = useState('all');
     const [showingKidsWithoutTeams, setShowingKidsWithoutTeams] = useState(false);
 
+    // TEAM CHANGE MODAL STATE
+    const [teamModalOpen, setTeamModalOpen] = useState(false);
+    const [selectedKidForTeamChange, setSelectedKidForTeamChange] = useState(null);
+
     // Load kids based on user role
     useEffect(() => {
-        loadKids();
-    }, [userRole, userData]);
+        if (!permissionsLoading && permissions) {
+            loadKids();
+        }
+    }, [userRole, userData, permissions, permissionsLoading]);
 
     // Filter kids when search term or filters change
     useEffect(() => {
@@ -62,6 +67,7 @@ const KidsManagementPage = () => {
     const loadKids = async () => {
         if (!permissions) return;
 
+        console.log(`🔄 Loading kids for ${userRole}`);
         setIsLoading(true);
         setError(null);
 
@@ -72,38 +78,41 @@ const KidsManagementPage = () => {
                 case 'admin':
                     kidsData = await getAllKids();
                     break;
-
                 case 'instructor':
                     if (userData?.instructorId) {
                         kidsData = await getKidsByInstructor(userData.instructorId);
                     }
                     break;
-
                 case 'parent':
                     if (user?.uid) {
                         kidsData = await getKidsByParent(user.uid);
                     }
                     break;
-
                 case 'guest':
-                    // Guests might see event participants only
-                    kidsData = await getAllKids();
+                    kidsData = [];
                     break;
-
                 default:
                     kidsData = [];
             }
 
-            // Filter kids based on permissions and transform to match current design
-            const permissionFilteredKids = kidsData
-                .filter(kid => permissions.canViewKid(kid))
+            console.log(`✅ Loaded ${kidsData.length} kids for ${userRole}`);
+
+            // Filter and transform based on role-based access
+            const accessibleKids = kidsData
+                .filter(kid => canUserAccessKid(userRole, kid, userData, user))
                 .map(kid => ({
                     id: kid.id,
-                    name: `${kid.personalInfo?.firstName || ''} ${kid.personalInfo?.lastName || ''}`.trim() || 'Name Hidden',
-                    parentName: permissions.canView('parentInfo.name', { kidData: kid }) ? kid.parentInfo?.name || 'N/A' : 'Restricted',
-                    age: permissions.canView('personalInfo.dateOfBirth', { kidData: kid })
-                        ? (kid.personalInfo?.dateOfBirth ? calculateAge(kid.personalInfo.dateOfBirth) : 'N/A')
-                        : 'N/A',
+                    name: userRole === 'admin'
+                        ? kid.participantNumber ? `Kid #${kid.participantNumber}` : 'Unnamed Kid'
+                        : userRole === 'parent' || userRole === 'instructor'
+                            ? `${kid.personalInfo?.firstName || ''} ${kid.personalInfo?.lastName || ''}`.trim() || `Kid #${kid.participantNumber}`
+                            : 'Restricted',
+                    parentName: userRole === 'admin' || userRole === 'instructor'
+                        ? kid.parentInfo?.name || 'N/A'
+                        : userRole === 'parent'
+                            ? 'You'
+                            : 'Restricted',
+                    age: kid.personalInfo?.dateOfBirth ? calculateAge(kid.personalInfo.dateOfBirth) : 'N/A',
                     team: kid.teamId ? `Team ${kid.teamId.slice(0, 8)}...` : 'No Team',
                     teamId: kid.teamId,
                     status: kid.signedFormStatus?.toLowerCase() || 'pending',
@@ -111,10 +120,12 @@ const KidsManagementPage = () => {
                     originalData: kid
                 }));
 
-            setKids(permissionFilteredKids);
+            console.log(`✅ User can access ${accessibleKids.length} kids`);
+            setKids(accessibleKids);
+
         } catch (err) {
-            console.error('Error loading kids:', err);
-            setError('Failed to load kids. Please try again.');
+            console.error('💥 Error loading kids:', err);
+            setError(`Failed to load kids: ${err.message}`);
         } finally {
             setIsLoading(false);
         }
@@ -157,15 +168,14 @@ const KidsManagementPage = () => {
         setShowingKidsWithoutTeams(false);
     };
 
-    // Handle clicking on the "Kids without Teams" stat card
     const handleShowKidsWithoutTeams = () => {
         setTeamFilter('no-team');
         setShowingKidsWithoutTeams(true);
     };
 
     const handleDeleteKid = async (kid) => {
-        if (!permissions.canEdit('delete', { kidData: kid.originalData })) {
-            alert('You do not have permission to delete this kid.');
+        if (userRole !== 'admin') {
+            alert('Only administrators can delete kids.');
             return;
         }
 
@@ -184,14 +194,41 @@ const KidsManagementPage = () => {
         navigate(`/admin/kids/view/${kid.id}`);
     };
 
+    // TEAM CHANGE MODAL HANDLERS
     const handleChangeTeam = (kid) => {
-        navigate(`/admin/kids/edit/${kid.id}`, {
-            state: { focusTeam: true }
-        });
+        setSelectedKidForTeamChange(kid);
+        setTeamModalOpen(true);
+    };
+
+    const handleTeamChanged = (kidId, newTeamId) => {
+        // Update the kid in the local state
+        setKids(prevKids =>
+            prevKids.map(kid =>
+                kid.id === kidId
+                    ? {
+                        ...kid,
+                        teamId: newTeamId,
+                        team: newTeamId ? `Team ${newTeamId.slice(0, 8)}...` : 'No Team'
+                    }
+                    : kid
+            )
+        );
+
+        // Close modal
+        setTeamModalOpen(false);
+        setSelectedKidForTeamChange(null);
+
+        // Show success message
+        const kidName = kids.find(k => k.id === kidId)?.name;
+        const teamName = newTeamId ? `Team ${newTeamId.slice(0, 8)}...` : 'removed from team';
+        alert(`✅ ${kidName} has been ${newTeamId ? 'assigned to' : 'removed from'} ${teamName}`);
     };
 
     const handleEditKid = (kid) => {
-        navigate(`/admin/kids/edit/${kid.id}`);
+        // For now, show an alert that this would open an edit form
+        // You can implement a proper edit modal or navigate to a simplified edit page
+        alert(`Edit functionality for ${kid.name} would go here. You could create an EditKidModal similar to the TeamChangeModal.`);
+        // navigate(`/admin/kids/edit/${kid.id}`); // Remove this to avoid the permission error
     };
 
     const handleAddKid = () => {
@@ -204,6 +241,38 @@ const KidsManagementPage = () => {
         activeKids: kids.filter(k => k.status === 'active' || k.status === 'completed').length,
         kidsWithTeams: kids.filter(k => k.team !== 'No Team').length
     };
+
+    if (permissionsLoading) {
+        return (
+            <Dashboard requiredRole={userRole}>
+                <div className={`kids-management-page ${appliedTheme}-mode`}>
+                    <div className="loading-state">
+                        <div className="loading-content">
+                            <Clock className="loading-spinner" size={30} />
+                            <p>Loading permissions...</p>
+                        </div>
+                    </div>
+                </div>
+            </Dashboard>
+        );
+    }
+
+    if (permissionsError) {
+        return (
+            <Dashboard requiredRole={userRole}>
+                <div className={`kids-management-page ${appliedTheme}-mode`}>
+                    <div className="error-container">
+                        <h3>Permission Error</h3>
+                        <p>{permissionsError}</p>
+                        <button onClick={() => window.location.reload()} className="btn-primary">
+                            <RefreshCw className="btn-icon" size={18} />
+                            Reload Page
+                        </button>
+                    </div>
+                </div>
+            </Dashboard>
+        );
+    }
 
     if (error) {
         return (
@@ -230,7 +299,7 @@ const KidsManagementPage = () => {
                 <div className="kids-management-container">
                     {/* Header with Actions */}
                     <div className="page-header">
-                        {(userRole === 'admin' || userRole === 'instructor') && (
+                        {userRole === 'admin' && (
                             <button className="btn-primary" onClick={handleAddKid}>
                                 <Plus className="btn-icon" size={18} />
                                 Add New Kid
@@ -242,34 +311,38 @@ const KidsManagementPage = () => {
                                 <RefreshCw className="btn-icon" size={18} />
                                 Refresh
                             </button>
-                            <button className="btn-export">
-                                <Download className="btn-icon" size={18} />
-                                Export Kids
-                            </button>
+                            {(userRole === 'admin' || userRole === 'instructor') && (
+                                <button className="btn-export">
+                                    <Download className="btn-icon" size={18} />
+                                    Export Kids
+                                </button>
+                            )}
                         </div>
                     </div>
 
-                    {/* Priority Stats Cards - Kids Without Teams First */}
+                    {/* Stats */}
                     <div className="stats-grid">
-                        <div
-                            className="stat-card priority-warning clickable"
-                            onClick={handleShowKidsWithoutTeams}
-                            role="button"
-                            tabIndex={0}
-                            onKeyDown={(e) => e.key === 'Enter' && handleShowKidsWithoutTeams()}
-                        >
-                            <AlertTriangle className="stat-icon warning" size={45} />
-                            <div className="stat-content">
-                                <h3>Kids without Teams</h3>
-                                <div className="stat-value">{stats.kidsWithoutTeams}</div>
-                                <div className="stat-subtitle">Click to view</div>
+                        {(userRole === 'admin' || userRole === 'instructor') && (
+                            <div
+                                className="stat-card priority-warning clickable"
+                                onClick={handleShowKidsWithoutTeams}
+                                role="button"
+                                tabIndex={0}
+                                onKeyDown={(e) => e.key === 'Enter' && handleShowKidsWithoutTeams()}
+                            >
+                                <AlertTriangle className="stat-icon warning" size={45} />
+                                <div className="stat-content">
+                                    <h3>Kids without Teams</h3>
+                                    <div className="stat-value">{stats.kidsWithoutTeams}</div>
+                                    <div className="stat-subtitle">Click to view</div>
+                                </div>
                             </div>
-                        </div>
+                        )}
 
                         <div className="stat-card total">
                             <Users className="stat-icon" size={40} />
                             <div className="stat-content">
-                                <h3>Total Kids</h3>
+                                <h3>{userRole === 'parent' ? 'Your Kids' : 'Total Kids'}</h3>
                                 <div className="stat-value">{stats.totalKids}</div>
                             </div>
                         </div>
@@ -290,6 +363,7 @@ const KidsManagementPage = () => {
                             </div>
                         </div>
                     </div>
+
                     {/* Search and Filters */}
                     <div className="search-filter-section">
                         <div className="search-container">
@@ -387,8 +461,13 @@ const KidsManagementPage = () => {
                                         <div className="empty-state">
                                             <Baby className="empty-icon" size={60} />
                                             <h3>No kids found</h3>
-                                            <p>Try adjusting your search or filters</p>
-                                            {(userRole === 'admin' || userRole === 'instructor') && (
+                                            <p>
+                                                {userRole === 'parent'
+                                                    ? 'No kids registered under your account'
+                                                    : 'Try adjusting your search or filters'
+                                                }
+                                            </p>
+                                            {userRole === 'admin' && (
                                                 <button className="btn-primary" style={{ marginTop: '15px' }} onClick={handleAddKid}>
                                                     <Plus className="btn-icon" size={18} />
                                                     Add First Kid
@@ -411,28 +490,28 @@ const KidsManagementPage = () => {
                                         </td>
                                         <td>{kid.age}</td>
                                         <td>
-                                                <span className={`team-badge ${kid.team === 'No Team' ? 'no-team' : 'with-team'}`}>
-                                                    {kid.team === 'No Team' ? (
-                                                        <>
-                                                            <AlertTriangle size={14} style={{ marginRight: '4px' }} />
-                                                            No Team
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <Car size={14} style={{ marginRight: '4px' }} />
-                                                            {kid.team}
-                                                        </>
-                                                    )}
-                                                </span>
+                                            <span className={`team-badge ${kid.team === 'No Team' ? 'no-team' : 'with-team'}`}>
+                                                {kid.team === 'No Team' ? (
+                                                    <>
+                                                        <AlertTriangle size={14} style={{ marginRight: '4px' }} />
+                                                        No Team
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Car size={14} style={{ marginRight: '4px' }} />
+                                                        {kid.team}
+                                                    </>
+                                                )}
+                                            </span>
                                         </td>
                                         <td>
-                                                <span className={`status-badge status-${kid.status}`}>
-                                                    {kid.status === 'active' && <Check size={14} style={{ marginRight: '4px' }} />}
-                                                    {kid.status === 'completed' && <Check size={14} style={{ marginRight: '4px' }} />}
-                                                    {kid.status === 'cancelled' && <XCircle size={14} style={{ marginRight: '4px' }} />}
-                                                    {kid.status === 'pending' && <Clock size={14} style={{ marginRight: '4px' }} />}
-                                                    {kid.status.charAt(0).toUpperCase() + kid.status.slice(1)}
-                                                </span>
+                                            <span className={`status-badge status-${kid.status}`}>
+                                                {kid.status === 'active' && <Check size={14} style={{ marginRight: '4px' }} />}
+                                                {kid.status === 'completed' && <Check size={14} style={{ marginRight: '4px' }} />}
+                                                {kid.status === 'cancelled' && <XCircle size={14} style={{ marginRight: '4px' }} />}
+                                                {kid.status === 'pending' && <Clock size={14} style={{ marginRight: '4px' }} />}
+                                                {kid.status.charAt(0).toUpperCase() + kid.status.slice(1)}
+                                            </span>
                                         </td>
                                         <td>
                                             <div className="action-buttons-enhanced">
@@ -443,24 +522,20 @@ const KidsManagementPage = () => {
                                                 >
                                                     <Eye size={16} />
                                                 </button>
-                                                {kid.team === 'No Team' ? (
+
+                                                {/* TEAM CHANGE BUTTON - Opens modal instead of navigating */}
+                                                {(userRole === 'admin' || userRole === 'instructor') && (
                                                     <button
-                                                        className="btn-action assign-team priority"
+                                                        className={`btn-action ${kid.team === 'No Team' ? 'assign-team priority' : 'change-team'}`}
                                                         onClick={() => handleChangeTeam(kid)}
-                                                        title="Assign Team"
+                                                        title={kid.team === 'No Team' ? 'Assign Team' : 'Change Team'}
                                                     >
-                                                        <Target size={16} />
-                                                    </button>
-                                                ) : (
-                                                    <button
-                                                        className="btn-action change-team"
-                                                        onClick={() => handleChangeTeam(kid)}
-                                                        title="Change Team"
-                                                    >
-                                                        <RefreshCw size={16} />
+                                                        {kid.team === 'No Team' ? <Plus size={16} /> : <Car size={16} />}
                                                     </button>
                                                 )}
-                                                {permissions.canEdit('participantNumber', { kidData: kid.originalData }) && (
+
+                                                {/* Edit - Placeholder for now */}
+                                                {(userRole === 'admin' || userRole === 'instructor') && (
                                                     <button
                                                         className="btn-action edit"
                                                         onClick={() => handleEditKid(kid)}
@@ -469,6 +544,8 @@ const KidsManagementPage = () => {
                                                         <Edit size={16} />
                                                     </button>
                                                 )}
+
+                                                {/* Delete - Admin only */}
                                                 {userRole === 'admin' && (
                                                     <button
                                                         className="btn-action delete"
@@ -487,6 +564,17 @@ const KidsManagementPage = () => {
                         </table>
                     </div>
                 </div>
+
+                {/* TEAM CHANGE MODAL */}
+                <TeamChangeModal
+                    kid={selectedKidForTeamChange}
+                    isOpen={teamModalOpen}
+                    onClose={() => {
+                        setTeamModalOpen(false);
+                        setSelectedKidForTeamChange(null);
+                    }}
+                    onTeamChanged={handleTeamChanged}
+                />
             </div>
         </Dashboard>
     );
