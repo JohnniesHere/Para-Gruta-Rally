@@ -6,160 +6,264 @@
    ======================================== */
 
 /* Page uses .admin-page class from global.css */
-.teams-management-page {
+.teams-management {
     /* No additional styles needed - inherits from .admin-page */
 }
 
-/* Container uses .admin-container class from global.css */
-.teams-management-container {
-    /* No additional styles needed - inherits from .admin-container */
-}
-
 /* ========================================
-   TEAMS-SPECIFIC STAT CARDS
+   FILTERS SECTION SPECIFIC
    ======================================== */
 
-.stat-card.open-instructors.clickable:hover {
-    transform: translateY(-8px) scale(1.02);
-    box-shadow: 0 15px 40px rgba(16, 185, 129, 0.4);
-}
-
-/* ========================================
-   TEAM INFO STYLING
-   ======================================== */
-
-.team-info {
+.filters-section {
+    /* Inherits from .search-filter-section but with custom layout */
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 15px;
+    transition: all 0.3s ease;
+}
+
+.search-container {
+    width: 100%;
+}
+
+.filter-controls {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-primary);
+    cursor: pointer;
+    user-select: none;
+    transition: color 0.3s ease;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: var(--accent-color);
+}
+
+/* ========================================
+   TEAMS GRID SPECIFIC
+   ======================================== */
+
+.teams-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 20px;
+}
+
+.team-card {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px var(--shadow-color);
+}
+
+.team-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px var(--shadow-color);
+    border-color: var(--accent-color);
+}
+
+.team-card-header {
+    background: linear-gradient(135deg, var(--accent-color), var(--accent-hover));
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.team-name-header {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.status-badge .status {
+    background-color: rgba(255, 255, 255, 0.2);
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.team-card-body {
+    padding: 20px;
 }
 
 .team-name {
-    font-weight: 600;
+    margin: 0 0 15px 0;
     color: var(--text-primary);
-}
-
-.team-description {
-    color: var(--text-muted);
-    font-size: 12px;
-}
-
-/* ========================================
-   INSTRUCTOR BADGES
-   ======================================== */
-
-.instructor-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 12px;
+    font-size: 18px;
     font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.instructor-badge.assigned {
-    background: linear-gradient(135deg, var(--success-light) 0%, #D1FAE5 100%);
-    color: #059669;
-    border: 1px solid #34D399;
-}
-
-.instructor-badge.unassigned {
-    background: linear-gradient(135deg, var(--warning-light) 0%, #FDE68A 100%);
-    color: #D97706;
-    border: 1px solid #FBBF24;
-    animation: pulse 2s infinite;
-}
-
-/* ========================================
-   KIDS COUNT
-   ======================================== */
-
-.kids-count {
-    font-weight: 600;
-    color: var(--racing-purple);
-}
-
-/* ========================================
-   ENHANCED ACTION BUTTONS
-   ======================================== */
-
-.action-buttons-enhanced {
+    transition: color 0.3s ease;
     display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
 }
 
-.btn-action.assign-instructor.priority {
-    background: linear-gradient(135deg, var(--racing-gold) 0%, var(--warning-color) 100%);
+.team-details {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.team-details p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 14px;
+    transition: color 0.3s ease;
+}
+
+.team-details strong {
     color: var(--text-primary);
-    animation: pulse 2s infinite;
-    border: 2px solid #D97706;
+    font-weight: 500;
 }
 
-.btn-action.manage-kids {
-    background: linear-gradient(135deg, var(--racing-purple) 0%, #7C3AED 100%);
+.instructor-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.instructor-info.no-instructor {
+    color: var(--error-color);
+}
+
+.instructor-info.has-instructor {
+    color: var(--success-color);
+}
+
+.members-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.members-count {
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.members-count.empty {
+    background-color: #fef2f2;
+    border-color: var(--error-color);
+    color: var(--error-color);
+}
+
+.members-count.available {
+    background-color: #f0fdf4;
+    border-color: var(--success-color);
+    color: var(--success-color);
+}
+
+.members-count.full {
+    background-color: #fffbeb;
+    border-color: #f59e0b;
+    color: #d97706;
+}
+
+.team-card-footer {
+    padding: 15px 20px;
+    background-color: var(--bg-tertiary);
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+/* ========================================
+   TEAM ACTION BUTTONS
+   ======================================== */
+
+/* Card footer buttons inherit from global .btn classes */
+.view-button,
+.edit-button,
+.delete-button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.view-button {
+    background-color: var(--accent-color);
     color: white;
 }
 
+.view-button:hover {
+    background-color: var(--accent-hover);
+}
+
+.edit-button {
+    background-color: var(--success-color);
+    color: white;
+}
+
+.edit-button:hover {
+    background-color: var(--success-hover);
+}
+
+.delete-button {
+    background-color: var(--error-color);
+    color: white;
+}
+
+.delete-button:hover {
+    background-color: var(--error-hover);
+}
+
 /* ========================================
-   LOADING STATE SPECIFIC
+   TABLE OVERRIDES FOR TEAMS
    ======================================== */
 
-.loading-state {
-    text-align: center;
-    padding: 60px 20px;
+.teams-table .priority-row {
+    background-color: #fffbeb;
+    border-left: 4px solid #f59e0b;
 }
 
-.loading-content {
+.teams-table .priority-row:hover {
+    background-color: #fef3c7;
+}
+
+.instructor-cell .no-instructor {
+    color: var(--error-color);
+    font-weight: 500;
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 10px;
-    color: var(--text-muted);
+    gap: 4px;
 }
 
-/* ========================================
-   ENHANCED EMPTY STATE WITH RACING THEME
-   ======================================== */
-
-.fun-illustration {
-    margin-top: 30px;
-    padding: 20px;
-    background: linear-gradient(135deg, var(--racing-gold) 0%, var(--racing-orange) 100%);
-    border-radius: 15px;
-    border: 2px solid var(--warning-color);
-}
-
-.race-cars {
+.instructor-cell .has-instructor {
+    color: var(--success-color);
+    font-weight: 500;
     display: flex;
-    justify-content: center;
     align-items: center;
-    margin-bottom: 15px;
-}
-
-.race-cars span {
-    animation: race 3s infinite linear;
-}
-
-.race-cars span:nth-child(1) { animation-delay: 0s; }
-.race-cars span:nth-child(2) { animation-delay: 1s; }
-.race-cars span:nth-child(3) { animation-delay: 2s; }
-
-@keyframes race {
-    0% { transform: translateX(-20px); }
-    50% { transform: translateX(20px); }
-    100% { transform: translateX(-20px); }
-}
-
-.empty-actions {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    margin-bottom: 30px;
-    flex-wrap: wrap;
+    gap: 4px;
 }
 
 /* ========================================
@@ -167,25 +271,50 @@
    ======================================== */
 
 @media (max-width: 768px) {
-    .action-buttons-enhanced {
+    .filter-controls {
         flex-direction: column;
-        gap: 4px;
+        align-items: stretch;
+        gap: 15px;
     }
 
-    .empty-actions {
-        flex-direction: column;
-        align-items: center;
+    .teams-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .team-card-footer {
+        flex-wrap: wrap;
+        justify-content: center;
     }
 }
 
 @media (max-width: 480px) {
-    .empty-actions {
-        flex-direction: column;
-        align-items: center;
+    .team-card-header {
+        padding: 12px 15px;
     }
 
-    .race-cars span {
-        font-size: 30px;
-        margin: 0 5px;
+    .team-name-header {
+        font-size: 16px;
+    }
+
+    .team-card-body {
+        padding: 15px;
+    }
+
+    .team-name {
+        font-size: 16px;
+    }
+
+    .team-details p {
+        font-size: 13px;
+    }
+
+    .team-card-footer {
+        padding: 12px 15px;
+    }
+
+    .view-button, .edit-button, .delete-button {
+        padding: 6px 12px;
+        font-size: 13px;
     }
 }

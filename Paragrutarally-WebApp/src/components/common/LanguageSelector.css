@@ -1,339 +1,64 @@
 /* src/components/common/LanguageSelector.css */
 .language-selector {
-    position: relative;
     display: inline-block;
+    position: relative;
 }
 
-/* Language button */
-.language-button {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 12px;
-    background-color: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
+.language-select {
+    background: var(--bg-secondary);
     color: var(--text-primary);
-    cursor: pointer;
+    border: 2px solid var(--border-color);
+    border-radius: 25px;
+    padding: 8px 16px;
     font-size: 14px;
     font-weight: 500;
+    cursor: pointer;
     transition: all 0.3s ease;
-    min-width: 80px;
-    justify-content: space-between;
+    outline: none;
+    min-width: 120px;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='currentColor'><path fill-rule='evenodd' d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z' clip-rule='evenodd'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
+    padding-right: 40px;
 }
 
-.language-button:hover {
-    background-color: var(--bg-tertiary);
+.language-select:hover {
     border-color: var(--accent-color);
     transform: translateY(-1px);
+    box-shadow: 0 4px 12px var(--shadow-color);
 }
 
-.language-button:focus {
-    outline: none;
+.language-select:focus {
     border-color: var(--accent-color);
-    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-/* Language button elements */
-.language-flag {
-    font-size: 16px;
-    line-height: 1;
-    flex-shrink: 0;
+/* RTL Support */
+.rtl .language-select {
+    background-position: left 12px center;
+    padding-right: 16px;
+    padding-left: 40px;
 }
 
-.language-name {
-    color: var(--text-primary);
-    transition: color 0.3s ease;
-    white-space: nowrap;
+/* Dark mode adjustments */
+[data-theme="dark"] .language-select,
+.dark-mode .language-select {
+    background-image: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%23CBD5E1'><path fill-rule='evenodd' d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z' clip-rule='evenodd'/></svg>");
 }
 
-.language-arrow {
-    transition: transform 0.3s ease;
-    color: var(--text-secondary);
-    flex-shrink: 0;
-}
-
-.language-arrow.open {
-    transform: rotate(180deg);
-}
-
-/* Overlay */
-.language-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 998;
-    background: transparent;
-}
-
-/* Dropdown */
-.language-dropdown {
-    position: absolute;
-    top: 100%;
-    z-index: 999;
-    background-color: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    box-shadow: 0 4px 16px var(--shadow-color);
-    margin-top: 4px;
-    overflow: hidden;
-    min-width: 180px;
-    animation: languageDropdownOpen 0.2s ease-out;
-    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-/* RTL/LTR positioning */
-.language-selector.ltr .language-dropdown {
-    left: 0;
-}
-
-.language-selector.rtl .language-dropdown {
-    right: 0;
-}
-
-/* Dropdown animation */
-@keyframes languageDropdownOpen {
-    from {
-        opacity: 0;
-        transform: translateY(-8px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Language option */
-.language-option {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    width: 100%;
-    padding: 12px 16px;
-    background: none;
-    border: none;
-    color: var(--text-primary);
-    cursor: pointer;
-    font-size: 14px;
-    text-align: left;
-    transition: all 0.3s ease;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.language-option:last-child {
-    border-bottom: none;
-}
-
-.language-option:hover {
-    background-color: var(--bg-tertiary);
-    color: var(--accent-color);
-}
-
-.language-option.active {
-    background-color: var(--accent-light);
-    color: var(--accent-color);
-}
-
-/* RTL text alignment */
-.language-selector.rtl .language-option {
-    text-align: right;
-}
-
-/* Language option elements */
-.language-option .language-flag {
-    font-size: 18px;
-    flex-shrink: 0;
-}
-
-.language-names {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    flex: 1;
-    min-width: 0;
-}
-
-.language-native {
-    font-weight: 500;
-    color: var(--text-primary);
-    transition: color 0.3s ease;
-}
-
-.language-english {
-    font-size: 12px;
-    color: var(--text-secondary);
-    transition: color 0.3s ease;
-}
-
-.language-option:hover .language-native,
-.language-option.active .language-native {
-    color: var(--accent-color);
-}
-
-.language-option:hover .language-english,
-.language-option.active .language-english {
-    color: var(--accent-color);
-    opacity: 0.8;
-}
-
-/* Check icon */
-.language-check {
-    color: var(--accent-color);
-    flex-shrink: 0;
-}
-
-/* RTL specific adjustments */
-.language-selector.rtl .language-button {
-    flex-direction: row-reverse;
-}
-
-.language-selector.rtl .language-option {
-    flex-direction: row-reverse;
-}
-
-.language-selector.rtl .language-names {
-    align-items: flex-end;
-}
-
-/* Size variants */
-.language-selector.small .language-button {
-    padding: 6px 10px;
-    font-size: 12px;
-    min-width: 70px;
-}
-
-.language-selector.small .language-flag {
-    font-size: 14px;
-}
-
-.language-selector.small .language-dropdown {
-    min-width: 160px;
-}
-
-.language-selector.small .language-option {
-    padding: 10px 14px;
-    font-size: 13px;
-}
-
-.language-selector.large .language-button {
-    padding: 10px 16px;
-    font-size: 16px;
-    min-width: 100px;
-}
-
-.language-selector.large .language-flag {
-    font-size: 20px;
-}
-
-.language-selector.large .language-dropdown {
-    min-width: 200px;
-}
-
-.language-selector.large .language-option {
-    padding: 14px 18px;
-    font-size: 15px;
-}
-
-/* Navbar integration */
-.navbar .language-selector .language-button {
-    background-color: transparent;
-    border: 1px solid transparent;
-    padding: 6px 10px;
-}
-
-.navbar .language-selector .language-button:hover {
-    background-color: var(--bg-tertiary);
-    border-color: var(--border-color);
-}
-
-/* Mobile responsiveness */
+/* Responsive */
 @media (max-width: 768px) {
-    .language-dropdown {
-        min-width: 160px;
-        margin-top: 2px;
-    }
-
-    .language-option {
-        padding: 10px 12px;
+    .language-select {
+        min-width: 100px;
         font-size: 13px;
+        padding: 6px 12px;
+        padding-right: 35px;
     }
 
-    .language-option .language-flag {
-        font-size: 16px;
-    }
-}
-
-@media (max-width: 480px) {
-    .language-button {
-        min-width: 60px;
-        padding: 6px 8px;
-    }
-
-    .language-name {
-        display: none; /* Hide text on very small screens, show only flag */
-    }
-
-    .language-dropdown {
-        min-width: 140px;
-        right: 0; /* Always align to right on mobile for better UX */
-        left: auto;
-    }
-
-    .language-selector.rtl .language-dropdown {
-        right: 0;
-        left: auto;
-    }
-}
-
-/* High contrast mode support */
-@media (prefers-contrast: no-preference) {
-    .language-button {
-        border-width: 2px;
-    }
-
-    .language-dropdown {
-        border-width: 2px;
-    }
-
-    .language-option {
-        border-bottom-width: 2px;
-    }
-}
-
-/* Reduced motion support */
-@media (prefers-reduced-motion: reduce) {
-    .language-button,
-    .language-option,
-    .language-arrow,
-    .language-dropdown {
-        transition: none;
-    }
-
-    @keyframes languageDropdownOpen {
-        from, to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-}
-
-/* Focus management for accessibility */
-.language-selector:focus-within .language-button {
-    border-color: var(--accent-color);
-    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
-}
-
-/* Keyboard navigation support */
-.language-option:focus {
-    outline: 2px solid var(--accent-color);
-    outline-offset: -2px;
-}
-
-/* Print styles */
-@media print {
-    .language-selector {
-        display: none;
+    .rtl .language-select {
+        padding-right: 12px;
+        padding-left: 35px;
     }
 }

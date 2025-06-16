@@ -1766,3 +1766,262 @@ body.dark .stat-card.total::before {
     background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 215, 0, 0.05) 100%) !important;
     opacity: 0.3 !important;
 }
+
+/* ========================================
+   RTL SUPPORT FOR HEBREW LANGUAGE
+   Add this to the END of your global.css file
+   ======================================== */
+
+/* RTL Global Styles */
+.rtl {
+    direction: rtl;
+    text-align: right;
+}
+
+.ltr {
+    direction: ltr;
+    text-align: left;
+}
+
+/* RTL Search Input Wrapper */
+.rtl .search-input-wrapper {
+    flex-direction: row-reverse;
+}
+
+.rtl .search-icon {
+    right: auto;
+    left: 15px;
+}
+
+.rtl .clear-search {
+    left: auto;
+    right: 15px;
+}
+
+/* RTL Action Buttons */
+.rtl .action-buttons-enhanced {
+    flex-direction: row-reverse;
+}
+
+.rtl .action-buttons {
+    flex-direction: row-reverse;
+}
+
+/* RTL Header Actions */
+.rtl .header-actions {
+    flex-direction: row-reverse;
+}
+
+.rtl .page-header {
+    flex-direction: row-reverse;
+}
+
+/* RTL Results Content */
+.rtl .results-content {
+    flex-direction: row-reverse;
+}
+
+.rtl .results-info {
+    flex-direction: row-reverse;
+}
+
+/* RTL Filter Controls */
+.rtl .filter-controls {
+    flex-direction: row-reverse;
+}
+
+.rtl .search-filter-section {
+    grid-template-columns: 1fr 2fr auto;
+}
+
+/* RTL Form Grid */
+.rtl .form-grid {
+    direction: rtl;
+}
+
+/* RTL Stats Grid - Keep LTR for numbers but RTL for layout */
+.rtl .stats-grid {
+    direction: rtl;
+}
+
+.rtl .stat-card {
+    direction: ltr; /* Keep numbers LTR */
+    text-align: right;
+}
+
+.rtl .stat-content h3 {
+    text-align: right;
+}
+
+/* RTL Table Headers */
+.rtl .data-table th {
+    text-align: right;
+}
+
+.rtl .data-table td {
+    text-align: right;
+}
+
+/* RTL Navigation */
+.rtl .nav-links {
+    flex-direction: row-reverse;
+}
+
+/* RTL Modal */
+.rtl .modal-header {
+    flex-direction: row-reverse;
+}
+
+.rtl .modal-close {
+    order: -1;
+}
+
+/* RTL Language Selector */
+.rtl .language-select {
+    background-position: left 12px center;
+    padding-right: 16px;
+    padding-left: 40px;
+}
+
+/* RTL Button Groups */
+.rtl .btn-group {
+    flex-direction: row-reverse;
+}
+
+.rtl .form-actions {
+    flex-direction: row-reverse;
+}
+
+.rtl .racing-actions {
+    flex-direction: row-reverse;
+}
+
+/* RTL Card Layout */
+.rtl .card-header {
+    flex-direction: row-reverse;
+}
+
+.rtl .card-footer {
+    flex-direction: row-reverse;
+    justify-content: flex-start;
+}
+
+/* RTL Loading Content */
+.rtl .loading-content {
+    direction: ltr; /* Keep loading spinner LTR */
+    text-align: center;
+}
+
+/* RTL Error Container */
+.rtl .error-container {
+    text-align: center;
+}
+
+/* RTL Empty State */
+.rtl .empty-state {
+    text-align: center;
+}
+
+/* RTL Icon Adjustments */
+.rtl .btn-icon {
+    order: 1;
+    margin-left: 8px;
+    margin-right: 0;
+}
+
+.rtl .stat-icon {
+    order: 1;
+}
+
+.rtl .priority-indicator {
+    order: -1;
+    margin-left: 8px;
+    margin-right: 0;
+}
+
+/* RTL Filter Labels */
+.rtl .filter-label {
+    flex-direction: row-reverse;
+}
+
+.rtl .search-label {
+    flex-direction: row-reverse;
+}
+
+/* RTL Section Headers */
+.rtl .section-header {
+    flex-direction: row-reverse;
+}
+
+.rtl .racing-header .header-content {
+    flex-direction: row-reverse;
+}
+
+/* RTL Team/Kid Info */
+.rtl .team-info,
+.rtl .kid-info {
+    text-align: right;
+}
+
+.rtl .team-name,
+.rtl .kid-name {
+    flex-direction: row-reverse;
+}
+
+/* RTL Instructor Info */
+.rtl .instructor-info {
+    flex-direction: row-reverse;
+}
+
+.rtl .members-info {
+    flex-direction: row-reverse;
+}
+
+/* RTL Responsive Adjustments */
+@media (max-width: 768px) {
+    .rtl .search-filter-section {
+        grid-template-columns: 1fr;
+    }
+
+    .rtl .page-header {
+        flex-direction: column-reverse;
+    }
+
+    .rtl .header-actions {
+        flex-direction: row-reverse;
+        width: 100%;
+    }
+
+    .rtl .filter-controls {
+        flex-direction: column-reverse;
+    }
+}
+
+@media (max-width: 480px) {
+    .rtl .racing-actions {
+        flex-direction: column-reverse;
+    }
+
+    .rtl .btn-cancel,
+    .rtl .btn-submit.racing-submit {
+        width: 100%;
+    }
+}
+
+/* RTL Number Display - Keep numbers LTR even in RTL mode */
+.rtl .stat-value,
+.rtl .members-count,
+.rtl .participants-count,
+.rtl .age,
+.rtl .phone-number,
+.rtl .participant-number {
+    direction: ltr;
+    display: inline-block;
+}
+
+/* RTL Date Display - Format dates appropriately */
+.rtl .date-display,
+.rtl .timestamp {
+    direction: ltr;
+    display: inline-block;
+}

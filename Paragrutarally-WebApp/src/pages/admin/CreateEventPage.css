@@ -291,19 +291,6 @@
     align-items: end;
 }
 
-.date-input,
-.time-input {
-    width: 100%;
-    padding: 15px 20px;
-    border: 2px solid var(--input-border);
-    border-radius: 50px;
-    font-size: 16px;
-    background: var(--input-bg);
-    color: var(--text-primary);
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 8px var(--shadow-color);
-    font-weight: 500;
-}
 
 .date-input:focus,
 .time-input:focus {

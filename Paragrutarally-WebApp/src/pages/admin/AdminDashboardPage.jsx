@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
 import { useTheme } from '../../contexts/ThemeContext';
 import { getDashboardData, formatTimeAgo, formatEventDate } from '../../services/dashboardService';
+import { useLanguage } from '../../contexts/LanguageContext';
 import {
     IconUsers as Users,
     IconCalendarEvent as Calendar,
@@ -15,6 +16,7 @@ import './AdminDashboardPage.css';
 const AdminDashboardPage = () => {
     const navigate = useNavigate();
     const { isDarkMode, appliedTheme } = useTheme();
+    const {t, isRTL } = useLanguage();
     const [dashboardData, setDashboardData] = useState({
         stats: {
             totalUsers: 0,

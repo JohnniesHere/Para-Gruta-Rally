@@ -7,7 +7,7 @@ export const LANGUAGES = {
     HEBREW: 'he'
 };
 
-// Translations object
+// Translations object - COMPLETE WITH ALL YOUR EXISTING and NEW TRANSLATIONS
 const translations = {
     en: {
         // Navigation
@@ -161,6 +161,125 @@ const translations = {
         'gallery.uploadPhotos': 'Upload Photos',
         'gallery.noPhotos': 'No photos found in this album.',
 
+        // Teams Management - NEW TRANSLATIONS
+        'teams.title': 'Teams Management',
+        'teams.addNewTeam': 'Add New Team',
+        'teams.refresh': 'Refresh',
+        'teams.exportTeams': 'Export Teams',
+        'teams.totalTeams': 'Total Teams',
+        'teams.activeTeams': 'Active Teams',
+        'teams.teamsWithoutKids': 'Teams without Kids',
+        'teams.teamsWithKids': 'Teams with Kids',
+        'teams.searchPlaceholder': 'Search by team name or instructor...',
+        'teams.clearAll': 'Clear All',
+        'teams.showing': 'Showing',
+        'teams.of': 'of',
+        'teams.teams': 'teams',
+        'teams.priorityFilter': 'PRIORITY: Teams without kids',
+        'teams.status': 'Status',
+        'teams.capacity': 'Capacity',
+        'teams.allStatus': 'All Status',
+        'teams.active': 'Active',
+        'teams.inactive': 'Inactive',
+        'teams.allTeams': 'All Teams',
+        'teams.emptyTeams': 'Empty Teams',
+        'teams.availableSpots': 'Available Spots',
+        'teams.fullTeams': 'Full Teams',
+        'teams.teamInfo': 'Team Info',
+        'teams.instructor': 'Instructor',
+        'teams.members': 'Members',
+        'teams.actions': 'Actions',
+        'teams.noInstructor': 'No Instructor',
+        'teams.loadingTeams': 'Loading teams...',
+        'teams.noTeamsFound': 'No teams found',
+        'teams.adjustFilters': 'Try adjusting your search or filters',
+        'teams.addFirstTeam': 'Add First Team',
+        'teams.reset': 'Reset',
+        'teams.permissionError': 'Permission Error',
+        'teams.reloadPage': 'Reload Page',
+        'teams.tryAgain': 'Try Again',
+        'teams.deleteConfirm': 'Are you sure you want to delete {teamName}? This action cannot be undone.',
+        'teams.cannotDelete': 'Cannot delete {teamName} because it has {memberCount} members. Please move the kids to other teams first.',
+        'teams.deleteSuccess': '{teamName} has been deleted successfully!',
+        'teams.deleteFailed': 'Failed to delete team. Please try again.',
+        'teams.onlyAdminsCanDelete': 'Only administrators can delete teams.',
+        'teams.unnamedTeam': 'Unnamed Team',
+        'teams.loadError': 'Failed to load teams',
+        'teams.editFunctionality': 'Edit functionality for {teamName} would go here.',
+
+        // Kids Management - NEW TRANSLATIONS
+        'kids.title': 'Kids Management',
+        'kids.addNewKid': 'Add New Kid',
+        'kids.refresh': 'Refresh',
+        'kids.exportKids': 'Export Kids',
+        'kids.kidsWithoutTeams': 'Kids without Teams',
+        'kids.totalKids': 'Total Kids',
+        'kids.yourKids': 'Your Kids',
+        'kids.activeKids': 'Active Kids',
+        'kids.kidsWithTeams': 'Kids with Teams',
+        'kids.searchPlaceholder': 'Search by kid name or parent name...',
+        'kids.clearAll': 'Clear All',
+        'kids.showing': 'Showing',
+        'kids.of': 'of',
+        'kids.kids': 'kids',
+        'kids.priorityFilter': 'PRIORITY: Kids without teams',
+        'kids.teamStatus': 'Team Status',
+        'kids.allKids': 'All Kids',
+        'kids.noTeam': 'No Team',
+        'kids.withTeam': 'With Team',
+        'kids.allStatus': 'All Status',
+        'kids.pending': 'Pending',
+        'kids.completed': 'Completed',
+        'kids.cancelled': 'Cancelled',
+        'kids.kidInfo': 'Kid Info',
+        'kids.age': 'Age',
+        'kids.team': 'Team',
+        'kids.loadingKids': 'Loading kids...',
+        'kids.noKidsFound': 'No kids found',
+        'kids.noKidsRegistered': 'No kids registered under your account',
+        'kids.adjustFilters': 'Try adjusting your search or filters',
+        'kids.addFirstKid': 'Add First Kid',
+        'kids.assignTeam': 'Assign Team',
+        'kids.changeTeam': 'Change Team',
+        'kids.deleteConfirm': 'Are you sure you want to delete {kidName}? This action cannot be undone.',
+        'kids.deleteSuccess': '{kidName} has been deleted successfully!',
+        'kids.deleteFailed': 'Failed to delete kid. Please try again.',
+        'kids.onlyAdminsCanDelete': 'Only administrators can delete kids.',
+        'kids.teamChanged': '{kidName} has been {action} {teamName}',
+        'kids.assignedTo': 'assigned to',
+        'kids.removedFrom': 'removed from team',
+        'kids.updated': '{kidName} has been updated successfully!',
+        'kids.name': 'Name',
+        'kids.parentName': 'Parent',
+        'kids.participantNumber': 'Participant #',
+
+        // Export functionality - NEW TRANSLATIONS
+        'export.title': 'Export Data',
+        'export.description': 'Download data as Excel or CSV files',
+        'export.selectFormat': 'Select Format',
+        'export.excel': 'Excel (XLSX)',
+        'export.csv': 'CSV',
+        'export.includeHeaders': 'Include Headers',
+        'export.fileName': 'File Name',
+        'export.exporting': 'Exporting...',
+        'export.success': 'Export completed successfully!',
+        'export.failed': 'Export failed: {error}',
+        'export.downloadStarted': 'Download started...',
+        'export.noData': 'No data to export',
+
+        // Common table/filter terms - NEW TRANSLATIONS
+        'common.clickToView': 'Click to view',
+        'common.filterApplied': 'Filter applied',
+        'common.searchApplied': 'Search applied',
+        'common.loadingPermissions': 'Loading permissions...',
+        'common.permissionDenied': 'Permission denied',
+        'common.error': 'Error',
+        'common.noDataFound': 'No data found',
+        'common.selectAll': 'Select All',
+        'common.assignTo': 'Assign to',
+        'common.removeFrom': 'Remove from',
+        'common.unlimited': 'Unlimited',
+
         // General
         'general.loading': 'Loading...',
         'general.save': 'Save',
@@ -172,13 +291,14 @@ const translations = {
         'general.yes': 'Yes',
         'general.no': 'No',
         'general.confirm': 'Confirm',
+        'general.search': 'Search',
 
         // Language selector
         'language.english': 'English',
         'language.hebrew': 'עברית',
         'language.selectLanguage': 'Select Language',
 
-        // English translations (add to translations.en)
+        // Login translations
         'login.appTitle': 'Paragrutarally WebApp',
         'login.title': 'Login',
         'login.email': 'Email',
@@ -347,6 +467,125 @@ const translations = {
         'gallery.uploadPhotos': 'העלה תמונות',
         'gallery.noPhotos': 'לא נמצאו תמונות באלבום זה.',
 
+        // Teams Management (Hebrew) - NEW TRANSLATIONS
+        'teams.title': 'ניהול קבוצות',
+        'teams.addNewTeam': 'הוסף קבוצה חדשה',
+        'teams.refresh': 'רענן',
+        'teams.exportTeams': 'ייצא קבוצות',
+        'teams.totalTeams': 'סך הקבוצות',
+        'teams.activeTeams': 'קבוצות פעילות',
+        'teams.teamsWithoutKids': 'קבוצות ללא ילדים',
+        'teams.teamsWithKids': 'קבוצות עם ילדים',
+        'teams.searchPlaceholder': 'חפש לפי שם קבוצה או מדריך...',
+        'teams.clearAll': 'נקה הכל',
+        'teams.showing': 'מציג',
+        'teams.of': 'מתוך',
+        'teams.teams': 'קבוצות',
+        'teams.priorityFilter': 'עדיפות: קבוצות ללא ילדים',
+        'teams.status': 'סטטוס',
+        'teams.capacity': 'קיבולת',
+        'teams.allStatus': 'כל הסטטוסים',
+        'teams.active': 'פעיל',
+        'teams.inactive': 'לא פעיל',
+        'teams.allTeams': 'כל הקבוצות',
+        'teams.emptyTeams': 'קבוצות ריקות',
+        'teams.availableSpots': 'מקומות פנויים',
+        'teams.fullTeams': 'קבוצות מלאות',
+        'teams.teamInfo': 'מידע קבוצה',
+        'teams.instructor': 'מדריך',
+        'teams.members': 'חברים',
+        'teams.actions': 'פעולות',
+        'teams.noInstructor': 'אין מדריך',
+        'teams.loadingTeams': 'טוען קבוצות...',
+        'teams.noTeamsFound': 'לא נמצאו קבוצות',
+        'teams.adjustFilters': 'נסה להתאים את החיפוש או הפילטרים',
+        'teams.addFirstTeam': 'הוסף קבוצה ראשונה',
+        'teams.reset': 'איפוס',
+        'teams.permissionError': 'שגיאת הרשאה',
+        'teams.reloadPage': 'טען מחדש',
+        'teams.tryAgain': 'נסה שוב',
+        'teams.deleteConfirm': 'האם אתה בטוח שברצונך למחוק את {teamName}? פעולה זו בלתי הפיכה.',
+        'teams.cannotDelete': 'לא ניתן למחוק את {teamName} כי יש לה {memberCount} חברים. אנא העבר את הילדים לקבוצות אחרות תחילה.',
+        'teams.deleteSuccess': '{teamName} נמחקה בהצלחה!',
+        'teams.deleteFailed': 'מחיקת הקבוצה נכשלה. אנא נסה שוב.',
+        'teams.onlyAdminsCanDelete': 'רק מנהלים יכולים למחוק קבוצות.',
+        'teams.unnamedTeam': 'קבוצה ללא שם',
+        'teams.loadError': 'כשל בטעינת קבוצות',
+        'teams.editFunctionality': 'פונקציונליות עריכה עבור {teamName} תהיה כאן.',
+
+        // Kids Management (Hebrew) - NEW TRANSLATIONS
+        'kids.title': 'ניהול ילדים',
+        'kids.addNewKid': 'הוסף ילד חדש',
+        'kids.refresh': 'רענן',
+        'kids.exportKids': 'ייצא ילדים',
+        'kids.kidsWithoutTeams': 'ילדים ללא קבוצות',
+        'kids.totalKids': 'סך הילדים',
+        'kids.yourKids': 'הילדים שלך',
+        'kids.activeKids': 'ילדים פעילים',
+        'kids.kidsWithTeams': 'ילדים עם קבוצות',
+        'kids.searchPlaceholder': 'חפש לפי שם ילד או הורה...',
+        'kids.clearAll': 'נקה הכל',
+        'kids.showing': 'מציג',
+        'kids.of': 'מתוך',
+        'kids.kids': 'ילדים',
+        'kids.priorityFilter': 'עדיפות: ילדים ללא קבוצות',
+        'kids.teamStatus': 'סטטוס קבוצה',
+        'kids.allKids': 'כל הילדים',
+        'kids.noTeam': 'ללא קבוצה',
+        'kids.withTeam': 'עם קבוצה',
+        'kids.allStatus': 'כל הסטטוסים',
+        'kids.pending': 'ממתין',
+        'kids.completed': 'הושלם',
+        'kids.cancelled': 'בוטל',
+        'kids.kidInfo': 'מידע ילד',
+        'kids.age': 'גיל',
+        'kids.team': 'קבוצה',
+        'kids.loadingKids': 'טוען ילדים...',
+        'kids.noKidsFound': 'לא נמצאו ילדים',
+        'kids.noKidsRegistered': 'אין ילדים רשומים תחת החשבון שלך',
+        'kids.adjustFilters': 'נסה להתאים את החיפוש או הפילטרים',
+        'kids.addFirstKid': 'הוסף ילד ראשון',
+        'kids.assignTeam': 'הקצה קבוצה',
+        'kids.changeTeam': 'שנה קבוצה',
+        'kids.deleteConfirm': 'האם אתה בטוח שברצונך למחוק את {kidName}? פעולה זו בלתי הפיכה.',
+        'kids.deleteSuccess': '{kidName} נמחק בהצלחה!',
+        'kids.deleteFailed': 'מחיקת הילד נכשלה. אנא נסה שוב.',
+        'kids.onlyAdminsCanDelete': 'רק מנהלים יכולים למחוק ילדים.',
+        'kids.teamChanged': '{kidName} {action} {teamName}',
+        'kids.assignedTo': 'הוקצה ל',
+        'kids.removedFrom': 'הוסר מהקבוצה',
+        'kids.updated': '{kidName} עודכן בהצלחה!',
+        'kids.name': 'שם',
+        'kids.parentName': 'הורה',
+        'kids.participantNumber': 'מספר משתתף',
+
+        // Export functionality (Hebrew) - NEW TRANSLATIONS
+        'export.title': 'ייצוא נתונים',
+        'export.description': 'הורד נתונים כקבצי Excel או CSV',
+        'export.selectFormat': 'בחר פורמט',
+        'export.excel': 'Excel (XLSX)',
+        'export.csv': 'CSV',
+        'export.includeHeaders': 'כלול כותרות',
+        'export.fileName': 'שם קובץ',
+        'export.exporting': 'מייצא...',
+        'export.success': 'הייצוא הושלם בהצלחה!',
+        'export.failed': 'הייצוא נכשל: {error}',
+        'export.downloadStarted': 'ההורדה החלה...',
+        'export.noData': 'אין נתונים לייצוא',
+
+        // Common table/filter terms (Hebrew) - NEW TRANSLATIONS
+        'common.clickToView': 'לחץ לצפייה',
+        'common.filterApplied': 'פילטר מופעל',
+        'common.searchApplied': 'חיפוש מופעל',
+        'common.loadingPermissions': 'טוען הרשאות...',
+        'common.permissionDenied': 'הרשאה נדחתה',
+        'common.error': 'שגיאה',
+        'common.noDataFound': 'לא נמצאו נתונים',
+        'common.selectAll': 'בחר הכל',
+        'common.assignTo': 'הקצה ל',
+        'common.removeFrom': 'הסר מ',
+        'common.unlimited': 'ללא הגבלה',
+
         // General
         'general.loading': 'טוען...',
         'general.save': 'שמור',
@@ -358,13 +597,14 @@ const translations = {
         'general.yes': 'כן',
         'general.no': 'לא',
         'general.confirm': 'אשר',
+        'general.search': 'חפש',
 
         // Language selector
         'language.english': 'English',
         'language.hebrew': 'עברית',
         'language.selectLanguage': 'בחר שפה',
 
-        // Hebrew translations (add to translations.he)
+        // Hebrew login translations
         'login.appTitle': 'אפליקציית פראגרוטרלי',
         'login.title': 'התחברות',
         'login.email': 'אימייל',
@@ -417,7 +657,7 @@ export const LanguageProvider = ({ children }) => {
             document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
             document.documentElement.lang = language;
 
-            // Add/remove RTL class to a body for additional styling
+            // Add/remove RTL class to the body for additional styling
             if (isRTL) {
                 document.body.classList.add('rtl');
                 document.body.classList.remove('ltr');
@@ -446,10 +686,18 @@ export const LanguageProvider = ({ children }) => {
         }
     };
 
-    // Function to get translation
-    const t = (key, defaultValue = '') => {
-        const translation = translations[currentLanguage]?.[key];
-        return translation || defaultValue || key;
+    // Function to get translation with interpolation support
+    const t = (key, defaultValue = '', interpolations = {}) => {
+        const translation = translations[currentLanguage]?.[key] || defaultValue || key;
+
+        // Handle interpolations like {teamName}, {kidName}, etc.
+        if (interpolations && Object.keys(interpolations).length > 0) {
+            return translation.replace(/{(\w+)}/g, (match, placeholder) => {
+                return interpolations[placeholder] || match;
+            });
+        }
+
+        return translation;
     };
 
     // Computed values
