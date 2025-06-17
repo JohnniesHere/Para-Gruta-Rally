@@ -46,9 +46,51 @@
     transition: color 0.3s ease;
 }
 
-.activity-item,
-.event-item {
+/* ========================================
+   EVENT HEADERS STYLING
+   ======================================== */
+
+.event-headers {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1.5fr;
+    gap: 15px;
+    padding: 12px 15px;
+    background: var(--bg-tertiary, #f8fafc);
+    border-radius: 8px;
+    margin-bottom: 10px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-secondary, #6b7280);
+    border: 1px solid var(--border-color, #e5e7eb);
+}
+
+.dark-mode .event-headers {
+    background: var(--bg-quaternary, #374151);
+    color: var(--text-secondary);
+    border-color: var(--border-color);
+}
+
+.event-header-date,
+.event-header-name,
+.event-header-location {
+    text-align: left;
+}
+
+/* ========================================
+   ACTIVITY AND EVENT ITEMS
+   ======================================== */
+
+.activity-item {
     padding: 15px 0;
+    border-bottom: 1px solid var(--border-color);
+    transition: border-color 0.3s ease;
+}
+
+.event-item {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1.5fr;
+    gap: 15px;
+    padding: 12px 15px;
     border-bottom: 1px solid var(--border-color);
     transition: border-color 0.3s ease;
 }
@@ -92,12 +134,18 @@
 }
 
 /* Enhanced hover effects */
-.activity-item:hover,
-.event-item:hover {
+.activity-item:hover {
     background-color: var(--bg-tertiary);
     border-radius: 4px;
     margin: 0 -10px;
     padding: 15px 10px;
+}
+
+.event-item:hover {
+    background-color: var(--bg-tertiary);
+    border-radius: 4px;
+    margin: 0 -10px;
+    padding: 12px 5px;
 }
 
 /* ========================================
@@ -117,6 +165,26 @@
     100% {
         background-position: -200% 0;
     }
+}
+
+/* ========================================
+   EMPTY STATE STYLING
+   ======================================== */
+
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-secondary);
+}
+
+.empty-state p {
+    margin-bottom: 5px;
+    font-size: 16px;
+}
+
+.empty-state small {
+    font-size: 14px;
+    opacity: 0.8;
 }
 
 /* ========================================
@@ -146,5 +214,17 @@
 @media (max-width: 768px) {
     .dashboard-sections {
         grid-template-columns: 1fr;
+    }
+
+    .event-headers,
+    .event-item {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .event-header-date,
+    .event-header-name,
+    .event-header-location {
+        text-align: center;
     }
 }
