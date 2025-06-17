@@ -1,11 +1,13 @@
-// src/pages/admin/AddKidPage.jsx - Fixed with Proper Error Handling & Validation
+// src/pages/admin/AddKidPage.jsx - Enhanced with Photo Upload
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
-import ProtectedField from '../../hooks/ProtectedField';
+import CreateUserModal from '../../components/modals/CreateUserModal';
 import { useTheme } from '../../contexts/ThemeContext';
 import { usePermissions } from '../../hooks/usePermissions.jsx';
 import { addKid, getNextParticipantNumber } from '../../services/kidService';
+import { uploadKidPhoto, validatePhotoFile, resizeImage, getKidPhotoInfo } from '../../services/kidPhotoService';
+import { createEmptyKid, validateKid, formStatusOptions } from '../../schemas/kidSchema';
 import { getDocs, collection, query, where } from 'firebase/firestore';
 import { db } from '../../firebase/config';
 import {
@@ -23,7 +25,12 @@ import {
     IconMapPin as MapPin,
     IconCalendar as Calendar,
     IconNotes as FileText,
-    IconSparkles as Sparkles
+    IconSparkles as Sparkles,
+    IconUserPlus as UserPlus,
+    IconLock as Lock,
+    IconCamera as Camera,
+    IconUpload as Upload,
+    IconX as X
 } from '@tabler/icons-react';
 import './AddKidPage.css';
 
@@ -36,42 +43,22 @@ const AddKidPage = () => {
     const [teams, setTeams] = useState([]);
     const [instructors, setInstructors] = useState([]);
     const [parents, setParents] = useState([]);
-    const [formData, setFormData] = useState({
-        participantNumber: '',
-        personalInfo: {
-            address: '',
-            dateOfBirth: '',
-            capabilities: '',
-            announcersNotes: '',
-            photo: ''
-        },
-        parentInfo: {
-            name: '',
-            email: '',
-            phone: '',
-            parentId: '',
-            grandparentsInfo: {
-                names: '',
-                phone: ''
-            }
-        },
-        comments: {
-            parent: '',
-            organization: '',
-            teamLeader: '',
-            familyContact: ''
-        },
-        instructorId: '',
-        teamId: '',
-        vehicleIds: [],
-        signedDeclaration: false,
-        signedFormStatus: 'Pending',
-        additionalComments: ''
-    });
+    const [formData, setFormData] = useState(createEmptyKid());
     const [errors, setErrors] = useState({});
     const [fieldErrors, setFieldErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [loadingError, setLoadingError] = useState(null);
+
+    // Parent selection state
+    const [selectedParentId, setSelectedParentId] = useState('');
+    const [selectedParentData, setSelectedParentData] = useState(null);
+    const [showCreateUserModal, setShowCreateUserModal] = useState(false);
+
+    // Photo upload state
+    const [selectedPhoto, setSelectedPhoto] = useState(null);
+    const [photoPreview, setPhotoPreview] = useState(null);
+    const [photoError, setPhotoError] = useState('');
+    const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
 
     useEffect(() => {
         loadInitialData();
@@ -91,7 +78,6 @@ const AddKidPage = () => {
                 }));
             } catch (error) {
                 console.error('Error loading participant number:', error);
-                // Set a default if service fails
                 setFormData(prev => ({
                     ...prev,
                     participantNumber: '001'
@@ -101,7 +87,6 @@ const AddKidPage = () => {
             // Load teams with better error handling
             try {
                 console.log('Loading teams...');
-                // Simple query without filters that might require indexes
                 const teamsQuery = collection(db, 'teams');
                 const teamsSnapshot = await getDocs(teamsQuery);
 
@@ -110,13 +95,13 @@ const AddKidPage = () => {
                         id: doc.id,
                         ...doc.data()
                     }))
-                    .filter(team => team.active !== false); // Filter active teams in memory
+                    .filter(team => team.active !== false);
 
                 console.log('Teams loaded successfully:', teamsData);
                 setTeams(teamsData);
             } catch (teamsError) {
                 console.error('Error loading teams:', teamsError);
-                setTeams([]); // Continue without teams
+                setTeams([]);
             }
 
             // Load instructors
@@ -132,7 +117,7 @@ const AddKidPage = () => {
                 setInstructors(instructorsData);
             } catch (instructorsError) {
                 console.error('Error loading instructors:', instructorsError);
-                setInstructors([]); // Continue without instructors
+                setInstructors([]);
             }
 
             // Load parents (users with parent role)
@@ -151,7 +136,7 @@ const AddKidPage = () => {
                 setParents(parentsData);
             } catch (parentsError) {
                 console.error('Error loading parents:', parentsError);
-                setParents([]); // Continue without parents
+                setParents([]);
             }
 
         } catch (error) {
@@ -194,52 +179,114 @@ const AddKidPage = () => {
         }
     };
 
-    const validateForm = () => {
-        const newErrors = {};
-        const newFieldErrors = {};
+    // Handle photo upload
+    const handlePhotoSelection = async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
 
-        // Required field validations
-        if (!formData.participantNumber) {
-            newErrors.participantNumber = 'Participant number is required';
-            newFieldErrors.participantNumber = true;
-        }
+        setPhotoError('');
 
-        if (!formData.personalInfo.dateOfBirth) {
-            newErrors['personalInfo.dateOfBirth'] = 'Date of birth is required';
-            newFieldErrors['personalInfo.dateOfBirth'] = true;
-        }
-
-        if (!formData.parentInfo.name) {
-            newErrors['parentInfo.name'] = 'Parent name is required';
-            newFieldErrors['parentInfo.name'] = true;
-        }
-
-        if (!formData.parentInfo.email) {
-            newErrors['parentInfo.email'] = 'Parent email is required';
-            newFieldErrors['parentInfo.email'] = true;
-        } else if (!/\S+@\S+\.\S+/.test(formData.parentInfo.email)) {
-            newErrors['parentInfo.email'] = 'Please enter a valid email address';
-            newFieldErrors['parentInfo.email'] = true;
-        }
-
-        if (!formData.parentInfo.phone) {
-            newErrors['parentInfo.phone'] = 'Parent phone is required';
-            newFieldErrors['parentInfo.phone'] = true;
-        }
-
-        // Validate date of birth
-        if (formData.personalInfo.dateOfBirth) {
-            const birthDate = new Date(formData.personalInfo.dateOfBirth);
-            const today = new Date();
-            if (birthDate >= today) {
-                newErrors['personalInfo.dateOfBirth'] = 'Date of birth must be in the past';
-                newFieldErrors['personalInfo.dateOfBirth'] = true;
+        try {
+            // Validate photo file
+            const validation = await validatePhotoFile(file);
+            if (!validation.isValid) {
+                setPhotoError(validation.errors.join(' '));
+                return;
             }
+
+            // Resize image if needed (optional optimization)
+            const resizedFile = await resizeImage(file, 400, 400, 0.8);
+
+            setSelectedPhoto(resizedFile);
+
+            // Create preview
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                setPhotoPreview(e.target.result);
+            };
+            reader.readAsDataURL(resizedFile);
+
+            console.log('📸 Photo selected and ready for upload');
+
+        } catch (error) {
+            console.error('Error processing photo:', error);
+            setPhotoError('Failed to process photo. Please try again.');
+        }
+    };
+
+    const handleRemovePhoto = () => {
+        setSelectedPhoto(null);
+        setPhotoPreview(null);
+        setPhotoError('');
+        // Reset file input
+        const fileInput = document.getElementById('photo-upload');
+        if (fileInput) fileInput.value = '';
+    };
+
+    // Handle parent selection
+    const handleParentSelection = (parentId) => {
+        if (parentId === 'create_new') {
+            if (window.confirm('This will open a form to create a new parent user. Continue?')) {
+                setShowCreateUserModal(true);
+            }
+            setSelectedParentId('');
+            return;
         }
 
-        setErrors(newErrors);
-        setFieldErrors(newFieldErrors);
-        return Object.keys(newErrors).length === 0;
+        setSelectedParentId(parentId);
+
+        if (parentId) {
+            const parent = parents.find(p => p.id === parentId);
+            if (parent) {
+                setSelectedParentData(parent);
+                setFormData(prev => ({
+                    ...prev,
+                    parentInfo: {
+                        ...prev.parentInfo,
+                        name: parent.name || parent.displayName || '',
+                        email: parent.email || '',
+                        phone: parent.phone || '',
+                        parentId: parent.id,
+                        grandparentsInfo: prev.parentInfo.grandparentsInfo
+                    }
+                }));
+            }
+        } else {
+            setSelectedParentData(null);
+            setFormData(prev => ({
+                ...prev,
+                parentInfo: {
+                    name: '',
+                    email: '',
+                    phone: '',
+                    parentId: '',
+                    grandparentsInfo: prev.parentInfo.grandparentsInfo
+                }
+            }));
+        }
+    };
+
+    // Handle new user created
+    const handleUserCreated = () => {
+        setShowCreateUserModal(false);
+        loadInitialData();
+    };
+
+    const validateForm = () => {
+        const validation = validateKid(formData);
+
+        if (!validation.isValid) {
+            setErrors(validation.errors);
+
+            // Set field errors for visual indicators
+            const newFieldErrors = {};
+            Object.keys(validation.errors).forEach(field => {
+                newFieldErrors[field] = true;
+            });
+            setFieldErrors(newFieldErrors);
+        }
+
+        return validation.isValid;
     };
 
     const handleSubmit = async (e) => {
@@ -251,18 +298,40 @@ const AddKidPage = () => {
 
         setIsSubmitting(true);
         try {
+            // First, create the kid
             const kidId = await addKid(formData);
+            console.log('✅ Kid created with ID:', kidId);
+
+            // Upload photo if one was selected
+            if (selectedPhoto) {
+                try {
+                    setIsUploadingPhoto(true);
+                    console.log('📸 Uploading photo for kid:', kidId);
+
+                    const photoUrl = await uploadKidPhoto(kidId, selectedPhoto);
+                    console.log('✅ Photo uploaded successfully:', photoUrl);
+
+                } catch (photoError) {
+                    console.error('⚠️ Photo upload failed:', photoError);
+                    // Don't fail the entire operation, just show a warning
+                    alert(`Kid was created successfully, but photo upload failed: ${photoError.message}. You can add a photo later by editing the kid.`);
+                } finally {
+                    setIsUploadingPhoto(false);
+                }
+            }
 
             // Navigate to the new kid's view page with success message
+            const firstName = formData.personalInfo.firstName || 'New racer';
             navigate(`/admin/kids/view/${kidId}`, {
                 state: {
-                    message: `🎉 ${formData.personalInfo.firstName || 'New kid'} has been added to the race! Welcome to the team! 🏎️`,
+                    message: `🎉 ${firstName} has been added to the race! Welcome to the team! 🏎️`,
                     type: 'success'
                 }
             });
+
         } catch (error) {
             console.error('Error adding kid:', error);
-            setErrors({ general: 'Failed to add kid. Please try again.' });
+            setErrors({ general: error.message || 'Failed to add kid. Please try again.' });
         } finally {
             setIsSubmitting(false);
         }
@@ -270,6 +339,47 @@ const AddKidPage = () => {
 
     const handleCancel = () => {
         navigate('/admin/kids');
+    };
+
+    // Get dynamic title for the section
+    const getSectionTitle = () => {
+        const firstName = formData.personalInfo.firstName;
+        if (firstName && firstName.trim()) {
+            return `🏎️ ${firstName}'s Profile`;
+        }
+        return `🏎️ Racer Profile`;
+    };
+
+    // Get error message for a field
+    const getErrorMessage = (fieldPath) => {
+        return errors[fieldPath];
+    };
+
+    // Check if field has error
+    const hasFieldError = (fieldPath) => {
+        return fieldErrors[fieldPath] || false;
+    };
+
+    // Get photo display info
+    const getPhotoDisplay = () => {
+        if (photoPreview) {
+            return {
+                hasPhoto: true,
+                url: photoPreview,
+                placeholder: null
+            };
+        }
+
+        // Generate placeholder initials
+        const firstName = formData.personalInfo?.firstName || '';
+        const lastName = formData.personalInfo?.lastName || '';
+        const initials = (firstName.charAt(0) + lastName.charAt(0)).toUpperCase() || formData.participantNumber?.charAt(0) || '?';
+
+        return {
+            hasPhoto: false,
+            url: null,
+            placeholder: initials
+        };
     };
 
     if (!permissions) {
@@ -284,6 +394,8 @@ const AddKidPage = () => {
             </Dashboard>
         );
     }
+
+    const photoDisplay = getPhotoDisplay();
 
     return (
         <Dashboard requiredRole={userRole}>
@@ -325,34 +437,117 @@ const AddKidPage = () => {
                     )}
 
                     <form onSubmit={handleSubmit} className="add-kid-form">
-                        {/* Basic Info Section */}
+                        {/* Basic Info Section with Photo */}
                         <div className="form-section racing-section">
                             <div className="section-header">
                                 <Baby className="section-icon" size={24} />
-                                <h2>🏎️ Racer Profile</h2>
+                                <h2>{getSectionTitle()}</h2>
                             </div>
                             <div className="form-grid">
+                                {/* Photo Upload Section */}
+                                <div className="form-group full-width">
+                                    <label className="form-label">📸 Racing Photo</label>
+                                    <div className="photo-upload-section">
+                                        <div className="photo-preview-container">
+                                            {photoDisplay.hasPhoto ? (
+                                                <img
+                                                    src={photoDisplay.url}
+                                                    alt="Kid preview"
+                                                    className="kid-photo"
+                                                />
+                                            ) : (
+                                                <div className="kid-photo-placeholder">
+                                                    {photoDisplay.placeholder}
+                                                </div>
+                                            )}
+                                            <button
+                                                type="button"
+                                                className="upload-photo-button"
+                                                onClick={() => document.getElementById('photo-upload').click()}
+                                                title="Upload Photo"
+                                            >
+                                                <Camera size={14} />
+                                            </button>
+                                            {photoDisplay.hasPhoto && (
+                                                <button
+                                                    type="button"
+                                                    className="remove-photo-button"
+                                                    onClick={handleRemovePhoto}
+                                                    title="Remove Photo"
+                                                >
+                                                    <X size={14} />
+                                                </button>
+                                            )}
+                                        </div>
+                                        <input
+                                            id="photo-upload"
+                                            type="file"
+                                            accept="image/jpeg,image/jpg,image/png,image/webp"
+                                            onChange={handlePhotoSelection}
+                                            className="photo-upload-input"
+                                        />
+                                        <div className="photo-upload-info">
+                                            <p>📸 Upload a racing photo! (Max 5MB, JPEG/PNG)</p>
+                                            {photoError && (
+                                                <p className="photo-error">{photoError}</p>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div className="form-group">
                                     <label className="form-label">🏁 Race Number *</label>
                                     <input
                                         type="text"
-                                        className={`form-input ${fieldErrors.participantNumber ? 'error' : ''}`}
+                                        className={`form-input ${hasFieldError('participantNumber') ? 'error' : ''}`}
                                         placeholder="001"
                                         value={formData.participantNumber}
                                         onChange={(e) => handleInputChange('participantNumber', e.target.value)}
                                     />
-                                    {errors.participantNumber && <span className="error-text">{errors.participantNumber}</span>}
+                                    {getErrorMessage('participantNumber') && (
+                                        <span className="error-text">{getErrorMessage('participantNumber')}</span>
+                                    )}
+                                </div>
+
+                                <div className="form-group">
+                                    <label className="form-label">👤 First Name *</label>
+                                    <input
+                                        type="text"
+                                        className={`form-input ${hasFieldError('personalInfo.firstName') ? 'error' : ''}`}
+                                        placeholder="Future champion's first name"
+                                        value={formData.personalInfo.firstName}
+                                        onChange={(e) => handleInputChange('personalInfo.firstName', e.target.value)}
+                                    />
+                                    {getErrorMessage('personalInfo.firstName') && (
+                                        <span className="error-text">{getErrorMessage('personalInfo.firstName')}</span>
+                                    )}
+                                </div>
+
+                                <div className="form-group">
+                                    <label className="form-label">👨‍👩‍👧‍👦 Last Name *</label>
+                                    <input
+                                        type="text"
+                                        className={`form-input ${hasFieldError('personalInfo.lastName') ? 'error' : ''}`}
+                                        placeholder="Racing family name"
+                                        value={formData.personalInfo.lastName}
+                                        onChange={(e) => handleInputChange('personalInfo.lastName', e.target.value)}
+                                    />
+                                    {getErrorMessage('personalInfo.lastName') && (
+                                        <span className="error-text">{getErrorMessage('personalInfo.lastName')}</span>
+                                    )}
                                 </div>
 
                                 <div className="form-group">
                                     <label className="form-label">🎂 Birthday *</label>
                                     <input
                                         type="date"
-                                        className={`form-input ${fieldErrors['personalInfo.dateOfBirth'] ? 'error' : ''}`}
+                                        className={`form-input ${hasFieldError('personalInfo.dateOfBirth') ? 'error' : ''}`}
                                         value={formData.personalInfo.dateOfBirth}
                                         onChange={(e) => handleInputChange('personalInfo.dateOfBirth', e.target.value)}
                                     />
-                                    {errors['personalInfo.dateOfBirth'] && <span className="error-text">{errors['personalInfo.dateOfBirth']}</span>}
+                                    {getErrorMessage('personalInfo.dateOfBirth') && (
+                                        <span className="error-text">{getErrorMessage('personalInfo.dateOfBirth')}</span>
+                                    )}
                                 </div>
 
                                 <div className="form-group full-width">
@@ -406,63 +601,132 @@ const AddKidPage = () => {
                                 <h2>👨‍👩‍👧‍👦 Racing Family Info</h2>
                             </div>
                             <div className="form-grid">
-                                <div className="form-group">
-                                    <label className="form-label">👤 Parent/Guardian Name *</label>
-                                    <input
-                                        type="text"
-                                        className={`form-input ${fieldErrors['parentInfo.name'] ? 'error' : ''}`}
-                                        placeholder="Racing coach's name"
-                                        value={formData.parentInfo.name}
-                                        onChange={(e) => handleInputChange('parentInfo.name', e.target.value)}
-                                    />
-                                    {errors['parentInfo.name'] && <span className="error-text">{errors['parentInfo.name']}</span>}
-                                </div>
-
-                                <div className="form-group">
-                                    <label className="form-label">📧 Email Address *</label>
-                                    <input
-                                        type="email"
-                                        className={`form-input ${fieldErrors['parentInfo.email'] ? 'error' : ''}`}
-                                        placeholder="parent@racingfamily.com"
-                                        value={formData.parentInfo.email}
-                                        onChange={(e) => handleInputChange('parentInfo.email', e.target.value)}
-                                    />
-                                    {errors['parentInfo.email'] && <span className="error-text">{errors['parentInfo.email']}</span>}
-                                </div>
-
-                                <div className="form-group">
-                                    <label className="form-label">📱 Phone Number *</label>
-                                    <input
-                                        type="tel"
-                                        className={`form-input ${fieldErrors['parentInfo.phone'] ? 'error' : ''}`}
-                                        placeholder="Racing hotline"
-                                        value={formData.parentInfo.phone}
-                                        onChange={(e) => handleInputChange('parentInfo.phone', e.target.value)}
-                                    />
-                                    {errors['parentInfo.phone'] && <span className="error-text">{errors['parentInfo.phone']}</span>}
-                                </div>
-
-                                <div className="form-group">
-                                    <div className="field-wrapper">
-                                        <label className="form-label">
-                                            <User className="label-icon" size={16} />
-                                            Link to Parent Account
-                                        </label>
+                                {/* Parent Selection Dropdown */}
+                                <div className="form-group full-width">
+                                    <label className="form-label">👤 Select Parent/Guardian *</label>
+                                    <div className="parent-selection-container">
                                         <select
-                                            value={formData.parentInfo.parentId}
-                                            onChange={(e) => handleInputChange('parentInfo.parentId', e.target.value)}
-                                            className="form-select"
+                                            value={selectedParentId}
+                                            onChange={(e) => handleParentSelection(e.target.value)}
+                                            className={`form-select ${hasFieldError('parentInfo.parentId') ? 'error' : ''}`}
                                         >
-                                            <option value="">🔗 Choose Parent Account (Optional)</option>
+                                            <option value="">🔗 Choose Parent Account</option>
                                             {parents.map(parent => (
                                                 <option key={parent.id} value={parent.id}>
                                                     {parent.displayName || parent.name} ({parent.email})
                                                 </option>
                                             ))}
+                                            <option value="create_new">➕ Create New Parent</option>
                                         </select>
+                                        <button
+                                            type="button"
+                                            className="btn-create-parent"
+                                            onClick={() => handleParentSelection('create_new')}
+                                        >
+                                            <UserPlus size={18} />
+                                            Create New Parent
+                                        </button>
                                     </div>
+                                    {getErrorMessage('parentInfo.parentId') && (
+                                        <span className="error-text">{getErrorMessage('parentInfo.parentId')}</span>
+                                    )}
                                 </div>
 
+                                {/* Parent Info Fields - Show when parent is selected */}
+                                {selectedParentData && (
+                                    <>
+                                        <div className="form-group">
+                                            <label className="form-label">
+                                                👤 Parent/Guardian Name *
+                                                <Lock size={14} className="lock-icon" />
+                                            </label>
+                                            <input
+                                                type="text"
+                                                className="form-input locked"
+                                                value={formData.parentInfo.name}
+                                                readOnly
+                                                disabled
+                                            />
+                                        </div>
+
+                                        <div className="form-group">
+                                            <label className="form-label">
+                                                📧 Email Address *
+                                                <Lock size={14} className="lock-icon" />
+                                            </label>
+                                            <input
+                                                type="email"
+                                                className="form-input locked"
+                                                value={formData.parentInfo.email}
+                                                readOnly
+                                                disabled
+                                            />
+                                        </div>
+
+                                        <div className="form-group">
+                                            <label className="form-label">
+                                                📱 Phone Number *
+                                                <Lock size={14} className="lock-icon" />
+                                            </label>
+                                            <input
+                                                type="tel"
+                                                className="form-input locked"
+                                                value={formData.parentInfo.phone}
+                                                readOnly
+                                                disabled
+                                            />
+                                        </div>
+                                    </>
+                                )}
+
+                                {/* Manual Entry Fields - Show when no parent is selected */}
+                                {!selectedParentData && (
+                                    <>
+                                        <div className="form-group">
+                                            <label className="form-label">👤 Parent/Guardian Name *</label>
+                                            <input
+                                                type="text"
+                                                className={`form-input ${hasFieldError('parentInfo.name') ? 'error' : ''}`}
+                                                placeholder="Racing coach's name"
+                                                value={formData.parentInfo.name}
+                                                onChange={(e) => handleInputChange('parentInfo.name', e.target.value)}
+                                            />
+                                            {getErrorMessage('parentInfo.name') && (
+                                                <span className="error-text">{getErrorMessage('parentInfo.name')}</span>
+                                            )}
+                                        </div>
+
+                                        <div className="form-group">
+                                            <label className="form-label">📧 Email Address *</label>
+                                            <input
+                                                type="email"
+                                                className={`form-input ${hasFieldError('parentInfo.email') ? 'error' : ''}`}
+                                                placeholder="parent@racingfamily.com"
+                                                value={formData.parentInfo.email}
+                                                onChange={(e) => handleInputChange('parentInfo.email', e.target.value)}
+                                            />
+                                            {getErrorMessage('parentInfo.email') && (
+                                                <span className="error-text">{getErrorMessage('parentInfo.email')}</span>
+                                            )}
+                                        </div>
+
+                                        <div className="form-group">
+                                            <label className="form-label">📱 Phone Number *</label>
+                                            <input
+                                                type="tel"
+                                                className={`form-input ${hasFieldError('parentInfo.phone') ? 'error' : ''}`}
+                                                placeholder="Racing hotline"
+                                                value={formData.parentInfo.phone}
+                                                onChange={(e) => handleInputChange('parentInfo.phone', e.target.value)}
+                                            />
+                                            {getErrorMessage('parentInfo.phone') && (
+                                                <span className="error-text">{getErrorMessage('parentInfo.phone')}</span>
+                                            )}
+                                        </div>
+                                    </>
+                                )}
+
+                                {/* Grandparents Info - Always editable */}
                                 <div className="form-group">
                                     <label className="form-label">👵👴 Grandparents Names</label>
                                     <input
@@ -556,10 +820,11 @@ const AddKidPage = () => {
                                             onChange={(e) => handleInputChange('signedFormStatus', e.target.value)}
                                             className="form-select"
                                         >
-                                            <option value="Pending">⏳ Pending - Getting Ready</option>
-                                            <option value="Completed">✅ Completed - Ready to Race!</option>
-                                            <option value="Needs Review">🔍 Needs Review</option>
-                                            <option value="Cancelled">❌ Cancelled</option>
+                                            {formStatusOptions.map(option => (
+                                                <option key={option.value} value={option.value}>
+                                                    {option.label}
+                                                </option>
+                                            ))}
                                         </select>
                                     </div>
                                 </div>
@@ -605,13 +870,13 @@ const AddKidPage = () => {
                             </button>
                             <button
                                 type="submit"
-                                disabled={isSubmitting}
+                                disabled={isSubmitting || isUploadingPhoto}
                                 className="btn btn-submit racing-submit"
                             >
                                 {isSubmitting ? (
                                     <>
                                         <div className="loading-spinner-mini"></div>
-                                        Adding Racer...
+                                        {isUploadingPhoto ? 'Uploading Photo...' : 'Adding Racer...'}
                                     </>
                                 ) : (
                                     <>
@@ -623,6 +888,13 @@ const AddKidPage = () => {
                         </div>
                     </form>
                 </div>
+
+                {/* Create User Modal */}
+                <CreateUserModal
+                    isOpen={showCreateUserModal}
+                    onClose={() => setShowCreateUserModal(false)}
+                    onUserCreated={handleUserCreated}
+                />
             </div>
         </Dashboard>
     );

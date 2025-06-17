@@ -1,4 +1,4 @@
-// src/pages/admin/KidsManagementPage.jsx - WITH EDIT KID MODAL
+// src/pages/admin/KidsManagementPage.jsx - WITH FIXES FOR NAME/TEAM DISPLAY AND CLICKABLE ROWS
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
@@ -12,6 +12,7 @@ import {
     getKidsByParent,
     deleteKid
 } from '../../services/kidService';
+import { getAllTeams } from '../../services/teamService'; // Import team service
 import {
     IconUserCircle as Baby,
     IconPlus as Plus,
@@ -41,6 +42,7 @@ const KidsManagementPage = () => {
     const { permissions, userRole, userData, user, loading: permissionsLoading, error: permissionsError } = usePermissions();
 
     const [kids, setKids] = useState([]);
+    const [teams, setTeams] = useState([]); // Add teams state
     const [filteredKids, setFilteredKids] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -57,10 +59,10 @@ const KidsManagementPage = () => {
     const [editModalOpen, setEditModalOpen] = useState(false);
     const [selectedKidForEdit, setSelectedKidForEdit] = useState(null);
 
-    // Load kids based on user role
+    // Load teams and kids
     useEffect(() => {
         if (!permissionsLoading && permissions) {
-            loadKids();
+            loadTeamsAndKids();
         }
     }, [userRole, userData, permissions, permissionsLoading]);
 
@@ -69,14 +71,48 @@ const KidsManagementPage = () => {
         filterKids();
     }, [kids, searchTerm, teamFilter, statusFilter]);
 
-    const loadKids = async () => {
+    // Helper function to get team name by ID
+    const getTeamNameById = (teamId) => {
+        if (!teamId) return 'No Team';
+        const team = teams.find(t => t.id === teamId);
+        return team ? team.name : `Team ${teamId.slice(0, 8)}...`;
+    };
+
+    // Helper function to get kid's display name based on role
+    const getKidDisplayName = (kid) => {
+        switch (userRole) {
+            case 'admin':
+                // For admin, show real name if available, otherwise participant number
+                const firstName = kid.personalInfo?.firstName || '';
+                const lastName = kid.personalInfo?.lastName || '';
+                const fullName = `${firstName} ${lastName}`.trim();
+                return fullName || `Kid #${kid.participantNumber}`;
+            case 'instructor':
+            case 'parent':
+                // For instructor and parent, show real name
+                const instFirstName = kid.personalInfo?.firstName || '';
+                const instLastName = kid.personalInfo?.lastName || '';
+                const instFullName = `${instFirstName} ${instLastName}`.trim();
+                return instFullName || `Kid #${kid.participantNumber}`;
+            default:
+                return 'Restricted';
+        }
+    };
+
+    const loadTeamsAndKids = async () => {
         if (!permissions) return;
 
-        console.log(`🔄 Loading kids for ${userRole}`);
+        console.log(`🔄 Loading teams and kids for ${userRole}`);
         setIsLoading(true);
         setError(null);
 
         try {
+            // Load teams first
+            const teamsData = await getAllTeams();
+            setTeams(teamsData);
+            console.log(`✅ Loaded ${teamsData.length} teams`);
+
+            // Load kids based on role
             let kidsData = [];
 
             switch (userRole) {
@@ -107,18 +143,14 @@ const KidsManagementPage = () => {
                 .filter(kid => canUserAccessKid(userRole, kid, userData, user))
                 .map(kid => ({
                     id: kid.id,
-                    name: userRole === 'admin'
-                        ? kid.participantNumber ? `Kid #${kid.participantNumber}` : 'Unnamed Kid'
-                        : userRole === 'parent' || userRole === 'instructor'
-                            ? `${kid.personalInfo?.firstName || ''} ${kid.personalInfo?.lastName || ''}`.trim() || `Kid #${kid.participantNumber}`
-                            : 'Restricted',
+                    name: getKidDisplayName(kid), // Use the helper function
                     parentName: userRole === 'admin' || userRole === 'instructor'
                         ? kid.parentInfo?.name || 'N/A'
                         : userRole === 'parent'
                             ? 'You'
                             : 'Restricted',
                     age: kid.personalInfo?.dateOfBirth ? calculateAge(kid.personalInfo.dateOfBirth) : 'N/A',
-                    team: kid.teamId ? `Team ${kid.teamId.slice(0, 8)}...` : 'No Team',
+                    team: getTeamNameById(kid.teamId), // Use the helper function
                     teamId: kid.teamId,
                     status: kid.signedFormStatus?.toLowerCase() || 'pending',
                     participantNumber: kid.participantNumber,
@@ -129,8 +161,8 @@ const KidsManagementPage = () => {
             setKids(accessibleKids);
 
         } catch (err) {
-            console.error('💥 Error loading kids:', err);
-            setError(`Failed to load kids: ${err.message}`);
+            console.error('💥 Error loading teams and kids:', err);
+            setError(`Failed to load data: ${err.message}`);
         } finally {
             setIsLoading(false);
         }
@@ -228,6 +260,15 @@ const KidsManagementPage = () => {
         navigate(`/admin/kids/view/${kid.id}`);
     };
 
+    // ADD: Handle row click to view kid
+    const handleRowClick = (kid, event) => {
+        // Prevent row click when clicking on action buttons
+        if (event.target.closest('.action-buttons-enhanced')) {
+            return;
+        }
+        handleViewKid(kid);
+    };
+
     // TEAM CHANGE MODAL HANDLERS
     const handleChangeTeam = (kid) => {
         setSelectedKidForTeamChange(kid);
@@ -242,7 +283,7 @@ const KidsManagementPage = () => {
                     ? {
                         ...kid,
                         teamId: newTeamId,
-                        team: newTeamId ? `Team ${newTeamId.slice(0, 8)}...` : 'No Team'
+                        team: getTeamNameById(newTeamId) // Use helper function
                     }
                     : kid
             )
@@ -254,7 +295,7 @@ const KidsManagementPage = () => {
 
         // Show success message
         const kidName = kids.find(k => k.id === kidId)?.name;
-        const teamName = newTeamId ? `Team ${newTeamId.slice(0, 8)}...` : 'removed from team';
+        const teamName = getTeamNameById(newTeamId);
         alert(`✅ ${kidName} has been ${newTeamId ? 'assigned to' : 'removed from'} ${teamName}`);
     };
 
@@ -271,14 +312,12 @@ const KidsManagementPage = () => {
                 kid.id === kidId
                     ? {
                         ...kid,
-                        name: userRole === 'admin'
-                            ? updatedData.participantNumber ? `Kid #${updatedData.participantNumber}` : 'Unnamed Kid'
-                            : kid.name,
+                        name: getKidDisplayName(updatedData), // Use helper function
                         parentName: userRole === 'admin' || userRole === 'instructor'
                             ? updatedData.parentInfo?.name || 'N/A'
                             : kid.parentName,
                         age: updatedData.personalInfo?.dateOfBirth ? calculateAge(updatedData.personalInfo.dateOfBirth) : 'N/A',
-                        team: updatedData.teamId ? `Team ${updatedData.teamId.slice(0, 8)}...` : 'No Team',
+                        team: getTeamNameById(updatedData.teamId), // Use helper function
                         teamId: updatedData.teamId,
                         status: updatedData.signedFormStatus?.toLowerCase() || 'pending',
                         participantNumber: updatedData.participantNumber,
@@ -347,7 +386,7 @@ const KidsManagementPage = () => {
                     <div className="error-container">
                         <h3>Error</h3>
                         <p>{error}</p>
-                        <button onClick={loadKids} className="btn-primary">
+                        <button onClick={loadTeamsAndKids} className="btn-primary">
                             <RefreshCw className="btn-icon" size={18} />
                             Try Again
                         </button>
@@ -373,7 +412,7 @@ const KidsManagementPage = () => {
                         )}
 
                         <div className="header-actions">
-                            <button className="btn-secondary" onClick={loadKids}>
+                            <button className="btn-secondary" onClick={loadTeamsAndKids}>
                                 <RefreshCw className="btn-icon" size={18} />
                                 Refresh
                             </button>
@@ -522,7 +561,7 @@ const KidsManagementPage = () => {
                         )}
                     </div>
 
-                    {/* Enhanced Table */}
+                    {/* Enhanced Table with Clickable Rows */}
                     <div className="table-container">
                         <table className="data-table">
                             <thead>
@@ -567,7 +606,13 @@ const KidsManagementPage = () => {
                                 </tr>
                             ) : (
                                 filteredKids.map(kid => (
-                                    <tr key={kid.id} className={kid.team === 'No Team' ? 'priority-row' : ''}>
+                                    <tr
+                                        key={kid.id}
+                                        className={`${kid.team === 'No Team' ? 'priority-row' : ''} clickable-row`}
+                                        onClick={(e) => handleRowClick(kid, e)}
+                                        style={{ cursor: 'pointer' }}
+                                        title="Click to view details"
+                                    >
                                         <td>
                                             <div className="kid-info">
                                                 <div className="kid-name">
@@ -606,7 +651,10 @@ const KidsManagementPage = () => {
                                             <div className="action-buttons-enhanced">
                                                 <button
                                                     className="btn-action view"
-                                                    onClick={() => handleViewKid(kid)}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleViewKid(kid);
+                                                    }}
                                                     title="View Details"
                                                 >
                                                     <Eye size={16} />
@@ -616,7 +664,10 @@ const KidsManagementPage = () => {
                                                 {(userRole === 'admin' || userRole === 'instructor') && (
                                                     <button
                                                         className={`btn-action ${kid.team === 'No Team' ? 'assign-team priority' : 'change-team'}`}
-                                                        onClick={() => handleChangeTeam(kid)}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleChangeTeam(kid);
+                                                        }}
                                                         title={kid.team === 'No Team' ? 'Assign Team' : 'Change Team'}
                                                     >
                                                         {kid.team === 'No Team' ? <Plus size={16} /> : <Car size={16} />}
@@ -627,7 +678,10 @@ const KidsManagementPage = () => {
                                                 {(userRole === 'admin' || userRole === 'instructor') && (
                                                     <button
                                                         className="btn-action edit"
-                                                        onClick={() => handleEditKid(kid)}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleEditKid(kid);
+                                                        }}
                                                         title="Edit Kid"
                                                     >
                                                         <Edit size={16} />
@@ -638,7 +692,10 @@ const KidsManagementPage = () => {
                                                 {userRole === 'admin' && (
                                                     <button
                                                         className="btn-action delete"
-                                                        onClick={() => handleDeleteKid(kid)}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleDeleteKid(kid);
+                                                        }}
                                                         title="Delete Kid"
                                                     >
                                                         <Trash2 size={16} />

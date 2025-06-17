@@ -1,4 +1,4 @@
-/* src/pages/admin/KidsManagementPage.css - Page-specific styles only */
+/* src/pages/admin/KidsManagementPage.css - Page-specific styles with clickable rows */
 @import url('./../../styles/global.css');
 
 /* ========================================
@@ -8,6 +8,53 @@
 /* Page uses .admin-page class from global.css */
 .kids-management {
     /* No additional styles needed - inherits from .admin-page */
+}
+
+/* ========================================
+   CLICKABLE ROWS STYLING
+   ======================================== */
+
+.clickable-row {
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.clickable-row:hover {
+    background-color: var(--bg-tertiary) !important;
+    transform: scale(1.01);
+    box-shadow: 0 2px 8px var(--shadow-color);
+}
+
+.clickable-row:active {
+    transform: scale(0.99);
+}
+
+/* Add visual hint for clickable rows */
+.data-table tbody .clickable-row::after {
+    content: "👁️ Click to view";
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0;
+    font-size: 12px;
+    color: var(--text-muted);
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    background: var(--bg-secondary);
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+}
+
+.data-table tbody .clickable-row:hover::after {
+    opacity: 1;
+}
+
+/* Make sure action buttons still work on hover */
+.action-buttons-enhanced {
+    position: relative;
+    z-index: 10;
 }
 
 /* ========================================
@@ -183,6 +230,111 @@
 }
 
 /* ========================================
+   IMAGE UPLOAD STYLES FOR KID PHOTOS
+   ======================================== */
+
+.kid-photo-container {
+    position: relative;
+    display: inline-block;
+}
+
+.kid-photo {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--racing-gold);
+    box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+.kid-photo:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.5);
+}
+
+.kid-photo-placeholder {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--racing-gold) 0%, var(--racing-orange) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-primary);
+    font-size: 24px;
+    font-weight: bold;
+    border: 3px solid var(--racing-gold);
+    box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+}
+
+.upload-photo-button {
+    position: absolute;
+    bottom: -5px;
+    right: -5px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--racing-gold);
+    border: 2px solid white;
+    color: var(--text-primary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.upload-photo-button:hover {
+    background: var(--racing-orange);
+    transform: scale(1.1);
+}
+
+.photo-upload-input {
+    display: none;
+}
+
+/* ========================================
+   TABLE ENHANCEMENTS FOR PHOTOS
+   ======================================== */
+
+.kid-info-with-photo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.kid-info-text {
+    flex: 1;
+}
+
+.table-kid-photo {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--racing-gold);
+    flex-shrink: 0;
+}
+
+.table-kid-photo-placeholder {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--racing-gold) 0%, var(--racing-orange) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-primary);
+    font-size: 16px;
+    font-weight: bold;
+    border: 2px solid var(--racing-gold);
+    flex-shrink: 0;
+}
+
+/* ========================================
    RESPONSIVE OVERRIDES
    ======================================== */
 
@@ -201,6 +353,25 @@
     .kid-card-footer {
         flex-wrap: wrap;
         justify-content: center;
+    }
+
+    /* Hide the hover hint on mobile */
+    .data-table tbody .clickable-row::after {
+        display: none;
+    }
+
+    /* Make kid info stack on mobile */
+    .kid-info-with-photo {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .table-kid-photo,
+    .table-kid-photo-placeholder {
+        width: 35px;
+        height: 35px;
+        font-size: 14px;
     }
 }
 
@@ -232,5 +403,25 @@
     .view-button, .edit-button, .delete-button {
         padding: 6px 12px;
         font-size: 13px;
+    }
+
+    .kid-photo,
+    .kid-photo-placeholder {
+        width: 45px;
+        height: 45px;
+        font-size: 18px;
+    }
+
+    .table-kid-photo,
+    .table-kid-photo-placeholder {
+        width: 30px;
+        height: 30px;
+        font-size: 12px;
+    }
+
+    .upload-photo-button {
+        width: 20px;
+        height: 20px;
+        font-size: 10px;
     }
 }

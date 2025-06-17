@@ -154,8 +154,8 @@
 .content-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-    gap: 25px;
-    padding: 30px;
+    gap: 30px;
+    padding: 35px;
 }
 
 .info-section.full-width {
@@ -163,13 +163,24 @@
 }
 
 /* ========================================
-   INFO GRIDS
+   REMOVE COLORED BORDERS FROM SECTIONS
+   ======================================== */
+
+.info-section {
+    /* Remove any colored borders and use standard styling */
+    border: 2px solid var(--border-color) !important;
+    background: var(--bg-secondary) !important;
+}
+
+/* ========================================
+   INFO GRIDS WITH MORE PADDING FROM CONTAINER
    ======================================== */
 
 .info-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
+    gap: 25px;
+    padding: 30px;
 }
 
 .info-item.full-width {
@@ -179,7 +190,7 @@
 .info-item {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 12px;
 }
 
 .info-item label {
@@ -188,19 +199,30 @@
     font-size: 14px;
     text-transform: uppercase;
     letter-spacing: 1px;
+    margin-bottom: 4px;
 }
 
 .info-value {
-    background: white;
-    padding: 12px 16px;
+    background: var(--input-bg);
+    color: var(--text-primary) !important;
+    padding: 18px 20px;
     border-radius: 12px;
     border: 1px solid var(--border-color);
-    color: var(--text-primary);
     font-weight: 500;
-    min-height: 44px;
+    min-height: 56px;
     display: flex;
     align-items: center;
     transition: all 0.3s ease;
+    line-height: 1.5;
+}
+
+/* FORCE BLACK TEXT IN DARK MODE FOR INPUT FIELDS */
+[data-theme="dark"] .info-value,
+.dark-mode .info-value,
+.dark .info-value {
+    color: #1F2937 !important;
+    background: #F9FAFB !important;
+    border-color: #D1D5DB !important;
 }
 
 .info-value:hover {
@@ -257,19 +279,20 @@
 }
 
 /* ========================================
-   COMMENTS GRID
+   COMMENTS GRID WITH MORE PADDING FROM CONTAINER
    ======================================== */
 
 .comments-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 20px;
+    gap: 25px;
+    padding: 30px;
 }
 
 .comment-item {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 12px;
 }
 
 .comment-item label {
@@ -278,22 +301,74 @@
     font-size: 14px;
     text-transform: uppercase;
     letter-spacing: 1px;
+    margin-bottom: 4px;
 }
 
 .comment-value {
-    background: white;
-    padding: 16px;
+    background: var(--input-bg);
+    color: var(--text-primary) !important;
+    padding: 20px;
     border-radius: 12px;
     border: 1px solid var(--border-color);
-    color: var(--text-primary);
-    min-height: 80px;
+    min-height: 100px;
     transition: all 0.3s ease;
     white-space: pre-wrap;
+    line-height: 1.6;
+}
+
+/* FORCE BLACK TEXT IN DARK MODE FOR COMMENT FIELDS */
+[data-theme="dark"] .comment-value,
+.dark-mode .comment-value,
+.dark .comment-value {
+    color: #1F2937 !important;
+    background: #F9FAFB !important;
+    border-color: #D1D5DB !important;
 }
 
 .comment-value:hover {
     border-color: var(--racing-gold);
     box-shadow: 0 2px 8px rgba(255, 215, 0, 0.2);
+}
+
+/* ========================================
+   COLLAPSIBLE SECTIONS STYLING WITH MORE PADDING
+   ======================================== */
+
+.section-header.clickable {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 30px;
+    margin: -25px -25px 20px -25px;
+    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-quaternary) 100%);
+    border-bottom: 2px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.section-header.clickable:hover {
+    background: linear-gradient(135deg, var(--bg-quaternary) 0%, var(--bg-tertiary) 100%);
+    border-bottom-color: var(--racing-gold);
+}
+
+.section-header-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.collapse-indicator {
+    display: flex;
+    align-items: center;
+    transition: transform 0.3s ease;
+}
+
+.collapse-icon {
+    color: var(--text-secondary);
+    transition: color 0.3s ease;
+}
+
+.section-header.clickable:hover .collapse-icon {
+    color: var(--racing-gold);
 }
 
 /* ========================================
