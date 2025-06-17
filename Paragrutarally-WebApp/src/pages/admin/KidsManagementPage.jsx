@@ -1,4 +1,4 @@
-// src/pages/admin/KidsManagementPage.jsx - WITH FIXES FOR NAME/TEAM DISPLAY AND CLICKABLE ROWS
+// src/pages/admin/KidsManagementPage.jsx - UPDATED WITH PHOTO SUPPORT
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
@@ -6,13 +6,15 @@ import TeamChangeModal from '../../components/modals/TeamChangeModal.jsx';
 import EditKidModal from '../../components/modals/EditKidModal.jsx';
 import { useTheme } from '../../contexts/ThemeContext';
 import { usePermissions, canUserAccessKid } from '../../hooks/usePermissions.jsx';
+import { db } from '../../firebase/config';
 import {
     getAllKids,
     getKidsByInstructor,
     getKidsByParent,
     deleteKid
 } from '../../services/kidService';
-import { getAllTeams } from '../../services/teamService'; // Import team service
+import { getAllTeams } from '../../services/teamService';
+import { getKidPhotoInfo } from '../../services/kidPhotoService'; // Import photo service
 import {
     IconUserCircle as Baby,
     IconPlus as Plus,
@@ -32,7 +34,8 @@ import {
     IconEdit as Edit,
     IconTrash as Trash2,
     IconClock as Clock,
-    IconCircleX as XCircle
+    IconCircleX as XCircle,
+    IconCamera as Camera
 } from '@tabler/icons-react';
 import './KidsManagementPage.css';
 
@@ -42,7 +45,7 @@ const KidsManagementPage = () => {
     const { permissions, userRole, userData, user, loading: permissionsLoading, error: permissionsError } = usePermissions();
 
     const [kids, setKids] = useState([]);
-    const [teams, setTeams] = useState([]); // Add teams state
+    const [teams, setTeams] = useState([]);
     const [filteredKids, setFilteredKids] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -82,14 +85,12 @@ const KidsManagementPage = () => {
     const getKidDisplayName = (kid) => {
         switch (userRole) {
             case 'admin':
-                // For admin, show real name if available, otherwise participant number
                 const firstName = kid.personalInfo?.firstName || '';
                 const lastName = kid.personalInfo?.lastName || '';
                 const fullName = `${firstName} ${lastName}`.trim();
                 return fullName || `Kid #${kid.participantNumber}`;
             case 'instructor':
             case 'parent':
-                // For instructor and parent, show real name
                 const instFirstName = kid.personalInfo?.firstName || '';
                 const instLastName = kid.personalInfo?.lastName || '';
                 const instFullName = `${instFirstName} ${instLastName}`.trim();
@@ -97,6 +98,14 @@ const KidsManagementPage = () => {
             default:
                 return 'Restricted';
         }
+    };
+
+    // Helper function to get initials for photo placeholder
+    const getKidInitials = (kid) => {
+        const firstName = kid.personalInfo?.firstName || '';
+        const lastName = kid.personalInfo?.lastName || '';
+        const initials = (firstName.charAt(0) + lastName.charAt(0)).toUpperCase();
+        return initials || kid.participantNumber?.charAt(0) || '?';
     };
 
     const loadTeamsAndKids = async () => {
@@ -141,21 +150,28 @@ const KidsManagementPage = () => {
             // Filter and transform based on role-based access
             const accessibleKids = kidsData
                 .filter(kid => canUserAccessKid(userRole, kid, userData, user))
-                .map(kid => ({
-                    id: kid.id,
-                    name: getKidDisplayName(kid), // Use the helper function
-                    parentName: userRole === 'admin' || userRole === 'instructor'
-                        ? kid.parentInfo?.name || 'N/A'
-                        : userRole === 'parent'
-                            ? 'You'
-                            : 'Restricted',
-                    age: kid.personalInfo?.dateOfBirth ? calculateAge(kid.personalInfo.dateOfBirth) : 'N/A',
-                    team: getTeamNameById(kid.teamId), // Use the helper function
-                    teamId: kid.teamId,
-                    status: kid.signedFormStatus?.toLowerCase() || 'pending',
-                    participantNumber: kid.participantNumber,
-                    originalData: kid
-                }));
+                .map(kid => {
+                    const photoInfo = getKidPhotoInfo(kid); // Get photo info for each kid
+                    return {
+                        id: kid.id,
+                        name: getKidDisplayName(kid),
+                        parentName: userRole === 'admin' || userRole === 'instructor'
+                            ? kid.parentInfo?.name || 'N/A'
+                            : userRole === 'parent'
+                                ? 'You'
+                                : 'Restricted',
+                        age: kid.personalInfo?.dateOfBirth ? calculateAge(kid.personalInfo.dateOfBirth) : 'N/A',
+                        team: getTeamNameById(kid.teamId),
+                        teamId: kid.teamId,
+                        status: kid.signedFormStatus?.toLowerCase() || 'pending',
+                        participantNumber: kid.participantNumber,
+                        // Add photo information
+                        photoUrl: photoInfo.url,
+                        hasPhoto: photoInfo.hasPhoto,
+                        initials: getKidInitials(kid),
+                        originalData: kid
+                    };
+                });
 
             console.log(`✅ User can access ${accessibleKids.length} kids`);
             setKids(accessibleKids);
@@ -224,7 +240,6 @@ const KidsManagementPage = () => {
             default:
                 break;
         }
-        // Clear search when clicking stat cards
         setSearchTerm('');
     };
 
@@ -233,10 +248,6 @@ const KidsManagementPage = () => {
         setTeamFilter('all');
         setStatusFilter('all');
         setShowingKidsWithoutTeams(false);
-    };
-
-    const handleShowKidsWithoutTeams = () => {
-        handleStatCardClick('without-teams');
     };
 
     const handleDeleteKid = async (kid) => {
@@ -260,9 +271,7 @@ const KidsManagementPage = () => {
         navigate(`/admin/kids/view/${kid.id}`);
     };
 
-    // ADD: Handle row click to view kid
     const handleRowClick = (kid, event) => {
-        // Prevent row click when clicking on action buttons
         if (event.target.closest('.action-buttons-enhanced')) {
             return;
         }
@@ -276,24 +285,21 @@ const KidsManagementPage = () => {
     };
 
     const handleTeamChanged = (kidId, newTeamId) => {
-        // Update the kid in the local state
         setKids(prevKids =>
             prevKids.map(kid =>
                 kid.id === kidId
                     ? {
                         ...kid,
                         teamId: newTeamId,
-                        team: getTeamNameById(newTeamId) // Use helper function
+                        team: getTeamNameById(newTeamId)
                     }
                     : kid
             )
         );
 
-        // Close modal
         setTeamModalOpen(false);
         setSelectedKidForTeamChange(null);
 
-        // Show success message
         const kidName = kids.find(k => k.id === kidId)?.name;
         const teamName = getTeamNameById(newTeamId);
         alert(`✅ ${kidName} has been ${newTeamId ? 'assigned to' : 'removed from'} ${teamName}`);
@@ -306,32 +312,35 @@ const KidsManagementPage = () => {
     };
 
     const handleKidUpdated = (kidId, updatedData) => {
-        // Update the kid in the local state
+        const photoInfo = getKidPhotoInfo(updatedData);
+
         setKids(prevKids =>
             prevKids.map(kid =>
                 kid.id === kidId
                     ? {
                         ...kid,
-                        name: getKidDisplayName(updatedData), // Use helper function
+                        name: getKidDisplayName(updatedData),
                         parentName: userRole === 'admin' || userRole === 'instructor'
                             ? updatedData.parentInfo?.name || 'N/A'
                             : kid.parentName,
                         age: updatedData.personalInfo?.dateOfBirth ? calculateAge(updatedData.personalInfo.dateOfBirth) : 'N/A',
-                        team: getTeamNameById(updatedData.teamId), // Use helper function
+                        team: getTeamNameById(updatedData.teamId),
                         teamId: updatedData.teamId,
                         status: updatedData.signedFormStatus?.toLowerCase() || 'pending',
                         participantNumber: updatedData.participantNumber,
+                        // Update photo information
+                        photoUrl: photoInfo.url,
+                        hasPhoto: photoInfo.hasPhoto,
+                        initials: getKidInitials(updatedData),
                         originalData: { ...kid.originalData, ...updatedData }
                     }
                     : kid
             )
         );
 
-        // Close modal
         setEditModalOpen(false);
         setSelectedKidForEdit(null);
 
-        // Show success message
         const kidName = kids.find(k => k.id === kidId)?.name;
         alert(`✅ ${kidName} has been updated successfully! 🏎️`);
     };
@@ -561,12 +570,13 @@ const KidsManagementPage = () => {
                         )}
                     </div>
 
-                    {/* Enhanced Table with Clickable Rows */}
+                    {/* Enhanced Table with Photo Column */}
                     <div className="table-container">
                         <table className="data-table">
                             <thead>
                             <tr>
                                 <th><Baby size={16} style={{ marginRight: '8px' }} />Kid Info</th>
+                                <th><Camera size={16} style={{ marginRight: '8px' }} />Photo</th>
                                 <th>🎂 Age</th>
                                 <th><Car size={16} style={{ marginRight: '8px' }} />Team</th>
                                 <th><BarChart3 size={16} style={{ marginRight: '8px' }} />Status</th>
@@ -576,7 +586,7 @@ const KidsManagementPage = () => {
                             <tbody>
                             {isLoading ? (
                                 <tr>
-                                    <td colSpan="5" className="loading-cell">
+                                    <td colSpan="6" className="loading-cell">
                                         <div className="loading-content">
                                             <Clock className="loading-spinner" size={30} />
                                             Loading kids...
@@ -585,7 +595,7 @@ const KidsManagementPage = () => {
                                 </tr>
                             ) : filteredKids.length === 0 ? (
                                 <tr>
-                                    <td colSpan="5">
+                                    <td colSpan="6">
                                         <div className="empty-state">
                                             <Baby className="empty-icon" size={60} />
                                             <h3>No kids found</h3>
@@ -622,6 +632,21 @@ const KidsManagementPage = () => {
                                                 <div className="parent-name">👨‍👩‍👧‍👦 {kid.parentName}</div>
                                             </div>
                                         </td>
+                                        <td>
+                                            <div className="kid-photo-container">
+                                                {kid.hasPhoto ? (
+                                                    <img
+                                                        src={kid.photoUrl}
+                                                        alt={kid.name}
+                                                        className="table-kid-photo"
+                                                    />
+                                                ) : (
+                                                    <div className="table-kid-photo-placeholder">
+                                                        {kid.initials}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </td>
                                         <td>{kid.age}</td>
                                         <td>
                                             <span className={`team-badge ${kid.team === 'No Team' ? 'no-team' : 'with-team'}`}>
@@ -633,7 +658,7 @@ const KidsManagementPage = () => {
                                                 ) : (
                                                     <>
                                                         <Car size={14} style={{ marginRight: '4px' }} />
-                                                        {kid.team}
+                                                        {getTeamNameById(kid.teamId)}
                                                     </>
                                                 )}
                                             </span>
@@ -660,7 +685,6 @@ const KidsManagementPage = () => {
                                                     <Eye size={16} />
                                                 </button>
 
-                                                {/* TEAM CHANGE BUTTON - Opens modal instead of navigating */}
                                                 {(userRole === 'admin' || userRole === 'instructor') && (
                                                     <button
                                                         className={`btn-action ${kid.team === 'No Team' ? 'assign-team priority' : 'change-team'}`}
@@ -674,7 +698,6 @@ const KidsManagementPage = () => {
                                                     </button>
                                                 )}
 
-                                                {/* EDIT BUTTON - Opens modal instead of navigating */}
                                                 {(userRole === 'admin' || userRole === 'instructor') && (
                                                     <button
                                                         className="btn-action edit"
@@ -688,7 +711,6 @@ const KidsManagementPage = () => {
                                                     </button>
                                                 )}
 
-                                                {/* Delete - Admin only */}
                                                 {userRole === 'admin' && (
                                                     <button
                                                         className="btn-action delete"

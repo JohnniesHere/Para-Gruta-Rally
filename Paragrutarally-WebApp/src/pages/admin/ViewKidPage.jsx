@@ -1,4 +1,4 @@
-// src/pages/admin/ViewKidPage.jsx - COLLAPSIBLE SECTIONS VERSION
+// src/pages/admin/ViewKidPage.jsx - UPDATED WITH PHOTO SUPPORT
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
@@ -6,6 +6,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { usePermissions } from '../../hooks/usePermissions.jsx';
 import { getKidById, deleteKid } from '../../services/kidService';
 import { getTeamById } from '../../services/teamService';
+import { getKidPhotoInfo } from '../../services/kidPhotoService'; // Import photo service
 import {
     IconUserCircle as Baby,
     IconEdit as Edit,
@@ -20,7 +21,8 @@ import {
     IconStar as Star,
     IconFlag as Flag,
     IconChevronDown as ChevronDown,
-    IconChevronRight as ChevronRight
+    IconChevronRight as ChevronRight,
+    IconCamera as Camera
 } from '@tabler/icons-react';
 import './ViewKidPage.css';
 
@@ -157,6 +159,35 @@ const ViewKidPage = () => {
         }
     };
 
+    // Get photo information for display
+    const getPhotoDisplay = () => {
+        if (!kidData) return null;
+
+        const photoInfo = getKidPhotoInfo(kidData);
+
+        if (photoInfo.hasPhoto) {
+            return (
+                <div className="racer-avatar with-photo">
+                    <img
+                        src={photoInfo.url}
+                        alt={`${kidData.personalInfo?.firstName || 'Kid'} ${kidData.personalInfo?.lastName || ''}`}
+                        className="racer-photo"
+                    />
+                    <div className="race-number">#{kidData.participantNumber}</div>
+                </div>
+            );
+        } else {
+            return (
+                <div className="racer-avatar">
+                    <div className="racer-photo-placeholder">
+                        {photoInfo.placeholder}
+                    </div>
+                    <div className="race-number">#{kidData.participantNumber}</div>
+                </div>
+            );
+        }
+    };
+
     if (isLoading) {
         return (
             <Dashboard requiredRole={userRole}>
@@ -231,10 +262,7 @@ const ViewKidPage = () => {
                 <div className="view-kid-container">
                     <div className="hero-section">
                         <div className="hero-content">
-                            <div className="racer-avatar">
-                                <Baby size={60} className="avatar-icon" />
-                                <div className="race-number">#{kidData.participantNumber}</div>
-                            </div>
+                            {getPhotoDisplay()}
                             <div className="hero-info">
                                 <h2 className="racer-name">
                                     {userRole === 'admin'
@@ -274,7 +302,7 @@ const ViewKidPage = () => {
                             >
                                 <div className="section-header-content">
                                     <Baby className="section-icon" size={24} />
-                                    <h3>🏎️ Racer Profile</h3>
+                                    <h3>🏎️ {kidData.personalInfo.firstName}'s Profile</h3>
                                 </div>
                                 <div className="collapse-indicator">
                                     {collapsedSections.personal ?
@@ -295,6 +323,25 @@ const ViewKidPage = () => {
                                         <label>🎂 Date of Birth</label>
                                         <div className="info-value">
                                             {kidData.personalInfo?.dateOfBirth || 'N/A'}
+                                        </div>
+                                    </div>
+
+                                    {/* ADD: Photo section in personal info */}
+                                    <div className="info-item">
+                                        <label>📸 Racing Photo</label>
+                                        <div className="info-value">
+                                            {kidData.personalInfo?.photo ? (
+                                                <div className="photo-display">
+                                                    <img
+                                                        src={kidData.personalInfo.photo}
+                                                        alt="Racing photo"
+                                                        className="inline-photo"
+                                                    />
+                                                    <span className="photo-status">✅ Uploaded</span>
+                                                </div>
+                                            ) : (
+                                                <span className="no-photo">📷 No photo uploaded</span>
+                                            )}
                                         </div>
                                     </div>
 
@@ -331,7 +378,7 @@ const ViewKidPage = () => {
                             >
                                 <div className="section-header-content">
                                     <Heart className="section-icon" size={24} />
-                                    <h3>👨‍👩‍👧‍👦 Racing Family</h3>
+                                    <h3>👨‍👩‍👧‍👦 {kidData.personalInfo.firstName}'s Family</h3>
                                 </div>
                                 <div className="collapse-indicator">
                                     {collapsedSections.family ?
@@ -390,7 +437,7 @@ const ViewKidPage = () => {
                             >
                                 <div className="section-header-content">
                                     <Car className="section-icon" size={24} />
-                                    <h3>🏎️ Racing Team</h3>
+                                    <h3>🏎️ {kidData.personalInfo.firstName}'s Team</h3>
                                 </div>
                                 <div className="collapse-indicator">
                                     {collapsedSections.team ?
@@ -445,7 +492,7 @@ const ViewKidPage = () => {
                             >
                                 <div className="section-header-content">
                                     <FileText className="section-icon" size={24} />
-                                    <h3>💬 Racing Notes & Comments</h3>
+                                    <h3>💬 {kidData.personalInfo.firstName}'s Notes & Comments</h3>
                                 </div>
                                 <div className="collapse-indicator">
                                     {collapsedSections.comments ?
@@ -484,6 +531,29 @@ const ViewKidPage = () => {
                                             {kidData.additionalComments || 'No additional notes'}
                                         </div>
                                     </div>
+
+                                    {/* ADD: Instructor Comments Timeline */}
+                                    {kidData.instructorsComments && kidData.instructorsComments.length > 0 && (
+                                        <div className="comment-item full-width">
+                                            <label>👨‍🏫 Team Notes History</label>
+                                            <div className="comment-value">
+                                                <div className="comments-timeline">
+                                                    {kidData.instructorsComments.map((comment, index) => (
+                                                        <div key={index} className="timeline-comment">
+                                                            <div className="comment-header">
+                                                                <span className="comment-author">{comment.author}</span>
+                                                                <span className="comment-role">({comment.authorRole})</span>
+                                                                <span className="comment-date">
+                                                                    {new Date(comment.timestamp).toLocaleDateString()}
+                                                                </span>
+                                                            </div>
+                                                            <div className="comment-text">{comment.text}</div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>

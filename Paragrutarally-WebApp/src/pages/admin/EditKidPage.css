@@ -1,4 +1,4 @@
-/* src/pages/admin/EditKidPage.css - Page-specific styles only */
+/* src/pages/admin/EditKidPage.css - V1 Enhanced Photo Buttons */
 @import url('./../../styles/global.css');
 
 /* ========================================
@@ -22,7 +22,197 @@
     /* No additional styles needed - inherits from .form-section */
 }
 
-/* Form elements use global classes: .form-input, .form-select, .form-textarea */
+/* ========================================
+   ENHANCED PHOTO BUTTONS - BELOW PHOTO WITH STRONG BORDERS
+   ======================================== */
+
+.photo-preview-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    padding: 20px;
+    border: 2px dashed var(--border-color);
+    border-radius: 12px;
+    background: var(--bg-tertiary);
+}
+
+.photo-display-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.kid-photo,
+.kid-photo-placeholder {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    display: block;
+}
+
+.kid-photo {
+    object-fit: cover;
+    border: 3px solid var(--racing-gold);
+    box-shadow: 0 4px 16px rgba(255, 215, 0, 0.3);
+}
+
+.kid-photo-placeholder {
+    background: linear-gradient(135deg, var(--racing-gold) 0%, var(--racing-orange) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-primary);
+    font-size: 48px;
+    font-weight: bold;
+    border: 3px solid var(--racing-gold);
+    box-shadow: 0 4px 16px rgba(255, 215, 0, 0.3);
+}
+
+/* ENHANCED PHOTO ACTION BUTTONS */
+.photo-action-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    align-items: center;
+}
+
+.photo-action-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    white-space: nowrap;
+    min-width: 120px;
+    justify-content: center;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: none;
+    outline: none;
+}
+
+.photo-action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+}
+
+.upload-btn {
+    background: #10B981;
+    color: white;
+    border: 3px solid #047857; /* STRONG dark green border */
+}
+
+.upload-btn:hover {
+    background: #059669;
+    border-color: #065F46;
+    color: white;
+}
+
+.remove-btn {
+    background: #EF4444;
+    color: white;
+    border: 3px solid #B91C1C; /* STRONG dark red border */
+}
+
+.remove-btn:hover {
+    background: #DC2626;
+    border-color: #991B1B;
+    color: white;
+}
+
+.btn-text {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Hidden file input */
+.photo-upload-input {
+    display: none !important;
+}
+
+/* Photo upload info */
+.photo-upload-info {
+    text-align: center;
+    margin-top: 10px;
+}
+
+.photo-upload-info p {
+    margin: 5px 0;
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.photo-error {
+    color: var(--error-color) !important;
+    font-weight: 600;
+    margin-top: 8px !important;
+    background: var(--error-light);
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--error-color);
+}
+
+/* Enhanced tooltip styling with stronger borders */
+.photo-action-btn[title]:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1F2937;
+    color: white;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    margin-bottom: 10px;
+    z-index: 1000;
+    pointer-events: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    border: 3px solid #374151;
+}
+
+.photo-action-btn[title]:hover::before {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 8px solid transparent;
+    border-top-color: #1F2937;
+    margin-bottom: 2px;
+    z-index: 1000;
+    pointer-events: none;
+}
+
+/* Focus states with visible borders */
+.photo-action-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.5);
+}
+
+.upload-btn:focus {
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.5);
+}
+
+.remove-btn:focus {
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.5);
+}
+
+/* Active states */
+.photo-action-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
 
 /* ========================================
    EDIT-SPECIFIC FORM FEATURES
@@ -86,10 +276,62 @@
     .form-button-group {
         flex-direction: column;
     }
+
+    .photo-action-buttons {
+        gap: 12px;
+    }
+
+    .photo-action-btn {
+        padding: 16px 26px;
+        font-size: 15px;
+        min-width: 130px;
+        border-width: 5px; /* Keep strong borders on mobile */
+    }
+
+    .btn-text {
+        font-size: 14px;
+    }
+
+    .kid-photo,
+    .kid-photo-placeholder {
+        width: 100px;
+        height: 100px;
+    }
+
+    .kid-photo-placeholder {
+        font-size: 40px;
+    }
 }
 
 @media (max-width: 480px) {
     .admin-form-section {
         padding: 16px;
+    }
+
+    .photo-action-buttons {
+        flex-direction: column;
+        gap: 15px;
+        align-items: center;
+    }
+
+    .photo-action-btn {
+        width: 180px;
+        padding: 18px 28px;
+        font-size: 16px;
+        border-width: 6px; /* Even stronger borders on small screens */
+    }
+
+    .btn-text {
+        font-size: 15px;
+    }
+
+    .kid-photo,
+    .kid-photo-placeholder {
+        width: 80px;
+        height: 80px;
+    }
+
+    .kid-photo-placeholder {
+        font-size: 32px;
     }
 }

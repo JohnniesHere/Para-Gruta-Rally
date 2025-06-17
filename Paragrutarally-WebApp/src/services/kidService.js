@@ -1,4 +1,4 @@
-// src/services/kidService.js - Updated with Schema Integration
+// src/services/kidService.js - FIXED VERSION with Enhanced updateKid function
 import {
     collection,
     addDoc,
@@ -106,44 +106,86 @@ export const addKid = async (kidData) => {
  */
 export const getKidById = async (kidId) => {
     try {
+        console.log('🔍 Getting kid by ID:', kidId);
         const kidDoc = await getDoc(doc(db, 'kids', kidId));
 
         if (!kidDoc.exists()) {
             throw new Error('Kid not found');
         }
 
-        return convertFirestoreToKid(kidDoc);
+        const kidData = convertFirestoreToKid(kidDoc);
+        console.log('✅ Kid retrieved successfully:', kidData);
+        return kidData;
     } catch (error) {
-        console.error('Error getting kid:', error);
+        console.error('❌ Error getting kid:', error);
         throw new Error(`Failed to get kid: ${error.message}`);
     }
 };
 
 /**
- * Update a kid
+ * Update a kid - ENHANCED VERSION with better error handling
  * @param {string} kidId - The kid's document ID
  * @param {Object} updates - Updated kid data
- * @returns {Promise<void>}
+ * @returns {Promise<Object>} Updated kid data
  */
 export const updateKid = async (kidId, updates) => {
     try {
+        console.log('🔄 Starting kid update for ID:', kidId);
+        console.log('📝 Update data received:', updates);
+
         // Validate the updated data
+        console.log('🔍 Validating update data...');
         const validation = validateKid(updates);
+
         if (!validation.isValid) {
+            console.error('❌ Validation failed:', validation.errors);
             const errorMessages = Object.values(validation.errors).join(', ');
             throw new Error(`Validation failed: ${errorMessages}`);
         }
 
+        console.log('✅ Validation passed');
+
         // Prepare data for Firestore
+        console.log('🔧 Preparing data for Firestore...');
         const preparedData = prepareKidForFirestore(updates, true);
+        console.log('📦 Prepared data:', preparedData);
 
         // Update in Firestore
-        await updateDoc(doc(db, 'kids', kidId), preparedData);
+        console.log('💾 Updating document in Firestore...');
+        const kidRef = doc(db, 'kids', kidId);
+        await updateDoc(kidRef, preparedData);
 
-        console.log('Kid updated successfully');
+        console.log('✅ Kid updated successfully in Firestore');
+
+        // Fetch and return the updated document to verify
+        console.log('🔍 Fetching updated document...');
+        const updatedDoc = await getDoc(kidRef);
+
+        if (!updatedDoc.exists()) {
+            throw new Error('Kid document not found after update');
+        }
+
+        const updatedKidData = convertFirestoreToKid(updatedDoc);
+        console.log('✅ Update complete. Final data:', updatedKidData);
+
+        return updatedKidData;
+
     } catch (error) {
-        console.error('Error updating kid:', error);
-        throw new Error(`Failed to update kid: ${error.message}`);
+        console.error('❌ Error updating kid:', error);
+
+        // Provide more specific error messages
+        if (error.code === 'permission-denied') {
+            throw new Error('Permission denied. You do not have access to update this kid.');
+        } else if (error.code === 'not-found') {
+            throw new Error('Kid not found. It may have been deleted.');
+        } else if (error.code === 'unavailable') {
+            throw new Error('Database temporarily unavailable. Please try again.');
+        } else if (error.message.includes('Validation failed')) {
+            // Re-throw validation errors as-is
+            throw error;
+        } else {
+            throw new Error(`Failed to update kid: ${error.message}`);
+        }
     }
 };
 
@@ -304,6 +346,7 @@ export const getKidsByParent = async (parentId) => {
         throw new Error(`Failed to get kids by parent: ${error.message}`);
     }
 };
+
 export const getKidsStats = async () => {
     try {
         const allKids = await getAllKids();
