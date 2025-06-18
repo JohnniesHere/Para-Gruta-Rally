@@ -1,0 +1,434 @@
+/* src/pages/admin/EditVehiclePage.css - Page-specific styles only */
+@import url('./../../styles/global.css');
+
+/* ========================================
+   EDIT VEHICLE PAGE SPECIFIC STYLES
+   ======================================== */
+
+/* Page uses .admin-page class from global.css */
+.edit-vehicle-page {
+    /* No additional styles needed - inherits from .admin-page */
+}
+
+/* Form container uses .admin-container from global.css */
+.edit-vehicle-container {
+    max-width: 4xl;
+    margin: 0 auto;
+    padding: 1.5rem;
+}
+
+/* Form sections use .form-section from global.css */
+.admin-form-section {
+    /* No additional styles needed - inherits from .form-section */
+}
+
+/* ========================================
+   HEADER STYLES
+   ======================================== */
+
+.header-content {
+    padding-bottom: 20px;
+}
+
+/* ========================================
+   RACING HEADER DARK MODE FIXES
+   ======================================== */
+
+/* Racing header text color fixes for dark mode */
+.racing-header .title-section h2 {
+    color: #2D3748; /* Dark text for light background */
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    font-weight: 700;
+    text-align: center; /* CENTER THE HEADER */
+}
+
+.racing-header .subtitle {
+    color: #4B5563; /* Darker gray for better contrast */
+    font-weight: 600;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+    text-align: center; /* CENTER THE SUBTITLE */
+}
+
+/* Dark mode overrides for racing header text */
+[data-theme="dark"] .racing-header .title-section h2,
+.dark-mode .racing-header .title-section h2,
+.dark .racing-header .title-section h2 {
+    color: #2D3748 !important; /* Keep dark text even in dark mode */
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .racing-header .subtitle,
+.dark-mode .racing-header .subtitle,
+.dark .racing-header .subtitle {
+    color: #374151 !important; /* Darker gray for dark mode */
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+}
+
+/* ========================================
+   BUTTON TEXT COLOR FIXES
+   ======================================== */
+
+/* SAVE UPDATES button text fix - Apply to all primary buttons on this page */
+.edit-vehicle-page .btn-primary,
+.edit-vehicle-page .btn-submit.racing-submit {
+    color: #2D3748 !important; /* Dark text for better contrast on yellow */
+    font-weight: 700;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+/* Ensure button text stays dark in all modes */
+[data-theme="dark"] .edit-vehicle-page .btn-primary,
+.dark-mode .edit-vehicle-page .btn-primary,
+.dark .edit-vehicle-page .btn-primary,
+[data-theme="dark"] .edit-vehicle-page .btn-submit.racing-submit,
+.dark-mode .edit-vehicle-page .btn-submit.racing-submit,
+.dark .edit-vehicle-page .btn-submit.racing-submit {
+    color: #2D3748 !important;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+/* Fix for button icons to be visible */
+.edit-vehicle-page .btn-primary svg,
+.edit-vehicle-page .btn-submit.racing-submit svg {
+    color: #2D3748 !important;
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.1));
+}
+
+/* ========================================
+   DARK MODE BACK BUTTON FIX
+   ======================================== */
+
+/* Dark mode back button fix */
+.back-button.dark-back-button {
+    background: #374151;
+    color: #f9fafb;
+    border: 1px solid #4b5563;
+}
+
+.back-button.dark-back-button:hover {
+    background: #4b5563;
+    color: #ffffff;
+    border-color: #6b7280;
+}
+
+/* Light mode back button (default) */
+.back-button {
+    background: #f8fafc;
+    color: #334155;
+    border: 1px solid #e2e8f0;
+    padding: 8px 16px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.back-button:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+    border-color: #cbd5e1;
+}
+
+/* ========================================
+   VEHICLE SECTION SPECIFIC COLORS
+   ======================================== */
+
+.racing-section {
+    border-color: #3B82F6;
+}
+
+.racing-section:hover {
+    border-color: #2563EB;
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.2);
+}
+
+.skills-section {
+    border-color: #FFD700;
+}
+
+.skills-section:hover {
+    border-color: #FFC107;
+    box-shadow: 0 8px 25px rgba(255, 215, 0, 0.2);
+}
+
+.team-section {
+    border-color: #8B5CF6;
+}
+
+.team-section:hover {
+    border-color: #7C3AED;
+    box-shadow: 0 8px 25px rgba(139, 92, 246, 0.2);
+}
+
+.status-section {
+    border-color: #10B981;
+}
+
+.status-section:hover {
+    border-color: #059669;
+    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.2);
+}
+
+.comments-section {
+    border-color: #6B7280;
+}
+
+.comments-section:hover {
+    border-color: #4B5563;
+    box-shadow: 0 8px 25px rgba(107, 114, 128, 0.2);
+}
+
+/* ========================================
+   PHOTO UPLOAD SECTION
+   ======================================== */
+
+.photo-upload-section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+}
+
+.photo-preview-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.photo-display-wrapper {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    border-radius: 15px;
+    overflow: hidden;
+    border: 3px solid var(--racing-gold);
+    box-shadow: 0 8px 25px rgba(255, 215, 0, 0.3);
+}
+
+.kid-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.kid-photo-placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--racing-gold) 0%, var(--racing-orange) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.photo-action-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.photo-action-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.photo-action-btn.upload-btn {
+    background: linear-gradient(135deg, var(--success-color) 0%, var(--success-hover) 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+}
+
+.photo-action-btn.upload-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+.photo-action-btn.remove-btn {
+    background: linear-gradient(135deg, var(--error-color) 0%, var(--error-hover) 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+}
+
+.photo-action-btn.remove-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+}
+
+.photo-upload-info {
+    text-align: center;
+    color: var(--text-muted);
+}
+
+.photo-upload-info p {
+    margin: 0;
+    font-size: 14px;
+}
+
+.photo-error {
+    color: var(--error-color);
+    font-weight: 600;
+    margin-top: 8px;
+    background: rgba(239, 68, 68, 0.1);
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* ========================================
+   FORM SECTIONS COLOR CODING
+   ======================================== */
+
+.racing-section .section-icon {
+    color: #3B82F6;
+    background: rgba(59, 130, 246, 0.1);
+    border-color: #3B82F6;
+}
+
+.skills-section .section-icon {
+    color: var(--racing-gold);
+    background: rgba(255, 215, 0, 0.1);
+    border-color: var(--racing-gold);
+}
+
+.team-section .section-icon {
+    color: #8B5CF6;
+    background: rgba(139, 92, 246, 0.1);
+    border-color: #8B5CF6;
+}
+
+.status-section .section-icon {
+    color: #10B981;
+    background: rgba(16, 185, 129, 0.1);
+    border-color: #10B981;
+}
+
+.comments-section .section-icon {
+    color: #6B7280;
+    background: rgba(107, 114, 128, 0.1);
+    border-color: #6B7280;
+}
+
+/* ========================================
+   LOADING STATES
+   ======================================== */
+
+.loading-form {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* ========================================
+   STATUS INDICATORS
+   ======================================== */
+
+.edit-status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    padding: 12px;
+    border-radius: 6px;
+    background-color: var(--bg-tertiary);
+}
+
+.edit-status-indicator.saved {
+    background-color: var(--success-light);
+    color: #065f46;
+}
+
+.edit-status-indicator.modified {
+    background-color: var(--warning-light);
+    color: #92400e;
+}
+
+.edit-status-indicator.error {
+    background-color: var(--error-light);
+    color: #991b1b;
+}
+
+/* ========================================
+   CHECKBOX STYLING
+   ======================================== */
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--racing-gold);
+    cursor: pointer;
+}
+
+/* ========================================
+   RESPONSIVE OVERRIDES
+   ======================================== */
+
+@media (max-width: 768px) {
+    .edit-vehicle-container {
+        padding: 1rem;
+    }
+
+    .photo-display-wrapper {
+        width: 100px;
+        height: 100px;
+    }
+
+    .kid-photo-placeholder {
+        font-size: 40px;
+    }
+
+    .photo-action-buttons {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .photo-action-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .admin-form-section {
+        padding: 16px;
+    }
+
+    .photo-display-wrapper {
+        width: 80px;
+        height: 80px;
+    }
+
+    .kid-photo-placeholder {
+        font-size: 32px;
+    }
+
+    .photo-action-btn {
+        padding: 6px 10px;
+        font-size: 11px;
+    }
+}

@@ -1,4 +1,4 @@
-// src/services/vehicleService.js - Vehicle Management Service
+// src/services/vehicleService.js - Vehicle Management Service with Schema Integration
 import {
     collection,
     doc,
@@ -13,6 +13,11 @@ import {
     serverTimestamp
 } from 'firebase/firestore';
 import { db } from '../firebase/config';
+import {
+    validateVehicle,
+    formatVehicleValidationErrors,
+    checkLicensePlateUniqueness
+} from '../schemas/vehicleSchema';
 
 const VEHICLES_COLLECTION = 'vehicles';
 
@@ -40,13 +45,13 @@ export const getAllVehicles = async () => {
 };
 
 /**
- * Get vehicles by team (Team Leaders)
+ * Get vehicles by team (Team Leaders) - Updated to use teamId
  */
-export const getVehiclesByTeam = async (teamName) => {
+export const getVehiclesByTeam = async (teamId) => {
     try {
         const vehiclesQuery = query(
             collection(db, VEHICLES_COLLECTION),
-            where('teamName', '==', teamName),
+            where('teamId', '==', teamId),
             orderBy('createdAt', 'desc')
         );
         const snapshot = await getDocs(vehiclesQuery);
@@ -114,46 +119,89 @@ export const getVehicleById = async (vehicleId) => {
 };
 
 /**
- * Create a new vehicle
+ * Create a new vehicle with schema validation
  */
 export const addVehicle = async (vehicleData) => {
     try {
+        console.log('🚗 Adding new vehicle with data:', vehicleData);
+
+        // Step 1: Validate the data against schema
+        const validation = validateVehicle(vehicleData, false);
+        if (!validation.success) {
+            const errors = formatVehicleValidationErrors(validation.errors);
+            console.error('❌ Vehicle validation failed:', errors);
+            throw new Error(`Validation failed: ${Object.values(errors).join(', ')}`);
+        }
+
+        const validatedData = validation.data;
+        console.log('✅ Vehicle data validated successfully:', validatedData);
+
+        // Step 2: Check license plate uniqueness
+        const isUnique = await checkLicensePlateUniqueness(validatedData.licensePlate);
+        if (!isUnique) {
+            throw new Error(`License plate "${validatedData.licensePlate}" is already in use by another vehicle.`);
+        }
+
+        // Step 3: Prepare the vehicle document
         const vehicleWithTimestamps = {
-            ...vehicleData,
-            active: vehicleData.active !== undefined ? vehicleData.active : true,
-            history: vehicleData.history || [],
+            ...validatedData,
+            active: validatedData.active !== undefined ? validatedData.active : true,
+            history: validatedData.history || [],
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp()
         };
 
+        // Step 4: Add to Firestore
         const docRef = await addDoc(collection(db, VEHICLES_COLLECTION), vehicleWithTimestamps);
-        console.log('Vehicle created with ID:', docRef.id);
+        console.log('🎉 Vehicle created with ID:', docRef.id);
         return docRef.id;
     } catch (error) {
-        console.error('Error adding vehicle:', error);
-        throw new Error('Failed to create vehicle');
+        console.error('💥 Error adding vehicle:', error);
+        throw new Error(`Failed to create vehicle: ${error.message}`);
     }
 };
 
 /**
- * Update an existing vehicle
+ * Update an existing vehicle with schema validation
  */
 export const updateVehicle = async (vehicleId, updates) => {
     try {
-        const vehicleRef = doc(db, VEHICLES_COLLECTION, vehicleId);
+        console.log('🔄 Updating vehicle with ID:', vehicleId, 'Data:', updates);
 
+        // Step 1: Validate the update data against schema
+        const validation = validateVehicle(updates, true);
+        if (!validation.success) {
+            const errors = formatVehicleValidationErrors(validation.errors);
+            console.error('❌ Vehicle update validation failed:', errors);
+            throw new Error(`Validation failed: ${Object.values(errors).join(', ')}`);
+        }
+
+        const validatedData = validation.data;
+        console.log('✅ Vehicle update data validated successfully:', validatedData);
+
+        // Step 2: Check license plate uniqueness if license plate is being updated
+        if (validatedData.licensePlate) {
+            const isUnique = await checkLicensePlateUniqueness(validatedData.licensePlate, vehicleId);
+            if (!isUnique) {
+                throw new Error(`License plate "${validatedData.licensePlate}" is already in use by another vehicle.`);
+            }
+        }
+
+        // Step 3: Prepare the update document
+        const vehicleRef = doc(db, VEHICLES_COLLECTION, vehicleId);
         const updateData = {
-            ...updates,
+            ...validatedData,
             updatedAt: serverTimestamp()
         };
 
+        // Step 4: Update in Firestore
         await updateDoc(vehicleRef, updateData);
-        console.log('Vehicle updated successfully:', vehicleId);
+        console.log('🎉 Vehicle updated successfully:', vehicleId);
 
         return vehicleId;
     } catch (error) {
-        console.error('Error updating vehicle:', error);
-        throw new Error('Failed to update vehicle');
+        console.error('💥 Error updating vehicle:', error);
+        throw new Error(`Failed to update vehicle: ${error.message}`);
     }
 };
 
@@ -240,17 +288,17 @@ export const deleteVehicle = async (vehicleId) => {
 };
 
 /**
- * Get available vehicles (not assigned to any kid)
+ * Get available vehicles (not assigned to any kid) - Updated to use teamId
  */
-export const getAvailableVehicles = async (teamName = null) => {
+export const getAvailableVehicles = async (teamId = null) => {
     try {
         let vehiclesQuery;
 
-        if (teamName) {
+        if (teamId) {
             vehiclesQuery = query(
                 collection(db, VEHICLES_COLLECTION),
                 where('active', '==', true),
-                where('teamName', '==', teamName),
+                where('teamId', '==', teamId),
                 where('currentKidId', '==', null)
             );
         } else {
@@ -310,14 +358,14 @@ export const updateVehicleBattery = async (vehicleId, batteryType, batteryDate) 
 };
 
 /**
- * Get vehicles statistics - CLEAN VERSION
+ * Get vehicles statistics - Updated to use teamId
  */
-export const getVehicleStats = async (teamName = null) => {
+export const getVehicleStats = async (teamId = null) => {
     try {
         let vehicles;
 
-        if (teamName) {
-            vehicles = await getVehiclesByTeam(teamName);
+        if (teamId) {
+            vehicles = await getVehiclesByTeam(teamId);
         } else {
             vehicles = await getAllVehicles();
         }
@@ -346,13 +394,13 @@ export const getVehicleStats = async (teamName = null) => {
 };
 
 /**
- * Search vehicles by various criteria
+ * Search vehicles by various criteria - Updated to use teamId
  */
 export const searchVehicles = async (searchTerm, filters = {}) => {
     try {
         // Start with all vehicles or filtered by team
-        let vehicles = filters.teamName
-            ? await getVehiclesByTeam(filters.teamName)
+        let vehicles = filters.teamId
+            ? await getVehiclesByTeam(filters.teamId)
             : await getAllVehicles();
 
         // Apply search term
@@ -362,7 +410,6 @@ export const searchVehicles = async (searchTerm, filters = {}) => {
                 vehicle.make?.toLowerCase().includes(term) ||
                 vehicle.model?.toLowerCase().includes(term) ||
                 vehicle.licensePlate?.toLowerCase().includes(term) ||
-                vehicle.teamName?.toLowerCase().includes(term) ||
                 vehicle.notes?.toLowerCase().includes(term)
             );
         }

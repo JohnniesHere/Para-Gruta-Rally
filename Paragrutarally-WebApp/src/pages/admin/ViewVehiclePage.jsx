@@ -1,4 +1,4 @@
-// src/pages/admin/ViewVehiclePage.jsx - Individual Vehicle Details with Permissions
+// src/pages/admin/ViewVehiclePage.jsx - Individual Vehicle Details with Schema Integration
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
@@ -6,6 +6,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { usePermissions } from '../../hooks/usePermissions.jsx';
 import { getVehicleById, assignVehicleToKid, unassignVehicle } from '../../services/vehicleService';
 import { getKidById } from '../../services/kidService';
+import { getTeamById } from '../../services/teamService';
 import {
     IconCar as Car,
     IconArrowLeft as ArrowLeft,
@@ -39,6 +40,7 @@ const ViewVehiclePage = () => {
 
     const [vehicle, setVehicle] = useState(null);
     const [currentKid, setCurrentKid] = useState(null);
+    const [assignedTeam, setAssignedTeam] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [successMessage, setSuccessMessage] = useState('');
@@ -69,6 +71,17 @@ const ViewVehiclePage = () => {
                 }
             }
 
+            // Load assigned team info if teamId exists
+            if (vehicleData.teamId) {
+                try {
+                    const teamData = await getTeamById(vehicleData.teamId);
+                    setAssignedTeam(teamData);
+                } catch (teamError) {
+                    console.error('Error loading team data:', teamError);
+                    setAssignedTeam(null);
+                }
+            }
+
         } catch (error) {
             console.error('Error loading vehicle:', error);
             setError('Failed to load vehicle details. Please try again.');
@@ -89,7 +102,7 @@ const ViewVehiclePage = () => {
 
     const canEdit = () => {
         if (userRole === 'admin') return true;
-        if (userRole === 'instructor' && userData?.teamId === vehicle?.teamName) return true;
+        if (userRole === 'instructor' && userData?.teamId === vehicle?.teamId) return true;
         return false;
     };
 
@@ -222,27 +235,31 @@ const ViewVehiclePage = () => {
         <Dashboard requiredRole={userRole}>
             <div className={`admin-page view-vehicle-page ${appliedTheme}-mode`}>
                 {/* Page Title */}
-                <h1>
-                    <Car size={32} className="page-title-icon" />
-                    {vehicle.make} {vehicle.model}
-                    <Settings size={24} className="sparkle-icon" />
-                </h1>
+                <button onClick={handleBack} className={`back-button ${appliedTheme}-back-button`}>
+                    <ArrowLeft className="btn-icon" size={20} />
+                    Back to Vehicles
+                </button>
+                <div className="page-header">
+                    <div className="title-section">
+                        <h1>
+                            <Car size={32} className="page-title-icon" />
+                            {vehicle.make} {vehicle.model}
+                            <Settings size={24} className="sparkle-icon" />
+                        </h1>
+                    </div>
+                </div>
 
                 <div className="admin-container">
                     {/* Header */}
                     <div className="racing-header">
                         <div className="header-content">
-                            <button onClick={handleBack} className="back-button">
-                                <ArrowLeft className="btn-icon" size={20} />
-                                Back to Vehicles
-                            </button>
                             <div className="title-section">
                                 <h1>{vehicle.make} {vehicle.model}</h1>
                                 <p className="subtitle">License Plate: {vehicle.licensePlate}</p>
                             </div>
                             <div className="header-actions">
                                 {canEdit() && (
-                                    <button onClick={handleEdit} className="btn-primary">
+                                    <button onClick={handleEdit} className="edit-button">
                                         <Edit size={18} />
                                         Edit Vehicle
                                     </button>
@@ -329,7 +346,7 @@ const ViewVehiclePage = () => {
                                 </div>
                                 <div className="info-item">
                                     <label>Team</label>
-                                    <span>{vehicle.teamName || 'Unassigned'}</span>
+                                    <span>{assignedTeam ? assignedTeam.name : 'Unassigned'}</span>
                                 </div>
                             </div>
                         </div>

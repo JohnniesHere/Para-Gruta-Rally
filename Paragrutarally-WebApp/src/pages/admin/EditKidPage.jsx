@@ -468,17 +468,7 @@ const EditKidPage = () => {
                 </div>
 
 
-                <div className="admin-container add-kid-container">
-                    {/* Racing Theme Header */}
-                    <div className="racing-header">
-                        <div className="header-content">
-
-                            <div className="title-section">
-                                <p className="subtitle">Let's keep this champion's info up to date! 🏁</p>
-                            </div>
-                        </div>
-                    </div>
-
+                <div className="add-kid-container">
                     {errors.general && (
                         <div className="alert error-alert">
                             <AlertTriangle size={20} />
@@ -747,7 +737,7 @@ const EditKidPage = () => {
                         <div className={`form-section team-section ${focusTeam ? 'highlight-section' : ''}`}>
                             <div className="section-header">
                                 <Car className="section-icon" size={24} />
-                                <h2>🏎️ Racing Team Assignment {focusTeam && <span className="focus-indicator">← Update Here!</span>}</h2>
+                                <h2>🏎️ Team Assignment {focusTeam && <span className="focus-indicator">← Update Here!</span>}</h2>
                             </div>
                             <div className="form-grid">
                                 <div className="form-group">

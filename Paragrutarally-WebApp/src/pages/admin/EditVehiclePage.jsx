@@ -1,4 +1,4 @@
-// src/pages/admin/EditVehiclePage.jsx - Edit Vehicle with Photo Upload
+// src/pages/admin/EditVehiclePage.jsx - Edit Vehicle with Schema Validation
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
@@ -7,6 +7,7 @@ import { usePermissions } from '../../hooks/usePermissions.jsx';
 import { getVehicleById, updateVehicle } from '../../services/vehicleService';
 import { uploadVehiclePhoto, deleteVehiclePhoto } from '../../services/vehiclePhotoService';
 import { getAllTeams } from '../../services/teamService';
+import { formatVehicleValidationErrors } from '../../schemas/vehicleSchema';
 import {
     IconCar as Car,
     IconDeviceFloppy as Save,
@@ -42,7 +43,7 @@ const EditVehiclePage = () => {
         make: '',
         model: '',
         licensePlate: '',
-        teamName: '',
+        teamId: '', // Changed from teamName to teamId
         driveType: '',
         steeringType: '',
         batteryType: '',
@@ -107,7 +108,7 @@ const EditVehiclePage = () => {
 
     const canEdit = (vehicle = formData) => {
         if (userRole === 'admin') return true;
-        if (userRole === 'instructor' && userData?.teamId === vehicle?.teamName) return true;
+        if (userRole === 'instructor' && userData?.teamId === vehicle?.teamId) return true;
         return false;
     };
 
@@ -201,10 +202,16 @@ const EditVehiclePage = () => {
     };
 
     const validateForm = () => {
+        // Clear previous errors
+        setErrors({});
+        setFieldErrors({});
+
+        // The schema validation will be handled by the service
+        // Just do basic client-side checks here
         const newErrors = {};
         const newFieldErrors = {};
 
-        // Required fields
+        // Required fields - basic check (schema will do full validation)
         if (!formData.make.trim()) {
             newErrors.make = 'Vehicle make is required';
             newFieldErrors.make = true;
@@ -220,17 +227,8 @@ const EditVehiclePage = () => {
             newFieldErrors.licensePlate = true;
         }
 
-        if (!formData.teamName.trim()) {
-            newErrors.teamName = 'Team assignment is required';
-            newFieldErrors.teamName = true;
-        }
-
         setErrors(newErrors);
         setFieldErrors(newFieldErrors);
-
-        if (Object.keys(newErrors).length > 0) {
-            alert(`Please fix the following errors:\n${Object.values(newErrors).join('\n')}`);
-        }
 
         return Object.keys(newErrors).length === 0;
     };
@@ -278,7 +276,7 @@ const EditVehiclePage = () => {
                 }
             }
 
-            // Update the vehicle
+            // Update the vehicle (schema validation will happen in the service)
             await updateVehicle(id, finalFormData);
 
             // Navigate with success message
@@ -290,8 +288,16 @@ const EditVehiclePage = () => {
             });
         } catch (error) {
             console.error('Error updating vehicle:', error);
-            setErrors({ general: `Failed to update vehicle: ${error.message}` });
-            alert(`Failed to update vehicle: ${error.message}`);
+
+            // Handle schema validation errors
+            if (error.message.includes('Validation failed:')) {
+                setErrors({ general: error.message });
+            } else if (error.message.includes('License plate')) {
+                setErrors({ licensePlate: error.message });
+                setFieldErrors({ licensePlate: true });
+            } else {
+                setErrors({ general: `Failed to update vehicle: ${error.message}` });
+            }
         } finally {
             setIsSubmitting(false);
         }
@@ -507,22 +513,22 @@ const EditVehiclePage = () => {
                                 <div className="form-group">
                                     <label className="form-label">
                                         <Users className="label-icon" size={16} />
-                                        Team Assignment *
+                                        Team Assignment
                                     </label>
                                     <select
-                                        value={formData.teamName}
-                                        onChange={(e) => handleInputChange('teamName', e.target.value)}
-                                        className={`form-select ${fieldErrors.teamName ? 'error' : ''}`}
+                                        value={formData.teamId || ''}
+                                        onChange={(e) => handleInputChange('teamId', e.target.value)}
+                                        className={`form-select ${fieldErrors.teamId ? 'error' : ''}`}
                                         disabled={userRole === 'instructor'} // Instructors can't change team
                                     >
-                                        <option value="">🏁 Select Racing Team</option>
+                                        <option value="">🏁 Unassigned (Vehicle Pool)</option>
                                         {teams.map(team => (
-                                            <option key={team.id} value={team.name}>
+                                            <option key={team.id} value={team.id}>
                                                 🏎️ {team.name}
                                             </option>
                                         ))}
                                     </select>
-                                    {errors.teamName && <span className="error-text">{errors.teamName}</span>}
+                                    {errors.teamId && <span className="error-text">{errors.teamId}</span>}
                                 </div>
                             </div>
                         </div>
@@ -540,7 +546,7 @@ const EditVehiclePage = () => {
                                         Drive Type
                                     </label>
                                     <select
-                                        value={formData.driveType}
+                                        value={formData.driveType || ''}
                                         onChange={(e) => handleInputChange('driveType', e.target.value)}
                                         className="form-select"
                                     >
@@ -560,7 +566,7 @@ const EditVehiclePage = () => {
                                         Steering Type
                                     </label>
                                     <select
-                                        value={formData.steeringType}
+                                        value={formData.steeringType || ''}
                                         onChange={(e) => handleInputChange('steeringType', e.target.value)}
                                         className="form-select"
                                     >
@@ -582,7 +588,7 @@ const EditVehiclePage = () => {
                                         type="text"
                                         className="form-input"
                                         placeholder="e.g., 12V Lead Acid, Lithium Ion, AGM"
-                                        value={formData.batteryType}
+                                        value={formData.batteryType || ''}
                                         onChange={(e) => handleInputChange('batteryType', e.target.value)}
                                     />
                                 </div>
@@ -595,7 +601,7 @@ const EditVehiclePage = () => {
                                     <input
                                         type="date"
                                         className="form-input"
-                                        value={formData.batteryDate}
+                                        value={formData.batteryDate || ''}
                                         onChange={(e) => handleInputChange('batteryDate', e.target.value)}
                                     />
                                 </div>
@@ -636,7 +642,7 @@ const EditVehiclePage = () => {
                                     <textarea
                                         className="form-textarea"
                                         placeholder="Describe any modifications made to this vehicle..."
-                                        value={formData.modifications}
+                                        value={formData.modifications || ''}
                                         onChange={(e) => handleInputChange('modifications', e.target.value)}
                                         rows="3"
                                     />
@@ -647,7 +653,7 @@ const EditVehiclePage = () => {
                                     <textarea
                                         className="form-textarea"
                                         placeholder="Any additional notes about this racing vehicle..."
-                                        value={formData.notes}
+                                        value={formData.notes || ''}
                                         onChange={(e) => handleInputChange('notes', e.target.value)}
                                         rows="3"
                                     />

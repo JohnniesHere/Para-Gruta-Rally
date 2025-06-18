@@ -1,10 +1,11 @@
-// src/pages/admin/VehiclesPage.jsx - Vehicles Management with Permissions
+// src/pages/admin/VehiclesPage.jsx - Vehicles Management with Schema Integration
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
 import { useTheme } from '../../contexts/ThemeContext';
 import { usePermissions } from '../../hooks/usePermissions.jsx';
 import { getAllVehicles, getVehiclesByTeam, getVehiclesByKids } from '../../services/vehicleService';
+import { getAllTeams } from '../../services/teamService';
 import { getKidsByParent } from '../../services/kidService';
 import {
     IconCar as Car,
@@ -33,6 +34,7 @@ const VehiclesPage = () => {
 
     const [vehicles, setVehicles] = useState([]);
     const [filteredVehicles, setFilteredVehicles] = useState([]);
+    const [teams, setTeams] = useState([]); // Added teams state
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -40,20 +42,24 @@ const VehiclesPage = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [teamFilter, setTeamFilter] = useState('');
     const [statusFilter, setStatusFilter] = useState('');
-    const [teams, setTeams] = useState([]);
 
     useEffect(() => {
-        loadVehicles();
+        loadData();
     }, [userRole, userData]);
 
     useEffect(() => {
         applyFilters();
     }, [vehicles, searchTerm, teamFilter, statusFilter]);
 
-    const loadVehicles = async () => {
+    const loadData = async () => {
         try {
             setIsLoading(true);
             setError(null);
+
+            // Load teams for filter dropdown
+            const teamsData = await getAllTeams();
+            setTeams(teamsData);
+
             let vehiclesData = [];
 
             switch (userRole) {
@@ -84,7 +90,7 @@ const VehiclesPage = () => {
                     break;
 
                 case 'guest':
-                    // Temporary guests - limited access (implement based on event registration)
+                    // Temporary guests - limited access
                     vehiclesData = [];
                     break;
 
@@ -94,12 +100,8 @@ const VehiclesPage = () => {
 
             setVehicles(vehiclesData);
 
-            // Extract unique teams for filter
-            const uniqueTeams = [...new Set(vehiclesData.map(v => v.teamName).filter(Boolean))];
-            setTeams(uniqueTeams);
-
         } catch (error) {
-            console.error('Error loading vehicles:', error);
+            console.error('Error loading data:', error);
             setError('Failed to load vehicles. Please try again.');
         } finally {
             setIsLoading(false);
@@ -115,13 +117,13 @@ const VehiclesPage = () => {
                 vehicle.make?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 vehicle.model?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 vehicle.licensePlate?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                vehicle.teamName?.toLowerCase().includes(searchTerm.toLowerCase())
+                getTeamName(vehicle.teamId)?.toLowerCase().includes(searchTerm.toLowerCase())
             );
         }
 
         // Team filter
         if (teamFilter) {
-            filtered = filtered.filter(vehicle => vehicle.teamName === teamFilter);
+            filtered = filtered.filter(vehicle => vehicle.teamId === teamFilter);
         }
 
         // Status filter
@@ -138,6 +140,13 @@ const VehiclesPage = () => {
         }
 
         setFilteredVehicles(filtered);
+    };
+
+    // Helper function to get team name from team ID
+    const getTeamName = (teamId) => {
+        if (!teamId) return 'Unassigned';
+        const team = teams.find(t => t.id === teamId);
+        return team ? team.name : 'Unknown Team';
     };
 
     const handleViewVehicle = (vehicleId) => {
@@ -308,8 +317,9 @@ const VehiclesPage = () => {
                                 className="filter-select"
                             >
                                 <option value="">All Teams</option>
+                                <option value="">Unassigned</option>
                                 {teams.map(team => (
-                                    <option key={team} value={team}>{team}</option>
+                                    <option key={team.id} value={team.id}>{team.name}</option>
                                 ))}
                             </select>
                         </div>
@@ -339,7 +349,7 @@ const VehiclesPage = () => {
                             <Car className="results-icon" size={18} />
                             Showing {filteredVehicles.length} of {vehicles.length} vehicles
                             {searchTerm && <span className="search-applied"> matching "{searchTerm}"</span>}
-                            {teamFilter && <span className="filter-applied"> in team "{teamFilter}"</span>}
+                            {teamFilter && <span className="filter-applied"> in team "{getTeamName(teamFilter)}"</span>}
                             {statusFilter && <span className="filter-applied"> with status "{statusFilter}"</span>}
                         </div>
                     )}
@@ -411,7 +421,7 @@ const VehiclesPage = () => {
                                             </div>
                                         </td>
                                         <td>
-                                            <span className="team-name">{vehicle.teamName || 'Unassigned'}</span>
+                                            <span className="team-name">{getTeamName(vehicle.teamId)}</span>
                                         </td>
                                         <td>
                                             <span className="license-plate">{vehicle.licensePlate}</span>
@@ -429,7 +439,7 @@ const VehiclesPage = () => {
                                         <td>
                                             <div className="battery-info">
                                                 <Battery size={16} />
-                                                <span>{vehicle.batteryType}</span>
+                                                <span>{vehicle.batteryType || 'N/A'}</span>
                                             </div>
                                         </td>
                                         <td>

@@ -156,14 +156,14 @@ const ViewTeamPage = () => {
         <Dashboard requiredRole={userRole}>
             <div className={`view-team-page ${appliedTheme}-mode`}>
                 {/* Racing Theme Header */}
+                <button
+                    onClick={handleBack}
+                    className={`back-button ${appliedTheme}-back-button`}>
+                    <ArrowLeft className="btn-icon" size={20} />
+                    Back to Teams
+                </button>
                 <div className="racing-header">
                     <div className="header-content">
-                        <button
-                            onClick={handleBack}
-                            className={`back-button ${appliedTheme}-back-button`}>
-                            <ArrowLeft className="btn-icon" size={20} />
-                            Back to Teams
-                        </button>
                         <div className="title-section">
                             <h1>
                                 <Trophy size={32} className="page-title-icon" />

@@ -224,14 +224,13 @@ const EditTeamPage = () => {
         <Dashboard requiredRole={userRole}>
             <div className={`add-team-page ${appliedTheme}-mode`}>
                 {/* Racing Theme Header */}
-                <div className="racing-header">
+                <button
+                    onClick={handleCancel}
+                    className={`back-button ${appliedTheme}-back-button`}>
+                    <ArrowLeft className="btn-icon" size={20} />
+                    Back to Teams
+                </button>
                     <div className="header-content">
-                        <button
-                            onClick={handleCancel}
-                            className={`back-button ${appliedTheme}-back-button`}>
-                            <ArrowLeft className="btn-icon" size={20} />
-                            Back to Teams
-                        </button>
                         <div className="title-section">
                             <h1>
                                 <Edit size={32} className="page-title-icon" />
@@ -241,7 +240,7 @@ const EditTeamPage = () => {
                             <p className="subtitle">Here you can update the team {formData.name} 🏁</p>
                         </div>
                     </div>
-                </div>
+
 
                 <div className="add-team-container">
                     {errors.general && (

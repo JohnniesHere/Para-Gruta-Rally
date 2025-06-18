@@ -1,0 +1,352 @@
+/* src/pages/admin/AddVehiclePage.css - Page-specific styles only */
+@import url('./../../styles/global.css');
+
+/* ========================================
+   ADD VEHICLE PAGE SPECIFIC STYLES
+   ======================================== */
+
+/* Page uses .admin-page class from global.css */
+.add-vehicle-page {
+    /* No additional styles needed - inherits from .admin-page */
+}
+
+/* Container uses .admin-container class from global.css */
+.add-vehicle-container {
+    /* No additional styles needed - inherits from .admin-container */
+}
+
+/* ========================================
+   RACING HEADER DARK MODE FIXES
+   ======================================== */
+
+/* Racing header text color fixes for dark mode */
+.racing-header .title-section h2 {
+    color: #2D3748; /* Dark text for light background */
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    font-weight: 700;
+    text-align: center; /* CENTER THE HEADER */
+}
+
+.racing-header .subtitle {
+    color: #4B5563; /* Darker gray for better contrast */
+    font-weight: 600;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+    text-align: center; /* CENTER THE SUBTITLE */
+}
+
+/* Dark mode overrides for racing header text */
+[data-theme="dark"] .racing-header .title-section h2,
+.dark-mode .racing-header .title-section h2,
+.dark .racing-header .title-section h2 {
+    color: #2D3748 !important; /* Keep dark text even in dark mode */
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .racing-header .subtitle,
+.dark-mode .racing-header .subtitle,
+.dark .racing-header .subtitle {
+    color: #374151 !important; /* Darker gray for dark mode */
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+}
+
+/* ========================================
+   BUTTON TEXT COLOR FIXES
+   ======================================== */
+
+/* ADD VEHICLE button text fix - Apply to all primary buttons on this page */
+.add-vehicle-page .btn-primary,
+.add-vehicle-page .btn-submit.racing-submit {
+    color: #2D3748 !important; /* Dark text for better contrast on yellow */
+    font-weight: 700;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+/* Ensure button text stays dark in all modes */
+[data-theme="dark"] .add-vehicle-page .btn-primary,
+.dark-mode .add-vehicle-page .btn-primary,
+.dark .add-vehicle-page .btn-primary,
+[data-theme="dark"] .add-vehicle-page .btn-submit.racing-submit,
+.dark-mode .add-vehicle-page .btn-submit.racing-submit,
+.dark .add-vehicle-page .btn-submit.racing-submit {
+    color: #2D3748 !important;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+/* Fix for button icons to be visible */
+.add-vehicle-page .btn-primary svg,
+.add-vehicle-page .btn-submit.racing-submit svg {
+    color: #2D3748 !important;
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.1));
+}
+
+/* ========================================
+   DARK MODE BACK BUTTON FIX
+   ======================================== */
+
+/* Dark mode back button fix */
+.back-button.dark-back-button {
+    background: #374151;
+    color: #f9fafb;
+    border: 1px solid #4b5563;
+}
+
+.back-button.dark-back-button:hover {
+    background: #4b5563;
+    color: #ffffff;
+    border-color: #6b7280;
+}
+
+/* Light mode back button (default) */
+.back-button {
+    background: #f8fafc;
+    color: #334155;
+    border: 1px solid #e2e8f0;
+    padding: 8px 16px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.back-button:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+    border-color: #cbd5e1;
+}
+
+/* ========================================
+   VEHICLE SECTION SPECIFIC COLORS
+   ======================================== */
+
+.vehicle-photo-section {
+    border-color: #3B82F6;
+}
+
+.vehicle-photo-section:hover {
+    border-color: #2563EB;
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.2);
+}
+
+.vehicle-info-section {
+    border-color: #FFD700;
+}
+
+.vehicle-info-section:hover {
+    border-color: #FFC107;
+    box-shadow: 0 8px 25px rgba(255, 215, 0, 0.2);
+}
+
+.technical-section {
+    border-color: #8B5CF6;
+}
+
+.technical-section:hover {
+    border-color: #7C3AED;
+    box-shadow: 0 8px 25px rgba(139, 92, 246, 0.2);
+}
+
+.notes-section {
+    border-color: #6B7280;
+}
+
+.notes-section:hover {
+    border-color: #4B5563;
+    box-shadow: 0 8px 25px rgba(107, 114, 128, 0.2);
+}
+
+/* ========================================
+   RACING ANIMATIONS
+   ======================================== */
+
+.sparkle-icon {
+    color: #FBBF24;
+    animation: twinkle 2s ease-in-out infinite alternate;
+}
+
+@keyframes twinkle {
+    0% { transform: scale(1) rotate(0deg); opacity: 1; }
+    100% { transform: scale(1.2) rotate(180deg); opacity: 0.7; }
+}
+
+/* ========================================
+   PHOTO UPLOAD SECTION
+   ======================================== */
+
+.photo-upload-section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+}
+
+.photo-preview-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.photo-display-wrapper {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    border-radius: 15px;
+    overflow: hidden;
+    border: 3px solid var(--racing-gold);
+    box-shadow: 0 8px 25px rgba(255, 215, 0, 0.3);
+}
+
+.kid-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.kid-photo-placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--racing-gold) 0%, var(--racing-orange) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.photo-action-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.photo-action-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.photo-action-btn.upload-btn {
+    background: linear-gradient(135deg, var(--success-color) 0%, var(--success-hover) 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+}
+
+.photo-action-btn.upload-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+.photo-action-btn.remove-btn {
+    background: linear-gradient(135deg, var(--error-color) 0%, var(--error-hover) 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+}
+
+.photo-action-btn.remove-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+}
+
+.photo-upload-info {
+    text-align: center;
+    color: var(--text-muted);
+}
+
+.photo-upload-info p {
+    margin: 0;
+    font-size: 14px;
+}
+
+.photo-error {
+    color: var(--error-color);
+    font-weight: 600;
+    margin-top: 8px;
+    background: rgba(239, 68, 68, 0.1);
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* ========================================
+   FORM SECTIONS COLOR CODING
+   ======================================== */
+
+.vehicle-photo-section .section-icon {
+    color: #3B82F6;
+    background: rgba(59, 130, 246, 0.1);
+    border-color: #3B82F6;
+}
+
+.vehicle-info-section .section-icon {
+    color: var(--racing-gold);
+    background: rgba(255, 215, 0, 0.1);
+    border-color: var(--racing-gold);
+}
+
+.technical-section .section-icon {
+    color: #8B5CF6;
+    background: rgba(139, 92, 246, 0.1);
+    border-color: #8B5CF6;
+}
+
+.notes-section .section-icon {
+    color: #6B7280;
+    background: rgba(107, 114, 128, 0.1);
+    border-color: #6B7280;
+}
+
+/* ========================================
+   RESPONSIVE OVERRIDES
+   ======================================== */
+
+@media (max-width: 768px) {
+    .photo-display-wrapper {
+        width: 100px;
+        height: 100px;
+    }
+
+    .kid-photo-placeholder {
+        font-size: 40px;
+    }
+
+    .photo-action-buttons {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .photo-action-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .photo-display-wrapper {
+        width: 80px;
+        height: 80px;
+    }
+
+    .kid-photo-placeholder {
+        font-size: 32px;
+    }
+
+    .photo-action-btn {
+        padding: 6px 10px;
+        font-size: 11px;
+    }
+}

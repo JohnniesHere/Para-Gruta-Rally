@@ -1,4 +1,4 @@
-// src/pages/admin/AddVehiclePage.jsx - Add New Vehicle with Photo Upload
+// src/pages/admin/AddVehiclePage.jsx - Add New Vehicle with Schema Validation
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
@@ -6,7 +6,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { usePermissions } from '../../hooks/usePermissions.jsx';
 import { addVehicle, updateVehicle } from '../../services/vehicleService';
 import { getAllTeams } from '../../services/teamService';
-import { uploadVehiclePhoto } from '../../services/vehiclePhotoService'; // You'll need to create this
+import { uploadVehiclePhoto } from '../../services/vehiclePhotoService';
 import {
     IconCar as Car,
     IconPlus as Plus,
@@ -24,7 +24,7 @@ import {
     IconSparkles as Sparkles,
     IconSettings as Settings
 } from '@tabler/icons-react';
-import './EditKidPage.css'; // Reuse the enhanced photo button styles
+import './AddVehiclePage.css';
 
 const AddVehiclePage = () => {
     const navigate = useNavigate();
@@ -37,7 +37,7 @@ const AddVehiclePage = () => {
         make: '',
         model: '',
         licensePlate: '',
-        teamName: '',
+        teamId: '', // Changed from teamName to teamId
         driveType: '',
         steeringType: '',
         batteryType: '',
@@ -73,13 +73,10 @@ const AddVehiclePage = () => {
 
             // Set default team for instructors
             if (userRole === 'instructor' && userData?.teamId) {
-                const userTeam = teamsData.find(team => team.id === userData.teamId);
-                if (userTeam) {
-                    setFormData(prev => ({
-                        ...prev,
-                        teamName: userTeam.name
-                    }));
-                }
+                setFormData(prev => ({
+                    ...prev,
+                    teamId: userData.teamId
+                }));
             }
 
         } catch (error) {
@@ -159,6 +156,11 @@ const AddVehiclePage = () => {
     };
 
     const validateForm = () => {
+        // Clear previous errors
+        setErrors({});
+        setFieldErrors({});
+
+        // Basic client-side validation (schema validation happens in service)
         const newErrors = {};
         const newFieldErrors = {};
 
@@ -178,16 +180,7 @@ const AddVehiclePage = () => {
             newFieldErrors.licensePlate = true;
         }
 
-        if (!formData.teamName.trim()) {
-            newErrors.teamName = 'Team assignment is required';
-            newFieldErrors.teamName = true;
-        }
-
-        // Validate license plate format (basic check)
-        if (formData.licensePlate && formData.licensePlate.length < 2) {
-            newErrors.licensePlate = 'License plate must be at least 2 characters';
-            newFieldErrors.licensePlate = true;
-        }
+        // Note: teamId is optional in the schema, so we don't require it here
 
         setErrors(newErrors);
         setFieldErrors(newFieldErrors);
@@ -204,7 +197,7 @@ const AddVehiclePage = () => {
 
         setIsSubmitting(true);
         try {
-            // Create the vehicle first
+            // Create the vehicle first (schema validation happens in the service)
             const vehicleId = await addVehicle(formData);
             console.log('✅ Vehicle created with ID:', vehicleId);
 
@@ -215,7 +208,6 @@ const AddVehiclePage = () => {
                     setIsUploadingPhoto(true);
                     console.log('📸 Uploading photo for vehicle:', vehicleId);
 
-                    // You'll need to create uploadVehiclePhoto service
                     finalPhotoUrl = await uploadVehiclePhoto(vehicleId, selectedPhoto);
                     console.log('✅ Photo uploaded successfully:', finalPhotoUrl);
 
@@ -240,7 +232,16 @@ const AddVehiclePage = () => {
 
         } catch (error) {
             console.error('Error adding vehicle:', error);
-            setErrors({ general: error.message || 'Failed to add vehicle. Please try again.' });
+
+            // Handle schema validation errors
+            if (error.message.includes('Validation failed:')) {
+                setErrors({ general: error.message });
+            } else if (error.message.includes('License plate')) {
+                setErrors({ licensePlate: error.message });
+                setFieldErrors({ licensePlate: true });
+            } else {
+                setErrors({ general: error.message || 'Failed to add vehicle. Please try again.' });
+            }
         } finally {
             setIsSubmitting(false);
         }
@@ -315,15 +316,16 @@ const AddVehiclePage = () => {
                     <Sparkles size={24} className="sparkle-icon" />
                 </h1>
 
-                <div className="admin-container add-kid-container">
+                <div className="admin-container add-vehicle-container">
                     {/* Racing Theme Header */}
                     <div className="racing-header">
                         <div className="header-content">
-                            <button onClick={handleCancel} className="back-button">
+                            <button onClick={handleCancel} className={`back-button ${appliedTheme}-back-button`}>
                                 <ArrowLeft className="btn-icon" size={20} />
                                 Back to Vehicles
                             </button>
                             <div className="title-section">
+                                <h2>Welcome to Vehicle Registration!</h2>
                                 <p className="subtitle">Let's add a new racing machine to the fleet! 🏁</p>
                             </div>
                         </div>
@@ -336,9 +338,9 @@ const AddVehiclePage = () => {
                         </div>
                     )}
 
-                    <form onSubmit={handleSubmit} className="add-kid-form">
+                    <form onSubmit={handleSubmit} className="add-vehicle-form">
                         {/* Vehicle Photo Section */}
-                        <div className="form-section racing-section">
+                        <div className="form-section vehicle-photo-section">
                             <div className="section-header">
                                 <Photo className="section-icon" size={24} />
                                 <h2>🏎️ Vehicle Photo</h2>
@@ -408,7 +410,7 @@ const AddVehiclePage = () => {
                         </div>
 
                         {/* Basic Vehicle Information */}
-                        <div className="form-section skills-section">
+                        <div className="form-section vehicle-info-section">
                             <div className="section-header">
                                 <Car className="section-icon" size={24} />
                                 <h2>🚗 Vehicle Information</h2>
@@ -453,28 +455,28 @@ const AddVehiclePage = () => {
                                 <div className="form-group">
                                     <label className="form-label">
                                         <Users className="label-icon" size={16} />
-                                        Team Assignment *
+                                        Team Assignment
                                     </label>
                                     <select
-                                        value={formData.teamName}
-                                        onChange={(e) => handleInputChange('teamName', e.target.value)}
-                                        className={`form-select ${fieldErrors.teamName ? 'error' : ''}`}
+                                        value={formData.teamId || ''}
+                                        onChange={(e) => handleInputChange('teamId', e.target.value)}
+                                        className={`form-select ${fieldErrors.teamId ? 'error' : ''}`}
                                         disabled={userRole === 'instructor'} // Instructors can only add to their team
                                     >
-                                        <option value="">🏁 Select Racing Team</option>
+                                        <option value="">🏁 Unassigned (Vehicle Pool)</option>
                                         {teams.map(team => (
-                                            <option key={team.id} value={team.name}>
+                                            <option key={team.id} value={team.id}>
                                                 🏎️ {team.name}
                                             </option>
                                         ))}
                                     </select>
-                                    {errors.teamName && <span className="error-text">{errors.teamName}</span>}
+                                    {errors.teamId && <span className="error-text">{errors.teamId}</span>}
                                 </div>
                             </div>
                         </div>
 
                         {/* Technical Specifications */}
-                        <div className="form-section team-section">
+                        <div className="form-section technical-section">
                             <div className="section-header">
                                 <Settings className="section-icon" size={24} />
                                 <h2>⚙️ Technical Specifications</h2>
@@ -486,7 +488,7 @@ const AddVehiclePage = () => {
                                         Drive Type
                                     </label>
                                     <select
-                                        value={formData.driveType}
+                                        value={formData.driveType || ''}
                                         onChange={(e) => handleInputChange('driveType', e.target.value)}
                                         className="form-select"
                                     >
@@ -506,7 +508,7 @@ const AddVehiclePage = () => {
                                         Steering Type
                                     </label>
                                     <select
-                                        value={formData.steeringType}
+                                        value={formData.steeringType || ''}
                                         onChange={(e) => handleInputChange('steeringType', e.target.value)}
                                         className="form-select"
                                     >
@@ -528,7 +530,7 @@ const AddVehiclePage = () => {
                                         type="text"
                                         className="form-input"
                                         placeholder="e.g., 12V Lead Acid, Lithium Ion, AGM"
-                                        value={formData.batteryType}
+                                        value={formData.batteryType || ''}
                                         onChange={(e) => handleInputChange('batteryType', e.target.value)}
                                     />
                                 </div>
@@ -541,7 +543,7 @@ const AddVehiclePage = () => {
                                     <input
                                         type="date"
                                         className="form-input"
-                                        value={formData.batteryDate}
+                                        value={formData.batteryDate || ''}
                                         onChange={(e) => handleInputChange('batteryDate', e.target.value)}
                                     />
                                 </div>
@@ -549,7 +551,7 @@ const AddVehiclePage = () => {
                         </div>
 
                         {/* Modifications and Notes */}
-                        <div className="form-section comments-section">
+                        <div className="form-section notes-section">
                             <div className="section-header">
                                 <FileText className="section-icon" size={24} />
                                 <h2>📝 Modifications & Notes</h2>
@@ -560,7 +562,7 @@ const AddVehiclePage = () => {
                                     <textarea
                                         className="form-textarea"
                                         placeholder="Describe any modifications made to this vehicle..."
-                                        value={formData.modifications}
+                                        value={formData.modifications || ''}
                                         onChange={(e) => handleInputChange('modifications', e.target.value)}
                                         rows="3"
                                     />
@@ -571,7 +573,7 @@ const AddVehiclePage = () => {
                                     <textarea
                                         className="form-textarea"
                                         placeholder="Any additional notes about this racing vehicle..."
-                                        value={formData.notes}
+                                        value={formData.notes || ''}
                                         onChange={(e) => handleInputChange('notes', e.target.value)}
                                         rows="3"
                                     />

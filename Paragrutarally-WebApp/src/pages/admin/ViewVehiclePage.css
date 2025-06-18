@@ -1,4 +1,4 @@
-/* src/pages/admin/ViewVehiclePage.css - Individual Vehicle View Styling */
+/* src/pages/admin/ViewVehiclePage.css - Individual Vehicle View Styling without gradients */
 @import url('./../../styles/global.css');
 
 /* ========================================
@@ -65,7 +65,7 @@
     font-weight: 500;
 }
 
-/* Status Information */
+/* Status Information - UPDATED: No gradient backgrounds */
 .status-section {
     grid-column: span 1;
     border: 3px solid var(--racing-green);
@@ -86,49 +86,43 @@
     border-radius: 15px;
     border: 2px solid;
     transition: all 0.3s ease;
+    background: var(--bg-secondary); /* Solid background instead of gradients */
 }
 
 .status-card.status-available {
-    background: linear-gradient(135deg, var(--success-light) 0%, #D1FAE5 100%);
     border-color: var(--success-color);
-    color: #065F46;
+    color: var(--success-color);
 }
 
 .status-card.status-in-use {
-    background: linear-gradient(135deg, var(--warning-light) 0%, #FDE68A 100%);
     border-color: var(--warning-color);
-    color: #92400E;
+    color: var(--warning-color);
 }
 
 .status-card.status-inactive {
-    background: linear-gradient(135deg, var(--error-light) 0%, #FEE2E2 100%);
     border-color: var(--error-color);
-    color: #991B1B;
+    color: var(--error-color);
 }
 
 .status-card.battery-good {
-    background: linear-gradient(135deg, var(--success-light) 0%, #D1FAE5 100%);
     border-color: var(--success-color);
-    color: #065F46;
+    color: var(--success-color);
 }
 
 .status-card.battery-aging {
-    background: linear-gradient(135deg, var(--warning-light) 0%, #FDE68A 100%);
     border-color: var(--warning-color);
-    color: #92400E;
+    color: var(--warning-color);
 }
 
 .status-card.battery-old,
 .status-card.battery-error {
-    background: linear-gradient(135deg, var(--error-light) 0%, #FEE2E2 100%);
     border-color: var(--error-color);
-    color: #991B1B;
+    color: var(--error-color);
 }
 
 .status-card.battery-unknown {
-    background: linear-gradient(135deg, var(--info-light) 0%, #DBEAFE 100%);
     border-color: var(--info-color);
-    color: #1E40AF;
+    color: var(--info-color);
 }
 
 .status-content h3 {
@@ -183,7 +177,7 @@
     border: 1px solid var(--border-color);
 }
 
-/* Assignment Section */
+/* Assignment Section - UPDATED: No gradient backgrounds */
 .assignment-section {
     grid-column: span 2;
     border: 3px solid var(--racing-orange);
@@ -199,9 +193,10 @@
     align-items: center;
     gap: 20px;
     padding: 20px;
-    background: linear-gradient(135deg, var(--success-light) 0%, #D1FAE5 100%);
+    background: var(--bg-secondary); /* Solid background instead of gradient */
     border: 2px solid var(--success-color);
     border-radius: 15px;
+    color: var(--success-color);
 }
 
 .kid-info {
@@ -213,15 +208,16 @@
 
 .kid-details h4 {
     margin: 0 0 5px 0;
-    color: #065F46;
+    color: var(--success-color);
     font-size: 16px;
     font-weight: 700;
 }
 
 .kid-details p {
     margin: 0 0 10px 0;
-    color: #047857;
+    color: var(--success-color);
     font-size: 14px;
+    opacity: 0.8;
 }
 
 .no-assignment {
@@ -252,10 +248,10 @@
     align-items: center;
     gap: 15px;
     padding: 20px;
-    background: linear-gradient(135deg, var(--error-light) 0%, #FEE2E2 100%);
+    background: var(--bg-secondary); /* Solid background instead of gradient */
     border: 2px solid var(--error-color);
     border-radius: 15px;
-    color: #991B1B;
+    color: var(--error-color);
 }
 
 .assignment-error p {

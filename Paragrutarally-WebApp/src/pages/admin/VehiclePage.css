@@ -1,4 +1,4 @@
-/* src/pages/admin/VehiclePage.css - Vehicles Management Styling */
+/* src/pages/admin/VehiclePage.css - Vehicles Management Styling without gradients */
 @import url('./../../styles/global.css');
 
 /* ========================================
@@ -106,7 +106,7 @@
 }
 
 /* ========================================
-   VIEW VEHICLE PAGE STYLES
+   VIEW VEHICLE PAGE STYLES - UPDATED: Remove gradients
    ======================================== */
 
 .view-vehicle-page {
@@ -163,7 +163,7 @@
     font-weight: 500;
 }
 
-/* Status Information */
+/* Status Information - UPDATED: Remove gradient backgrounds */
 .status-section {
     grid-column: span 1;
 }
@@ -182,49 +182,43 @@
     border-radius: 15px;
     border: 2px solid;
     transition: all 0.3s ease;
+    background: var(--bg-secondary); /* Solid background instead of gradients */
 }
 
 .status-card.status-available {
-    background: linear-gradient(135deg, var(--success-light) 0%, #D1FAE5 100%);
     border-color: var(--success-color);
-    color: #065F46;
+    color: var(--success-color);
 }
 
 .status-card.status-in-use {
-    background: linear-gradient(135deg, var(--warning-light) 0%, #FDE68A 100%);
     border-color: var(--warning-color);
-    color: #92400E;
+    color: var(--warning-color);
 }
 
 .status-card.status-inactive {
-    background: linear-gradient(135deg, var(--error-light) 0%, #FEE2E2 100%);
     border-color: var(--error-color);
-    color: #991B1B;
+    color: var(--error-color);
 }
 
 .status-card.battery-good {
-    background: linear-gradient(135deg, var(--success-light) 0%, #D1FAE5 100%);
     border-color: var(--success-color);
-    color: #065F46;
+    color: var(--success-color);
 }
 
 .status-card.battery-aging {
-    background: linear-gradient(135deg, var(--warning-light) 0%, #FDE68A 100%);
     border-color: var(--warning-color);
-    color: #92400E;
+    color: var(--warning-color);
 }
 
 .status-card.battery-old,
 .status-card.battery-error {
-    background: linear-gradient(135deg, var(--error-light) 0%, #FEE2E2 100%);
     border-color: var(--error-color);
-    color: #991B1B;
+    color: var(--error-color);
 }
 
 .status-card.battery-unknown {
-    background: linear-gradient(135deg, var(--info-light) 0%, #DBEAFE 100%);
     border-color: var(--info-color);
-    color: #1E40AF;
+    color: var(--info-color);
 }
 
 .status-content h3 {
@@ -279,7 +273,7 @@
     border: 1px solid var(--border-color);
 }
 
-/* Assignment Section */
+/* Assignment Section - UPDATED: Remove gradient backgrounds */
 .assignment-section {
     grid-column: span 2;
 }
@@ -293,9 +287,10 @@
     align-items: center;
     gap: 20px;
     padding: 20px;
-    background: linear-gradient(135deg, var(--success-light) 0%, #D1FAE5 100%);
+    background: var(--bg-secondary); /* Solid background instead of gradient */
     border: 2px solid var(--success-color);
     border-radius: 15px;
+    color: var(--success-color);
 }
 
 .kid-info {
@@ -307,15 +302,16 @@
 
 .kid-details h4 {
     margin: 0 0 5px 0;
-    color: #065F46;
+    color: var(--success-color);
     font-size: 16px;
     font-weight: 700;
 }
 
 .kid-details p {
     margin: 0 0 10px 0;
-    color: #047857;
+    color: var(--success-color);
     font-size: 14px;
+    opacity: 0.8;
 }
 
 .no-assignment {
@@ -346,10 +342,10 @@
     align-items: center;
     gap: 15px;
     padding: 20px;
-    background: linear-gradient(135deg, var(--error-light) 0%, #FEE2E2 100%);
+    background: var(--bg-secondary); /* Solid background instead of gradient */
     border: 2px solid var(--error-color);
     border-radius: 15px;
-    color: #991B1B;
+    color: var(--error-color);
 }
 
 .assignment-error p {
@@ -491,8 +487,126 @@
 }
 
 /* ========================================
-   RESPONSIVE DESIGN
+   VEHICLES PAGE BADGE OVERRIDES - Remove gradients from badges
    ======================================== */
+
+/* Override badge gradients specifically for vehicles page */
+.vehicles-page .badge.success {
+    background: var(--bg-secondary) !important;
+    color: var(--success-color) !important;
+    border-color: var(--success-color) !important;
+}
+
+.vehicles-page .badge.warning {
+    background: var(--bg-secondary) !important;
+    color: var(--warning-color) !important;
+    border-color: var(--warning-color) !important;
+}
+
+.vehicles-page .badge.danger {
+    background: var(--bg-secondary) !important;
+    color: var(--error-color) !important;
+    border-color: var(--error-color) !important;
+}
+
+.vehicles-page .badge.info {
+    background: var(--bg-secondary) !important;
+    color: var(--info-color) !important;
+    border-color: var(--info-color) !important;
+}
+
+.vehicles-page .badge.secondary {
+    background: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
+}
+
+/* ========================================
+   RESPONSIVE TABLE DESIGN
+   ======================================== */
+
+/* Make table container scrollable on smaller screens */
+.table-container {
+    overflow-x: auto;
+    margin: 0 -10px; /* Negative margin to use full width */
+    padding: 0 10px;
+}
+
+/* Improve table responsiveness */
+.data-table {
+    min-width: 800px; /* Minimum width for proper display */
+    width: 100%;
+}
+
+/* Adjust column widths for better space distribution */
+.data-table th,
+.data-table td {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Specific column width adjustments */
+.data-table th:nth-child(1), /* Vehicle */
+.data-table td:nth-child(1) {
+    min-width: 200px;
+    max-width: 250px;
+}
+
+.data-table th:nth-child(2), /* Team */
+.data-table td:nth-child(2) {
+    min-width: 120px;
+    max-width: 150px;
+}
+
+.data-table th:nth-child(3), /* License Plate */
+.data-table td:nth-child(3) {
+    min-width: 130px;
+    max-width: 160px;
+}
+
+.data-table th:nth-child(4), /* Status */
+.data-table td:nth-child(4) {
+    min-width: 100px;
+    max-width: 120px;
+}
+
+.data-table th:nth-child(5), /* Current User */
+.data-table td:nth-child(5) {
+    min-width: 100px;
+    max-width: 120px;
+}
+
+.data-table th:nth-child(6), /* Battery */
+.data-table td:nth-child(6) {
+    min-width: 120px;
+    max-width: 150px;
+}
+
+.data-table th:nth-child(7), /* Actions */
+.data-table td:nth-child(7) {
+    min-width: 100px;
+    max-width: 120px;
+    text-align: center;
+}
+
+/* ========================================
+   RESPONSIVE DESIGN UPDATES
+   ======================================== */
+
+@media (max-width: 1200px) {
+    /* Adjust container padding for medium screens */
+    .admin-container {
+        padding: 20px;
+    }
+
+    /* Make table more compact */
+    .data-table th,
+    .data-table td {
+        padding: 12px 8px;
+        font-size: 13px;
+    }
+}
 
 @media (max-width: 768px) {
     .vehicle-details-grid {
@@ -553,6 +667,34 @@
         width: 40px;
         height: 40px;
     }
+
+    /* Mobile table adjustments */
+    .table-container {
+        margin: 0 -20px;
+        padding: 0 20px;
+    }
+
+    .data-table {
+        font-size: 12px;
+        min-width: 700px; /* Reduced minimum width for mobile */
+    }
+
+    .data-table th,
+    .data-table td {
+        padding: 10px 6px;
+    }
+
+    /* Stack stats cards on mobile */
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+
+    /* Adjust search and filter section for mobile */
+    .search-filter-section {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -606,5 +748,39 @@
     .battery-info {
         font-size: 11px;
         gap: 4px;
+    }
+
+    /* Mobile table further optimizations */
+    .table-container {
+        margin: 0 -15px;
+        padding: 0 15px;
+    }
+
+    .data-table {
+        font-size: 11px;
+        min-width: 600px; /* Further reduced for small phones */
+    }
+
+    .data-table th,
+    .data-table td {
+        padding: 8px 4px;
+    }
+
+    /* Stack stats in single column on very small screens */
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    /* Compact action buttons for mobile */
+    .action-buttons {
+        gap: 3px;
+    }
+
+    .btn-action {
+        min-width: 30px;
+        max-width: 35px;
+        padding: 4px 6px;
+        font-size: 9px;
     }
 }

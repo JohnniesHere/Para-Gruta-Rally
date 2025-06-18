@@ -22,6 +22,27 @@
     /* No additional styles needed - inherits from .form-section */
 }
 
+
+/* Ensure proper contrast in dark mode for kid cards */
+
+.dark-mode .kid-card{
+    background-color: var(--input-bg);
+    border-color: var(--border-color);
+
+}
+.dark-mode .kid-card .kid-name,
+.dark .kid-card .kid-name,
+[data-theme="dark"] .kid-card .kid-name {
+    color: var(--text-primary);
+}
+
+/* ========================================
+   HEADER STYLES
+   ======================================== */
+
+.header-content{
+    padding-bottom: 20px;
+}
 /* ========================================
    TEAM MEMBER MANAGEMENT
    ======================================== */
