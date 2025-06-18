@@ -1,4 +1,4 @@
-// src/pages/admin/AddKidPage.jsx - Enhanced with Photo Upload
+// src/pages/admin/AddKidPage.jsx - Enhanced with Photo Upload - MATCHING EditKidPage UI
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
@@ -30,9 +30,10 @@ import {
     IconLock as Lock,
     IconCamera as Camera,
     IconUpload as Upload,
-    IconX as X
+    IconX as X,
+    IconTrash as Trash2  // ADDED: Import Trash2 for consistency with EditKidPage
 } from '@tabler/icons-react';
-import './AddKidPage.css';
+import './EditKidPage.css'; // CHANGED: Use EditKidPage.css instead of AddKidPage.css
 
 const AddKidPage = () => {
     const navigate = useNavigate();
@@ -179,7 +180,7 @@ const AddKidPage = () => {
         }
     };
 
-    // Handle photo upload
+    // Handle photo upload - UPDATED to match EditKidPage
     const handlePhotoSelection = async (event) => {
         const file = event.target.files[0];
         if (!file) return;
@@ -187,24 +188,27 @@ const AddKidPage = () => {
         setPhotoError('');
 
         try {
-            // Validate photo file
-            const validation = await validatePhotoFile(file);
-            if (!validation.isValid) {
-                setPhotoError(validation.errors.join(' '));
+            // Basic validation - matching EditKidPage
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+            if (!allowedTypes.includes(file.type)) {
+                setPhotoError('Please upload a JPEG, PNG, or WebP image file.');
                 return;
             }
 
-            // Resize image if needed (optional optimization)
-            const resizedFile = await resizeImage(file, 400, 400, 0.8);
+            const maxSize = 5 * 1024 * 1024; // 5MB
+            if (file.size > maxSize) {
+                setPhotoError('Photo file size must be less than 5MB.');
+                return;
+            }
 
-            setSelectedPhoto(resizedFile);
+            setSelectedPhoto(file);
 
             // Create preview
             const reader = new FileReader();
             reader.onload = (e) => {
                 setPhotoPreview(e.target.result);
             };
-            reader.readAsDataURL(resizedFile);
+            reader.readAsDataURL(file);
 
             console.log('📸 Photo selected and ready for upload');
 
@@ -214,6 +218,7 @@ const AddKidPage = () => {
         }
     };
 
+    // UPDATED: Remove photo function to match EditKidPage
     const handleRemovePhoto = () => {
         setSelectedPhoto(null);
         setPhotoPreview(null);
@@ -360,7 +365,7 @@ const AddKidPage = () => {
         return fieldErrors[fieldPath] || false;
     };
 
-    // Get photo display info
+    // Get photo display info - MATCHES EditKidPage
     const getPhotoDisplay = () => {
         if (photoPreview) {
             return {
@@ -437,55 +442,68 @@ const AddKidPage = () => {
                     )}
 
                     <form onSubmit={handleSubmit} className="add-kid-form">
-                        {/* Basic Info Section with Photo */}
+                        {/* Basic Info Section with Photo - UPDATED TO MATCH EditKidPage */}
                         <div className="form-section racing-section">
                             <div className="section-header">
                                 <Baby className="section-icon" size={24} />
                                 <h2>{getSectionTitle()}</h2>
                             </div>
                             <div className="form-grid">
-                                {/* Photo Upload Section */}
+                                {/* Enhanced Photo Upload Section - MATCHING EditKidPage */}
                                 <div className="form-group full-width">
                                     <label className="form-label">📸 Racing Photo</label>
                                     <div className="photo-upload-section">
                                         <div className="photo-preview-container">
-                                            {photoDisplay.hasPhoto ? (
-                                                <img
-                                                    src={photoDisplay.url}
-                                                    alt="Kid preview"
-                                                    className="kid-photo"
-                                                />
-                                            ) : (
-                                                <div className="kid-photo-placeholder">
-                                                    {photoDisplay.placeholder}
-                                                </div>
-                                            )}
-                                            <button
-                                                type="button"
-                                                className="upload-photo-button"
-                                                onClick={() => document.getElementById('photo-upload').click()}
-                                                title="Upload Photo"
-                                            >
-                                                <Camera size={14} />
-                                            </button>
-                                            {photoDisplay.hasPhoto && (
+                                            {/* Photo Display */}
+                                            <div className="photo-display-wrapper">
+                                                {photoDisplay.hasPhoto ? (
+                                                    <img
+                                                        src={photoDisplay.url}
+                                                        alt="Kid preview"
+                                                        className="kid-photo"
+                                                    />
+                                                ) : (
+                                                    <div className="kid-photo-placeholder">
+                                                        {photoDisplay.placeholder}
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {/* Action Buttons Below Photo - MATCHING EditKidPage */}
+                                            <div className="photo-action-buttons">
                                                 <button
                                                     type="button"
-                                                    className="remove-photo-button"
-                                                    onClick={handleRemovePhoto}
-                                                    title="Remove Photo"
+                                                    className="photo-action-btn upload-btn"
+                                                    onClick={() => document.getElementById('photo-upload').click()}
+                                                    title={photoDisplay.hasPhoto ? "Change Photo" : "Upload Photo"}
                                                 >
-                                                    <X size={14} />
+                                                    <Camera size={18} />
+                                                    <span className="btn-text">{photoDisplay.hasPhoto ? "Change" : "Upload"}</span>
                                                 </button>
-                                            )}
+
+                                                {photoDisplay.hasPhoto && (
+                                                    <button
+                                                        type="button"
+                                                        className="photo-action-btn remove-btn"
+                                                        onClick={handleRemovePhoto}
+                                                        title="Remove Photo"
+                                                    >
+                                                        <Trash2 size={18} />
+                                                        <span className="btn-text">Remove</span>
+                                                    </button>
+                                                )}
+                                            </div>
                                         </div>
+
                                         <input
                                             id="photo-upload"
                                             type="file"
                                             accept="image/jpeg,image/jpg,image/png,image/webp"
                                             onChange={handlePhotoSelection}
                                             className="photo-upload-input"
+                                            style={{ display: 'none' }}
                                         />
+
                                         <div className="photo-upload-info">
                                             <p>📸 Upload a racing photo! (Max 5MB, JPEG/PNG)</p>
                                             {photoError && (
