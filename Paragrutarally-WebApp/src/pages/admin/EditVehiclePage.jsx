@@ -364,25 +364,22 @@ const EditVehiclePage = () => {
         <Dashboard requiredRole={userRole}>
             <div className={`admin-page edit-vehicle-page ${appliedTheme}-mode`}>
                 {/* Page Title */}
-                <h1>
-                    <Edit size={32} className="page-title-icon" />
-                    Update Racing Vehicle!
-                    <Sparkles size={24} className="sparkle-icon" />
-                </h1>
+                <button onClick={handleCancel} className={`back-button ${appliedTheme}-back-button`}>
+                    <ArrowLeft className="btn-icon" size={20} />
+                    Back to Vehicle
+                </button>
+                <div className="header-content">
+                    <div className="title-section">
+                        <h1>
+                            <Edit size={32} className="page-title-icon" />
+                            Update Racing Vehicle!
+                            <Sparkles size={24} className="sparkle-icon" />
+                        </h1>
+                    </div>
+                </div>
 
                 <div className="admin-container add-kid-container">
                     {/* Racing Theme Header */}
-                    <div className="racing-header">
-                        <div className="header-content">
-                            <button onClick={handleCancel} className="back-button">
-                                <ArrowLeft className="btn-icon" size={20} />
-                                Back to Vehicle
-                            </button>
-                            <div className="title-section">
-                                <p className="subtitle">Let's keep this racing machine up to date! 🏁</p>
-                            </div>
-                        </div>
-                    </div>
 
                     {errors.general && (
                         <div className="alert error-alert">

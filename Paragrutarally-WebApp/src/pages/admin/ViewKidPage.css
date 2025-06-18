@@ -1,4 +1,4 @@
-/* src/pages/admin/ViewKidPage.css - Page-specific styles only */
+/* src/pages/admin/ViewKidPage.css - Updated with Vehicle Integration */
 @import url('./../../styles/global.css');
 
 /* ========================================
@@ -247,6 +247,210 @@
     /* Remove any colored borders and use standard styling */
     border: 2px solid var(--border-color) !important;
     background: var(--bg-secondary) !important;
+}
+
+/* ========================================
+   TEAM & VEHICLE CONTENT LAYOUT
+   ======================================== */
+
+.team-vehicle-content {
+    padding: 30px;
+}
+
+.vehicle-section {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+.vehicle-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    color: var(--text-primary);
+}
+
+.vehicle-header h4 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+/* ========================================
+   VEHICLE DISPLAY STYLES
+   ======================================== */
+
+.vehicle-assignment {
+    width: 100%;
+}
+
+.no-vehicle {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 25px;
+    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-quaternary) 100%);
+    border: 2px dashed var(--border-color);
+    border-radius: 15px;
+    color: var(--text-muted);
+}
+
+.no-vehicle-icon {
+    opacity: 0.6;
+}
+
+.no-vehicle-text p {
+    margin: 0 0 5px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.no-vehicle-text span {
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+.vehicle-card {
+    display: flex;
+    gap: 20px;
+    padding: 25px;
+    background: var(--bg-secondary);
+    border: 2px solid var(--racing-gold);
+    border-radius: 15px;
+    box-shadow: 0 4px 16px rgba(255, 215, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.vehicle-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(255, 215, 0, 0.3);
+}
+
+.vehicle-photo-section {
+    flex-shrink: 0;
+}
+
+.vehicle-photo {
+    width: 80px;
+    height: 80px;
+    border-radius: 12px;
+    object-fit: cover;
+    border: 2px solid var(--racing-gold);
+    box-shadow: 0 2px 8px rgba(255, 215, 0, 0.2);
+}
+
+.vehicle-photo-placeholder {
+    width: 80px;
+    height: 80px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--racing-gold) 0%, var(--racing-orange) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-primary);
+    font-size: 32px;
+    font-weight: bold;
+    border: 2px solid var(--racing-gold);
+    box-shadow: 0 2px 8px rgba(255, 215, 0, 0.2);
+}
+
+.vehicle-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.vehicle-name {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.vehicle-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+}
+
+.vehicle-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.detail-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.license-plate {
+    font-family: 'Courier New', monospace;
+    font-weight: 700;
+    color: var(--text-primary);
+    background: var(--bg-tertiary);
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    font-size: 13px;
+    display: inline-block;
+    white-space: nowrap;
+}
+
+.battery-info {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.battery-info svg {
+    color: var(--racing-green);
+}
+
+.vehicle-status {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.vehicle-status.active {
+    color: var(--success-color);
+}
+
+.vehicle-status.inactive {
+    color: var(--error-color);
+}
+
+.vehicle-actions {
+    margin-top: 10px;
+}
+
+.btn-vehicle-view {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: linear-gradient(135deg, var(--info-color) 0%, var(--accent-hover) 100%);
+    color: white;
+    border: none;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.btn-vehicle-view:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
 }
 
 /* ========================================
@@ -554,6 +758,23 @@
     .comments-timeline {
         max-height: 200px;
     }
+
+    .vehicle-card {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .vehicle-photo,
+    .vehicle-photo-placeholder {
+        width: 60px;
+        height: 60px;
+        font-size: 24px;
+    }
+
+    .vehicle-info-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -590,5 +811,19 @@
 
     .comment-date {
         margin-left: 0;
+    }
+
+    .vehicle-card {
+        padding: 20px;
+    }
+
+    .vehicle-name {
+        font-size: 18px;
+    }
+
+    .no-vehicle {
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
     }
 }

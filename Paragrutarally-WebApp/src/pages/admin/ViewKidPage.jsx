@@ -1,4 +1,4 @@
-// src/pages/admin/ViewKidPage.jsx - UPDATED WITH PHOTO SUPPORT
+// src/pages/admin/ViewKidPage.jsx - UPDATED WITH VEHICLE INTEGRATION
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
@@ -6,7 +6,9 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { usePermissions } from '../../hooks/usePermissions.jsx';
 import { getKidById, deleteKid } from '../../services/kidService';
 import { getTeamById } from '../../services/teamService';
-import { getKidPhotoInfo } from '../../services/kidPhotoService'; // Import photo service
+import { getKidPhotoInfo } from '../../services/kidPhotoService';
+import { getVehicleById } from '../../services/vehicleService'; // Add vehicle service
+import { getVehiclePhotoInfo } from '../../services/vehiclePhotoService'; // Add vehicle photo service
 import {
     IconUserCircle as Baby,
     IconEdit as Edit,
@@ -22,9 +24,13 @@ import {
     IconFlag as Flag,
     IconChevronDown as ChevronDown,
     IconChevronRight as ChevronRight,
-    IconCamera as Camera
+    IconCamera as Camera,
+    IconSettings as Settings,
+    IconBattery as Battery
 } from '@tabler/icons-react';
 import './ViewKidPage.css';
+
+// CSS additions for vehicle display will be added to ViewKidPage.css
 
 const ViewKidPage = () => {
     const navigate = useNavigate();
@@ -35,6 +41,7 @@ const ViewKidPage = () => {
 
     const [kidData, setKidData] = useState(null);
     const [teamData, setTeamData] = useState(null);
+    const [vehicleData, setVehicleData] = useState(null); // Add vehicle state
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [successMessage, setSuccessMessage] = useState('');
@@ -78,12 +85,24 @@ const ViewKidPage = () => {
 
             setKidData(kid);
 
+            // Load team data if assigned
             if (kid.teamId) {
                 try {
                     const team = await getTeamById(kid.teamId);
                     setTeamData(team);
                 } catch (teamError) {
                     console.warn('Could not load team data:', teamError);
+                }
+            }
+
+            // Load vehicle data if assigned
+            if (kid.vehicleIds && kid.vehicleIds.length > 0) {
+                try {
+                    // For now, load the first vehicle (kids typically have one primary vehicle)
+                    const vehicle = await getVehicleById(kid.vehicleIds[0]);
+                    setVehicleData(vehicle);
+                } catch (vehicleError) {
+                    console.warn('Could not load vehicle data:', vehicleError);
                 }
             }
 
@@ -188,6 +207,82 @@ const ViewKidPage = () => {
         }
     };
 
+    // Get vehicle display component
+    const getVehicleDisplay = () => {
+        if (!vehicleData) {
+            return (
+                <div className="vehicle-assignment">
+                    <div className="no-vehicle">
+                        <Car size={40} className="no-vehicle-icon" />
+                        <div className="no-vehicle-text">
+                            <p>No Vehicle Assigned</p>
+                            <span>Ready for assignment!</span>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        const vehiclePhotoInfo = getVehiclePhotoInfo(vehicleData);
+
+        return (
+            <div className="vehicle-assignment">
+                <div className="vehicle-card">
+                    <div className="vehicle-photo-section">
+                        {vehiclePhotoInfo.hasPhoto ? (
+                            <img
+                                src={vehiclePhotoInfo.url}
+                                alt={`${vehicleData.make} ${vehicleData.model}`}
+                                className="vehicle-photo"
+                            />
+                        ) : (
+                            <div className="vehicle-photo-placeholder">
+                                {vehiclePhotoInfo.placeholder}
+                            </div>
+                        )}
+                    </div>
+                    <div className="vehicle-details">
+                        <h4 className="vehicle-name">
+                            {vehicleData.make} {vehicleData.model}
+                        </h4>
+                        <div className="vehicle-info-grid">
+                            <div className="vehicle-detail">
+                                <span className="detail-label">License Plate:</span>
+                                <span className="license-plate">{vehicleData.licensePlate}</span>
+                            </div>
+                            <div className="vehicle-detail">
+                                <span className="detail-label">Type:</span>
+                                <span>{vehicleData.driveType} • {vehicleData.steeringType}</span>
+                            </div>
+                            <div className="vehicle-detail">
+                                <span className="detail-label">Battery:</span>
+                                <div className="battery-info">
+                                    <Battery size={16} />
+                                    <span>{vehicleData.batteryType || 'N/A'}</span>
+                                </div>
+                            </div>
+                            <div className="vehicle-detail">
+                                <span className="detail-label">Status:</span>
+                                <span className={`vehicle-status ${vehicleData.active ? 'active' : 'inactive'}`}>
+                                    {vehicleData.active ? '✅ Active' : '❌ Inactive'}
+                                </span>
+                            </div>
+                        </div>
+                        <div className="vehicle-actions">
+                            <button
+                                onClick={() => navigate(`/admin/vehicles/view/${vehicleData.id}`)}
+                                className="btn-vehicle-view"
+                            >
+                                <Settings size={16} />
+                                View Vehicle
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     if (isLoading) {
         return (
             <Dashboard requiredRole={userRole}>
@@ -285,6 +380,12 @@ const ViewKidPage = () => {
                                         <div className="stat-item">
                                             <Car className="stat-icon" size={16} />
                                             <span>Team: {teamData.name}</span>
+                                        </div>
+                                    )}
+                                    {vehicleData && (
+                                        <div className="stat-item">
+                                            <Settings className="stat-icon" size={16} />
+                                            <span>Vehicle: {vehicleData.make} {vehicleData.model}</span>
                                         </div>
                                     )}
                                 </div>
@@ -428,7 +529,7 @@ const ViewKidPage = () => {
                             )}
                         </div>
 
-                        {/* COLLAPSIBLE Team & Racing Info */}
+                        {/* UPDATED: Team & Vehicle Info */}
                         <div className="info-section team-section">
                             <div
                                 className="section-header clickable"
@@ -437,7 +538,7 @@ const ViewKidPage = () => {
                             >
                                 <div className="section-header-content">
                                     <Car className="section-icon" size={24} />
-                                    <h3>🏎️ {kidData.personalInfo.firstName}'s Team</h3>
+                                    <h3>🏎️ {kidData.personalInfo.firstName}'s Team & Vehicle</h3>
                                 </div>
                                 <div className="collapse-indicator">
                                     {collapsedSections.team ?
@@ -448,36 +549,47 @@ const ViewKidPage = () => {
                             </div>
 
                             {!collapsedSections.team && (
-                                <div className="info-grid">
-                                    <div className="info-item">
-                                        <label>🏁 Team</label>
-                                        <div className="info-value">
-                                            {teamData ? (
-                                                <span className="team-link" onClick={() => navigate(`/admin/teams/view/${teamData.id}`)}>
-                                                    {teamData.name}
+                                <div className="team-vehicle-content">
+                                    <div className="info-grid">
+                                        <div className="info-item">
+                                            <label>🏁 Team</label>
+                                            <div className="info-value">
+                                                {teamData ? (
+                                                    <span className="team-link" onClick={() => navigate(`/admin/teams/view/${teamData.id}`)}>
+                                                        {teamData.name}
+                                                    </span>
+                                                ) : (
+                                                    <span className="no-team">No Team Assigned</span>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <div className="info-item">
+                                            <label>📋 Form Status</label>
+                                            <div className="info-value">
+                                                <span className={`status-badge ${getStatusColor(kidData.signedFormStatus)}`}>
+                                                    {kidData.signedFormStatus || 'Pending'}
                                                 </span>
-                                            ) : (
-                                                <span className="no-team">No Team Assigned</span>
-                                            )}
+                                            </div>
+                                        </div>
+
+                                        <div className="info-item">
+                                            <label>🛡️ Safety Declaration</label>
+                                            <div className="info-value">
+                                                <span className={`declaration-badge ${kidData.signedDeclaration ? 'signed' : 'pending'}`}>
+                                                    {kidData.signedDeclaration ? '✅ Signed' : '⏳ Pending'}
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
 
-                                    <div className="info-item">
-                                        <label>📋 Form Status</label>
-                                        <div className="info-value">
-                                            <span className={`status-badge ${getStatusColor(kidData.signedFormStatus)}`}>
-                                                {kidData.signedFormStatus || 'Pending'}
-                                            </span>
+                                    {/* Vehicle Assignment Section */}
+                                    <div className="vehicle-section">
+                                        <div className="vehicle-header">
+                                            <Settings size={20} />
+                                            <h4>Racing Vehicle Assignment</h4>
                                         </div>
-                                    </div>
-
-                                    <div className="info-item">
-                                        <label>🛡️ Safety Declaration</label>
-                                        <div className="info-value">
-                                            <span className={`declaration-badge ${kidData.signedDeclaration ? 'signed' : 'pending'}`}>
-                                                {kidData.signedDeclaration ? '✅ Signed' : '⏳ Pending'}
-                                            </span>
-                                        </div>
+                                        {getVehicleDisplay()}
                                     </div>
                                 </div>
                             )}

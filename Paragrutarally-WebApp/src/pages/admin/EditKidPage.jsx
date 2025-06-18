@@ -1,4 +1,4 @@
-// src/pages/admin/EditKidPage.jsx - V1 with Enhanced Photo Buttons
+// src/pages/admin/EditKidPage.jsx - Updated with Vehicle Integration
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
@@ -8,6 +8,8 @@ import { usePermissions } from '../../hooks/usePermissions.jsx';
 import { getKidById, updateKid } from '../../services/kidService';
 import { uploadKidPhoto, deleteKidPhoto, getKidPhotoInfo } from '../../services/kidPhotoService';
 import { getAllTeams } from '../../services/teamService';
+import { getAllVehicles, updateVehicle, getVehicleById } from '../../services/vehicleService'; // Add vehicle services
+import { getVehiclePhotoInfo } from '../../services/vehiclePhotoService';
 import { validateKid, formStatusOptions } from '../../schemas/kidSchema';
 import { getDocs, collection, query, where } from 'firebase/firestore';
 import { db } from '../../firebase/config';
@@ -34,9 +36,11 @@ import {
     IconPlus as Plus,
     IconSend as Send,
     IconMessage as MessageCircle,
-    IconTrash as Trash2
+    IconTrash as Trash2,
+    IconSettings as Settings,
+    IconBattery as Battery
 } from '@tabler/icons-react';
-import './EditKidPage.css'; // Use EditKidPage.css instead of AddKidPage.css
+import { updateKidVehicleAssignments } from '../../services/vehicleAssignmentService'; // Add the new service
 
 const EditKidPage = () => {
     const navigate = useNavigate();
@@ -47,6 +51,8 @@ const EditKidPage = () => {
 
     const [isLoading, setIsLoading] = useState(true);
     const [teams, setTeams] = useState([]);
+    const [vehicles, setVehicles] = useState([]); // Add vehicles state
+    const [availableVehicles, setAvailableVehicles] = useState([]); // Available vehicles for assignment
     const [instructors, setInstructors] = useState([]);
     const [parents, setParents] = useState([]);
     const [originalData, setOriginalData] = useState(null);
@@ -79,7 +85,7 @@ const EditKidPage = () => {
         },
         instructorId: '',
         teamId: '',
-        vehicleIds: [],
+        vehicleIds: [], // Vehicle assignment
         signedDeclaration: false,
         signedFormStatus: 'pending',
         additionalComments: '',
@@ -135,13 +141,23 @@ const EditKidPage = () => {
             }
 
             // Load supporting data
-            const [teamsData, instructorsData, parentsData] = await Promise.all([
+            const [teamsData, vehiclesData, instructorsData, parentsData] = await Promise.all([
                 getAllTeams({ active: true }),
+                getAllVehicles(), // Load all vehicles
                 getDocs(query(collection(db, 'instructors'))),
                 getDocs(query(collection(db, 'users'), where('role', '==', 'parent')))
             ]);
 
             setTeams(teamsData);
+            setVehicles(vehiclesData);
+
+            // Filter available vehicles (active and not assigned to other kids)
+            const available = vehiclesData.filter(vehicle =>
+                vehicle.active &&
+                (!vehicle.currentKidId || vehicle.currentKidId === id)
+            );
+            setAvailableVehicles(available);
+
             setInstructors(instructorsData.docs.map(doc => ({ id: doc.id, ...doc.data() })));
             setParents(parentsData.docs.map(doc => ({ id: doc.id, ...doc.data() })));
 
@@ -183,6 +199,36 @@ const EditKidPage = () => {
                 [path]: undefined
             }));
         }
+    };
+
+    // Vehicle assignment handlers
+    const handleVehicleAssignment = async (vehicleId) => {
+        try {
+            if (!vehicleId) {
+                // Remove vehicle assignment
+                setFormData(prev => ({
+                    ...prev,
+                    vehicleIds: []
+                }));
+                return;
+            }
+
+            // Assign vehicle (replace existing assignment for now)
+            setFormData(prev => ({
+                ...prev,
+                vehicleIds: [vehicleId]
+            }));
+
+        } catch (error) {
+            console.error('Error handling vehicle assignment:', error);
+            alert('Failed to update vehicle assignment. Please try again.');
+        }
+    };
+
+    // Get assigned vehicle data
+    const getAssignedVehicle = () => {
+        if (!formData.vehicleIds || formData.vehicleIds.length === 0) return null;
+        return vehicles.find(v => v.id === formData.vehicleIds[0]);
     };
 
     // Enhanced photo handling with old photo cleanup
@@ -314,7 +360,26 @@ const EditKidPage = () => {
         return validation.isValid;
     };
 
-    // SIMPLIFIED: Submit function with old photo cleanup
+    // Update vehicle assignments using the new service
+    const updateVehicleAssignments = async (newVehicleIds, oldVehicleIds) => {
+        try {
+            const kidName = `${formData.personalInfo.firstName} ${formData.personalInfo.lastName}`.trim();
+            const assignedBy = userData?.name || userData?.email || 'Unknown User';
+
+            await updateKidVehicleAssignments(
+                id,
+                kidName,
+                assignedBy,
+                newVehicleIds,
+                oldVehicleIds
+            );
+        } catch (error) {
+            console.error('Error updating vehicle assignments:', error);
+            throw error;
+        }
+    };
+
+    // SIMPLIFIED: Submit function with vehicle integration
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -363,6 +428,16 @@ const EditKidPage = () => {
                 }
             }
 
+            // Update vehicle assignments
+            const oldVehicleIds = originalData?.vehicleIds || [];
+            const newVehicleIds = finalFormData.vehicleIds || [];
+
+            if (JSON.stringify(oldVehicleIds.sort()) !== JSON.stringify(newVehicleIds.sort())) {
+                console.log('🚗 Updating vehicle assignments...');
+                await updateVehicleAssignments(newVehicleIds, oldVehicleIds);
+                console.log('✅ Vehicle assignments updated successfully');
+            }
+
             // Update the kid
             await updateKid(id, finalFormData);
 
@@ -405,6 +480,81 @@ const EditKidPage = () => {
             url: null,
             placeholder: initials
         };
+    };
+
+    // Get vehicle display component for assignment section
+    const getVehicleAssignmentDisplay = () => {
+        const assignedVehicle = getAssignedVehicle();
+
+        return (
+            <div className="vehicle-assignment-section">
+                <div className="vehicle-assignment-header">
+                    <Settings size={20} />
+                    <h4>Racing Vehicle Assignment</h4>
+                </div>
+
+                <div className="vehicle-selection">
+                    <label className="form-label">
+                        <Car className="label-icon" size={16} />
+                        Assigned Vehicle
+                    </label>
+                    <select
+                        value={formData.vehicleIds[0] || ''}
+                        onChange={(e) => handleVehicleAssignment(e.target.value)}
+                        className="form-select vehicle-select"
+                    >
+                        <option value="">🚫 No Vehicle Assigned</option>
+                        {availableVehicles.map(vehicle => (
+                            <option key={vehicle.id} value={vehicle.id}>
+                                🏎️ {vehicle.make} {vehicle.model} ({vehicle.licensePlate})
+                            </option>
+                        ))}
+                    </select>
+                </div>
+
+                {assignedVehicle && (
+                    <div className="assigned-vehicle-preview">
+                        <h5>Current Assignment:</h5>
+                        <div className="vehicle-preview-card">
+                            <div className="vehicle-preview-photo">
+                                {(() => {
+                                    const vehiclePhotoInfo = getVehiclePhotoInfo(assignedVehicle);
+                                    return vehiclePhotoInfo.hasPhoto ? (
+                                        <img
+                                            src={vehiclePhotoInfo.url}
+                                            alt={`${assignedVehicle.make} ${assignedVehicle.model}`}
+                                            className="vehicle-preview-img"
+                                        />
+                                    ) : (
+                                        <div className="vehicle-preview-placeholder">
+                                            {vehiclePhotoInfo.placeholder}
+                                        </div>
+                                    );
+                                })()}
+                            </div>
+                            <div className="vehicle-preview-details">
+                                <h6>{assignedVehicle.make} {assignedVehicle.model}</h6>
+                                <div className="vehicle-preview-info">
+                                    <span className="license-plate">{assignedVehicle.licensePlate}</span>
+                                    <div className="battery-info">
+                                        <Battery size={14} />
+                                        <span>{assignedVehicle.batteryType || 'N/A'}</span>
+                                    </div>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => navigate(`/admin/vehicles/view/${assignedVehicle.id}`)}
+                                    className="btn-preview-vehicle"
+                                >
+                                    <Settings size={14} />
+                                    View Vehicle Details
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
+        );
     };
 
     // Get error message for a field
@@ -466,7 +616,6 @@ const EditKidPage = () => {
                         </h1>
                     </div>
                 </div>
-
 
                 <div className="add-kid-container">
                     {errors.general && (
@@ -733,11 +882,11 @@ const EditKidPage = () => {
                             </div>
                         </div>
 
-                        {/* Team Assignment */}
+                        {/* Team Assignment with Vehicle Integration */}
                         <div className={`form-section team-section ${focusTeam ? 'highlight-section' : ''}`}>
                             <div className="section-header">
                                 <Car className="section-icon" size={24} />
-                                <h2>🏎️ Team Assignment {focusTeam && <span className="focus-indicator">← Update Here!</span>}</h2>
+                                <h2>🏎️ Team & Vehicle Assignment {focusTeam && <span className="focus-indicator">← Update Here!</span>}</h2>
                             </div>
                             <div className="form-grid">
                                 <div className="form-group">
@@ -781,6 +930,11 @@ const EditKidPage = () => {
                                         </select>
                                     </div>
                                 </div>
+                            </div>
+
+                            {/* Vehicle Assignment Section */}
+                            <div className="vehicle-assignment-wrapper">
+                                {getVehicleAssignmentDisplay()}
                             </div>
                         </div>
 

@@ -1,8 +1,9 @@
-// src/services/vehiclePhotoService.js - Vehicle Photo Management Service
+// src/services/vehiclePhotoService.js - Vehicle Photo Management Service (Updated)
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { storage } from '../firebase/config';
+import { updateVehicle, getVehicleById } from './vehicleService';
 
-const VEHICLE_PHOTOS_PATH = 'vehicle-photos';
+const VEHICLE_PHOTOS_PATH = 'vehiclePhotos';
 
 /**
  * Validate photo file before upload
@@ -78,19 +79,36 @@ export const uploadVehiclePhoto = async (vehicleId, photoFile) => {
 
         // Create a unique filename
         const timestamp = Date.now();
-        const fileExtension = photoFile.name.split('.').pop();
+        const fileExtension = photoFile.name.split('.').pop().toLowerCase();
         const fileName = `${vehicleId}_${timestamp}.${fileExtension}`;
 
         // Create storage reference
         const photoRef = ref(storage, `${VEHICLE_PHOTOS_PATH}/${fileName}`);
 
-        // Upload the file
+        // Upload the file with metadata
         console.log('📤 Uploading vehicle photo:', fileName);
-        const snapshot = await uploadBytes(photoRef, photoFile);
+        const uploadResult = await uploadBytes(photoRef, photoFile, {
+            contentType: photoFile.type,
+            customMetadata: {
+                'vehicleId': vehicleId,
+                'uploadedAt': new Date().toISOString(),
+                'originalName': photoFile.name
+            }
+        });
 
         // Get download URL
-        const downloadURL = await getDownloadURL(snapshot.ref);
+        const downloadURL = await getDownloadURL(uploadResult.ref);
         console.log('✅ Vehicle photo uploaded successfully:', downloadURL);
+
+        // Update vehicle document with photo URL
+        const vehicle = await getVehicleById(vehicleId);
+        const updatedVehicleData = {
+            ...vehicle,
+            photo: downloadURL
+        };
+
+        await updateVehicle(vehicleId, updatedVehicleData);
+        console.log('✅ Vehicle document updated with photo URL');
 
         return downloadURL;
     } catch (error) {
@@ -100,7 +118,7 @@ export const uploadVehiclePhoto = async (vehicleId, photoFile) => {
 };
 
 /**
- * Delete vehicle photo from Firebase Storage
+ * Delete vehicle photo from Firebase Storage (Updated to match kids service)
  */
 export const deleteVehiclePhoto = async (vehicleId, photoUrl) => {
     try {
@@ -109,29 +127,110 @@ export const deleteVehiclePhoto = async (vehicleId, photoUrl) => {
             return;
         }
 
-        // Extract the file path from the URL
+        console.log(`🔄 Deleting photo for vehicle ${vehicleId}`);
+
+        // Extract filename from URL (same method as kids service)
         const url = new URL(photoUrl);
-        const pathMatch = url.pathname.match(/\/o\/(.+?)\?/);
-
-        if (!pathMatch) {
-            console.warn('⚠️ Could not extract file path from photo URL');
-            return;
-        }
-
-        const filePath = decodeURIComponent(pathMatch[1]);
+        const pathParts = url.pathname.split('/');
+        const encodedFilename = pathParts[pathParts.length - 1];
+        const filename = decodeURIComponent(encodedFilename.split('?')[0]);
 
         // Create storage reference
-        const photoRef = ref(storage, filePath);
+        const photoRef = ref(storage, filename);
 
-        // Delete the file
-        console.log('🗑️ Deleting vehicle photo:', filePath);
+        // Delete file from storage
         await deleteObject(photoRef);
-        console.log('✅ Vehicle photo deleted successfully');
+
+        // Update vehicle document to remove photo URL
+        const vehicle = await getVehicleById(vehicleId);
+        const updatedVehicleData = {
+            ...vehicle,
+            photo: ''
+        };
+
+        await updateVehicle(vehicleId, updatedVehicleData);
+
+        console.log(`✅ Photo deleted successfully for vehicle ${vehicleId}`);
 
     } catch (error) {
         console.error('❌ Vehicle photo deletion failed:', error);
-        // Don't throw error for deletion failures - log and continue
-        console.warn('⚠️ Photo deletion failed but continuing with operation');
+        // Don't throw error if file doesn't exist (same as kids service)
+        if (error.code !== 'storage/object-not-found') {
+            throw new Error(`Failed to delete photo: ${error.message}`);
+        }
+    }
+};
+
+/**
+ * Replace vehicle photo (delete old, upload new) - Updated
+ */
+export const replaceVehiclePhoto = async (vehicleId, newPhotoFile, oldPhotoUrl) => {
+    try {
+        console.log(`🔄 Replacing photo for vehicle ${vehicleId}`);
+
+        // Delete old photo first (if exists)
+        if (oldPhotoUrl) {
+            try {
+                await deleteVehiclePhoto(vehicleId, oldPhotoUrl);
+                console.log('✅ Old photo deleted successfully');
+            } catch (deleteError) {
+                console.warn('⚠️ Failed to delete old photo, continuing with upload:', deleteError);
+            }
+        }
+
+        // Upload new photo
+        const newPhotoUrl = await uploadVehiclePhoto(vehicleId, newPhotoFile);
+        console.log('✅ New photo uploaded successfully');
+
+        return newPhotoUrl;
+    } catch (error) {
+        console.error('❌ Failed to replace vehicle photo:', error);
+        throw error;
+    }
+};
+
+/**
+ * Update vehicle photo (handles both new uploads and replacements)
+ */
+export const updateVehiclePhoto = async (vehicleId, newPhotoFile) => {
+    try {
+        // Get current vehicle data
+        const vehicle = await getVehicleById(vehicleId);
+        const currentPhotoUrl = vehicle.photo;
+
+        // If there's an existing photo, replace it; otherwise, just upload new one
+        if (currentPhotoUrl) {
+            return await replaceVehiclePhoto(vehicleId, newPhotoFile, currentPhotoUrl);
+        } else {
+            return await uploadVehiclePhoto(vehicleId, newPhotoFile);
+        }
+    } catch (error) {
+        console.error('❌ Failed to update vehicle photo:', error);
+        throw error;
+    }
+};
+
+/**
+ * Remove vehicle photo completely (delete from storage and update document)
+ */
+export const removeVehiclePhoto = async (vehicleId) => {
+    try {
+        // Get current vehicle data
+        const vehicle = await getVehicleById(vehicleId);
+        const currentPhotoUrl = vehicle.photo;
+
+        if (!currentPhotoUrl) {
+            console.log('ℹ️ No photo to remove for this vehicle');
+            return;
+        }
+
+        // Delete the photo
+        await deleteVehiclePhoto(vehicleId, currentPhotoUrl);
+        console.log('✅ Vehicle photo removed successfully');
+
+    } catch (error) {
+        console.error('❌ Failed to remove vehicle photo:', error);
+        throw error;
     }
 };
 
@@ -165,48 +264,6 @@ export const getVehiclePhotoInfo = (vehicle) => {
         url: null,
         placeholder: initials
     };
-};
-
-/**
- * Update vehicle photo URL in database (helper function)
- */
-export const updateVehiclePhotoUrl = async (vehicleId, photoUrl) => {
-    try {
-        // This would typically be handled by the vehicle service
-        // Just a placeholder for consistency
-        console.log('📝 Updating vehicle photo URL in database:', vehicleId, photoUrl);
-
-        // You might want to call updateVehicle from vehicleService here
-        // await updateVehicle(vehicleId, { photo: photoUrl });
-
-    } catch (error) {
-        console.error('❌ Failed to update vehicle photo URL:', error);
-        throw error;
-    }
-};
-
-/**
- * Replace vehicle photo (delete old, upload new)
- */
-export const replaceVehiclePhoto = async (vehicleId, newPhotoFile, oldPhotoUrl) => {
-    try {
-        // Delete old photo first (if exists)
-        if (oldPhotoUrl) {
-            try {
-                await deleteVehiclePhoto(vehicleId, oldPhotoUrl);
-            } catch (deleteError) {
-                console.warn('⚠️ Failed to delete old photo, continuing with upload:', deleteError);
-            }
-        }
-
-        // Upload new photo
-        const newPhotoUrl = await uploadVehiclePhoto(vehicleId, newPhotoFile);
-
-        return newPhotoUrl;
-    } catch (error) {
-        console.error('❌ Failed to replace vehicle photo:', error);
-        throw error;
-    }
 };
 
 /**
@@ -264,4 +321,19 @@ export const generatePhotoThumbnail = (photoUrl, size = 'small') => {
     } catch {
         return photoUrl;
     }
+};
+
+// Export default object for consistency
+export default {
+    uploadVehiclePhoto,
+    deleteVehiclePhoto,
+    replaceVehiclePhoto,
+    updateVehiclePhoto,
+    removeVehiclePhoto,
+    getVehiclePhotoInfo,
+    validatePhotoFile,
+    resizeImage,
+    bulkDeleteVehiclePhotos,
+    isValidPhotoUrl,
+    generatePhotoThumbnail
 };

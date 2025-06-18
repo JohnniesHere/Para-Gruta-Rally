@@ -1,4 +1,4 @@
-// src/pages/admin/VehiclesPage.jsx - Vehicles Management with Schema Integration
+// src/pages/admin/VehiclesPage.jsx - Enhanced with Mobile-Responsive Card Layout
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
@@ -34,7 +34,7 @@ const VehiclesPage = () => {
 
     const [vehicles, setVehicles] = useState([]);
     const [filteredVehicles, setFilteredVehicles] = useState([]);
-    const [teams, setTeams] = useState([]); // Added teams state
+    const [teams, setTeams] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -64,21 +64,16 @@ const VehiclesPage = () => {
 
             switch (userRole) {
                 case 'admin':
-                    // Admins can see all vehicles
                     vehiclesData = await getAllVehicles();
                     break;
-
                 case 'instructor':
-                    // Team leaders can see vehicles for their team
                     if (userData?.teamId) {
                         vehiclesData = await getVehiclesByTeam(userData.teamId);
                     } else {
                         vehiclesData = [];
                     }
                     break;
-
                 case 'parent':
-                    // Parents can see vehicles assigned to their kids
                     try {
                         const parentKids = await getKidsByParent(userData.uid);
                         const kidIds = parentKids.map(kid => kid.id);
@@ -88,12 +83,9 @@ const VehiclesPage = () => {
                         vehiclesData = [];
                     }
                     break;
-
                 case 'guest':
-                    // Temporary guests - limited access
                     vehiclesData = [];
                     break;
-
                 default:
                     vehiclesData = [];
             }
@@ -189,6 +181,93 @@ const VehiclesPage = () => {
 
         return { total, active, inUse, available };
     };
+
+    // Mobile card component
+    const VehicleMobileCard = ({ vehicle }) => (
+        <div className="vehicle-mobile-card">
+            <div className="vehicle-mobile-header">
+                {vehicle.photo ? (
+                    <img
+                        src={vehicle.photo}
+                        alt={`${vehicle.make} ${vehicle.model}`}
+                        className="vehicle-mobile-photo"
+                    />
+                ) : (
+                    <div className="vehicle-mobile-photo-placeholder">
+                        <Car size={24} />
+                    </div>
+                )}
+                <div className="vehicle-mobile-info">
+                    <div className="vehicle-mobile-name">
+                        {vehicle.make} {vehicle.model}
+                    </div>
+                    <div className="vehicle-mobile-type">
+                        {vehicle.driveType} • {vehicle.steeringType}
+                    </div>
+                </div>
+            </div>
+
+            <div className="vehicle-mobile-details">
+                <div className="vehicle-mobile-detail">
+                    <div className="vehicle-mobile-detail-label">Team</div>
+                    <div className="vehicle-mobile-detail-value">
+                        <span className="team-name">{getTeamName(vehicle.teamId)}</span>
+                    </div>
+                </div>
+                <div className="vehicle-mobile-detail">
+                    <div className="vehicle-mobile-detail-label">License Plate</div>
+                    <div className="vehicle-mobile-detail-value">
+                        <span className="license-plate">{vehicle.licensePlate}</span>
+                    </div>
+                </div>
+                <div className="vehicle-mobile-detail">
+                    <div className="vehicle-mobile-detail-label">Current User</div>
+                    <div className="vehicle-mobile-detail-value">
+                        {vehicle.currentKidId ? (
+                            <span className="current-user">Assigned</span>
+                        ) : (
+                            <span className="no-user">Available</span>
+                        )}
+                    </div>
+                </div>
+                <div className="vehicle-mobile-detail">
+                    <div className="vehicle-mobile-detail-label">Battery</div>
+                    <div className="vehicle-mobile-detail-value">
+                        <div className="battery-info">
+                            <Battery size={16} />
+                            <span>{vehicle.batteryType || 'N/A'}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div className="vehicle-mobile-actions">
+                <div className="vehicle-mobile-status">
+                    {getStatusBadge(vehicle)}
+                </div>
+                <div className="vehicle-mobile-buttons">
+                    <button
+                        onClick={() => handleViewVehicle(vehicle.id)}
+                        className="btn-mobile-action btn-mobile-view"
+                        title="View Vehicle"
+                    >
+                        <Eye size={14} />
+                        View
+                    </button>
+                    {canEdit(vehicle) && (
+                        <button
+                            onClick={() => handleEditVehicle(vehicle.id)}
+                            className="btn-mobile-action btn-mobile-edit"
+                            title="Edit Vehicle"
+                        >
+                            <Edit size={14} />
+                            Edit
+                        </button>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
 
     if (isLoading) {
         return (
@@ -362,7 +441,7 @@ const VehiclesPage = () => {
                         </div>
                     )}
 
-                    {/* Vehicles Grid */}
+                    {/* Vehicles Content */}
                     {filteredVehicles.length === 0 ? (
                         <div className="empty-state">
                             <Car className="empty-icon" size={80} />
@@ -381,92 +460,102 @@ const VehiclesPage = () => {
                             )}
                         </div>
                     ) : (
-                        <div className="table-container">
-                            <table className="data-table">
-                                <thead>
-                                <tr>
-                                    <th>Vehicle</th>
-                                    <th>Team</th>
-                                    <th>License Plate</th>
-                                    <th>Status</th>
-                                    <th>Current User</th>
-                                    <th>Battery</th>
-                                    <th>Actions</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {filteredVehicles.map(vehicle => (
-                                    <tr key={vehicle.id}>
-                                        <td>
-                                            <div className="vehicle-info">
-                                                {vehicle.photo ? (
-                                                    <img
-                                                        src={vehicle.photo}
-                                                        alt={`${vehicle.make} ${vehicle.model}`}
-                                                        className="vehicle-photo-small"
-                                                    />
-                                                ) : (
-                                                    <div className="vehicle-photo-placeholder">
-                                                        <Car size={20} />
-                                                    </div>
-                                                )}
-                                                <div className="vehicle-details">
-                                                    <div className="vehicle-name">
-                                                        {vehicle.make} {vehicle.model}
-                                                    </div>
-                                                    <div className="vehicle-type">
-                                                        {vehicle.driveType} • {vehicle.steeringType}
+                        <>
+                            {/* Desktop Table View */}
+                            <div className="table-container">
+                                <table className="data-table">
+                                    <thead>
+                                    <tr>
+                                        <th>Vehicle</th>
+                                        <th>Team</th>
+                                        <th>License Plate</th>
+                                        <th>Status</th>
+                                        <th>Current User</th>
+                                        <th>Battery</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {filteredVehicles.map(vehicle => (
+                                        <tr key={vehicle.id}>
+                                            <td>
+                                                <div className="vehicle-info">
+                                                    {vehicle.photo ? (
+                                                        <img
+                                                            src={vehicle.photo}
+                                                            alt={`${vehicle.make} ${vehicle.model}`}
+                                                            className="vehicle-photo-small"
+                                                        />
+                                                    ) : (
+                                                        <div className="vehicle-photo-placeholder">
+                                                            <Car size={20} />
+                                                        </div>
+                                                    )}
+                                                    <div className="vehicle-details">
+                                                        <div className="vehicle-name">
+                                                            {vehicle.make} {vehicle.model}
+                                                        </div>
+                                                        <div className="vehicle-type">
+                                                            {vehicle.driveType} • {vehicle.steeringType}
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <span className="team-name">{getTeamName(vehicle.teamId)}</span>
-                                        </td>
-                                        <td>
-                                            <span className="license-plate">{vehicle.licensePlate}</span>
-                                        </td>
-                                        <td>
-                                            {getStatusBadge(vehicle)}
-                                        </td>
-                                        <td>
-                                            {vehicle.currentKidId ? (
-                                                <span className="current-user">Assigned</span>
-                                            ) : (
-                                                <span className="no-user">Available</span>
-                                            )}
-                                        </td>
-                                        <td>
-                                            <div className="battery-info">
-                                                <Battery size={16} />
-                                                <span>{vehicle.batteryType || 'N/A'}</span>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div className="action-buttons">
-                                                <button
-                                                    onClick={() => handleViewVehicle(vehicle.id)}
-                                                    className="btn-action view"
-                                                    title="View Vehicle"
-                                                >
-                                                    <Eye size={14} />
-                                                </button>
-                                                {canEdit(vehicle) && (
-                                                    <button
-                                                        onClick={() => handleEditVehicle(vehicle.id)}
-                                                        className="btn-action edit"
-                                                        title="Edit Vehicle"
-                                                    >
-                                                        <Edit size={14} />
-                                                    </button>
+                                            </td>
+                                            <td>
+                                                <span className="team-name">{getTeamName(vehicle.teamId)}</span>
+                                            </td>
+                                            <td>
+                                                <span className="license-plate">{vehicle.licensePlate}</span>
+                                            </td>
+                                            <td>
+                                                {getStatusBadge(vehicle)}
+                                            </td>
+                                            <td>
+                                                {vehicle.currentKidId ? (
+                                                    <span className="current-user">Assigned</span>
+                                                ) : (
+                                                    <span className="no-user">Available</span>
                                                 )}
-                                            </div>
-                                        </td>
-                                    </tr>
+                                            </td>
+                                            <td>
+                                                <div className="battery-info">
+                                                    <Battery size={16} />
+                                                    <span>{vehicle.batteryType || 'N/A'}</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div className="action-buttons">
+                                                    <button
+                                                        onClick={() => handleViewVehicle(vehicle.id)}
+                                                        className="btn-action view"
+                                                        title="View Vehicle"
+                                                    >
+                                                        <Eye size={14} />
+                                                    </button>
+                                                    {canEdit(vehicle) && (
+                                                        <button
+                                                            onClick={() => handleEditVehicle(vehicle.id)}
+                                                            className="btn-action edit"
+                                                            title="Edit Vehicle"
+                                                        >
+                                                            <Edit size={14} />
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            {/* Mobile Card View */}
+                            <div className="vehicles-mobile-grid">
+                                {filteredVehicles.map(vehicle => (
+                                    <VehicleMobileCard key={vehicle.id} vehicle={vehicle} />
                                 ))}
-                                </tbody>
-                            </table>
-                        </div>
+                            </div>
+                        </>
                     )}
                 </div>
             </div>

@@ -1,4 +1,4 @@
-/* src/pages/admin/VehiclePage.css - Vehicles Management Styling without gradients */
+/* src/pages/admin/VehiclePage.css - Enhanced Mobile-First Responsive Design */
 @import url('./../../styles/global.css');
 
 /* ========================================
@@ -26,6 +26,7 @@
     object-fit: cover;
     border: 2px solid var(--racing-gold);
     box-shadow: 0 2px 8px rgba(255, 215, 0, 0.2);
+    flex-shrink: 0;
 }
 
 .vehicle-photo-placeholder {
@@ -39,18 +40,24 @@
     color: var(--text-primary);
     border: 2px solid var(--racing-gold);
     box-shadow: 0 2px 8px rgba(255, 215, 0, 0.2);
+    flex-shrink: 0;
 }
 
 .vehicle-details {
     display: flex;
     flex-direction: column;
     gap: 4px;
+    min-width: 0;
+    flex: 1;
 }
 
 .vehicle-name {
     font-weight: 600;
     color: var(--text-primary);
     font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .vehicle-type {
@@ -59,6 +66,9 @@
     display: flex;
     align-items: center;
     gap: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .team-name {
@@ -67,8 +77,27 @@
     padding: 4px 8px;
     background: rgba(59, 130, 246, 0.1);
     border-radius: 12px;
-    font-size: 12px;
+    font-size: 11px;
     border: 1px solid rgba(59, 130, 246, 0.3);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    display: inline-block;
+}
+
+/* Force override the inherited font-size */
+.vehicles-page .data-table .team-name,
+.data-table tbody .team-name,
+.data-table .team-name {
+    font-size: 15px !important;
+    font-weight: 600;
+}
+
+/* Also fix the actions column padding */
+.vehicles-page .data-table th:nth-child(7),
+.vehicles-page .data-table td:nth-child(7) {
+    padding-right: 8px !important;
 }
 
 .license-plate {
@@ -79,7 +108,9 @@
     padding: 4px 8px;
     border-radius: 6px;
     border: 1px solid var(--border-color);
-    font-size: 13px;
+    font-size: 14px;
+    white-space: nowrap;
+
 }
 
 .current-user {
@@ -99,10 +130,225 @@
     gap: 6px;
     color: var(--text-secondary);
     font-size: 12px;
+    white-space: nowrap;
 }
 
 .battery-info svg {
     color: var(--racing-green);
+}
+
+/* ========================================
+   ENHANCED RESPONSIVE TABLE DESIGN
+   ======================================== */
+
+/* Mobile-first approach for better responsiveness */
+.table-container {
+    background: var(--bg-secondary);
+    border-radius: 20px;
+    overflow: hidden;
+    border: 2px solid var(--border-color);
+    box-shadow: 0 4px 15px var(--shadow-color);
+    transition: all 0.3s ease;
+    margin: 0;
+}
+
+/* Desktop table view */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 900px;
+    table-layout: fixed;
+}
+
+/* Improved column width distribution */
+.data-table th:nth-child(1), /* Vehicle */
+.data-table td:nth-child(1) {
+    width: 22%;
+    min-width: 220px;
+}
+
+.data-table th:nth-child(2), /* Team */
+.data-table td:nth-child(2) {
+    width: 12%;
+    min-width: 140px;
+}
+
+.data-table th:nth-child(3), /* License Plate */
+.data-table td:nth-child(3) {
+    width: 14%;
+    min-width: 140px;
+}
+
+.data-table th:nth-child(4), /* Status */
+.data-table td:nth-child(4) {
+    width: 12%;
+    min-width: 110px;
+}
+
+.data-table th:nth-child(5), /* Current User */
+.data-table td:nth-child(5) {
+    width: 12%;
+    min-width: 110px;
+}
+
+.data-table th:nth-child(6), /* Battery */
+.data-table td:nth-child(6) {
+    width: 14%;
+    min-width: 130px;
+}
+
+.data-table th:nth-child(7), /* Actions */
+.data-table td:nth-child(7) {
+    width: 14%;
+    min-width: 120px;
+    text-align: center;
+    padding-right: 20px;
+}
+
+/* Mobile card layout for vehicles */
+.vehicles-mobile-grid {
+    display: none;
+    grid-template-columns: 1fr;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.vehicle-mobile-card {
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 4px 15px var(--shadow-color);
+    transition: all 0.3s ease;
+}
+
+.vehicle-mobile-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px var(--shadow-hover);
+    border-color: var(--racing-gold);
+}
+
+.vehicle-mobile-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.vehicle-mobile-photo {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    object-fit: cover;
+    border: 2px solid var(--racing-gold);
+    box-shadow: 0 2px 8px rgba(255, 215, 0, 0.2);
+    flex-shrink: 0;
+}
+
+.vehicle-mobile-photo-placeholder {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--racing-gold) 0%, var(--racing-orange) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-primary);
+    border: 2px solid var(--racing-gold);
+    box-shadow: 0 2px 8px rgba(255, 215, 0, 0.2);
+    flex-shrink: 0;
+}
+
+.vehicle-mobile-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.vehicle-mobile-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 5px;
+}
+
+.vehicle-mobile-type {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+}
+
+.vehicle-mobile-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 15px;
+}
+
+.vehicle-mobile-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.vehicle-mobile-detail-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.vehicle-mobile-detail-value {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.vehicle-mobile-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 15px;
+    border-top: 1px solid var(--border-color);
+}
+
+.vehicle-mobile-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.vehicle-mobile-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-mobile-action {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.btn-mobile-view {
+    background: linear-gradient(135deg, var(--info-color) 0%, var(--accent-hover) 100%);
+    color: white;
+}
+
+.btn-mobile-edit {
+    background: linear-gradient(135deg, var(--success-color) 0%, var(--success-hover) 100%);
+    color: white;
+}
+
+.btn-mobile-action:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 /* ========================================
@@ -182,7 +428,7 @@
     border-radius: 15px;
     border: 2px solid;
     transition: all 0.3s ease;
-    background: var(--bg-secondary); /* Solid background instead of gradients */
+    background: var(--bg-secondary);
 }
 
 .status-card.status-available {
@@ -287,7 +533,7 @@
     align-items: center;
     gap: 20px;
     padding: 20px;
-    background: var(--bg-secondary); /* Solid background instead of gradient */
+    background: var(--bg-secondary);
     border: 2px solid var(--success-color);
     border-radius: 15px;
     color: var(--success-color);
@@ -342,7 +588,7 @@
     align-items: center;
     gap: 15px;
     padding: 20px;
-    background: var(--bg-secondary); /* Solid background instead of gradient */
+    background: var(--bg-secondary);
     border: 2px solid var(--error-color);
     border-radius: 15px;
     color: var(--error-color);
@@ -522,93 +768,77 @@
 }
 
 /* ========================================
-   RESPONSIVE TABLE DESIGN
-   ======================================== */
-
-/* Make table container scrollable on smaller screens */
-.table-container {
-    overflow-x: auto;
-    margin: 0 -10px; /* Negative margin to use full width */
-    padding: 0 10px;
-}
-
-/* Improve table responsiveness */
-.data-table {
-    min-width: 800px; /* Minimum width for proper display */
-    width: 100%;
-}
-
-/* Adjust column widths for better space distribution */
-.data-table th,
-.data-table td {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-/* Specific column width adjustments */
-.data-table th:nth-child(1), /* Vehicle */
-.data-table td:nth-child(1) {
-    min-width: 200px;
-    max-width: 250px;
-}
-
-.data-table th:nth-child(2), /* Team */
-.data-table td:nth-child(2) {
-    min-width: 120px;
-    max-width: 150px;
-}
-
-.data-table th:nth-child(3), /* License Plate */
-.data-table td:nth-child(3) {
-    min-width: 130px;
-    max-width: 160px;
-}
-
-.data-table th:nth-child(4), /* Status */
-.data-table td:nth-child(4) {
-    min-width: 100px;
-    max-width: 120px;
-}
-
-.data-table th:nth-child(5), /* Current User */
-.data-table td:nth-child(5) {
-    min-width: 100px;
-    max-width: 120px;
-}
-
-.data-table th:nth-child(6), /* Battery */
-.data-table td:nth-child(6) {
-    min-width: 120px;
-    max-width: 150px;
-}
-
-.data-table th:nth-child(7), /* Actions */
-.data-table td:nth-child(7) {
-    min-width: 100px;
-    max-width: 120px;
-    text-align: center;
-}
-
-/* ========================================
    RESPONSIVE DESIGN UPDATES
    ======================================== */
 
-@media (max-width: 1200px) {
-    /* Adjust container padding for medium screens */
+/* Large screens - show table */
+@media (min-width: 1201px) {
+    .table-container {
+        display: block;
+    }
+
+    .vehicles-mobile-grid {
+        display: none;
+    }
+}
+
+/* Medium to large tablets - compact table */
+@media (max-width: 1200px) and (min-width: 769px) {
     .admin-container {
         padding: 20px;
     }
 
-    /* Make table more compact */
+    .data-table {
+        min-width: 800px;
+    }
+
     .data-table th,
     .data-table td {
         padding: 12px 8px;
         font-size: 13px;
     }
+
+    .data-table th:first-child,
+    .data-table td:first-child {
+        padding-left: 16px;
+    }
+
+    .data-table th:last-child,
+    .data-table td:last-child {
+        padding-right: 16px;
+    }
+
+    .vehicle-photo-small,
+    .vehicle-photo-placeholder {
+        width: 40px;
+        height: 40px;
+    }
+
+    .team-name {
+        font-size: 10px;
+    }
+
+    .table-container {
+        overflow-x: auto;
+        margin: 0 -10px;
+        padding: 0 10px;
+    }
+
+    .action-buttons {
+        padding: 0 4px;
+    }
 }
 
+/* Tablets and smaller - switch to mobile cards */
 @media (max-width: 768px) {
+    .table-container {
+        display: none;
+    }
+
+    .vehicles-mobile-grid {
+        display: grid;
+    }
+
     .vehicle-details-grid {
         grid-template-columns: 1fr;
         gap: 20px;
@@ -658,45 +888,20 @@
         gap: 10px;
     }
 
-    .vehicle-photo-small {
-        width: 40px;
-        height: 40px;
-    }
-
-    .vehicle-photo-placeholder {
-        width: 40px;
-        height: 40px;
-    }
-
-    /* Mobile table adjustments */
-    .table-container {
-        margin: 0 -20px;
-        padding: 0 20px;
-    }
-
-    .data-table {
-        font-size: 12px;
-        min-width: 700px; /* Reduced minimum width for mobile */
-    }
-
-    .data-table th,
-    .data-table td {
-        padding: 10px 6px;
-    }
-
-    /* Stack stats cards on mobile */
+    /* Stats cards adjustment for mobile */
     .stats-grid {
         grid-template-columns: repeat(2, 1fr);
         gap: 15px;
     }
 
-    /* Adjust search and filter section for mobile */
+    /* Search and filter section for mobile */
     .search-filter-section {
         grid-template-columns: 1fr;
         gap: 15px;
     }
 }
 
+/* Small phones */
 @media (max-width: 480px) {
     .vehicle-details-grid {
         gap: 15px;
@@ -727,43 +932,28 @@
         font-size: 13px;
     }
 
-    .vehicle-name {
+    .vehicle-mobile-name {
+        font-size: 16px;
+    }
+
+    .vehicle-mobile-type {
         font-size: 13px;
     }
 
-    .vehicle-type {
-        font-size: 11px;
+    .vehicle-mobile-details {
+        grid-template-columns: 1fr;
+        gap: 10px;
     }
 
-    .license-plate {
-        font-size: 12px;
-        padding: 3px 6px;
+    .vehicle-mobile-actions {
+        flex-direction: column;
+        gap: 12px;
+        align-items: stretch;
     }
 
-    .team-name {
-        font-size: 11px;
-        padding: 3px 6px;
-    }
-
-    .battery-info {
-        font-size: 11px;
-        gap: 4px;
-    }
-
-    /* Mobile table further optimizations */
-    .table-container {
-        margin: 0 -15px;
-        padding: 0 15px;
-    }
-
-    .data-table {
-        font-size: 11px;
-        min-width: 600px; /* Further reduced for small phones */
-    }
-
-    .data-table th,
-    .data-table td {
-        padding: 8px 4px;
+    .vehicle-mobile-buttons {
+        justify-content: center;
+        width: 100%;
     }
 
     /* Stack stats in single column on very small screens */
