@@ -79,29 +79,7 @@
     filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.1));
 }
 
-/* ========================================
-   BACK BUTTON FIXES
-   ======================================== */
 
-/* Back button text color fixes */
-.add-team-page .back-button {
-    color: #2D3748 !important; /* Dark text for visibility */
-    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
-}
-
-/* Ensure back button text stays dark in all modes */
-[data-theme="dark"] .add-team-page .back-button,
-.dark-mode .add-team-page .back-button,
-.dark .add-team-page .back-button {
-    color: #2D3748 !important;
-    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
-}
-
-/* Back button icon color fix */
-.add-team-page .back-button svg {
-    color: #2D3748 !important;
-    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.1));
-}
 
 /* ========================================
    DARK MODE BACK BUTTON FIX

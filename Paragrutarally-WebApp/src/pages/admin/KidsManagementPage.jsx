@@ -307,8 +307,7 @@ const KidsManagementPage = () => {
 
     // EDIT KID MODAL HANDLERS
     const handleEditKid = (kid) => {
-        setSelectedKidForEdit(kid);
-        setEditModalOpen(true);
+        navigate(`/admin/kids/edit/${kid.id}`);
     };
 
     const handleKidUpdated = (kidId, updatedData) => {

@@ -170,9 +170,7 @@ const TeamsManagementPage = () => {
     };
 
     const handleEditTeam = (team) => {
-        // For now, show alert that this would open edit modal
-        alert(`Edit functionality for ${team.name} would go here. You could create an EditTeamModal similar to the EditKidModal.`);
-        // navigate(`/admin/teams/edit/${team.id}`);
+        navigate(`/admin/teams/edit/${team.id}`);
     };
 
     const handleAddTeam = () => {

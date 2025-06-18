@@ -176,21 +176,28 @@ const AddTeamPage = () => {
         <Dashboard requiredRole={userRole}>
             <div className={`admin-page add-team-page ${appliedTheme}-mode`}>
                 {/* Page Title - Outside container */}
-                <h1>
-                    <UsersGroup size={32} className="page-title-icon" />
-                    Create Racing Team!
-                    <Trophy size={24} className="trophy-icon" />
-                </h1>
+                <div className="page-header">
+                    <button
+                        onClick={handleCancel}
+                        className={`back-button ${appliedTheme}-back-button`}>
+                        <ArrowLeft className="btn-icon" size={20} />
+                        Back to Teams
+                    </button>
+
+                    <h1>
+                        <UsersGroup size={32} className="page-title-icon" />
+                        Create Racing Team!
+                        <Trophy size={24} className="trophy-icon" />
+                    </h1>
+                </div>
+
 
                 {/* Main Container */}
                 <div className="admin-container add-team-container">
                     {/* Racing Theme Header */}
                     <div className="racing-header">
                         <div className="header-content">
-                            <button onClick={handleCancel} className="back-button">
-                                <ArrowLeft className="btn-icon" size={20} />
-                                Back to Teams
-                            </button>
+
                             <div className="title-section">
                                 <p className="subtitle">Let's build the ultimate racing squad! 🏁</p>
                             </div>

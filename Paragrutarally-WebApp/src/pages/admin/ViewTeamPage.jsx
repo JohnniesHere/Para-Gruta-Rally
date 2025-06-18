@@ -158,7 +158,9 @@ const ViewTeamPage = () => {
                 {/* Racing Theme Header */}
                 <div className="racing-header">
                     <div className="header-content">
-                        <button onClick={handleBack} className="back-button">
+                        <button
+                            onClick={handleBack}
+                            className="back-button">
                             <ArrowLeft className="btn-icon" size={20} />
                             Back to Teams
                         </button>

@@ -86,7 +86,7 @@
     --error-hover: #EF4444;
 
     --info-color: #60A5FA;
-    --info-light: #1E3A8A;
+    --info-light: #6286e6;
 
     --shadow-color: rgba(0, 0, 0, 0.3);
     --shadow-hover: rgba(0, 0, 0, 0.4);
@@ -940,8 +940,8 @@ body.dark .stat-card.total::before {
 }
 
 .info-alert {
-    background: linear-gradient(135deg, var(--info-light) 0%, #DBEAFE 100%);
-    color: #1E40AF;
+    background: var(--info-light);
+    color: #131b30;
     border-color: #60A5FA;
     box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2);
 }
