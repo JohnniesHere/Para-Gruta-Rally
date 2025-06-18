@@ -1,4 +1,4 @@
-// src/hooks/usePermissions.jsx - SIMPLIFIED ROLE-BASED PERMISSIONS
+// src/hooks/usePermissions.jsx - ENHANCED WITH FIELD-LEVEL PERMISSIONS
 import { useState, useEffect, useContext, createContext, useCallback } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
@@ -6,58 +6,250 @@ import { useAuth } from '../contexts/AuthContext';
 
 const PermissionContext = createContext();
 
-// SIMPLE ROLE-BASED PERMISSIONS
-const createRolePermissions = (userRole = 'guest') => {
-    switch (userRole) {
-        case 'admin':
-            return {
-                canCreate: true,
-                canEdit: true,
-                canDelete: true,
-                canViewAll: true,
-                canViewKid: () => true,
-                canViewField: () => true,
-                canEditField: () => true,
-                role: 'admin'
-            };
+// FIELD-LEVEL PERMISSIONS CONFIGURATION
+const FIELD_PERMISSIONS = {
+    admin: {
+        // Admins can see and edit most fields
+        visible: [
+            'participantNumber',
+            'personalInfo.firstName',
+            'personalInfo.lastName',
+            'personalInfo.dateOfBirth',
+            'personalInfo.address',
+            'personalInfo.capabilities',
+            'personalInfo.announcersNotes',
+            'personalInfo.photo',
+            'parentInfo.name',
+            'parentInfo.email',
+            'parentInfo.phone',
+            'parentInfo.parentId',
+            'parentInfo.grandparentsInfo.names',
+            'parentInfo.grandparentsInfo.phone',
+            'teamId',
+            'instructorId',
+            'vehicleIds',
+            'signedDeclaration',
+            'signedFormStatus',
+            'additionalComments',
+            'comments.organization',
+            'comments.teamLeader',
+            'comments.parent',
+            'comments.familyContact',
+            'createdAt',
+            'updatedAt'
+        ],
+        editable: [
+            'participantNumber',
+            'personalInfo.address',
+            'personalInfo.capabilities',
+            'personalInfo.announcersNotes',
+            'personalInfo.photo',
+            'parentInfo.name',
+            'parentInfo.phone',
+            'parentInfo.parentId',
+            'parentInfo.grandparentsInfo.names',
+            'parentInfo.grandparentsInfo.phone',
+            'teamId',
+            'instructorId',
+            'vehicleIds',
+            'signedDeclaration',
+            'signedFormStatus',
+            'additionalComments',
+            'comments.organization'
+        ],
+        hidden: [] // Admins can see everything
+    },
 
-        case 'parent':
-            return {
-                canCreate: false,
-                canEdit: false,
-                canDelete: false,
-                canViewAll: false,
-                canViewKid: (kid, userId) => kid.parentInfo?.parentId === userId,
-                canViewField: () => true,
-                canEditField: () => false,
-                role: 'parent'
-            };
+    instructor: {
+        // Team leaders can see kids assigned to them, edit purple fields
+        visible: [
+            'participantNumber',
+            'personalInfo.firstName',
+            'personalInfo.lastName',
+            'personalInfo.dateOfBirth',
+            'personalInfo.capabilities',
+            'personalInfo.announcersNotes',
+            'parentInfo.name',
+            'parentInfo.phone', // Can see parent contact for their kids
+            'teamId',
+            'instructorId',
+            'vehicleIds',
+            'signedFormStatus',
+            'additionalComments',
+            'comments.teamLeader',
+            'comments.organization',
+            'instructorsComments'
+        ],
+        editable: [
+            'personalInfo.capabilities',
+            'personalInfo.announcersNotes',
+            'comments.teamLeader',
+            'instructorsComments',
+            'vehicleIds'
+        ],
+        hidden: [
+            'parentInfo.email', // Red field - hidden from instructors
+            'parentInfo.parentId',
+            'parentInfo.grandparentsInfo',
+            'comments.parent',
+            'comments.familyContact',
+            'personalInfo.address' // Restricted access
+        ]
+    },
 
-        case 'instructor':
-            return {
-                canCreate: false,
-                canEdit: true,
-                canDelete: false,
-                canViewAll: false,
-                canViewKid: (kid, userData) => kid.instructorId === userData?.instructorId,
-                canViewField: () => true,
-                canEditField: () => true,
-                role: 'instructor'
-            };
+    parent: {
+        // Parents can see ALL details of their own kids only
+        visible: [
+            'participantNumber',
+            'personalInfo.firstName',
+            'personalInfo.lastName',
+            'personalInfo.dateOfBirth',
+            'personalInfo.address',
+            'personalInfo.capabilities',
+            'personalInfo.announcersNotes',
+            'personalInfo.photo',
+            'parentInfo.name',
+            'parentInfo.email',
+            'parentInfo.phone',
+            'parentInfo.grandparentsInfo.names',
+            'parentInfo.grandparentsInfo.phone',
+            'teamId',
+            'signedDeclaration',
+            'signedFormStatus',
+            'additionalComments',
+            'comments.parent'
+        ],
+        editable: [
+            'comments.parent' // Parents can only edit their own comments
+        ],
+        hidden: [
+            'parentInfo.parentId', // System field
+            'comments.organization', // Red field for parents
+            'comments.teamLeader',   // Red field for parents
+            'comments.familyContact', // Red field for parents
+            'instructorId',
+            'instructorsComments'
+        ]
+    },
 
-        case 'guest':
-        default:
-            return {
-                canCreate: false,
-                canEdit: false,
-                canDelete: false,
-                canViewAll: false,
-                canViewKid: () => false,
-                canViewField: () => false,
-                canEditField: () => false,
-                role: 'guest'
-            };
+    guest: {
+        // Temporary guests (kibbutz hosts) - can see only kids registered for events
+        visible: [
+            'participantNumber',
+            'personalInfo.firstName',
+            'personalInfo.lastName',
+            'personalInfo.capabilities',
+            'personalInfo.announcersNotes',
+            'teamId',
+            'signedFormStatus',
+            'additionalComments',
+            'comments.organization'
+        ],
+        editable: [
+            'comments.organization' // Guests can edit organization comments
+        ],
+        hidden: [
+            'personalInfo.dateOfBirth', // Red field for guests
+            'personalInfo.address',     // Red field for guests
+            'personalInfo.photo',       // Red field for guests
+            'parentInfo',              // Red field - all parent info hidden
+            'instructorId',
+            'vehicleIds',
+            'signedDeclaration',
+            'comments.parent',
+            'comments.teamLeader',
+            'comments.familyContact',
+            'instructorsComments'
+        ]
     }
+};
+
+// ENHANCED ROLE-BASED PERMISSIONS WITH FIELD-LEVEL SUPPORT
+const createRolePermissions = (userRole = 'guest') => {
+    const permissions = FIELD_PERMISSIONS[userRole] || FIELD_PERMISSIONS.guest;
+
+    // Helper function to check if user can access kid
+    const canViewKid = (kid, userData, user) => {
+        switch (userRole) {
+            case 'admin':
+                return true;
+            case 'parent':
+                return kid?.parentInfo?.parentId === user?.uid;
+            case 'instructor':
+                return kid?.instructorId === userData?.instructorId;
+            case 'guest':
+            default:
+                return false;
+        }
+    };
+
+    // Helper function to check if user can edit kid
+    const canEditKid = (kid, userData, user) => {
+        switch (userRole) {
+            case 'admin':
+                return true;
+            case 'instructor':
+                return kid?.instructorId === userData?.instructorId;
+            case 'parent':
+            case 'guest':
+            default:
+                return false;
+        }
+    };
+
+    return {
+        // Basic permissions
+        canCreate: userRole === 'admin',
+        canEdit: userRole === 'admin' || userRole === 'instructor',
+        canDelete: userRole === 'admin',
+        canViewAll: userRole === 'admin',
+
+        // Kid-level permissions
+        canViewKid,
+        canEditKid,
+
+        // Field-level permissions - THIS IS WHAT PROTECTEDFIELD EXPECTS
+        canViewField: (fieldPath, context = {}) => {
+            const { kidData, vehicleData } = context;
+
+            // First check if field is explicitly hidden
+            if (permissions.hidden.includes(fieldPath)) {
+                return false;
+            }
+
+            // Check if user can access this kid first
+            if (kidData && !canViewKid(kidData, context.userData, context.user)) {
+                return false;
+            }
+
+            // Check if field is in visible list
+            return permissions.visible.includes(fieldPath);
+        },
+
+        canEditField: (fieldPath, context = {}) => {
+            const { kidData, vehicleData } = context;
+
+            // Must be able to view field first
+            if (!permissions.visible.includes(fieldPath)) {
+                return false;
+            }
+
+            // Must be able to access this kid
+            if (kidData && !canEditKid(kidData, context.userData, context.user)) {
+                return false;
+            }
+
+            // Check if field is in editable list
+            return permissions.editable.includes(fieldPath);
+        },
+
+        // Utility functions
+        getVisibleFields: () => permissions.visible,
+        getEditableFields: () => permissions.editable,
+        getHiddenFields: () => permissions.hidden,
+
+        role: userRole
+    };
 };
 
 export const PermissionProvider = ({ children }) => {
