@@ -453,16 +453,18 @@ const EditKidPage = () => {
         <Dashboard requiredRole={userRole}>
             <div className={`admin-page add-kid-page ${appliedTheme}-mode`}>
                 {/* Page Title */}
+                <button onClick={handleCancel} className={`back-button ${appliedTheme}-back-button`}>
+                    <ArrowLeft className="btn-icon" size={20} />
+                    Back to Profile
+                </button>
                 <div className="page-header">
-                    <button onClick={handleCancel} className={`back-button ${appliedTheme}-back-button`}>
-                        <ArrowLeft className="btn-icon" size={20} />
-                        Back to Profile
-                    </button>
-                    <h1>
-                        <Edit size={32} className="page-title-icon" />
-                        Update Racing Star!
-                        <Sparkles size={24} className="sparkle-icon" />
-                    </h1>
+                    <div className="title-section">
+                        <h1>
+                            <Edit size={32} className="page-title-icon" />
+                            Update {formData.personalInfo.firstName}'s Info!
+                            <Sparkles size={24} className="sparkle-icon" />
+                        </h1>
+                    </div>
                 </div>
 
 

@@ -160,7 +160,7 @@ const ViewTeamPage = () => {
                     <div className="header-content">
                         <button
                             onClick={handleBack}
-                            className="back-button">
+                            className={`back-button ${appliedTheme}-back-button`}>
                             <ArrowLeft className="btn-icon" size={20} />
                             Back to Teams
                         </button>
@@ -295,59 +295,61 @@ const ViewTeamPage = () => {
                         </div>
 
                         {/* Team Leader & Instructors */}
-                        <div className="info-section instructors-section">
+                        <div className="info-section">
                             <div className="section-header">
                                 <Crown className="section-icon" size={24} />
                                 <h3>👨‍🏫 Racing Coaches</h3>
                             </div>
-
-                            {teamData.teamLeader && (
-                                <div className="team-leader-card">
-                                    <div className="leader-header">
-                                        <Crown className="leader-icon" size={20} />
-                                        <span className="leader-title">Team Leader</span>
-                                    </div>
-                                    <div className="leader-info">
-                                        <h4>{teamData.teamLeader.name}</h4>
-                                        {teamData.teamLeader.phone && (
-                                            <div className="contact-info">
-                                                <Phone size={14} />
-                                                {teamData.teamLeader.phone}
-                                            </div>
-                                        )}
-                                        {teamData.teamLeader.email && (
-                                            <div className="contact-info">
-                                                <Mail size={14} />
-                                                {teamData.teamLeader.email}
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            )}
-
-                            <div className="instructors-grid">
-                                {teamData.instructors?.length > 0 ? (
-                                    teamData.instructors.map(instructor => (
-                                        <div key={instructor.id} className="instructor-card">
-                                            <div className="instructor-header">
-                                                <User className="instructor-icon" size={18} />
-                                                <span className="instructor-name">{instructor.name}</span>
-                                            </div>
-                                            {instructor.phone && (
+                            <div className="instructors-section">
+                                {teamData.teamLeader && (
+                                    <div className="team-leader-card">
+                                        <div className="leader-header">
+                                            <Crown className="leader-icon" size={20} />
+                                            <span className="leader-title">Team Leader</span>
+                                        </div>
+                                        <div className="leader-info">
+                                            <h4>{teamData.teamLeader.name}</h4>
+                                            {teamData.teamLeader.phone && (
                                                 <div className="contact-info">
-                                                    <Phone size={12} />
-                                                    {instructor.phone}
+                                                    <Phone size={14} />
+                                                    {teamData.teamLeader.phone}
+                                                </div>
+                                            )}
+                                            {teamData.teamLeader.email && (
+                                                <div className="contact-info">
+                                                    <Mail size={14} />
+                                                    {teamData.teamLeader.email}
                                                 </div>
                                             )}
                                         </div>
-                                    ))
-                                ) : (
-                                    <div className="empty-state">
-                                        <User className="empty-icon" size={30} />
-                                        <p>No instructors assigned yet</p>
                                     </div>
                                 )}
+
+                                <div className="instructors-grid">
+                                    {teamData.instructors?.length > 0 ? (
+                                        teamData.instructors.map(instructor => (
+                                            <div key={instructor.id} className="instructor-card">
+                                                <div className="instructor-header">
+                                                    <User className="instructor-icon" size={18} />
+                                                    <span className="instructor-name">{instructor.name}</span>
+                                                </div>
+                                                {instructor.phone && (
+                                                    <div className="contact-info">
+                                                        <Phone size={12} />
+                                                        {instructor.phone}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="empty-state">
+                                            <User className="empty-icon" size={30} />
+                                            <p>No instructors assigned yet</p>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
+
                         </div>
 
                         {/* Team Racers */}

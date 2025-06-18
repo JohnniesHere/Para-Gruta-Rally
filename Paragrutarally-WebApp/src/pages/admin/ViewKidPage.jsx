@@ -223,7 +223,7 @@ const ViewKidPage = () => {
             <div className={`view-kid-page ${appliedTheme}-mode`}>
                 <div className="racing-header">
                     <div className="header-content">
-                        <button onClick={handleBack} className="back-button">
+                        <button onClick={handleBack} className={`back-button ${appliedTheme}-back-button`}>
                             <ArrowLeft className="btn-icon" size={20} />
                             Back to Kids
                         </button>

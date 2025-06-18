@@ -1,13 +1,13 @@
 // src/pages/admin/AddTeamPage.jsx - Updated for Global Theme System
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, {useState, useEffect} from 'react';
+import {useNavigate} from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
-import { useTheme } from '../../contexts/ThemeContext';
-import { usePermissions } from '../../hooks/usePermissions.jsx';
-import { addTeam } from '../../services/teamService';
-import { getAllKids } from '../../services/kidService';
-import { getDocs, collection, query, where } from 'firebase/firestore';
-import { db } from '../../firebase/config';
+import {useTheme} from '../../contexts/ThemeContext';
+import {usePermissions} from '../../hooks/usePermissions.jsx';
+import {addTeam} from '../../services/teamService';
+import {getAllKids} from '../../services/kidService';
+import {getDocs, collection, query, where} from 'firebase/firestore';
+import {db} from '../../firebase/config';
 import {
     IconUsers as UsersGroup,
     IconPlus as Plus,
@@ -27,8 +27,8 @@ import './AddTeamPage.css';
 
 const AddTeamPage = () => {
     const navigate = useNavigate();
-    const { isDarkMode, appliedTheme } = useTheme();
-    const { permissions, userRole } = usePermissions();
+    const {isDarkMode, appliedTheme} = useTheme();
+    const {permissions, userRole} = usePermissions();
 
     const [isLoading, setIsLoading] = useState(false);
     const [instructors, setInstructors] = useState([]);
@@ -70,7 +70,7 @@ const AddTeamPage = () => {
 
         } catch (error) {
             console.error('Error loading initial data:', error);
-            setErrors({ general: 'Failed to load form data. Please refresh and try again.' });
+            setErrors({general: 'Failed to load form data. Please refresh and try again.'});
         } finally {
             setIsLoading(false);
         }
@@ -149,7 +149,7 @@ const AddTeamPage = () => {
             });
         } catch (error) {
             console.error('Error adding team:', error);
-            setErrors({ general: 'Failed to add team. Please try again.' });
+            setErrors({general: 'Failed to add team. Please try again.'});
         } finally {
             setIsSubmitting(false);
         }
@@ -176,20 +176,21 @@ const AddTeamPage = () => {
         <Dashboard requiredRole={userRole}>
             <div className={`admin-page add-team-page ${appliedTheme}-mode`}>
                 {/* Page Title - Outside container */}
-                <div className="page-header">
-                    <button
-                        onClick={handleCancel}
-                        className={`back-button ${appliedTheme}-back-button`}>
-                        <ArrowLeft className="btn-icon" size={20} />
-                        Back to Teams
-                    </button>
-
-                    <h1>
-                        <UsersGroup size={32} className="page-title-icon" />
-                        Create Racing Team!
-                        <Trophy size={24} className="trophy-icon" />
-                    </h1>
-                </div>
+                <button
+                    onClick={handleCancel}
+                    className={`back-button ${appliedTheme}-back-button`}>
+                    <ArrowLeft className="btn-icon" size={20}/>
+                    Back to Teams
+                </button>
+                    <div className="page-header">
+                        <div className="title-section">
+                            <h1>
+                                <UsersGroup size={32} className="page-title-icon"/>
+                                Create A Team!
+                                <Trophy size={24} className="trophy-icon"/>
+                            </h1>
+                        </div>
+                    </div>
 
 
                 {/* Main Container */}
@@ -206,7 +207,7 @@ const AddTeamPage = () => {
 
                     {errors.general && (
                         <div className="alert error-alert">
-                            <AlertTriangle size={20} />
+                            <AlertTriangle size={20}/>
                             {errors.general}
                         </div>
                     )}
@@ -215,14 +216,14 @@ const AddTeamPage = () => {
                         {/* Team Info Section */}
                         <div className="form-section team-info-section">
                             <div className="section-header">
-                                <Trophy className="section-icon" size={24} />
+                                <Trophy className="section-icon" size={24}/>
                                 <h2>🏎️ Team Identity</h2>
                             </div>
                             <div className="form-grid">
                                 <div className="form-group">
                                     <div className="field-wrapper">
                                         <label className="form-label">
-                                            <Target className="label-icon" size={16} />
+                                            <Target className="label-icon" size={16}/>
                                             Team Name *
                                         </label>
                                         <input
@@ -239,7 +240,7 @@ const AddTeamPage = () => {
                                 <div className="form-group">
                                     <div className="field-wrapper">
                                         <label className="form-label">
-                                            <Users className="label-icon" size={16} />
+                                            <Users className="label-icon" size={16}/>
                                             Max Racers
                                         </label>
                                         <input
@@ -257,7 +258,7 @@ const AddTeamPage = () => {
                                 <div className="form-group full-width">
                                     <div className="field-wrapper">
                                         <label className="form-label">
-                                            <FileText className="label-icon" size={16} />
+                                            <FileText className="label-icon" size={16}/>
                                             Team Description
                                         </label>
                                         <textarea
@@ -273,7 +274,7 @@ const AddTeamPage = () => {
                                 <div className="form-group">
                                     <div className="field-wrapper">
                                         <label className="form-label">
-                                            <Check className="label-icon" size={16} />
+                                            <Check className="label-icon" size={16}/>
                                             Team Status
                                         </label>
                                         <select
@@ -292,13 +293,13 @@ const AddTeamPage = () => {
                         {/* Instructors Section */}
                         <div className="form-section instructors-section">
                             <div className="section-header">
-                                <User className="section-icon" size={24} />
+                                <User className="section-icon" size={24}/>
                                 <h2>👨‍🏫 Racing Instructors</h2>
                             </div>
                             <div className="instructors-grid">
                                 {instructors.length === 0 ? (
                                     <div className="empty-state">
-                                        <User className="empty-icon" size={40} />
+                                        <User className="empty-icon" size={40}/>
                                         <p>No instructors available. Add some instructors first!</p>
                                     </div>
                                 ) : (
@@ -309,10 +310,10 @@ const AddTeamPage = () => {
                                             onClick={() => handleInstructorToggle(instructor.id)}
                                         >
                                             <div className="card-header">
-                                                <User className="card-icon" size={20} />
+                                                <User className="card-icon" size={20}/>
                                                 <span className="instructor-name card-title">{instructor.name}</span>
                                                 {formData.instructorIds.includes(instructor.id) && (
-                                                    <Check className="selected-icon" size={16} />
+                                                    <Check className="selected-icon" size={16}/>
                                                 )}
                                             </div>
                                             {instructor.phone && (
@@ -329,7 +330,7 @@ const AddTeamPage = () => {
                                 <div className="team-leader-section">
                                     <div className="field-wrapper">
                                         <label className="form-label">
-                                            <Trophy className="label-icon" size={16} />
+                                            <Trophy className="label-icon" size={16}/>
                                             Team Leader
                                         </label>
                                         <select
@@ -355,13 +356,13 @@ const AddTeamPage = () => {
                         {/* Kids Assignment Section */}
                         <div className="form-section kids-section">
                             <div className="section-header">
-                                <Baby className="section-icon" size={24} />
+                                <Baby className="section-icon" size={24}/>
                                 <h2>🏎️ Team Racers ({formData.kidIds.length}/{formData.maxCapacity})</h2>
                             </div>
 
                             {errors.kidIds && (
                                 <div className="capacity-warning">
-                                    <AlertTriangle size={16} />
+                                    <AlertTriangle size={16}/>
                                     {errors.kidIds}
                                 </div>
                             )}
@@ -369,7 +370,7 @@ const AddTeamPage = () => {
                             <div className="kids-grid">
                                 {availableKids.length === 0 ? (
                                     <div className="empty-state">
-                                        <Baby className="empty-icon" size={40} />
+                                        <Baby className="empty-icon" size={40}/>
                                         <p>All kids are already assigned to teams! 🎉</p>
                                         <small>Add more kids or check existing team assignments.</small>
                                     </div>
@@ -381,12 +382,12 @@ const AddTeamPage = () => {
                                             onClick={() => handleKidToggle(kid.id)}
                                         >
                                             <div className="card-header">
-                                                <Baby className="card-icon" size={20} />
+                                                <Baby className="card-icon" size={20}/>
                                                 <span className="kid-name card-title">
                                                     {kid.personalInfo?.firstName || 'Unknown'} {kid.personalInfo?.lastName || ''}
                                                 </span>
                                                 {formData.kidIds.includes(kid.id) && (
-                                                    <Check className="selected-icon" size={16} />
+                                                    <Check className="selected-icon" size={16}/>
                                                 )}
                                             </div>
                                             <div className="kid-details card-body">
@@ -404,14 +405,14 @@ const AddTeamPage = () => {
                         {/* Additional Notes */}
                         <div className="form-section notes-section">
                             <div className="section-header">
-                                <FileText className="section-icon" size={24} />
+                                <FileText className="section-icon" size={24}/>
                                 <h2>📝 Team Notes</h2>
                             </div>
                             <div className="form-grid">
                                 <div className="form-group full-width">
                                     <div className="field-wrapper">
                                         <label className="form-label">
-                                            <Sparkles className="label-icon" size={16} />
+                                            <Sparkles className="label-icon" size={16}/>
                                             Special Notes & Strategy
                                         </label>
                                         <textarea
@@ -429,7 +430,7 @@ const AddTeamPage = () => {
                         {/* Racing Action Buttons */}
                         <div className="racing-actions">
                             <button type="button" onClick={handleCancel} className="btn btn-cancel">
-                                <ArrowLeft className="btn-icon" size={18} />
+                                <ArrowLeft className="btn-icon" size={18}/>
                                 Cancel
                             </button>
                             <button
@@ -444,7 +445,7 @@ const AddTeamPage = () => {
                                     </>
                                 ) : (
                                     <>
-                                        <Plus className="btn-icon" size={18} />
+                                        <Plus className="btn-icon" size={18}/>
                                         Create Racing Team! 🏁
                                     </>
                                 )}

@@ -155,7 +155,7 @@
     --bg-quaternary: #404040;
 
     /* Text Colors */
-    --text-primary: #f0f0f0;
+    --text-primary: rgb(251, 251, 251);
     --text-secondary: #c0c0c0;
     --text-tertiary: #a0a0a0;
     --text-muted: #808080;
@@ -173,13 +173,13 @@
     --success-light: rgba(81, 207, 102, 0.15);
     --warning-color: #ffd43b;
     --warning-hover: #fcc419;
-    --warning-light: rgba(255, 212, 59, 0.15);
+    --warning-light: rgb(237, 234, 172);
     --error-color: #ff6b6b;
     --error-hover: #fa5252;
     --error-light: rgba(255, 107, 107, 0.15);
     --info-color: #4dabf7;
     --info-hover: #339af0;
-    --info-light: rgba(77, 171, 247, 0.15);
+    --info-light: rgb(116, 173, 237);
 
     /* Border Colors */
     --border-color: #404040;

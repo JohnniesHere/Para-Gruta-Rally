@@ -116,7 +116,7 @@ const UsersTable = ({ users, isLoading, onUpdateUser }) => {
     // Get sort indicator for column headers
     const getSortIndicator = (columnKey) => {
         if (sortConfig.key !== columnKey) {
-            return ' ↕️'; // Default indicator
+            return ' ↕'; // Default indicator
         }
         return sortConfig.direction === 'asc' ? ' ↑' : ' ↓';
     };

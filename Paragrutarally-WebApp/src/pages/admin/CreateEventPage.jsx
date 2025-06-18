@@ -241,19 +241,20 @@ const CreateEventPage = () => {
         <Dashboard>
             <div className={`create-event-page admin-page ${appliedTheme}-mode`}>
                 {/* Header */}
+                <button
+                    onClick={() => navigate('/admin/events')}
+                    className={`back-button ${appliedTheme}-back-button`}
+                >
+                    <ArrowLeft size={20} />
+                    Back to Events
+                </button>
                 <div className="page-header">
-                    <button
-                        onClick={() => navigate('/admin/events')}
-                        className={`back-button ${appliedTheme}-back-button`}
-                    >
-                        <ArrowLeft size={20} />
-                        Back to Events
-                    </button>
-
-                    <h1 className="page-title">
-                        <Trophy size={32} className="page-title-icon" />
-                        Create Racing Event
-                    </h1>
+                    <div className="title-section">
+                        <h1 className="page-title">
+                            <Trophy size={32} className="page-title-icon" />
+                            Create Racing Event
+                        </h1>
+                    </div>
                 </div>
 
                 <div className="admin-container create-event-container">

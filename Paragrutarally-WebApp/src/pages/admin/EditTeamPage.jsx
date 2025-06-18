@@ -228,7 +228,7 @@ const EditTeamPage = () => {
                     <div className="header-content">
                         <button
                             onClick={handleCancel}
-                            className={`back-button ${appliedTheme}-back-button`}>>
+                            className={`back-button ${appliedTheme}-back-button`}>
                             <ArrowLeft className="btn-icon" size={20} />
                             Back to Teams
                         </button>
@@ -238,7 +238,7 @@ const EditTeamPage = () => {
                                 Update Racing Team!
                                 <Trophy size={24} className="trophy-icon" />
                             </h1>
-                            <p className="subtitle">Keep the racing squad in top form! 🏁</p>
+                            <p className="subtitle">Here you can update the team {formData.name} 🏁</p>
                         </div>
                     </div>
                 </div>
@@ -252,7 +252,7 @@ const EditTeamPage = () => {
                     )}
 
                     {!hasChanges() && (
-                        <div className="info-alert">
+                        <div className="alert info-alert">
                             <Check size={20} />
                             You're viewing Team {formData.name}'s current information. Make changes below to update! 🏎️
                         </div>

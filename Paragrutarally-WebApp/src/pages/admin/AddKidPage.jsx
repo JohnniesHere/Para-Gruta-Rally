@@ -406,18 +406,20 @@ const AddKidPage = () => {
         <Dashboard requiredRole={userRole}>
             <div className={`admin-page add-kid-page ${appliedTheme}-mode`}>
                 {/* Page Title - Outside container */}
-                <div className="page-header">
                 <button
                     onClick={handleCancel}
                     className={`back-button ${appliedTheme}-back-button`}>
                     <ArrowLeft className="btn-icon" size={20} />
                     Back to Kids
                 </button>
-                <h1>
-                    <Baby size={32} className="page-title-icon" />
-                    Add A New Kid
-                    <Sparkles size={24} className="sparkle-icon" />
-                </h1>
+                <div className="page-header">
+                    <div className="title-section">
+                        <h1>
+                            <Baby size={32} className="page-title-icon" />
+                            Add A New Kid
+                            <Sparkles size={24} className="sparkle-icon" />
+                        </h1>
+                    </div>
                 </div>
                 {/* Main Container */}
                 <div className="admin-container add-kid-container">
