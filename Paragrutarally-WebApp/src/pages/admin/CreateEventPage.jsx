@@ -253,7 +253,6 @@ const CreateEventPage = () => {
                     <h1 className="page-title">
                         <Trophy size={32} className="page-title-icon" />
                         Create Racing Event
-                        <Sparkles size={24} className="sparkle-icon" />
                     </h1>
                 </div>
 

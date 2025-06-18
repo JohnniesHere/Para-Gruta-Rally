@@ -16,6 +16,134 @@
 }
 
 /* ========================================
+   RACING HEADER DARK MODE FIXES
+   ======================================== */
+
+/* Racing header text color fixes for dark mode */
+.racing-header .title-section h2 {
+    color: #2D3748; /* Dark text for light background */
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    font-weight: 700;
+    text-align: center; /* CENTER THE HEADER */
+}
+
+.racing-header .subtitle {
+    color: #4B5563; /* Darker gray for better contrast */
+    font-weight: 600;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+    text-align: center; /* CENTER THE SUBTITLE */
+}
+
+/* Dark mode overrides for racing header text */
+[data-theme="dark"] .racing-header .title-section h2,
+.dark-mode .racing-header .title-section h2,
+.dark .racing-header .title-section h2 {
+    color: #2D3748 !important; /* Keep dark text even in dark mode */
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .racing-header .subtitle,
+.dark-mode .racing-header .subtitle,
+.dark .racing-header .subtitle {
+    color: #374151 !important; /* Darker gray for dark mode */
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+}
+
+/* ========================================
+   BUTTON TEXT COLOR FIXES
+   ======================================== */
+
+/* CREATE TEAM button text fix - Apply to all primary buttons on this page */
+.add-team-page .btn-primary,
+.add-team-page .btn-submit.racing-submit {
+    color: #2D3748 !important; /* Dark text for better contrast on yellow */
+    font-weight: 700;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+/* Ensure button text stays dark in all modes */
+[data-theme="dark"] .add-team-page .btn-primary,
+.dark-mode .add-team-page .btn-primary,
+.dark .add-team-page .btn-primary,
+[data-theme="dark"] .add-team-page .btn-submit.racing-submit,
+.dark-mode .add-team-page .btn-submit.racing-submit,
+.dark .add-team-page .btn-submit.racing-submit {
+    color: #2D3748 !important;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+/* Fix for button icons to be visible */
+.add-team-page .btn-primary svg,
+.add-team-page .btn-submit.racing-submit svg {
+    color: #2D3748 !important;
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.1));
+}
+
+/* ========================================
+   BACK BUTTON FIXES
+   ======================================== */
+
+/* Back button text color fixes */
+.add-team-page .back-button {
+    color: #2D3748 !important; /* Dark text for visibility */
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+/* Ensure back button text stays dark in all modes */
+[data-theme="dark"] .add-team-page .back-button,
+.dark-mode .add-team-page .back-button,
+.dark .add-team-page .back-button {
+    color: #2D3748 !important;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+/* Back button icon color fix */
+.add-team-page .back-button svg {
+    color: #2D3748 !important;
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.1));
+}
+
+/* ========================================
+   DARK MODE BACK BUTTON FIX
+   ======================================== */
+
+/* Dark mode back button fix */
+.back-button.dark-back-button {
+    background: #374151;
+    color: #f9fafb;
+    border: 1px solid #4b5563;
+}
+
+.back-button.dark-back-button:hover {
+    background: #4b5563;
+    color: #ffffff;
+    border-color: #6b7280;
+}
+
+/* Light mode back button (default) */
+.back-button {
+    background: #f8fafc;
+    color: #334155;
+    border: 1px solid #e2e8f0;
+    padding: 8px 16px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.back-button:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+    border-color: #cbd5e1;
+}
+
+/* ========================================
    TEAM SECTION SPECIFIC COLORS
    ======================================== */
 

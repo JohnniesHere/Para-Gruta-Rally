@@ -24,7 +24,7 @@ import {
     IconTarget as Target,
     IconEdit as Edit
 } from '@tabler/icons-react';
-import './AddTeamPage.css'; // Reuse the same CSS
+import './EditTeamPage.css'; // Reuse the same CSS
 
 const EditTeamPage = () => {
     const navigate = useNavigate();
@@ -226,7 +226,9 @@ const EditTeamPage = () => {
                 {/* Racing Theme Header */}
                 <div className="racing-header">
                     <div className="header-content">
-                        <button onClick={handleCancel} className="back-button">
+                        <button
+                            onClick={handleCancel}
+                            className={`back-button ${appliedTheme}-back-button`}>>
                             <ArrowLeft className="btn-icon" size={20} />
                             Back to Teams
                         </button>

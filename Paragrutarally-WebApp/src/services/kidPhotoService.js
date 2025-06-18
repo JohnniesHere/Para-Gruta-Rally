@@ -89,7 +89,7 @@ export const deleteKidPhoto = async (kidId, photoUrl) => {
         const filename = decodeURIComponent(encodedFilename.split('?')[0]);
 
         // Create storage reference
-        const photoRef = ref(storage, `kidsPFP/${filename}`);
+        const photoRef = ref(storage, `${filename}`);
 
         // Delete file from storage
         await deleteObject(photoRef);
