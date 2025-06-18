@@ -1,4 +1,4 @@
-// src/pages/admin/AdminDashboardPage.jsx - Fixed to use Firestore data like EventManagementPage
+// src/pages/admin/AdminDashboardPage.jsx - Enhanced with Vehicle Statistics
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { collection, getDocs, query, orderBy, where } from 'firebase/firestore';
@@ -6,11 +6,13 @@ import { db } from '../../firebase/config';
 import Dashboard from '../../components/layout/Dashboard';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { getVehicleStats } from '../../services/vehicleService'; // ADDED: Vehicle service
 import {
     IconUsers as Users,
     IconCalendarEvent as Calendar,
     IconUserCircle as Kids,
-    IconUsersGroup as Teams
+    IconUsersGroup as Teams,
+    IconCar // ADDED: Vehicle icon
 } from '@tabler/icons-react';
 import './AdminDashboardPage.css';
 
@@ -23,7 +25,12 @@ const AdminDashboardPage = () => {
             totalUsers: 0,
             totalKids: 0,
             activeTeams: 0,
-            upcomingEventsCount: 0
+            upcomingEventsCount: 0,
+            // ADDED: Vehicle statistics
+            totalVehicles: 0,
+            activeVehicles: 0,
+            vehiclesInUse: 0,
+            availableVehicles: 0
         },
         upcomingEvents: [],
         recentActivities: []
@@ -46,6 +53,11 @@ const AdminDashboardPage = () => {
 
     const handleNavigateToTeams = () => {
         navigate('/admin/teams');
+    };
+
+    // ADDED: Navigation handler for vehicles
+    const handleNavigateToVehicles = () => {
+        navigate('/admin/vehicles');
     };
 
     // Format time ago utility
@@ -89,7 +101,12 @@ const AdminDashboardPage = () => {
                     totalUsers: 0,
                     totalKids: 0,
                     activeTeams: 0,
-                    upcomingEventsCount: 0
+                    upcomingEventsCount: 0,
+                    // ADDED: Vehicle statistics
+                    totalVehicles: 0,
+                    activeVehicles: 0,
+                    vehiclesInUse: 0,
+                    availableVehicles: 0
                 },
                 upcomingEvents: [],
                 recentActivities: []
@@ -159,6 +176,23 @@ const AdminDashboardPage = () => {
                 console.warn('Could not fetch teams:', teamError);
                 // Use mock data if teams collection doesn't exist
                 data.stats.activeTeams = 2;
+            }
+
+            // ADDED: Fetch vehicles
+            try {
+                const vehicleStats = await getVehicleStats();
+                console.log('✅ Vehicle stats loaded:', vehicleStats);
+                data.stats.totalVehicles = vehicleStats.total;
+                data.stats.activeVehicles = vehicleStats.active;
+                data.stats.vehiclesInUse = vehicleStats.inUse;
+                data.stats.availableVehicles = vehicleStats.available;
+            } catch (vehicleError) {
+                console.warn('Could not fetch vehicles:', vehicleError);
+                // Use mock data if vehicles collection doesn't exist or fails
+                data.stats.totalVehicles = 0;
+                data.stats.activeVehicles = 0;
+                data.stats.vehiclesInUse = 0;
+                data.stats.availableVehicles = 0;
             }
 
             // Generate recent activities based on actual data
@@ -283,7 +317,7 @@ const AdminDashboardPage = () => {
 
                 {/* Main Container */}
                 <div className="admin-container">
-                    {/* Stats Grid */}
+                    {/* Stats Grid - ENHANCED with 5 cards */}
                     <div className="stats-grid dashboard-stats">
                         <div
                             className={`stat-card total clickable ${isLoading ? 'loading' : ''}`}
@@ -366,6 +400,30 @@ const AdminDashboardPage = () => {
                                     )}
                                 </div>
                                 <div className="stat-subtitle">Racing Ready</div>
+                            </div>
+                        </div>
+
+                        {/* ADDED: Racing Vehicles Card */}
+                        <div
+                            className={`stat-card vehicles clickable ${isLoading ? 'loading' : ''}`}
+                            onClick={handleNavigateToVehicles}
+                            role="button"
+                            tabIndex={0}
+                            onKeyDown={(e) => e.key === 'Enter' && handleNavigateToVehicles()}
+                        >
+                            <IconCar className="stat-icon" size={40} />
+                            <div className="stat-content">
+                                <h3>Racing Vehicles</h3>
+                                <div className="stat-value">
+                                    {isLoading ? (
+                                        <div className="loading-skeleton">--</div>
+                                    ) : (
+                                        dashboardData.stats.totalVehicles
+                                    )}
+                                </div>
+                                <div className="stat-subtitle">
+                                    {dashboardData.stats.availableVehicles} Available
+                                </div>
                             </div>
                         </div>
                     </div>

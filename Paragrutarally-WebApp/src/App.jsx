@@ -22,6 +22,12 @@ import InstructorDashboardPage from './pages/instructor/InstructorDashboardPage'
 import HostDashboardPage from './pages/host/HostDashboardPage';
 import MyAccountPage from './pages/shared/MyAccountPage';
 
+// Import vehicle management components
+import VehiclesPage from './pages/admin/VehiclesPage';
+import ViewVehiclePage from './pages/admin/ViewVehiclePage';
+import AddVehiclePage from './pages/admin/AddVehiclePage';
+import EditVehiclePage from './pages/admin/EditVehiclePage';
+
 // Import new management components
 import KidsManagementPage from './pages/admin/KidsManagementPage';
 import TeamsManagementPage from './pages/admin/TeamsManagementPage';
@@ -231,6 +237,50 @@ function App() {
                                             }
                                         />
 
+                                        {/* ========================================
+                                           VEHICLES MANAGEMENT ROUTES - NEW
+                                           ======================================== */}
+
+                                        {/* Main vehicles page - accessible to admin, instructor, parent */}
+                                        <Route
+                                            path="/admin/vehicles"
+                                            element={
+                                                <ProtectedRoute>
+                                                    <VehiclesPage />
+                                                </ProtectedRoute>
+                                            }
+                                        />
+
+                                        {/* View vehicle details - accessible to admin, instructor, parent */}
+                                        <Route
+                                            path="/admin/vehicles/view/:id"
+                                            element={
+                                                <ProtectedRoute>
+                                                    <ViewVehiclePage />
+                                                </ProtectedRoute>
+                                            }
+                                        />
+
+                                        {/* Add new vehicle - admin and instructor only */}
+                                        <Route
+                                            path="/admin/vehicles/add"
+                                            element={
+                                                <ProtectedRoute>
+                                                    <AddVehiclePage />
+                                                </ProtectedRoute>
+                                            }
+                                        />
+
+                                        {/* Edit vehicle - admin and instructor only */}
+                                        <Route
+                                            path="/admin/vehicles/edit/:id"
+                                            element={
+                                                <ProtectedRoute>
+                                                    <EditVehiclePage />
+                                                </ProtectedRoute>
+                                            }
+                                        />
+
                                         <Route
                                             path="/admin/forms"
                                             element={
@@ -273,6 +323,16 @@ function App() {
                                             element={
                                                 <ProtectedRoute requiredRole="instructor">
                                                     <InstructorDashboardPage />
+                                                </ProtectedRoute>
+                                            }
+                                        />
+
+                                        {/* ALTERNATIVE: Instructor-specific vehicle routes (if you want separate URLs) */}
+                                        <Route
+                                            path="/instructor/vehicles"
+                                            element={
+                                                <ProtectedRoute requiredRole="instructor">
+                                                    <VehiclesPage />
                                                 </ProtectedRoute>
                                             }
                                         />

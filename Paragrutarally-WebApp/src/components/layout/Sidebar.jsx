@@ -1,4 +1,4 @@
-// src/components/layout/Sidebar.jsx - Beautiful Tabler Icons
+// src/components/layout/Sidebar.jsx - Beautiful Tabler Icons with Vehicles Added
 import React from 'react';
 import {NavLink} from 'react-router-dom';
 import {
@@ -7,6 +7,7 @@ import {
     IconUsers as Users,
     IconUserCircle as Baby,
     IconUsersGroup as UserGroup,
+    IconCar as Car,  // ADDED: Import Car icon for Vehicles
     IconFileText as FileText,
     IconRefresh as RefreshCw,
     IconDownload as Download,
@@ -56,6 +57,14 @@ const Sidebar = ({userRole}) => {
                         >
                             <UserGroup className="sidebar-icon" size={20}/>
                             Teams
+                        </NavLink>
+                        {/* ADDED: Vehicles menu item for Admin */}
+                        <NavLink
+                            to="/admin/vehicles"
+                            className={({isActive}) => isActive ? 'active' : ''}
+                        >
+                            <Car className="sidebar-icon" size={20}/>
+                            Vehicles
                         </NavLink>
                         <NavLink
                             to="/admin/forms"
@@ -112,6 +121,14 @@ const Sidebar = ({userRole}) => {
                         >
                             <UserGroup className="sidebar-icon" size={20}/>
                             Teams
+                        </NavLink>
+                        {/* ADDED: Vehicles menu item for Instructor */}
+                        <NavLink
+                            to="/admin/vehicles"
+                            className={({isActive}) => isActive ? 'active' : ''}
+                        >
+                            <Car className="sidebar-icon" size={20}/>
+                            Vehicles
                         </NavLink>
                         <NavLink
                             to="/gallery"

@@ -1,0 +1,430 @@
+/* src/pages/admin/ViewVehiclePage.css - Individual Vehicle View Styling */
+@import url('./../../styles/global.css');
+
+/* ========================================
+   VIEW VEHICLE PAGE SPECIFIC STYLES
+   ======================================== */
+
+.view-vehicle-page {
+    /* Inherits from .admin-page in global.css */
+}
+
+/* ========================================
+   VEHICLE DETAILS GRID
+   ======================================== */
+
+.vehicle-details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+    align-items: start;
+}
+
+/* Vehicle Photo Section */
+.vehicle-photo-section {
+    grid-column: span 1;
+    border: 3px solid var(--racing-blue);
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(59, 130, 246, 0.1) 100%);
+}
+
+.vehicle-photo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.vehicle-photo-large {
+    width: 100%;
+    max-width: 300px;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 15px;
+    border: 3px solid var(--racing-gold);
+    box-shadow: 0 8px 25px rgba(255, 215, 0, 0.3);
+}
+
+.vehicle-photo-placeholder-large {
+    width: 100%;
+    max-width: 300px;
+    height: 200px;
+    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-quaternary) 100%);
+    border: 3px dashed var(--racing-gold);
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    gap: 10px;
+}
+
+.vehicle-photo-placeholder-large p {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* Status Information */
+.status-section {
+    grid-column: span 1;
+    border: 3px solid var(--racing-green);
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(16, 185, 129, 0.1) 100%);
+}
+
+.status-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.status-card {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 20px;
+    border-radius: 15px;
+    border: 2px solid;
+    transition: all 0.3s ease;
+}
+
+.status-card.status-available {
+    background: linear-gradient(135deg, var(--success-light) 0%, #D1FAE5 100%);
+    border-color: var(--success-color);
+    color: #065F46;
+}
+
+.status-card.status-in-use {
+    background: linear-gradient(135deg, var(--warning-light) 0%, #FDE68A 100%);
+    border-color: var(--warning-color);
+    color: #92400E;
+}
+
+.status-card.status-inactive {
+    background: linear-gradient(135deg, var(--error-light) 0%, #FEE2E2 100%);
+    border-color: var(--error-color);
+    color: #991B1B;
+}
+
+.status-card.battery-good {
+    background: linear-gradient(135deg, var(--success-light) 0%, #D1FAE5 100%);
+    border-color: var(--success-color);
+    color: #065F46;
+}
+
+.status-card.battery-aging {
+    background: linear-gradient(135deg, var(--warning-light) 0%, #FDE68A 100%);
+    border-color: var(--warning-color);
+    color: #92400E;
+}
+
+.status-card.battery-old,
+.status-card.battery-error {
+    background: linear-gradient(135deg, var(--error-light) 0%, #FEE2E2 100%);
+    border-color: var(--error-color);
+    color: #991B1B;
+}
+
+.status-card.battery-unknown {
+    background: linear-gradient(135deg, var(--info-light) 0%, #DBEAFE 100%);
+    border-color: var(--info-color);
+    color: #1E40AF;
+}
+
+.status-content h3 {
+    margin: 0 0 5px 0;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.status-content p {
+    margin: 0;
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+/* Information Grids */
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.info-item.full-width {
+    grid-column: 1 / -1;
+}
+
+.info-item label {
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.info-item span,
+.info-item p {
+    color: var(--text-primary);
+    font-weight: 500;
+    font-size: 14px;
+    margin: 0;
+    padding: 8px 12px;
+    background: var(--bg-tertiary);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+/* Assignment Section */
+.assignment-section {
+    grid-column: span 2;
+    border: 3px solid var(--racing-orange);
+    background: linear-gradient(135deg, rgba(255, 165, 0, 0.05) 0%, rgba(255, 165, 0, 0.1) 100%);
+}
+
+.assignment-content {
+    padding: 20px;
+}
+
+.current-assignment {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 20px;
+    background: linear-gradient(135deg, var(--success-light) 0%, #D1FAE5 100%);
+    border: 2px solid var(--success-color);
+    border-radius: 15px;
+}
+
+.kid-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex: 1;
+}
+
+.kid-details h4 {
+    margin: 0 0 5px 0;
+    color: #065F46;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.kid-details p {
+    margin: 0 0 10px 0;
+    color: #047857;
+    font-size: 14px;
+}
+
+.no-assignment {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-muted);
+}
+
+.no-assignment-icon {
+    margin-bottom: 15px;
+    opacity: 0.6;
+}
+
+.no-assignment h4 {
+    margin: 0 0 10px 0;
+    color: var(--text-primary);
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.no-assignment p {
+    margin: 0;
+    font-size: 14px;
+}
+
+.assignment-error {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 20px;
+    background: linear-gradient(135deg, var(--error-light) 0%, #FEE2E2 100%);
+    border: 2px solid var(--error-color);
+    border-radius: 15px;
+    color: #991B1B;
+}
+
+.assignment-error p {
+    margin: 0;
+    font-size: 14px;
+}
+
+/* Other Sections */
+.basic-info-section {
+    border: 3px solid var(--racing-gold);
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.05) 0%, rgba(255, 215, 0, 0.1) 100%);
+}
+
+.technical-section {
+    border: 3px solid var(--racing-purple);
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(139, 92, 246, 0.1) 100%);
+}
+
+.notes-section,
+.history-section {
+    grid-column: span 2;
+    border: 3px solid var(--racing-pink);
+    background: linear-gradient(135deg, rgba(236, 72, 153, 0.05) 0%, rgba(236, 72, 153, 0.1) 100%);
+}
+
+.timestamps-section {
+    grid-column: span 2;
+    border: 3px solid var(--text-muted);
+    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-quaternary) 100%);
+}
+
+/* Section Icons */
+.vehicle-photo-section .section-icon {
+    color: var(--racing-blue);
+    background: rgba(59, 130, 246, 0.1);
+    border-color: var(--racing-blue);
+}
+
+.status-section .section-icon {
+    color: var(--racing-green);
+    background: rgba(16, 185, 129, 0.1);
+    border-color: var(--racing-green);
+}
+
+.basic-info-section .section-icon {
+    color: var(--racing-gold);
+    background: rgba(255, 215, 0, 0.1);
+    border-color: var(--racing-gold);
+}
+
+.technical-section .section-icon {
+    color: var(--racing-purple);
+    background: rgba(139, 92, 246, 0.1);
+    border-color: var(--racing-purple);
+}
+
+.assignment-section .section-icon {
+    color: var(--racing-orange);
+    background: rgba(255, 165, 0, 0.1);
+    border-color: var(--racing-orange);
+}
+
+/* Notes and History */
+.notes-content,
+.history-content {
+    padding: 20px;
+}
+
+.history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.history-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: var(--bg-tertiary);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.history-item span {
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+
+@media (max-width: 768px) {
+    .vehicle-details-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .vehicle-photo-section,
+    .status-section,
+    .assignment-section,
+    .notes-section,
+    .history-section,
+    .timestamps-section {
+        grid-column: span 1;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .vehicle-photo-large,
+    .vehicle-photo-placeholder-large {
+        max-width: 250px;
+        height: 150px;
+    }
+
+    .status-grid {
+        gap: 12px;
+    }
+
+    .status-card {
+        padding: 15px;
+    }
+
+    .current-assignment {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .kid-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .vehicle-details-grid {
+        gap: 15px;
+    }
+
+    .vehicle-photo-large,
+    .vehicle-photo-placeholder-large {
+        max-width: 200px;
+        height: 120px;
+    }
+
+    .status-card {
+        padding: 12px;
+        gap: 12px;
+    }
+
+    .status-content h3 {
+        font-size: 14px;
+    }
+
+    .status-content p {
+        font-size: 12px;
+    }
+
+    .info-item span,
+    .info-item p {
+        padding: 6px 10px;
+        font-size: 13px;
+    }
+}

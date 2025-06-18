@@ -1,0 +1,484 @@
+// src/pages/admin/ViewVehiclePage.jsx - Individual Vehicle Details with Permissions
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import Dashboard from '../../components/layout/Dashboard';
+import { useTheme } from '../../contexts/ThemeContext';
+import { usePermissions } from '../../hooks/usePermissions.jsx';
+import { getVehicleById, assignVehicleToKid, unassignVehicle } from '../../services/vehicleService';
+import { getKidById } from '../../services/kidService';
+import {
+    IconCar as Car,
+    IconArrowLeft as ArrowLeft,
+    IconEdit as Edit,
+    IconBattery as Battery,
+    IconEngine as Engine,
+    IconSteeringWheel as Steering,
+    IconUser as User,
+    IconUsers as Users,
+    IconCalendar as Calendar,
+    IconPhoto as Photo,
+    IconAlertTriangle as AlertTriangle,
+    IconSettings as Settings,
+    IconClock as Clock,
+    IconMapPin as MapPin,
+    IconFileText as FileText,
+    IconHistory as History,
+    IconTool as Tool,
+    IconCircle as CheckCircle,
+    IconCircle as XCircle,
+    IconInfoCircle as InfoCircle
+} from '@tabler/icons-react';
+import './ViewVehiclePage.css';
+
+const ViewVehiclePage = () => {
+    const navigate = useNavigate();
+    const { id } = useParams();
+    const location = useLocation();
+    const { appliedTheme } = useTheme();
+    const { permissions, userRole, userData } = usePermissions();
+
+    const [vehicle, setVehicle] = useState(null);
+    const [currentKid, setCurrentKid] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [successMessage, setSuccessMessage] = useState('');
+
+    useEffect(() => {
+        if (location.state?.message) {
+            setSuccessMessage(location.state.message);
+        }
+        loadVehicleData();
+    }, [id]);
+
+    const loadVehicleData = async () => {
+        try {
+            setIsLoading(true);
+            setError(null);
+
+            const vehicleData = await getVehicleById(id);
+            setVehicle(vehicleData);
+
+            // Load current kid info if assigned
+            if (vehicleData.currentKidId) {
+                try {
+                    const kidData = await getKidById(vehicleData.currentKidId);
+                    setCurrentKid(kidData);
+                } catch (kidError) {
+                    console.error('Error loading kid data:', kidError);
+                    setCurrentKid(null);
+                }
+            }
+
+        } catch (error) {
+            console.error('Error loading vehicle:', error);
+            setError('Failed to load vehicle details. Please try again.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleEdit = () => {
+        if (canEdit()) {
+            navigate(`/admin/vehicles/edit/${id}`);
+        }
+    };
+
+    const handleBack = () => {
+        navigate('/admin/vehicles');
+    };
+
+    const canEdit = () => {
+        if (userRole === 'admin') return true;
+        if (userRole === 'instructor' && userData?.teamId === vehicle?.teamName) return true;
+        return false;
+    };
+
+    const canViewSensitiveInfo = () => {
+        return userRole === 'admin' || userRole === 'instructor';
+    };
+
+    const formatDate = (dateString) => {
+        if (!dateString) return 'Not specified';
+        try {
+            return new Date(dateString).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        } catch {
+            return dateString;
+        }
+    };
+
+    const getStatusInfo = () => {
+        if (!vehicle?.active) {
+            return {
+                status: 'Inactive',
+                className: 'status-inactive',
+                icon: <XCircle size={20} />,
+                description: 'This vehicle is currently inactive'
+            };
+        }
+
+        if (vehicle.currentKidId) {
+            return {
+                status: 'In Use',
+                className: 'status-in-use',
+                icon: <User size={20} />,
+                description: 'Currently assigned to a racer'
+            };
+        }
+
+        return {
+            status: 'Available',
+            className: 'status-available',
+            icon: <CheckCircle size={20} />,
+            description: 'Ready for assignment'
+        };
+    };
+
+    const getBatteryStatus = () => {
+        if (!vehicle?.batteryDate) {
+            return {
+                status: 'Unknown',
+                className: 'battery-unknown',
+                icon: <InfoCircle size={16} />,
+                description: 'Battery date not recorded'
+            };
+        }
+
+        try {
+            const batteryDate = new Date(vehicle.batteryDate);
+            const now = new Date();
+            const diffMonths = (now.getFullYear() - batteryDate.getFullYear()) * 12 +
+                (now.getMonth() - batteryDate.getMonth());
+
+            if (diffMonths > 6) {
+                return {
+                    status: 'Needs Attention',
+                    className: 'battery-old',
+                    icon: <AlertTriangle size={16} />,
+                    description: 'Battery is over 6 months old'
+                };
+            } else if (diffMonths > 3) {
+                return {
+                    status: 'Monitor',
+                    className: 'battery-aging',
+                    icon: <Clock size={16} />,
+                    description: 'Battery should be monitored'
+                };
+            } else {
+                return {
+                    status: 'Good',
+                    className: 'battery-good',
+                    icon: <CheckCircle size={16} />,
+                    description: 'Battery is in good condition'
+                };
+            }
+        } catch {
+            return {
+                status: 'Error',
+                className: 'battery-error',
+                icon: <XCircle size={16} />,
+                description: 'Invalid battery date'
+            };
+        }
+    };
+
+    if (isLoading) {
+        return (
+            <Dashboard requiredRole={userRole}>
+                <div className={`admin-page view-vehicle-page ${appliedTheme}-mode`}>
+                    <div className="loading-container">
+                        <div className="loading-spinner"></div>
+                        <p>Loading vehicle details...</p>
+                    </div>
+                </div>
+            </Dashboard>
+        );
+    }
+
+    if (error || !vehicle) {
+        return (
+            <Dashboard requiredRole={userRole}>
+                <div className={`admin-page view-vehicle-page ${appliedTheme}-mode`}>
+                    <div className="error-container">
+                        <h3>Error</h3>
+                        <p>{error || 'Vehicle not found'}</p>
+                        <button onClick={handleBack} className="btn-primary">
+                            <ArrowLeft className="btn-icon" size={18} />
+                            Back to Vehicles
+                        </button>
+                    </div>
+                </div>
+            </Dashboard>
+        );
+    }
+
+    const statusInfo = getStatusInfo();
+    const batteryInfo = getBatteryStatus();
+
+    return (
+        <Dashboard requiredRole={userRole}>
+            <div className={`admin-page view-vehicle-page ${appliedTheme}-mode`}>
+                {/* Page Title */}
+                <h1>
+                    <Car size={32} className="page-title-icon" />
+                    {vehicle.make} {vehicle.model}
+                    <Settings size={24} className="sparkle-icon" />
+                </h1>
+
+                <div className="admin-container">
+                    {/* Header */}
+                    <div className="racing-header">
+                        <div className="header-content">
+                            <button onClick={handleBack} className="back-button">
+                                <ArrowLeft className="btn-icon" size={20} />
+                                Back to Vehicles
+                            </button>
+                            <div className="title-section">
+                                <h1>{vehicle.make} {vehicle.model}</h1>
+                                <p className="subtitle">License Plate: {vehicle.licensePlate}</p>
+                            </div>
+                            <div className="header-actions">
+                                {canEdit() && (
+                                    <button onClick={handleEdit} className="btn-primary">
+                                        <Edit size={18} />
+                                        Edit Vehicle
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Success Message */}
+                    {successMessage && (
+                        <div className="alert success-alert">
+                            <CheckCircle size={20} />
+                            {successMessage}
+                        </div>
+                    )}
+
+                    {/* Vehicle Details */}
+                    <div className="vehicle-details-grid">
+                        {/* Vehicle Photo and Basic Info */}
+                        <div className="form-section vehicle-photo-section">
+                            <div className="section-header">
+                                <Photo className="section-icon" size={24} />
+                                <h2>Vehicle Photo</h2>
+                            </div>
+                            <div className="vehicle-photo-container">
+                                {vehicle.photo ? (
+                                    <img
+                                        src={vehicle.photo}
+                                        alt={`${vehicle.make} ${vehicle.model}`}
+                                        className="vehicle-photo-large"
+                                    />
+                                ) : (
+                                    <div className="vehicle-photo-placeholder-large">
+                                        <Car size={80} />
+                                        <p>No photo available</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Status Information */}
+                        <div className="form-section status-section">
+                            <div className="section-header">
+                                <Settings className="section-icon" size={24} />
+                                <h2>Status Information</h2>
+                            </div>
+                            <div className="status-grid">
+                                <div className={`status-card ${statusInfo.className}`}>
+                                    {statusInfo.icon}
+                                    <div className="status-content">
+                                        <h3>{statusInfo.status}</h3>
+                                        <p>{statusInfo.description}</p>
+                                    </div>
+                                </div>
+
+                                <div className={`status-card ${batteryInfo.className}`}>
+                                    {batteryInfo.icon}
+                                    <div className="status-content">
+                                        <h3>Battery: {batteryInfo.status}</h3>
+                                        <p>{batteryInfo.description}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Basic Vehicle Information */}
+                        <div className="form-section basic-info-section">
+                            <div className="section-header">
+                                <Car className="section-icon" size={24} />
+                                <h2>Vehicle Information</h2>
+                            </div>
+                            <div className="info-grid">
+                                <div className="info-item">
+                                    <label>Make</label>
+                                    <span>{vehicle.make}</span>
+                                </div>
+                                <div className="info-item">
+                                    <label>Model</label>
+                                    <span>{vehicle.model}</span>
+                                </div>
+                                <div className="info-item">
+                                    <label>License Plate</label>
+                                    <span>{vehicle.licensePlate}</span>
+                                </div>
+                                <div className="info-item">
+                                    <label>Team</label>
+                                    <span>{vehicle.teamName || 'Unassigned'}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Technical Specifications */}
+                        <div className="form-section technical-section">
+                            <div className="section-header">
+                                <Tool className="section-icon" size={24} />
+                                <h2>Technical Specifications</h2>
+                            </div>
+                            <div className="info-grid">
+                                <div className="info-item">
+                                    <label>
+                                        <Engine size={16} />
+                                        Drive Type
+                                    </label>
+                                    <span>{vehicle.driveType || 'Not specified'}</span>
+                                </div>
+                                <div className="info-item">
+                                    <label>
+                                        <Steering size={16} />
+                                        Steering Type
+                                    </label>
+                                    <span>{vehicle.steeringType || 'Not specified'}</span>
+                                </div>
+                                <div className="info-item">
+                                    <label>
+                                        <Battery size={16} />
+                                        Battery Type
+                                    </label>
+                                    <span>{vehicle.batteryType || 'Not specified'}</span>
+                                </div>
+                                <div className="info-item">
+                                    <label>
+                                        <Calendar size={16} />
+                                        Battery Date
+                                    </label>
+                                    <span>{formatDate(vehicle.batteryDate)}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Current Assignment */}
+                        <div className="form-section assignment-section">
+                            <div className="section-header">
+                                <User className="section-icon" size={24} />
+                                <h2>Current Assignment</h2>
+                            </div>
+                            <div className="assignment-content">
+                                {vehicle.currentKidId ? (
+                                    <div className="current-assignment">
+                                        {currentKid ? (
+                                            <div className="kid-info">
+                                                <div className="kid-details">
+                                                    <h4>{currentKid.personalInfo?.firstName} {currentKid.personalInfo?.lastName}</h4>
+                                                    <p>Participant #{currentKid.participantNumber}</p>
+                                                    {canViewSensitiveInfo() && (
+                                                        <button
+                                                            onClick={() => navigate(`/admin/kids/view/${currentKid.id}`)}
+                                                            className="btn-secondary btn-sm"
+                                                        >
+                                                            View Racer Profile
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="assignment-error">
+                                                <AlertTriangle size={20} />
+                                                <p>Assigned to kid ID: {vehicle.currentKidId}</p>
+                                                <p>Unable to load racer details</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <div className="no-assignment">
+                                        <Users size={40} className="no-assignment-icon" />
+                                        <h4>Available for Assignment</h4>
+                                        <p>This vehicle is not currently assigned to any racer</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Modifications and Notes - Only for admins and instructors */}
+                        {canViewSensitiveInfo() && (
+                            <div className="form-section notes-section">
+                                <div className="section-header">
+                                    <FileText className="section-icon" size={24} />
+                                    <h2>Modifications & Notes</h2>
+                                </div>
+                                <div className="notes-content">
+                                    <div className="info-item full-width">
+                                        <label>Modifications</label>
+                                        <p>{vehicle.modifications || 'No modifications recorded'}</p>
+                                    </div>
+                                    <div className="info-item full-width">
+                                        <label>Additional Notes</label>
+                                        <p>{vehicle.notes || 'No additional notes'}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Vehicle History - Only for admins and instructors */}
+                        {canViewSensitiveInfo() && vehicle.history && vehicle.history.length > 0 && (
+                            <div className="form-section history-section">
+                                <div className="section-header">
+                                    <History className="section-icon" size={24} />
+                                    <h2>Usage History</h2>
+                                </div>
+                                <div className="history-content">
+                                    <p>Previous racers who used this vehicle:</p>
+                                    <div className="history-list">
+                                        {vehicle.history.map((kidId, index) => (
+                                            <div key={index} className="history-item">
+                                                <User size={16} />
+                                                <span>Kid ID: {kidId}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Timestamps - Only for admins */}
+                        {userRole === 'admin' && (
+                            <div className="form-section timestamps-section">
+                                <div className="section-header">
+                                    <Clock className="section-icon" size={24} />
+                                    <h2>Record Information</h2>
+                                </div>
+                                <div className="info-grid">
+                                    <div className="info-item">
+                                        <label>Created</label>
+                                        <span>{formatDate(vehicle.createdAt)}</span>
+                                    </div>
+                                    <div className="info-item">
+                                        <label>Last Updated</label>
+                                        <span>{formatDate(vehicle.updatedAt)}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+        </Dashboard>
+    );
+};
+
+export default ViewVehiclePage;
