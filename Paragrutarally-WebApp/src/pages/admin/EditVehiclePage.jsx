@@ -1,13 +1,12 @@
 // src/pages/admin/EditVehiclePage.jsx - Edit Vehicle with Schema Validation
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
 import { useTheme } from '../../contexts/ThemeContext';
 import { usePermissions } from '../../hooks/usePermissions.jsx';
 import { getVehicleById, updateVehicle } from '../../services/vehicleService';
 import { uploadVehiclePhoto, deleteVehiclePhoto } from '../../services/vehiclePhotoService';
 import { getAllTeams } from '../../services/teamService';
-import { formatVehicleValidationErrors } from '../../schemas/vehicleSchema';
 import {
     IconCar as Car,
     IconDeviceFloppy as Save,
@@ -32,9 +31,8 @@ import './EditKidPage.css';
 const EditVehiclePage = () => {
     const navigate = useNavigate();
     const { id } = useParams();
-    const location = useLocation();
     const { appliedTheme } = useTheme();
-    const { permissions, userRole, userData } = usePermissions();
+    const { userRole, userData } = usePermissions();
 
     const [isLoading, setIsLoading] = useState(true);
     const [teams, setTeams] = useState([]);
@@ -87,7 +85,29 @@ const EditVehiclePage = () => {
             }
 
             setOriginalData(vehicleData);
-            setFormData(vehicleData);
+
+            // ✅ COMPLETE FIX: Only extract form fields, exclude Firestore metadata
+            setFormData({
+                make: vehicleData.make || '',
+                model: vehicleData.model || '',
+                licensePlate: vehicleData.licensePlate || '',
+                teamId: vehicleData.teamId || '',
+                driveType: vehicleData.driveType || '',
+                steeringType: vehicleData.steeringType || '',
+                batteryType: vehicleData.batteryType || '',
+                // ✅ Convert batteryDate to the proper format for date input
+                batteryDate: vehicleData.batteryDate ?
+                    (typeof vehicleData.batteryDate === 'string' ?
+                        vehicleData.batteryDate :
+                        vehicleData.batteryDate.toISOString?.()?.split('T')[0] || '') : '',
+                modifications: vehicleData.modifications || '',
+                notes: vehicleData.notes || '',
+                photo: vehicleData.photo || '',
+                active: Boolean(vehicleData.active ?? true), // Default to true if undefined
+                currentKidId: vehicleData.currentKidId || null,
+                history: Array.isArray(vehicleData.history) ? vehicleData.history : []
+                // ❌ EXCLUDE: createdAt, updatedAt, id - these cause validation errors
+            });
 
             // Set photo preview if exists
             if (vehicleData.photo) {
@@ -118,7 +138,7 @@ const EditVehiclePage = () => {
             [field]: value
         }));
 
-        // Clear specific error when user starts typing
+        // Clear specific error when the user starts typing
         if (fieldErrors[field]) {
             setFieldErrors(prev => ({
                 ...prev,
@@ -171,14 +191,14 @@ const EditVehiclePage = () => {
 
     const handleRemovePhoto = async () => {
         try {
-            // Delete old photo from storage if it exists
+            // Delete an old photo from storage if it exists
             if (formData.photo) {
                 console.log('🗑️ Deleting old photo from storage...');
                 await deleteVehiclePhoto(id, formData.photo);
                 console.log('✅ Old photo deleted successfully');
             }
 
-            // Update form data to remove photo
+            // Update form data to remove a photo
             setFormData(prev => ({
                 ...prev,
                 photo: ''
@@ -241,15 +261,33 @@ const EditVehiclePage = () => {
         }
 
         setIsSubmitting(true);
-        let finalFormData = { ...formData };
+
+        // ✅ EXCLUDE history and currentKidId from manual updates
+        const cleanedFormData = {
+            make: String(formData.make || '').trim(),
+            model: String(formData.model || '').trim(),
+            licensePlate: String(formData.licensePlate || '').trim(),
+            teamId: formData.teamId || '',
+            driveType: formData.driveType || '',
+            steeringType: formData.steeringType || '',
+            batteryType: formData.batteryType || '',
+            batteryDate: formData.batteryDate || '',
+            modifications: formData.modifications || '',
+            notes: formData.notes || '',
+            photo: formData.photo || '',
+            active: Boolean(formData.active)
+            // ❌ REMOVED: history and currentKidId - these are managed by assign/unassign functions
+        };
+
+        console.log('🔍 Sending cleaned data:', cleanedFormData);
 
         try {
-            // Upload photo if one was selected
+            // Handle photo upload first if needed
             if (selectedPhoto) {
                 try {
                     setIsUploadingPhoto(true);
 
-                    // Delete old photo first if it exists
+                    // Delete an old photo first if it exists
                     if (formData.photo) {
                         console.log('🗑️ Deleting old photo before uploading new one...');
                         try {
@@ -260,13 +298,10 @@ const EditVehiclePage = () => {
                         }
                     }
 
-                    // Upload new photo
+                    // Upload a new photo
                     console.log('📷 Uploading new photo...');
                     const photoUrl = await uploadVehiclePhoto(id, selectedPhoto);
-                    finalFormData = {
-                        ...finalFormData,
-                        photo: photoUrl
-                    };
+                    cleanedFormData.photo = String(photoUrl);
                     console.log('✅ New photo uploaded successfully:', photoUrl);
                 } catch (photoError) {
                     console.error('❌ Photo upload failed:', photoError);
@@ -276,33 +311,23 @@ const EditVehiclePage = () => {
                 }
             }
 
-            // Update the vehicle (schema validation will happen in the service)
-            await updateVehicle(id, finalFormData);
+            // Update the vehicle
+            await updateVehicle(id, cleanedFormData);
 
-            // Navigate with success message
+            // Navigate with a success message
             navigate(`/admin/vehicles/view/${id}`, {
                 state: {
-                    message: `🎉 ${finalFormData.make} ${finalFormData.model} has been updated successfully! 🏎️`,
+                    message: `🎉 ${cleanedFormData.make} ${cleanedFormData.model} has been updated successfully! 🏎️`,
                     type: 'success'
                 }
             });
         } catch (error) {
             console.error('Error updating vehicle:', error);
-
-            // Handle schema validation errors
-            if (error.message.includes('Validation failed:')) {
-                setErrors({ general: error.message });
-            } else if (error.message.includes('License plate')) {
-                setErrors({ licensePlate: error.message });
-                setFieldErrors({ licensePlate: true });
-            } else {
-                setErrors({ general: `Failed to update vehicle: ${error.message}` });
-            }
+            setErrors({ general: `Failed to update vehicle: ${error.message}` });
         } finally {
             setIsSubmitting(false);
         }
     };
-
     const handleCancel = () => {
         navigate(`/admin/vehicles/view/${id}`);
     };
