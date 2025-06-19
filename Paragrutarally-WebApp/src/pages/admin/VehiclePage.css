@@ -17,6 +17,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
+    min-width: 0;
 }
 
 .vehicle-photo-small {
@@ -94,10 +95,11 @@
     font-weight: 600;
 }
 
-/* Also fix the actions column padding */
+/* FIXED: Actions column padding and spacing */
 .vehicles-page .data-table th:nth-child(7),
 .vehicles-page .data-table td:nth-child(7) {
-    padding-right: 8px !important;
+    padding: 16px 8px !important;
+    text-align: center;
 }
 
 .license-plate {
@@ -110,7 +112,6 @@
     border: 1px solid var(--border-color);
     font-size: 14px;
     white-space: nowrap;
-
 }
 
 .current-user {
@@ -138,7 +139,7 @@
 }
 
 /* ========================================
-   ENHANCED RESPONSIVE TABLE DESIGN
+   ENHANCED RESPONSIVE TABLE DESIGN - FIXED HEADERS
    ======================================== */
 
 /* Mobile-first approach for better responsiveness */
@@ -150,62 +151,174 @@
     box-shadow: 0 4px 15px var(--shadow-color);
     transition: all 0.3s ease;
     margin: 0;
+    overflow-x: auto; /* Enable horizontal scrolling if needed */
 }
 
-/* Desktop table view */
+/* Desktop table view - FIXED: Better column distribution */
 .data-table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 900px;
+    min-width: 1000px; /* Increased min-width for better spacing */
     table-layout: fixed;
 }
 
-/* Improved column width distribution */
+/* FIXED: Improved column width distribution to prevent overlap */
 .data-table th:nth-child(1), /* Vehicle */
 .data-table td:nth-child(1) {
-    width: 22%;
-    min-width: 220px;
+    width: 240px; /* Increased for vehicle info */
+    min-width: 240px;
 }
 
 .data-table th:nth-child(2), /* Team */
 .data-table td:nth-child(2) {
-    width: 12%;
+    width: 140px;
     min-width: 140px;
 }
 
 .data-table th:nth-child(3), /* License Plate */
 .data-table td:nth-child(3) {
-    width: 14%;
-    min-width: 140px;
+    width: 130px;
+    min-width: 130px;
 }
 
 .data-table th:nth-child(4), /* Status */
 .data-table td:nth-child(4) {
-    width: 12%;
-    min-width: 110px;
+    width: 100px;
+    min-width: 100px;
 }
 
 .data-table th:nth-child(5), /* Current User */
 .data-table td:nth-child(5) {
-    width: 12%;
+    width: 110px;
     min-width: 110px;
 }
 
 .data-table th:nth-child(6), /* Battery */
 .data-table td:nth-child(6) {
-    width: 14%;
-    min-width: 130px;
+    width: 120px;
+    min-width: 120px;
 }
 
 .data-table th:nth-child(7), /* Actions */
 .data-table td:nth-child(7) {
-    width: 14%;
-    min-width: 120px;
+    width: 160px; /* Increased for delete button */
+    min-width: 160px;
     text-align: center;
-    padding-right: 20px;
 }
 
-/* Mobile card layout for vehicles */
+/* FIXED: Ensure headers don't overlap with better padding */
+.data-table th {
+    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-quaternary) 100%);
+    color: var(--text-primary);
+    font-weight: 700;
+    font-size: 14px;
+    padding: 20px 12px; /* Reduced horizontal padding to fit better */
+    text-align: left;
+    border-bottom: 2px solid var(--border-color);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.data-table td {
+    color: var(--text-secondary);
+    font-size: 14px;
+    padding: 16px 12px; /* Consistent with header padding */
+    border-bottom: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+    vertical-align: middle;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ========================================
+   ACTION BUTTONS - UPDATED: Add delete button styles
+   ======================================== */
+
+.action-buttons {
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: nowrap;
+}
+
+.btn-action {
+    padding: 8px 10px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+}
+
+.btn-action.view {
+    background: linear-gradient(135deg, var(--info-color) 0%, var(--accent-hover) 100%);
+    color: white;
+    box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
+}
+
+.btn-action.view:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(59, 130, 246, 0.4);
+}
+
+.btn-action.edit {
+    background: linear-gradient(135deg, var(--success-color) 0%, var(--success-hover) 100%);
+    color: white;
+    box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3);
+}
+
+.btn-action.edit:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.4);
+}
+
+/* NEW: Delete button styles */
+.btn-action.delete {
+    background: linear-gradient(135deg, var(--error-color) 0%, #DC2626 100%);
+    color: white;
+    box-shadow: 0 2px 6px rgba(239, 68, 68, 0.3);
+}
+
+.btn-action.delete:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(239, 68, 68, 0.4);
+}
+
+.btn-action.delete:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Loading spinner for delete action */
+.loading-spinner-tiny {
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ========================================
+   MOBILE CARD LAYOUT - UPDATED: Add delete button
+   ======================================== */
+
 .vehicles-mobile-grid {
     display: none;
     grid-template-columns: 1fr;
@@ -321,6 +434,7 @@
 .vehicle-mobile-buttons {
     display: flex;
     gap: 8px;
+    flex-wrap: wrap;
 }
 
 .btn-mobile-action {
@@ -334,6 +448,7 @@
     display: flex;
     align-items: center;
     gap: 5px;
+    white-space: nowrap;
 }
 
 .btn-mobile-view {
@@ -346,9 +461,31 @@
     color: white;
 }
 
-.btn-mobile-action:hover {
+/* NEW: Mobile delete button */
+.btn-mobile-delete {
+    background: linear-gradient(135deg, var(--error-color) 0%, #DC2626 100%);
+    color: white;
+}
+
+.btn-mobile-action:hover:not(:disabled) {
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.btn-mobile-action:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Loading spinner for mobile delete */
+.loading-spinner-mini {
+    width: 12px;
+    height: 12px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
 }
 
 /* ========================================
@@ -789,7 +926,7 @@
     }
 
     .data-table {
-        min-width: 800px;
+        min-width: 900px; /* Slightly reduced for better fit */
     }
 
     .data-table th,
@@ -825,7 +962,13 @@
     }
 
     .action-buttons {
-        padding: 0 4px;
+        gap: 2px;
+    }
+
+    .btn-action {
+        min-width: 32px;
+        height: 32px;
+        padding: 6px 8px;
     }
 }
 
@@ -899,6 +1042,16 @@
         grid-template-columns: 1fr;
         gap: 15px;
     }
+
+    /* Mobile buttons adjustment */
+    .vehicle-mobile-buttons {
+        gap: 6px;
+    }
+
+    .btn-mobile-action {
+        padding: 6px 12px;
+        font-size: 11px;
+    }
 }
 
 /* Small phones */
@@ -954,6 +1107,14 @@
     .vehicle-mobile-buttons {
         justify-content: center;
         width: 100%;
+        gap: 4px;
+    }
+
+    .btn-mobile-action {
+        flex: 1;
+        justify-content: center;
+        padding: 8px 6px;
+        font-size: 10px;
     }
 
     /* Stack stats in single column on very small screens */
@@ -962,15 +1123,14 @@
         gap: 12px;
     }
 
-    /* Compact action buttons for mobile */
+    /* Very compact action buttons for small screens */
     .action-buttons {
-        gap: 3px;
+        gap: 2px;
     }
 
     .btn-action {
-        min-width: 30px;
-        max-width: 35px;
+        min-width: 28px;
+        height: 28px;
         padding: 4px 6px;
-        font-size: 9px;
     }
 }

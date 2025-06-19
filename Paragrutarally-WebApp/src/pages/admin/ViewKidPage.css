@@ -278,7 +278,7 @@
 }
 
 /* ========================================
-   VEHICLE DISPLAY STYLES
+   VEHICLE DISPLAY STYLES - UPDATED: Photo moved to bottom
    ======================================== */
 
 .vehicle-assignment {
@@ -314,6 +314,7 @@
 
 .vehicle-card {
     display: flex;
+    flex-direction: column;
     gap: 20px;
     padding: 25px;
     background: var(--bg-secondary);
@@ -328,36 +329,12 @@
     box-shadow: 0 8px 25px rgba(255, 215, 0, 0.3);
 }
 
+/* UPDATED: Removed photo section from top */
 .vehicle-photo-section {
-    flex-shrink: 0;
-}
-
-.vehicle-photo {
-    width: 80px;
-    height: 80px;
-    border-radius: 12px;
-    object-fit: cover;
-    border: 2px solid var(--racing-gold);
-    box-shadow: 0 2px 8px rgba(255, 215, 0, 0.2);
-}
-
-.vehicle-photo-placeholder {
-    width: 80px;
-    height: 80px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, var(--racing-gold) 0%, var(--racing-orange) 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--text-primary);
-    font-size: 32px;
-    font-weight: bold;
-    border: 2px solid var(--racing-gold);
-    box-shadow: 0 2px 8px rgba(255, 215, 0, 0.2);
+    display: none; /* Hide the original photo section */
 }
 
 .vehicle-details {
-    flex: 1;
     display: flex;
     flex-direction: column;
     gap: 15px;
@@ -428,8 +405,17 @@
     color: var(--error-color);
 }
 
+/* UPDATED: Actions section with photo moved here */
 .vehicle-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-top: 10px;
+}
+
+.vehicle-actions-buttons {
+    display: flex;
+    gap: 10px;
 }
 
 .btn-vehicle-view {
@@ -451,6 +437,31 @@
 .btn-vehicle-view:hover {
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+/* UPDATED: Vehicle photo moved to actions area - no border */
+.vehicle-photo-bottom {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    object-fit: cover;
+    /* REMOVED: border: 2px solid var(--racing-gold); */
+    box-shadow: 0 2px 8px rgba(255, 215, 0, 0.2);
+}
+
+.vehicle-photo-placeholder-bottom {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--racing-gold) 0%, var(--racing-orange) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-primary);
+    font-size: 24px;
+    font-weight: bold;
+    /* REMOVED: border: 2px solid var(--racing-gold); */
+    box-shadow: 0 2px 8px rgba(255, 215, 0, 0.2);
 }
 
 /* ========================================
@@ -760,20 +771,29 @@
     }
 
     .vehicle-card {
-        flex-direction: column;
         gap: 15px;
     }
 
-    .vehicle-photo,
-    .vehicle-photo-placeholder {
-        width: 60px;
-        height: 60px;
-        font-size: 24px;
+    .vehicle-photo-bottom,
+    .vehicle-photo-placeholder-bottom {
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
     }
 
     .vehicle-info-grid {
         grid-template-columns: 1fr;
         gap: 10px;
+    }
+
+    .vehicle-actions {
+        flex-direction: column;
+        gap: 15px;
+        align-items: center;
+    }
+
+    .vehicle-actions-buttons {
+        order: 2;
     }
 }
 
@@ -825,5 +845,12 @@
         flex-direction: column;
         text-align: center;
         gap: 10px;
+    }
+
+    .vehicle-photo-bottom,
+    .vehicle-photo-placeholder-bottom {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
     }
 }

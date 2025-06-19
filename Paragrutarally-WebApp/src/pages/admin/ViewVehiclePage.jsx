@@ -1,4 +1,4 @@
-// src/pages/admin/ViewVehiclePage.jsx - Individual Vehicle Details with Schema Integration
+// src/pages/admin/ViewVehiclePage.jsx - Individual Vehicle Details with Schema Integration - FIXED HISTORY RENDERING
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
@@ -60,13 +60,21 @@ const ViewVehiclePage = () => {
             const vehicleData = await getVehicleById(id);
             setVehicle(vehicleData);
 
-            // Load current kid info if assigned
+            // Load current kid info if assigned - WITH BETTER ERROR HANDLING
             if (vehicleData.currentKidId) {
                 try {
+                    console.log(`🔍 Loading kid data for ID: ${vehicleData.currentKidId}`);
                     const kidData = await getKidById(vehicleData.currentKidId);
-                    setCurrentKid(kidData);
+                    if (kidData) {
+                        setCurrentKid(kidData);
+                        console.log(`✅ Kid data loaded successfully for: ${kidData.personalInfo?.firstName}`);
+                    } else {
+                        console.warn(`⚠️ Kid not found for ID: ${vehicleData.currentKidId}`);
+                        setCurrentKid(null);
+                    }
                 } catch (kidError) {
-                    console.error('Error loading kid data:', kidError);
+                    console.error('❌ Error loading kid data:', kidError);
+                    // Don't fail the whole page if kid loading fails
                     setCurrentKid(null);
                 }
             }
@@ -196,6 +204,63 @@ const ViewVehiclePage = () => {
                 description: 'Invalid battery date'
             };
         }
+    };
+
+    // FIXED: Helper function to render vehicle history correctly
+    const renderVehicleHistory = () => {
+        if (!vehicle.history || vehicle.history.length === 0) {
+            return (
+                <div className="no-history">
+                    <History size={40} className="no-history-icon" />
+                    <p>No usage history recorded</p>
+                </div>
+            );
+        }
+
+        return (
+            <div className="history-list">
+                {vehicle.history.map((historyItem, index) => {
+                    // Handle both old format (string kidId) and new format (object)
+                    if (typeof historyItem === 'string') {
+                        // Old format: just kidId as string
+                        return (
+                            <div key={index} className="history-item">
+                                <User size={16} />
+                                <span>Kid ID: {historyItem}</span>
+                            </div>
+                        );
+                    } else if (typeof historyItem === 'object' && historyItem !== null) {
+                        // New format: object with kidId, kidName, assignedAt, assignedBy
+                        return (
+                            <div key={index} className="history-item enhanced">
+                                <User size={16} />
+                                <div className="history-item-details">
+                                    <div className="history-kid-info">
+                                        <span className="kid-name">{historyItem.kidName || `Kid ID: ${historyItem.kidId}`}</span>
+                                        {historyItem.assignedAt && (
+                                            <span className="assignment-date">
+                                                Assigned: {formatDate(historyItem.assignedAt)}
+                                            </span>
+                                        )}
+                                    </div>
+                                    {historyItem.assignedBy && (
+                                        <span className="assigned-by">by {historyItem.assignedBy}</span>
+                                    )}
+                                </div>
+                            </div>
+                        );
+                    } else {
+                        // Fallback for any unexpected format
+                        return (
+                            <div key={index} className="history-item">
+                                <User size={16} />
+                                <span>Unknown assignment</span>
+                            </div>
+                        );
+                    }
+                })}
+            </div>
+        );
     };
 
     if (isLoading) {
@@ -389,7 +454,7 @@ const ViewVehiclePage = () => {
                             </div>
                         </div>
 
-                        {/* Current Assignment */}
+                        {/* Current Assignment - IMPROVED ERROR HANDLING */}
                         <div className="form-section assignment-section">
                             <div className="section-header">
                                 <User className="section-icon" size={24} />
@@ -402,13 +467,12 @@ const ViewVehiclePage = () => {
                                             <div className="kid-info">
                                                 <div className="kid-details">
                                                     <h4>{currentKid.personalInfo?.firstName} {currentKid.personalInfo?.lastName}</h4>
-                                                    <p>Participant #{currentKid.participantNumber}</p>
                                                     {canViewSensitiveInfo() && (
                                                         <button
                                                             onClick={() => navigate(`/admin/kids/view/${currentKid.id}`)}
                                                             className="btn-secondary btn-sm"
                                                         >
-                                                            View Racer Profile
+                                                            View Kid's Profile
                                                         </button>
                                                     )}
                                                 </div>
@@ -416,8 +480,11 @@ const ViewVehiclePage = () => {
                                         ) : (
                                             <div className="assignment-error">
                                                 <AlertTriangle size={20} />
-                                                <p>Assigned to kid ID: {vehicle.currentKidId}</p>
-                                                <p>Unable to load racer details</p>
+                                                <div>
+                                                    <p><strong>Assignment Issue:</strong> Vehicle is assigned to kid ID: {vehicle.currentKidId}</p>
+                                                    <p>However, the racer profile could not be loaded. The racer may have been deleted or there's a data inconsistency.</p>
+                                                    <p className="suggestion">💡 Consider reassigning this vehicle to resolve the issue.</p>
+                                                </div>
                                             </div>
                                         )}
                                     </div>
@@ -451,7 +518,7 @@ const ViewVehiclePage = () => {
                             </div>
                         )}
 
-                        {/* Vehicle History - Only for admins and instructors */}
+                        {/* Vehicle History - Only for admins and instructors - FIXED */}
                         {canViewSensitiveInfo() && vehicle.history && vehicle.history.length > 0 && (
                             <div className="form-section history-section">
                                 <div className="section-header">
@@ -460,14 +527,7 @@ const ViewVehiclePage = () => {
                                 </div>
                                 <div className="history-content">
                                     <p>Previous racers who used this vehicle:</p>
-                                    <div className="history-list">
-                                        {vehicle.history.map((kidId, index) => (
-                                            <div key={index} className="history-item">
-                                                <User size={16} />
-                                                <span>Kid ID: {kidId}</span>
-                                            </div>
-                                        ))}
-                                    </div>
+                                    {renderVehicleHistory()}
                                 </div>
                             </div>
                         )}

@@ -1,10 +1,11 @@
-// src/pages/admin/VehiclesPage.jsx - Enhanced with Mobile-Responsive Card Layout
+// src/pages/admin/VehiclesPage.jsx - Enhanced with Mobile-Responsive Card Layout and Delete Function
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
 import { useTheme } from '../../contexts/ThemeContext';
 import { usePermissions } from '../../hooks/usePermissions.jsx';
-import { getAllVehicles, getVehiclesByTeam, getVehiclesByKids } from '../../services/vehicleService';
+import { getAllVehicles, getVehiclesByTeam, getVehiclesByKids, deleteVehicle } from '../../services/vehicleService';
+import { unassignVehicleFromKid } from '../../services/vehicleAssignmentService'; // Import for cleanup
 import { getAllTeams } from '../../services/teamService';
 import { getKidsByParent } from '../../services/kidService';
 import {
@@ -37,6 +38,7 @@ const VehiclesPage = () => {
     const [teams, setTeams] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [isDeleting, setIsDeleting] = useState(null); // Track which vehicle is being deleted
 
     // Search and filter states
     const [searchTerm, setSearchTerm] = useState('');
@@ -157,10 +159,59 @@ const VehiclesPage = () => {
         }
     };
 
+    // NEW: Handle delete vehicle
+    const handleDeleteVehicle = async (vehicle) => {
+        if (userRole !== 'admin') {
+            alert('You do not have permission to delete vehicles.');
+            return;
+        }
+
+        const vehicleName = `${vehicle.make} ${vehicle.model} (${vehicle.licensePlate})`;
+
+        // Extra confirmation if vehicle is currently assigned
+        let confirmMessage = `Are you sure you want to delete ${vehicleName}?`;
+        if (vehicle.currentKidId) {
+            confirmMessage += '\n\nWARNING: This vehicle is currently assigned to a racer. Deleting it will remove the assignment.';
+        }
+        confirmMessage += '\n\nThis action cannot be undone.';
+
+        if (!window.confirm(confirmMessage)) {
+            return;
+        }
+
+        try {
+            setIsDeleting(vehicle.id);
+
+            // If vehicle is assigned, unassign it first
+            if (vehicle.currentKidId) {
+                console.log(`🔄 Unassigning vehicle ${vehicle.id} before deletion...`);
+                await unassignVehicleFromKid(vehicle.id);
+            }
+
+            // Delete the vehicle
+            await deleteVehicle(vehicle.id);
+
+            // Update local state
+            setVehicles(prev => prev.filter(v => v.id !== vehicle.id));
+
+            alert(`${vehicleName} has been successfully deleted.`);
+
+        } catch (error) {
+            console.error('Error deleting vehicle:', error);
+            alert(`Failed to delete ${vehicleName}: ${error.message}`);
+        } finally {
+            setIsDeleting(null);
+        }
+    };
+
     const canEdit = (vehicle) => {
         if (userRole === 'admin') return true;
         if (userRole === 'instructor' && userData?.teamId === vehicle.teamId) return true;
         return false;
+    };
+
+    const canDelete = (vehicle) => {
+        return userRole === 'admin';
     };
 
     const getStatusBadge = (vehicle) => {
@@ -182,7 +233,7 @@ const VehiclesPage = () => {
         return { total, active, inUse, available };
     };
 
-    // Mobile card component
+    // Mobile card component - UPDATED: Add delete button
     const VehicleMobileCard = ({ vehicle }) => (
         <div className="vehicle-mobile-card">
             <div className="vehicle-mobile-header">
@@ -264,6 +315,21 @@ const VehiclesPage = () => {
                             Edit
                         </button>
                     )}
+                    {canDelete(vehicle) && (
+                        <button
+                            onClick={() => handleDeleteVehicle(vehicle)}
+                            className="btn-mobile-action btn-mobile-delete"
+                            title="Delete Vehicle"
+                            disabled={isDeleting === vehicle.id}
+                        >
+                            {isDeleting === vehicle.id ? (
+                                <div className="loading-spinner-mini"></div>
+                            ) : (
+                                <Trash2 size={14} />
+                            )}
+                            {isDeleting === vehicle.id ? 'Deleting...' : 'Delete'}
+                        </button>
+                    )}
                 </div>
             </div>
         </div>
@@ -293,23 +359,19 @@ const VehiclesPage = () => {
                     Racing Vehicles
                     <Settings size={24} className="sparkle-icon" />
                 </h1>
-
-                <div className="admin-container">
-                    {/* Header with stats */}
-                    <div className="page-header">
-                        <div className="header-info">
-                            <h2>Vehicle Fleet Management</h2>
-                            <p>Manage racing vehicles and assignments</p>
-                        </div>
-                        <div className="header-actions">
-                            {(userRole === 'admin' || userRole === 'instructor') && (
-                                <button onClick={handleAddVehicle} className="btn-primary">
-                                    <Plus size={18} />
-                                    Add Vehicle
-                                </button>
-                            )}
-                        </div>
+                <div className="page-header">
+                    <div className="header-actions">
+                        {(userRole === 'admin' || userRole === 'instructor') && (
+                            <button onClick={handleAddVehicle} className="btn-primary">
+                                <Plus size={18} />
+                                Add Vehicle
+                            </button>
+                        )}
                     </div>
+                </div>
+                <div className="vehicle-management-container">
+                    {/* Header with stats */}
+
 
                     {/* Stats Cards */}
                     <div className="stats-grid">
@@ -461,7 +523,7 @@ const VehiclesPage = () => {
                         </div>
                     ) : (
                         <>
-                            {/* Desktop Table View */}
+                            {/* Desktop Table View - UPDATED: Better column widths and add delete button */}
                             <div className="table-container">
                                 <table className="data-table">
                                     <thead>
@@ -539,6 +601,20 @@ const VehiclesPage = () => {
                                                             title="Edit Vehicle"
                                                         >
                                                             <Edit size={14} />
+                                                        </button>
+                                                    )}
+                                                    {canDelete(vehicle) && (
+                                                        <button
+                                                            onClick={() => handleDeleteVehicle(vehicle)}
+                                                            className="btn-action delete"
+                                                            title="Delete Vehicle"
+                                                            disabled={isDeleting === vehicle.id}
+                                                        >
+                                                            {isDeleting === vehicle.id ? (
+                                                                <div className="loading-spinner-tiny"></div>
+                                                            ) : (
+                                                                <Trash2 size={14} />
+                                                            )}
                                                         </button>
                                                     )}
                                                 </div>

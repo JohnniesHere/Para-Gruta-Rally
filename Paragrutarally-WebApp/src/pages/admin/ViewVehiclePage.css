@@ -1,4 +1,4 @@
-/* src/pages/admin/ViewVehiclePage.css - Individual Vehicle View Styling without gradients */
+/* src/pages/admin/ViewVehiclePage.css - Individual Vehicle View Styling with Enhanced History */
 @import url('./../../styles/global.css');
 
 /* ========================================
@@ -65,7 +65,7 @@
     font-weight: 500;
 }
 
-/* Status Information - UPDATED: No gradient backgrounds */
+/* Status Information */
 .status-section {
     grid-column: span 1;
     border: 3px solid var(--racing-green);
@@ -86,7 +86,7 @@
     border-radius: 15px;
     border: 2px solid;
     transition: all 0.3s ease;
-    background: var(--bg-secondary); /* Solid background instead of gradients */
+    background: var(--bg-secondary);
 }
 
 .status-card.status-available {
@@ -177,7 +177,7 @@
     border: 1px solid var(--border-color);
 }
 
-/* Assignment Section - UPDATED: No gradient backgrounds */
+/* Assignment Section */
 .assignment-section {
     grid-column: span 2;
     border: 3px solid var(--racing-orange);
@@ -193,7 +193,7 @@
     align-items: center;
     gap: 20px;
     padding: 20px;
-    background: var(--bg-secondary); /* Solid background instead of gradient */
+    background: var(--bg-secondary);
     border: 2px solid var(--success-color);
     border-radius: 15px;
     color: var(--success-color);
@@ -248,7 +248,7 @@
     align-items: center;
     gap: 15px;
     padding: 20px;
-    background: var(--bg-secondary); /* Solid background instead of gradient */
+    background: var(--bg-secondary);
     border: 2px solid var(--error-color);
     border-radius: 15px;
     color: var(--error-color);
@@ -320,26 +320,97 @@
     padding: 20px;
 }
 
+/* ========================================
+   ENHANCED HISTORY DISPLAY STYLES
+   ======================================== */
+
 .history-list {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 15px;
     margin-top: 15px;
 }
 
 .history-item {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 12px 16px;
+    gap: 12px;
+    padding: 15px 18px;
     background: var(--bg-tertiary);
-    border-radius: 8px;
+    border-radius: 10px;
     border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.history-item:hover {
+    background: var(--bg-quaternary);
+    border-color: var(--racing-gold);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .history-item span {
     color: var(--text-primary);
     font-size: 14px;
+    font-weight: 500;
+}
+
+/* Enhanced history item for new object format */
+.history-item.enhanced {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 18px 20px;
+}
+
+.history-item-details {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+    margin-left: 28px; /* Align with icon */
+}
+
+.history-kid-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.kid-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.assignment-date {
+    font-size: 13px;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.assigned-by {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-style: italic;
+    margin-top: 2px;
+}
+
+/* No history state */
+.no-history {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-muted);
+}
+
+.no-history-icon {
+    margin-bottom: 15px;
+    opacity: 0.6;
+}
+
+.no-history p {
+    margin: 0;
+    font-size: 16px;
     font-weight: 500;
 }
 
@@ -392,6 +463,27 @@
         align-items: flex-start;
         gap: 10px;
     }
+
+    /* History responsive adjustments */
+    .history-item.enhanced {
+        padding: 15px 16px;
+    }
+
+    .history-item-details {
+        margin-left: 24px;
+    }
+
+    .kid-name {
+        font-size: 15px;
+    }
+
+    .assignment-date {
+        font-size: 12px;
+    }
+
+    .assigned-by {
+        font-size: 11px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -422,5 +514,34 @@
     .info-item p {
         padding: 6px 10px;
         font-size: 13px;
+    }
+
+    /* Compact history for small screens */
+    .history-item {
+        padding: 12px 14px;
+    }
+
+    .history-item.enhanced {
+        padding: 12px 14px;
+    }
+
+    .history-item-details {
+        margin-left: 20px;
+    }
+
+    .kid-name {
+        font-size: 14px;
+    }
+
+    .assignment-date {
+        font-size: 11px;
+    }
+
+    .assigned-by {
+        font-size: 10px;
+    }
+
+    .history-list {
+        gap: 10px;
     }
 }

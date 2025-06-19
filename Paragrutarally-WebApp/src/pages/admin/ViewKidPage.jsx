@@ -207,7 +207,7 @@ const ViewKidPage = () => {
         }
     };
 
-    // Get vehicle display component
+    // Get vehicle display component - UPDATED: Photo moved to bottom
     const getVehicleDisplay = () => {
         if (!vehicleData) {
             return (
@@ -228,19 +228,6 @@ const ViewKidPage = () => {
         return (
             <div className="vehicle-assignment">
                 <div className="vehicle-card">
-                    <div className="vehicle-photo-section">
-                        {vehiclePhotoInfo.hasPhoto ? (
-                            <img
-                                src={vehiclePhotoInfo.url}
-                                alt={`${vehicleData.make} ${vehicleData.model}`}
-                                className="vehicle-photo"
-                            />
-                        ) : (
-                            <div className="vehicle-photo-placeholder">
-                                {vehiclePhotoInfo.placeholder}
-                            </div>
-                        )}
-                    </div>
                     <div className="vehicle-details">
                         <h4 className="vehicle-name">
                             {vehicleData.make} {vehicleData.model}
@@ -268,7 +255,11 @@ const ViewKidPage = () => {
                                 </span>
                             </div>
                         </div>
-                        <div className="vehicle-actions">
+                    </div>
+
+                    {/* UPDATED: Actions and photo together at bottom */}
+                    <div className="vehicle-actions">
+                        <div className="vehicle-actions-buttons">
                             <button
                                 onClick={() => navigate(`/admin/vehicles/view/${vehicleData.id}`)}
                                 className="btn-vehicle-view"
@@ -276,6 +267,21 @@ const ViewKidPage = () => {
                                 <Settings size={16} />
                                 View Vehicle
                             </button>
+                        </div>
+
+                        {/* UPDATED: Photo moved here without border */}
+                        <div className="vehicle-photo-section-bottom">
+                            {vehiclePhotoInfo.hasPhoto ? (
+                                <img
+                                    src={vehiclePhotoInfo.url}
+                                    alt={`${vehicleData.make} ${vehicleData.model}`}
+                                    className="vehicle-photo-bottom"
+                                />
+                            ) : (
+                                <div className="vehicle-photo-placeholder-bottom">
+                                    <Car size={24} />
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
