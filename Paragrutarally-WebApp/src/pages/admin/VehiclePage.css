@@ -1,4 +1,4 @@
-/* src/pages/admin/VehiclePage.css - Enhanced Mobile-First Responsive Design */
+/* src/pages/admin/VehiclePage.css - Enhanced Mobile-First Responsive Design with ALL FIXES APPLIED */
 @import url('./../../styles/global.css');
 
 /* ========================================
@@ -12,12 +12,32 @@
 /* ========================================
    VEHICLE INFO COMPONENTS
    ======================================== */
+/* QUICK FIX: Adjust Status and License Plate column widths */
+.vehicles-page .data-table th:nth-child(3), /* License Plate */
+.vehicles-page .data-table td:nth-child(3) {
+    width: 220px !important; /* Increased from 180px */
+    min-width: 220px !important;
+    max-width: 240px !important;
+}
+
+.vehicles-page .data-table th:nth-child(4), /* Status */
+.vehicles-page .data-table td:nth-child(4) {
+    width: 100px !important; /* Reduced from 120px */
+    min-width: 100px !important;
+    max-width: 110px !important;
+}
+
+/* Update total table width to accommodate the change */
+.vehicles-page .data-table {
+    min-width: 1260px !important; /* Increased from 1240px */
+}
 
 .vehicle-info {
     display: flex;
     align-items: center;
     gap: 12px;
     min-width: 0;
+    width: 100%;
 }
 
 .vehicle-photo-small {
@@ -47,7 +67,7 @@
 .vehicle-details {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px; /* Increased gap for better spacing */
     min-width: 0;
     flex: 1;
 }
@@ -55,51 +75,54 @@
 .vehicle-name {
     font-weight: 600;
     color: var(--text-primary);
-    font-size: 14px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    font-size: 15px; /* Slightly larger */
+    line-height: 1.3;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
 }
 
 .vehicle-type {
-    font-size: 12px;
+    font-size: 13px; /* Slightly larger */
     color: var(--text-muted);
     display: flex;
     align-items: center;
     gap: 4px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    line-height: 1.2;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .team-name {
     font-weight: 600;
     color: var(--racing-blue);
-    padding: 4px 8px;
+    padding: 6px 10px; /* Increased padding */
     background: rgba(59, 130, 246, 0.1);
     border-radius: 12px;
-    font-size: 11px;
+    font-size: 13px; /* Consistent size */
     border: 1px solid rgba(59, 130, 246, 0.3);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: normal; /* Allow wrapping for long team names */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
     max-width: 100%;
     display: inline-block;
+    line-height: 1.3;
 }
 
 /* Force override the inherited font-size */
 .vehicles-page .data-table .team-name,
 .data-table tbody .team-name,
 .data-table .team-name {
-    font-size: 15px !important;
+    font-size: 13px !important; /* Updated to match new consistent size */
     font-weight: 600;
 }
 
 /* FIXED: Actions column padding and spacing */
 .vehicles-page .data-table th:nth-child(7),
 .vehicles-page .data-table td:nth-child(7) {
-    padding: 16px 8px !important;
+    padding: 12px 8px !important; /* Updated padding for proper alignment */
     text-align: center;
+    vertical-align: middle !important; /* Force vertical centering */
 }
 
 .license-plate {
@@ -107,11 +130,14 @@
     font-weight: 700;
     color: var(--text-primary);
     background: var(--bg-tertiary);
-    padding: 4px 8px;
+    padding: 6px 10px; /* Increased padding */
     border-radius: 6px;
     border: 1px solid var(--border-color);
     font-size: 14px;
-    white-space: nowrap;
+    white-space: nowrap !important; /* Prevent wrapping */
+    max-width: 100%;
+    overflow: visible !important; /* Show full content */
+    text-overflow: clip !important; /* Don't ellipsis */
 }
 
 .current-user {
@@ -139,10 +165,10 @@
 }
 
 /* ========================================
-   ENHANCED RESPONSIVE TABLE DESIGN - FIXED HEADERS
+   ENHANCED RESPONSIVE TABLE DESIGN - ALL FIXES APPLIED
    ======================================== */
 
-/* Mobile-first approach for better responsiveness */
+/* FIXED: Mobile-first approach for better responsiveness */
 .table-container {
     background: var(--bg-secondary);
     border-radius: 20px;
@@ -151,103 +177,140 @@
     box-shadow: 0 4px 15px var(--shadow-color);
     transition: all 0.3s ease;
     margin: 0;
-    overflow-x: auto; /* Enable horizontal scrolling if needed */
+    overflow-x: auto; /* Enable horizontal scrolling */
+    max-width: 100%;
 }
 
-/* Desktop table view - FIXED: Better column distribution */
+/* FIXED: Improved table sizing and layout with license plate fix */
 .data-table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 1000px; /* Increased min-width for better spacing */
-    table-layout: fixed;
+    min-width: 1240px; /* Increased to accommodate larger license plate column */
+    table-layout: auto; /* Changed from fixed to auto for better content fitting */
 }
 
-/* FIXED: Improved column width distribution to prevent overlap */
+/* FIXED: Better column width distribution with license plate fix */
 .data-table th:nth-child(1), /* Vehicle */
 .data-table td:nth-child(1) {
-    width: 240px; /* Increased for vehicle info */
-    min-width: 240px;
+    width: 280px; /* Increased for vehicle info with photo */
+    min-width: 280px;
+    max-width: 320px;
 }
 
 .data-table th:nth-child(2), /* Team */
 .data-table td:nth-child(2) {
-    width: 140px;
-    min-width: 140px;
+    width: 160px; /* Increased for team names */
+    min-width: 160px;
+    max-width: 200px;
 }
 
-.data-table th:nth-child(3), /* License Plate */
+.data-table th:nth-child(3), /* License Plate - FIXED */
 .data-table td:nth-child(3) {
-    width: 130px;
-    min-width: 130px;
+    width: 180px; /* Increased from 140px to fit "LICENSE PLATE" header */
+    min-width: 180px;
+    max-width: 200px;
 }
 
 .data-table th:nth-child(4), /* Status */
 .data-table td:nth-child(4) {
-    width: 100px;
-    min-width: 100px;
+    width: 120px; /* Increased for status badges */
+    min-width: 120px;
+    max-width: 140px;
 }
 
 .data-table th:nth-child(5), /* Current User */
 .data-table td:nth-child(5) {
-    width: 110px;
-    min-width: 110px;
+    width: 130px; /* Increased for user info */
+    min-width: 130px;
+    max-width: 150px;
 }
 
 .data-table th:nth-child(6), /* Battery */
 .data-table td:nth-child(6) {
-    width: 120px;
-    min-width: 120px;
+    width: 140px; /* Increased for battery info */
+    min-width: 140px;
+    max-width: 160px;
 }
 
 .data-table th:nth-child(7), /* Actions */
 .data-table td:nth-child(7) {
-    width: 160px; /* Increased for delete button */
-    min-width: 160px;
+    width: 180px; /* Increased for all action buttons */
+    min-width: 180px;
+    max-width: 200px;
     text-align: center;
 }
 
-/* FIXED: Ensure headers don't overlap with better padding */
+/* FIXED: Improved header styling */
 .data-table th {
     background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-quaternary) 100%);
     color: var(--text-primary);
     font-weight: 700;
     font-size: 14px;
-    padding: 20px 12px; /* Reduced horizontal padding to fit better */
+    padding: 20px 16px; /* Better padding for readability */
     text-align: left;
     border-bottom: 2px solid var(--border-color);
     text-transform: uppercase;
     letter-spacing: 1px;
     transition: all 0.3s ease;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: nowrap; /* Prevent header text wrapping */
+    position: sticky; /* Keep headers visible during scroll */
+    top: 0;
+    z-index: 10;
 }
 
+/* FIXED: Improved cell styling with better text handling and button alignment */
 .data-table td {
     color: var(--text-secondary);
     font-size: 14px;
-    padding: 16px 12px; /* Consistent with header padding */
+    padding: 16px; /* Optimized padding for better fit */
     border-bottom: 1px solid var(--border-color);
     transition: all 0.2s ease;
-    vertical-align: middle;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    vertical-align: middle; /* Ensure all cells are vertically centered */
+    line-height: 1.4;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+/* SPECIFIC FIX: Actions column cell styling for perfect button alignment */
+.data-table td:nth-child(7) {
+    padding: 12px 8px; /* Reduce padding for actions column */
+    vertical-align: middle !important;
+    text-align: center !important;
+}
+
+/* FIXED: Better row hover effects */
+.data-table tbody tr {
+    transition: all 0.2s ease;
+}
+
+.data-table tbody tr:hover {
+    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-quaternary) 100%);
+    transform: none; /* Removed scale to prevent layout issues */
+    box-shadow: 0 2px 8px var(--shadow-color);
+}
+
+.data-table tbody tr:last-child td {
+    border-bottom: none;
 }
 
 /* ========================================
-   ACTION BUTTONS - UPDATED: Add delete button styles
+   ACTION BUTTONS - FULLY FIXED FOR PERFECT ALIGNMENT
    ======================================== */
 
 .action-buttons {
     display: flex;
-    gap: 4px;
+    gap: 6px;
     justify-content: center;
     align-items: center;
-    flex-wrap: nowrap;
+    flex-wrap: nowrap; /* Prevent wrapping to keep buttons in line */
+    width: 100%;
+    height: 100%; /* Take full height of cell */
+    margin: 0; /* Remove any margin */
+    padding: 0; /* Remove any padding */
 }
 
 .btn-action {
-    padding: 8px 10px;
+    padding: 0; /* Remove padding, use width/height instead */
     border: none;
     border-radius: 8px;
     cursor: pointer;
@@ -255,9 +318,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 36px;
-    height: 36px;
+    min-width: 36px; /* Consistent width */
+    width: 36px; /* Fixed width for consistency */
+    height: 36px; /* Consistent height */
     flex-shrink: 0;
+    font-size: 14px;
+    margin: 0; /* Remove any margin */
 }
 
 .btn-action.view {
@@ -905,7 +971,7 @@
 }
 
 /* ========================================
-   RESPONSIVE DESIGN UPDATES
+   RESPONSIVE DESIGN UPDATES - FIXED FOR ALL SCREEN SIZES
    ======================================== */
 
 /* Large screens - show table */
@@ -919,6 +985,44 @@
     }
 }
 
+/* FIXED: Better responsive behavior for large medium screens */
+@media (max-width: 1400px) {
+    .data-table {
+        min-width: 1140px; /* Adjusted for large medium screens */
+    }
+
+    .data-table th:nth-child(1),
+    .data-table td:nth-child(1) {
+        width: 260px;
+        min-width: 260px;
+    }
+
+    .data-table th:nth-child(3), /* License Plate */
+    .data-table td:nth-child(3) {
+        width: 170px;
+        min-width: 170px;
+    }
+
+    .data-table th,
+    .data-table td {
+        padding: 16px 12px;
+    }
+
+    .data-table td:nth-child(7) {
+        padding: 10px 6px;
+    }
+
+    .action-buttons {
+        gap: 4px;
+    }
+
+    .btn-action {
+        min-width: 32px;
+        width: 32px;
+        height: 32px;
+    }
+}
+
 /* Medium to large tablets - compact table */
 @media (max-width: 1200px) and (min-width: 769px) {
     .admin-container {
@@ -926,13 +1030,35 @@
     }
 
     .data-table {
-        min-width: 900px; /* Slightly reduced for better fit */
+        min-width: 1040px; /* Adjusted for tablet screens */
+    }
+
+    .data-table th:nth-child(1),
+    .data-table td:nth-child(1) {
+        width: 240px;
+        min-width: 240px;
+    }
+
+    .data-table th:nth-child(3), /* License Plate */
+    .data-table td:nth-child(3) {
+        width: 160px;
+        min-width: 160px;
+    }
+
+    .data-table th:nth-child(7),
+    .data-table td:nth-child(7) {
+        width: 160px;
+        min-width: 160px;
     }
 
     .data-table th,
     .data-table td {
-        padding: 12px 8px;
+        padding: 14px 10px; /* Reduced padding for tablets */
         font-size: 13px;
+    }
+
+    .data-table td:nth-child(7) {
+        padding: 10px 6px;
     }
 
     .data-table th:first-child,
@@ -952,7 +1078,8 @@
     }
 
     .team-name {
-        font-size: 10px;
+        font-size: 11px;
+        padding: 4px 8px;
     }
 
     .table-container {
@@ -962,13 +1089,13 @@
     }
 
     .action-buttons {
-        gap: 2px;
+        gap: 4px;
     }
 
     .btn-action {
         min-width: 32px;
+        width: 32px;
         height: 32px;
-        padding: 6px 8px;
     }
 }
 
@@ -1130,7 +1257,56 @@
 
     .btn-action {
         min-width: 28px;
+        width: 28px;
         height: 28px;
-        padding: 4px 6px;
+    }
+}
+
+/* FIXED: Better loading states */
+.data-table.loading {
+    opacity: 0.7;
+}
+
+.data-table.loading td {
+    position: relative;
+}
+
+.data-table.loading td::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* FIXED: Better print styles */
+@media print {
+    .table-container {
+        overflow: visible;
+        box-shadow: none;
+        border: 1px solid #000;
+    }
+
+    .data-table {
+        min-width: auto;
+        font-size: 10px;
+    }
+
+    .data-table th,
+    .data-table td {
+        padding: 8px 4px;
+        border: 1px solid #000;
+    }
+
+    .action-buttons {
+        display: none;
     }
 }
