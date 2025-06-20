@@ -40,8 +40,8 @@
     --shadow-hover: rgba(0, 0, 0, 0.15);
 
     /* Racing Theme Colors */
-    --racing-gold: #FFD700;
-    --racing-orange: #FFA500;
+    --racing-gold: #9146FF;
+    --racing-orange: #6441A4;
     --racing-red: #DC2626;
     --racing-purple: #8B5CF6;
     --racing-blue: #3B82F6;
@@ -51,7 +51,7 @@
     /* Input Colors */
     --input-bg: #FFFFFF;
     --input-border: #E2E8F0;
-    --input-focus: #FFD700;
+    --input-focus: #BF94FF;
 }
 
 /* Dark Mode Colors */
@@ -77,7 +77,7 @@
     --success-light: #064E3B;
     --success-hover: #10B981;
 
-    --warning-color: #FBBF24;
+    --warning-color: #BF94FF;
     --warning-light: #451A03;
     --warning-hover: #F59E0B;
 
@@ -94,7 +94,7 @@
     /* Input Colors for Dark Mode */
     --input-bg: #374151;
     --input-border: #6B7280;
-    --input-focus: #FBBF24;
+    --input-focus: #BF94FF;
 }
 
 /* ========================================

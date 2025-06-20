@@ -119,7 +119,7 @@
     background: rgba(255, 215, 0, 0.1);
     padding: 8px;
     border-radius: 10px;
-    border: 2px solid #FBBF24;
+    border: 2px solid #BF94FF;
 }
 
 .form-card-title {
@@ -297,7 +297,7 @@
 .submission-status.pending {
     background: linear-gradient(135deg, var(--warning-light) 0%, #FDE68A 100%);
     color: #92400E;
-    border: 1px solid #FBBF24;
+    border: 1px solid #BF94FF;
 }
 
 .submission-status.completed {

@@ -133,11 +133,11 @@
 }
 
 .vehicle-info-section {
-    border-color: #FFD700;
+    border-color: #BF94FF;
 }
 
 .vehicle-info-section:hover {
-    border-color: #FFC107;
+    border-color: #BF94FF;
     box-shadow: 0 8px 25px rgba(255, 215, 0, 0.2);
 }
 
