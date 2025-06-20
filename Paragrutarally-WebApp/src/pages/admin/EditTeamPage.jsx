@@ -1,8 +1,9 @@
-// src/pages/admin/EditTeamPage.jsx - Fun Racing Theme Edit Team Form
+// src/pages/admin/EditTeamPage.jsx - TRANSLATED VERSION
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useLanguage } from '../../contexts/LanguageContext'; // Add this import
 import { usePermissions } from '../../hooks/usePermissions.jsx';
 import { getTeamById, updateTeam } from '../../services/teamService';
 import { getAllKids } from '../../services/kidService';
@@ -24,13 +25,14 @@ import {
     IconTarget as Target,
     IconEdit as Edit
 } from '@tabler/icons-react';
-import './EditTeamPage.css'; // Reuse the same CSS
+import './EditTeamPage.css';
 
 const EditTeamPage = () => {
     const navigate = useNavigate();
     const { id } = useParams();
     const location = useLocation();
     const { isDarkMode, appliedTheme } = useTheme();
+    const { t } = useLanguage(); // Add this hook
     const { permissions, userRole } = usePermissions();
 
     const [isLoading, setIsLoading] = useState(true);
@@ -70,7 +72,7 @@ const EditTeamPage = () => {
             // Load team data
             const teamData = await getTeamById(id);
             if (!teamData) {
-                setErrors({ general: 'Team not found!' });
+                setErrors({ general: t('teams.teamNotFound', 'Team not found!') });
                 return;
             }
 
@@ -88,7 +90,7 @@ const EditTeamPage = () => {
 
         } catch (error) {
             console.error('Error loading team data:', error);
-            setErrors({ general: 'Failed to load team data. Please try again.' });
+            setErrors({ general: t('teams.loadDataError', 'Failed to load team data. Please try again.') });
         } finally {
             setIsLoading(false);
         }
@@ -132,15 +134,18 @@ const EditTeamPage = () => {
 
         // Required field validations
         if (!formData.name.trim()) {
-            newErrors.name = 'Team name is required';
+            newErrors.name = t('teams.nameRequired', 'Team name is required');
         }
 
         if (formData.maxCapacity < 1 || formData.maxCapacity > 50) {
-            newErrors.maxCapacity = 'Max capacity must be between 1 and 50';
+            newErrors.maxCapacity = t('teams.capacityRange', 'Max capacity must be between 1 and 50');
         }
 
         if (formData.kidIds.length > formData.maxCapacity) {
-            newErrors.kidIds = `Cannot assign more kids (${formData.kidIds.length}) than max capacity (${formData.maxCapacity})`;
+            newErrors.kidIds = t('teams.tooManyKids', 'Cannot assign more kids ({current}) than max capacity ({max})', {
+                current: formData.kidIds.length,
+                max: formData.maxCapacity
+            });
         }
 
         setErrors(newErrors);
@@ -161,13 +166,13 @@ const EditTeamPage = () => {
             // Navigate back with success message
             navigate(`/admin/teams/view/${id}`, {
                 state: {
-                    message: `🏁 Team "${formData.name}" has been updated successfully! 🏎️`,
+                    message: t('teams.updateSuccess', '🏁 Team "{teamName}" has been updated successfully! 🏎️', { teamName: formData.name }),
                     type: 'success'
                 }
             });
         } catch (error) {
             console.error('Error updating team:', error);
-            setErrors({ general: 'Failed to update team. Please try again.' });
+            setErrors({ general: t('teams.updateError', 'Failed to update team. Please try again.') });
         } finally {
             setIsSubmitting(false);
         }
@@ -194,7 +199,7 @@ const EditTeamPage = () => {
                 <div className={`add-team-page ${appliedTheme}-mode`}>
                     <div className="loading-container">
                         <div className="loading-spinner"></div>
-                        <p>Loading team data...</p>
+                        <p>{t('teams.loadingTeamData', 'Loading team data...')}</p>
                     </div>
                 </div>
             </Dashboard>
@@ -206,11 +211,11 @@ const EditTeamPage = () => {
             <Dashboard requiredRole={userRole}>
                 <div className={`add-team-page ${appliedTheme}-mode`}>
                     <div className="error-container">
-                        <h3>Error</h3>
+                        <h3>{t('common.error', 'Error')}</h3>
                         <p>{errors.general}</p>
                         <button onClick={() => navigate('/admin/teams')} className="btn-primary">
                             <ArrowLeft className="btn-icon" size={18} />
-                            Back to Teams
+                            {t('teams.backToTeams', 'Back to Teams')}
                         </button>
                     </div>
                 </div>
@@ -228,19 +233,18 @@ const EditTeamPage = () => {
                     onClick={handleCancel}
                     className={`back-button ${appliedTheme}-back-button`}>
                     <ArrowLeft className="btn-icon" size={20} />
-                    Back to Teams
+                    {t('teams.backToTeams', 'Back to Teams')}
                 </button>
-                    <div className="header-content">
-                        <div className="title-section">
-                            <h1>
-                                <Edit size={32} className="page-title-icon" />
-                                Update Racing Team!
-                                <Trophy size={24} className="trophy-icon" />
-                            </h1>
-                            <p className="subtitle">Here you can update the team {formData.name} 🏁</p>
-                        </div>
+                <div className="header-content">
+                    <div className="title-section">
+                        <h1>
+                            <Edit size={32} className="page-title-icon" />
+                            {t('teams.updateRacingTeam', 'Update Racing Team!')}
+                            <Trophy size={24} className="trophy-icon" />
+                        </h1>
+                        <p className="subtitle">{t('teams.viewingCurrentInfo', 'Here you can update the team {teamName} 🏁', { teamName: formData.name })}</p>
                     </div>
-
+                </div>
 
                 <div className="add-team-container">
                     {errors.general && (
@@ -253,7 +257,7 @@ const EditTeamPage = () => {
                     {!hasChanges() && (
                         <div className="alert info-alert">
                             <Check size={20} />
-                            You're viewing Team {formData.name}'s current information. Make changes below to update! 🏎️
+                            {t('teams.viewingCurrentInfo', 'You\'re viewing Team {teamName}\'s current information. Make changes below to update! 🏎️', { teamName: formData.name })}
                         </div>
                     )}
 
@@ -262,20 +266,20 @@ const EditTeamPage = () => {
                         <div className="form-section team-info-section">
                             <div className="section-header">
                                 <Trophy className="section-icon" size={24} />
-                                <h2>🏎️ Team Identity</h2>
+                                <h2>{t('teams.teamIdentity', '🏎️ Team Identity')}</h2>
                             </div>
                             <div className="form-grid">
                                 <div className="form-group">
                                     <div className="field-wrapper">
                                         <label className="form-label">
                                             <Target className="label-icon" size={16} />
-                                            Team Name *
+                                            {t('teams.teamName', 'Team Name')} {t('editKid.required', '*')}
                                         </label>
                                         <input
                                             type="text"
                                             value={formData.name}
                                             onChange={(e) => handleInputChange('name', e.target.value)}
-                                            placeholder="Thunder Racers, Speed Demons, Lightning Bolts..."
+                                            placeholder={t('teams.teamNamePlaceholder', 'Thunder Racers, Speed Demons, Lightning Bolts...')}
                                             className="form-input racing-input"
                                         />
                                         {errors.name && <span className="error-text">{errors.name}</span>}
@@ -286,7 +290,7 @@ const EditTeamPage = () => {
                                     <div className="field-wrapper">
                                         <label className="form-label">
                                             <Users className="label-icon" size={16} />
-                                            Max Racers
+                                            {t('teams.maxRacers', 'Max Racers')}
                                         </label>
                                         <input
                                             type="number"
@@ -304,12 +308,12 @@ const EditTeamPage = () => {
                                     <div className="field-wrapper">
                                         <label className="form-label">
                                             <FileText className="label-icon" size={16} />
-                                            Team Description
+                                            {t('teams.teamDescription', 'Team Description')}
                                         </label>
                                         <textarea
                                             value={formData.description}
                                             onChange={(e) => handleInputChange('description', e.target.value)}
-                                            placeholder="What makes this team special? Their racing spirit, teamwork, or special skills..."
+                                            placeholder={t('teams.teamDescriptionPlaceholder', 'What makes this team special? Their racing spirit, teamwork, or special skills...')}
                                             className="form-textarea racing-textarea"
                                             rows={3}
                                         />
@@ -320,15 +324,15 @@ const EditTeamPage = () => {
                                     <div className="field-wrapper">
                                         <label className="form-label">
                                             <Check className="label-icon" size={16} />
-                                            Team Status
+                                            {t('teams.teamStatus', 'Team Status')}
                                         </label>
                                         <select
                                             value={formData.active ? 'active' : 'inactive'}
                                             onChange={(e) => handleInputChange('active', e.target.value === 'active')}
                                             className="form-select racing-select"
                                         >
-                                            <option value="active">✅ Active & Ready to Race</option>
-                                            <option value="inactive">⏸️ Inactive (Prep Mode)</option>
+                                            <option value="active">{t('teams.activeReady', '✅ Active & Ready to Race')}</option>
+                                            <option value="inactive">{t('teams.inactivePrep', '⏸️ Inactive (Prep Mode)')}</option>
                                         </select>
                                     </div>
                                 </div>
@@ -339,13 +343,16 @@ const EditTeamPage = () => {
                         <div className={`form-section instructors-section ${focusInstructor ? 'highlight-section' : ''}`}>
                             <div className="section-header">
                                 <User className="section-icon" size={24} />
-                                <h2>👨‍🏫 Racing Instructors {focusInstructor && <span className="focus-indicator">← Update Here!</span>}</h2>
+                                <h2>
+                                    {t('teams.racingInstructors', '👨‍🏫 Racing Instructors')}
+                                    {focusInstructor && <span className="focus-indicator">{t('teams.focusIndicator', '← Update Here!')}</span>}
+                                </h2>
                             </div>
                             <div className="instructors-grid">
                                 {instructors.length === 0 ? (
                                     <div className="empty-state">
                                         <User className="empty-icon" size={40} />
-                                        <p>No instructors available. Add some instructors first!</p>
+                                        <p>{t('teams.noInstructorsAvailable', 'No instructors available. Add some instructors first!')}</p>
                                     </div>
                                 ) : (
                                     instructors.map(instructor => (
@@ -376,19 +383,19 @@ const EditTeamPage = () => {
                                     <div className="field-wrapper">
                                         <label className="form-label">
                                             <Trophy className="label-icon" size={16} />
-                                            Team Leader
+                                            {t('teams.teamLeader', 'Team Leader')}
                                         </label>
                                         <select
                                             value={formData.teamLeaderId}
                                             onChange={(e) => handleInputChange('teamLeaderId', e.target.value)}
                                             className={`form-select racing-select ${focusInstructor ? 'focus-field' : ''}`}
                                         >
-                                            <option value="">🎯 Choose Team Leader</option>
+                                            <option value="">{t('teams.chooseTeamLeader', '🎯 Choose Team Leader')}</option>
                                             {formData.instructorIds.map(instructorId => {
                                                 const instructor = instructors.find(i => i.id === instructorId);
                                                 return (
                                                     <option key={instructorId} value={instructorId}>
-                                                        👑 {instructor?.name}
+                                                        {t('teams.leaderOption', '👑 {instructorName}', { instructorName: instructor?.name })}
                                                     </option>
                                                 );
                                             })}
@@ -402,7 +409,13 @@ const EditTeamPage = () => {
                         <div className={`form-section kids-section ${focusKids ? 'highlight-section' : ''}`}>
                             <div className="section-header">
                                 <Baby className="section-icon" size={24} />
-                                <h2>🏎️ Team Racers ({formData.kidIds.length}/{formData.maxCapacity}) {focusKids && <span className="focus-indicator">← Update Here!</span>}</h2>
+                                <h2>
+                                    {t('teams.teamRacers', '🏎️ Team Racers ({current}/{max})', {
+                                        current: formData.kidIds.length,
+                                        max: formData.maxCapacity
+                                    })}
+                                    {focusKids && <span className="focus-indicator">{t('teams.focusIndicator', '← Update Here!')}</span>}
+                                </h2>
                             </div>
 
                             {errors.kidIds && (
@@ -416,8 +429,8 @@ const EditTeamPage = () => {
                                 {availableKids.length === 0 ? (
                                     <div className="empty-state">
                                         <Baby className="empty-icon" size={40} />
-                                        <p>No kids available for assignment! 🎉</p>
-                                        <small>All kids are already assigned to teams.</small>
+                                        <p>{t('teams.noKidsAvailable', 'No kids available for assignment! 🎉')}</p>
+                                        <small>{t('teams.allKidsAssigned', 'All kids are already assigned to teams.')}</small>
                                     </div>
                                 ) : (
                                     availableKids.map(kid => (
@@ -441,7 +454,7 @@ const EditTeamPage = () => {
                                                     <div>👨‍👩‍👧‍👦 {kid.parentInfo.name}</div>
                                                 )}
                                                 {kid.teamId && kid.teamId !== id && (
-                                                    <div className="current-team">📍 Currently in other team</div>
+                                                    <div className="current-team">{t('teams.currentlyInOtherTeam', '📍 Currently in other team')}</div>
                                                 )}
                                             </div>
                                         </div>
@@ -454,19 +467,19 @@ const EditTeamPage = () => {
                         <div className="form-section notes-section">
                             <div className="section-header">
                                 <FileText className="section-icon" size={24} />
-                                <h2>📝 Team Notes</h2>
+                                <h2>{t('teams.teamNotes', '📝 Team Notes')}</h2>
                             </div>
                             <div className="form-grid">
                                 <div className="form-group full-width">
                                     <div className="field-wrapper">
                                         <label className="form-label">
                                             <Sparkles className="label-icon" size={16} />
-                                            Special Notes & Strategy
+                                            {t('teams.specialNotesStrategy', '📝 Special Notes & Strategy')}
                                         </label>
                                         <textarea
                                             value={formData.notes}
                                             onChange={(e) => handleInputChange('notes', e.target.value)}
-                                            placeholder="Team strategy, special requirements, or any other important notes..."
+                                            placeholder={t('teams.notesPlaceholder', 'Team strategy, special requirements, or any other important notes...')}
                                             className="form-textarea racing-textarea"
                                             rows={4}
                                         />
@@ -479,7 +492,7 @@ const EditTeamPage = () => {
                         <div className="form-actions racing-actions">
                             <button type="button" onClick={handleCancel} className="btn-cancel">
                                 <ArrowLeft className="btn-icon" size={18} />
-                                Cancel
+                                {t('general.cancel', 'Cancel')}
                             </button>
                             <button
                                 type="submit"
@@ -489,12 +502,12 @@ const EditTeamPage = () => {
                                 {isSubmitting ? (
                                     <>
                                         <div className="loading-spinner-mini"></div>
-                                        Updating Team...
+                                        {t('teams.updatingTeam', 'Updating Team...')}
                                     </>
                                 ) : (
                                     <>
                                         <Save className="btn-icon" size={18} />
-                                        {hasChanges() ? 'Save Updates! 🏁' : 'No Changes to Save'}
+                                        {hasChanges() ? t('teams.saveUpdates', 'Save Updates! 🏁') : t('teams.noChangesToSave', 'No Changes to Save')}
                                     </>
                                 )}
                             </button>
