@@ -1,8 +1,9 @@
-// src/pages/admin/VehiclesPage.jsx - Enhanced with Mobile-Responsive Card Layout and Delete Function
+// src/pages/admin/VehiclesPage.jsx - Enhanced with Mobile-Responsive Card Layout, Delete Function, and Full Translation Support
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { usePermissions } from '../../hooks/usePermissions.jsx';
 import { getAllVehicles, getVehiclesByTeam, getVehiclesByKids, deleteVehicle } from '../../services/vehicleService';
 import { unassignVehicleFromKid } from '../../services/vehicleAssignmentService'; // Import for cleanup
@@ -31,6 +32,7 @@ import './VehiclePage.css';
 const VehiclesPage = () => {
     const navigate = useNavigate();
     const { appliedTheme } = useTheme();
+    const { t } = useLanguage();
     const { permissions, userRole, userData } = usePermissions();
 
     const [vehicles, setVehicles] = useState([]);
@@ -96,7 +98,7 @@ const VehiclesPage = () => {
 
         } catch (error) {
             console.error('Error loading data:', error);
-            setError('Failed to load vehicles. Please try again.');
+            setError(t('vehicles.failedToLoad', 'Failed to load vehicles. Please try again.'));
         } finally {
             setIsLoading(false);
         }
@@ -136,11 +138,11 @@ const VehiclesPage = () => {
         setFilteredVehicles(filtered);
     };
 
-    // Helper function to get team name from team ID
+    // Helper function to get team name from team ID - TRANSLATED
     const getTeamName = (teamId) => {
-        if (!teamId) return 'Unassigned';
+        if (!teamId) return t('vehicles.unassigned', 'Unassigned');
         const team = teams.find(t => t.id === teamId);
-        return team ? team.name : 'Unknown Team';
+        return team ? team.name : t('vehicles.unknownTeam', 'Unknown Team');
     };
 
     const handleViewVehicle = (vehicleId) => {
@@ -159,21 +161,21 @@ const VehiclesPage = () => {
         }
     };
 
-    // NEW: Handle delete vehicle
+    // Handle delete vehicle - TRANSLATED
     const handleDeleteVehicle = async (vehicle) => {
         if (userRole !== 'admin') {
-            alert('You do not have permission to delete vehicles.');
+            alert(t('vehicles.delete.noPermission', 'You do not have permission to delete vehicles.'));
             return;
         }
 
         const vehicleName = `${vehicle.make} ${vehicle.model} (${vehicle.licensePlate})`;
 
-        // Extra confirmation if vehicle is currently assigned
-        let confirmMessage = `Are you sure you want to delete ${vehicleName}?`;
+        // Extra confirmation if vehicle is currently assigned - TRANSLATED
+        let confirmMessage = t('vehicles.delete.confirm', 'Are you sure you want to delete {vehicleName}?', { vehicleName });
         if (vehicle.currentKidId) {
-            confirmMessage += '\n\nWARNING: This vehicle is currently assigned to a racer. Deleting it will remove the assignment.';
+            confirmMessage += '\n\n' + t('vehicles.delete.warningAssigned', 'WARNING: This vehicle is currently assigned to a racer. Deleting it will remove the assignment.');
         }
-        confirmMessage += '\n\nThis action cannot be undone.';
+        confirmMessage += '\n\n' + t('vehicles.delete.cannotUndo', 'This action cannot be undone.');
 
         if (!window.confirm(confirmMessage)) {
             return;
@@ -194,11 +196,11 @@ const VehiclesPage = () => {
             // Update local state
             setVehicles(prev => prev.filter(v => v.id !== vehicle.id));
 
-            alert(`${vehicleName} has been successfully deleted.`);
+            alert(t('vehicles.delete.success', '{vehicleName} has been successfully deleted.', { vehicleName }));
 
         } catch (error) {
             console.error('Error deleting vehicle:', error);
-            alert(`Failed to delete ${vehicleName}: ${error.message}`);
+            alert(t('vehicles.delete.failed', 'Failed to delete {vehicleName}: {error}', { vehicleName, error: error.message }));
         } finally {
             setIsDeleting(null);
         }
@@ -214,14 +216,15 @@ const VehiclesPage = () => {
         return userRole === 'admin';
     };
 
+    // Status badge function - TRANSLATED
     const getStatusBadge = (vehicle) => {
         if (!vehicle.active) {
-            return <span className="badge danger">Inactive</span>;
+            return <span className="badge danger">{t('vehicles.status.inactive', 'Inactive')}</span>;
         }
         if (vehicle.currentKidId) {
-            return <span className="badge warning">In Use</span>;
+            return <span className="badge warning">{t('vehicles.status.inUse', 'In Use')}</span>;
         }
-        return <span className="badge success">Available</span>;
+        return <span className="badge success">{t('vehicles.status.available', 'Available')}</span>;
     };
 
     const getVehicleStats = () => {
@@ -233,7 +236,7 @@ const VehiclesPage = () => {
         return { total, active, inUse, available };
     };
 
-    // Mobile card component - UPDATED: Add delete button
+    // Mobile card component - TRANSLATED
     const VehicleMobileCard = ({ vehicle }) => (
         <div className="vehicle-mobile-card">
             <div className="vehicle-mobile-header">
@@ -260,33 +263,33 @@ const VehiclesPage = () => {
 
             <div className="vehicle-mobile-details">
                 <div className="vehicle-mobile-detail">
-                    <div className="vehicle-mobile-detail-label">Team</div>
+                    <div className="vehicle-mobile-detail-label">{t('vehicles.mobile.team', 'Team')}</div>
                     <div className="vehicle-mobile-detail-value">
                         <span className="team-name">{getTeamName(vehicle.teamId)}</span>
                     </div>
                 </div>
                 <div className="vehicle-mobile-detail">
-                    <div className="vehicle-mobile-detail-label">License Plate</div>
+                    <div className="vehicle-mobile-detail-label">{t('vehicles.mobile.licensePlate', 'License Plate')}</div>
                     <div className="vehicle-mobile-detail-value">
                         <span className="license-plate">{vehicle.licensePlate}</span>
                     </div>
                 </div>
                 <div className="vehicle-mobile-detail">
-                    <div className="vehicle-mobile-detail-label">Current User</div>
+                    <div className="vehicle-mobile-detail-label">{t('vehicles.mobile.currentUser', 'Current User')}</div>
                     <div className="vehicle-mobile-detail-value">
                         {vehicle.currentKidId ? (
-                            <span className="current-user">Assigned</span>
+                            <span className="current-user">{t('vehicles.status.assigned', 'Assigned')}</span>
                         ) : (
-                            <span className="no-user">Available</span>
+                            <span className="no-user">{t('vehicles.status.available', 'Available')}</span>
                         )}
                     </div>
                 </div>
                 <div className="vehicle-mobile-detail">
-                    <div className="vehicle-mobile-detail-label">Battery</div>
+                    <div className="vehicle-mobile-detail-label">{t('vehicles.mobile.battery', 'Battery')}</div>
                     <div className="vehicle-mobile-detail-value">
                         <div className="battery-info">
                             <Battery size={16} />
-                            <span>{vehicle.batteryType || 'N/A'}</span>
+                            <span>{vehicle.batteryType || t('vehicles.notAvailable', 'N/A')}</span>
                         </div>
                     </div>
                 </div>
@@ -300,26 +303,26 @@ const VehiclesPage = () => {
                     <button
                         onClick={() => handleViewVehicle(vehicle.id)}
                         className="btn-mobile-action btn-mobile-view"
-                        title="View Vehicle"
+                        title={t('vehicles.actions.viewVehicle', 'View Vehicle')}
                     >
                         <Eye size={14} />
-                        View
+                        {t('vehicles.actions.view', 'View')}
                     </button>
                     {canEdit(vehicle) && (
                         <button
                             onClick={() => handleEditVehicle(vehicle.id)}
                             className="btn-mobile-action btn-mobile-edit"
-                            title="Edit Vehicle"
+                            title={t('vehicles.actions.editVehicle', 'Edit Vehicle')}
                         >
                             <Edit size={14} />
-                            Edit
+                            {t('vehicles.actions.edit', 'Edit')}
                         </button>
                     )}
                     {canDelete(vehicle) && (
                         <button
                             onClick={() => handleDeleteVehicle(vehicle)}
                             className="btn-mobile-action btn-mobile-delete"
-                            title="Delete Vehicle"
+                            title={t('vehicles.actions.deleteVehicle', 'Delete Vehicle')}
                             disabled={isDeleting === vehicle.id}
                         >
                             {isDeleting === vehicle.id ? (
@@ -327,7 +330,7 @@ const VehiclesPage = () => {
                             ) : (
                                 <Trash2 size={14} />
                             )}
-                            {isDeleting === vehicle.id ? 'Deleting...' : 'Delete'}
+                            {isDeleting === vehicle.id ? t('vehicles.deleting', 'Deleting...') : t('vehicles.actions.delete', 'Delete')}
                         </button>
                     )}
                 </div>
@@ -341,7 +344,7 @@ const VehiclesPage = () => {
                 <div className={`admin-page vehicles-page ${appliedTheme}-mode`}>
                     <div className="loading-container">
                         <div className="loading-spinner"></div>
-                        <p>Loading vehicles...</p>
+                        <p>{t('vehicles.loadingVehicles', 'Loading vehicles...')}</p>
                     </div>
                 </div>
             </Dashboard>
@@ -353,10 +356,10 @@ const VehiclesPage = () => {
     return (
         <Dashboard requiredRole={userRole}>
             <div className={`admin-page vehicles-page ${appliedTheme}-mode`}>
-                {/* Page Title */}
+                {/* Page Title - TRANSLATED */}
                 <h1>
                     <Car size={32} className="page-title-icon" />
-                    Racing Vehicles
+                    {t('vehicles.title', 'Racing Vehicles')}
                     <Settings size={24} className="sparkle-icon" />
                 </h1>
                 <div className="page-header">
@@ -364,25 +367,22 @@ const VehiclesPage = () => {
                         {(userRole === 'admin' || userRole === 'instructor') && (
                             <button onClick={handleAddVehicle} className="btn-primary">
                                 <Plus size={18} />
-                                Add Vehicle
+                                {t('vehicles.addVehicle', 'Add Vehicle')}
                             </button>
                         )}
                     </div>
                 </div>
                 <div className="vehicle-management-container">
-                    {/* Header with stats */}
-
-
-                    {/* Stats Cards */}
+                    {/* Stats Cards - TRANSLATED */}
                     <div className="stats-grid">
                         <div className="stat-card total">
                             <div className="stat-icon">
                                 <Car size={40} />
                             </div>
                             <div className="stat-content">
-                                <h3>Total Vehicles</h3>
+                                <h3>{t('vehicles.totalVehicles', 'Total Vehicles')}</h3>
                                 <p className="stat-value">{stats.total}</p>
-                                <p className="stat-subtitle">In Fleet</p>
+                                <p className="stat-subtitle">{t('vehicles.inFleet', 'In Fleet')}</p>
                             </div>
                         </div>
 
@@ -391,9 +391,9 @@ const VehiclesPage = () => {
                                 <Settings size={40} />
                             </div>
                             <div className="stat-content">
-                                <h3>Active Vehicles</h3>
+                                <h3>{t('vehicles.activeVehicles', 'Active Vehicles')}</h3>
                                 <p className="stat-value">{stats.active}</p>
-                                <p className="stat-subtitle">Ready to Race</p>
+                                <p className="stat-subtitle">{t('vehicles.readyToRace', 'Ready to Race')}</p>
                             </div>
                         </div>
 
@@ -402,9 +402,9 @@ const VehiclesPage = () => {
                                 <User size={40} />
                             </div>
                             <div className="stat-content">
-                                <h3>In Use</h3>
+                                <h3>{t('vehicles.inUse', 'In Use')}</h3>
                                 <p className="stat-value">{stats.inUse}</p>
-                                <p className="stat-subtitle">Currently Racing</p>
+                                <p className="stat-subtitle">{t('vehicles.currentlyRacing', 'Currently Racing')}</p>
                             </div>
                         </div>
 
@@ -413,25 +413,25 @@ const VehiclesPage = () => {
                                 <Battery size={40} />
                             </div>
                             <div className="stat-content">
-                                <h3>Available</h3>
+                                <h3>{t('vehicles.available', 'Available')}</h3>
                                 <p className="stat-value">{stats.available}</p>
-                                <p className="stat-subtitle">Ready for Assignment</p>
+                                <p className="stat-subtitle">{t('vehicles.readyForAssignment', 'Ready for Assignment')}</p>
                             </div>
                         </div>
                     </div>
 
-                    {/* Search and Filters */}
+                    {/* Search and Filters - TRANSLATED */}
                     <div className="search-filter-section">
                         <div className="search-container">
                             <label className="search-label">
                                 <Search size={16} />
-                                Search Vehicles
+                                {t('vehicles.searchVehicles', 'Search Vehicles')}
                             </label>
                             <div className="search-input-wrapper">
                                 <Search className="search-icon" size={18} />
                                 <input
                                     type="text"
-                                    placeholder="Search by make, model, license plate, or team..."
+                                    placeholder={t('vehicles.searchPlaceholder', 'Search by make, model, license plate, or team...')}
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                     className="search-input"
@@ -450,15 +450,15 @@ const VehiclesPage = () => {
                         <div className="filter-container">
                             <label className="filter-label">
                                 <Filter size={16} />
-                                Team
+                                {t('vehicles.teamFilter', 'Team')}
                             </label>
                             <select
                                 value={teamFilter}
                                 onChange={(e) => setTeamFilter(e.target.value)}
                                 className="filter-select"
                             >
-                                <option value="">All Teams</option>
-                                <option value="">Unassigned</option>
+                                <option value="">{t('vehicles.allTeams', 'All Teams')}</option>
+                                <option value="">{t('vehicles.unassigned', 'Unassigned')}</option>
                                 {teams.map(team => (
                                     <option key={team.id} value={team.id}>{team.name}</option>
                                 ))}
@@ -468,30 +468,30 @@ const VehiclesPage = () => {
                         <div className="filter-container">
                             <label className="filter-label">
                                 <Settings size={16} />
-                                Status
+                                {t('vehicles.statusFilter', 'Status')}
                             </label>
                             <select
                                 value={statusFilter}
                                 onChange={(e) => setStatusFilter(e.target.value)}
                                 className="filter-select"
                             >
-                                <option value="">All Status</option>
-                                <option value="active">Active</option>
-                                <option value="inactive">Inactive</option>
-                                <option value="in-use">In Use</option>
-                                <option value="available">Available</option>
+                                <option value="">{t('vehicles.allStatus', 'All Status')}</option>
+                                <option value="active">{t('vehicles.active', 'Active')}</option>
+                                <option value="inactive">{t('vehicles.inactive', 'Inactive')}</option>
+                                <option value="in-use">{t('vehicles.inUse', 'In Use')}</option>
+                                <option value="available">{t('vehicles.available', 'Available')}</option>
                             </select>
                         </div>
                     </div>
 
-                    {/* Results Summary */}
+                    {/* Results Summary - TRANSLATED */}
                     {(searchTerm || teamFilter || statusFilter) && (
                         <div className="results-summary">
                             <Car className="results-icon" size={18} />
-                            Showing {filteredVehicles.length} of {vehicles.length} vehicles
-                            {searchTerm && <span className="search-applied"> matching "{searchTerm}"</span>}
-                            {teamFilter && <span className="filter-applied"> in team "{getTeamName(teamFilter)}"</span>}
-                            {statusFilter && <span className="filter-applied"> with status "{statusFilter}"</span>}
+                            {t('vehicles.showing', 'Showing')} {filteredVehicles.length} {t('vehicles.of', 'of')} {vehicles.length} {t('vehicles.vehicles', 'vehicles')}
+                            {searchTerm && <span className="search-applied"> {t('vehicles.matching', 'matching')} "{searchTerm}"</span>}
+                            {teamFilter && <span className="filter-applied"> {t('vehicles.inTeam', 'in team')} "{getTeamName(teamFilter)}"</span>}
+                            {statusFilter && <span className="filter-applied"> {t('vehicles.withStatus', 'with status')} "{statusFilter}"</span>}
                         </div>
                     )}
 
@@ -507,34 +507,34 @@ const VehiclesPage = () => {
                     {filteredVehicles.length === 0 ? (
                         <div className="empty-state">
                             <Car className="empty-icon" size={80} />
-                            <h3>No Vehicles Found</h3>
+                            <h3>{t('vehicles.noVehiclesFound', 'No Vehicles Found')}</h3>
                             <p>
                                 {searchTerm || teamFilter || statusFilter
-                                    ? "No vehicles match your current filters."
-                                    : "No vehicles have been added yet."
+                                    ? t('vehicles.noVehiclesMatch', 'No vehicles match your current filters.')
+                                    : t('vehicles.noVehiclesAdded', 'No vehicles have been added yet.')
                                 }
                             </p>
                             {(userRole === 'admin' || userRole === 'instructor') && !searchTerm && !teamFilter && !statusFilter && (
                                 <button onClick={handleAddVehicle} className="btn-primary">
                                     <Plus size={18} />
-                                    Add First Vehicle
+                                    {t('vehicles.addFirstVehicle', 'Add First Vehicle')}
                                 </button>
                             )}
                         </div>
                     ) : (
                         <>
-                            {/* Desktop Table View - UPDATED: Better column widths and add delete button */}
+                            {/* Desktop Table View - TRANSLATED */}
                             <div className="table-container">
                                 <table className="data-table">
                                     <thead>
                                     <tr>
-                                        <th>Vehicle</th>
-                                        <th>Team</th>
-                                        <th>License Plate</th>
-                                        <th>Status</th>
-                                        <th>Current User</th>
-                                        <th>Battery</th>
-                                        <th>Actions</th>
+                                        <th>{t('vehicles.table.vehicle', 'Vehicle')}</th>
+                                        <th>{t('vehicles.table.team', 'Team')}</th>
+                                        <th>{t('vehicles.table.licensePlate', 'License Plate')}</th>
+                                        <th>{t('vehicles.table.status', 'Status')}</th>
+                                        <th>{t('vehicles.table.currentUser', 'Current User')}</th>
+                                        <th>{t('vehicles.table.battery', 'Battery')}</th>
+                                        <th>{t('vehicles.table.actions', 'Actions')}</th>
                                     </tr>
                                     </thead>
                                     <tbody>
@@ -574,15 +574,15 @@ const VehiclesPage = () => {
                                             </td>
                                             <td>
                                                 {vehicle.currentKidId ? (
-                                                    <span className="current-user">Assigned</span>
+                                                    <span className="current-user">{t('vehicles.status.assigned', 'Assigned')}</span>
                                                 ) : (
-                                                    <span className="no-user">Available</span>
+                                                    <span className="no-user">{t('vehicles.status.available', 'Available')}</span>
                                                 )}
                                             </td>
                                             <td>
                                                 <div className="battery-info">
                                                     <Battery size={16} />
-                                                    <span>{vehicle.batteryType || 'N/A'}</span>
+                                                    <span>{vehicle.batteryType || t('vehicles.notAvailable', 'N/A')}</span>
                                                 </div>
                                             </td>
                                             <td>
@@ -590,7 +590,7 @@ const VehiclesPage = () => {
                                                     <button
                                                         onClick={() => handleViewVehicle(vehicle.id)}
                                                         className="btn-action view"
-                                                        title="View Vehicle"
+                                                        title={t('vehicles.actions.viewVehicle', 'View Vehicle')}
                                                     >
                                                         <Eye size={14} />
                                                     </button>
@@ -598,7 +598,7 @@ const VehiclesPage = () => {
                                                         <button
                                                             onClick={() => handleEditVehicle(vehicle.id)}
                                                             className="btn-action edit"
-                                                            title="Edit Vehicle"
+                                                            title={t('vehicles.actions.editVehicle', 'Edit Vehicle')}
                                                         >
                                                             <Edit size={14} />
                                                         </button>
@@ -607,7 +607,7 @@ const VehiclesPage = () => {
                                                         <button
                                                             onClick={() => handleDeleteVehicle(vehicle)}
                                                             className="btn-action delete"
-                                                            title="Delete Vehicle"
+                                                            title={t('vehicles.actions.deleteVehicle', 'Delete Vehicle')}
                                                             disabled={isDeleting === vehicle.id}
                                                         >
                                                             {isDeleting === vehicle.id ? (
