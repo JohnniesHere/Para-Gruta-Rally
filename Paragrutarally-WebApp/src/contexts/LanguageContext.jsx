@@ -21,6 +21,11 @@ const translations = {
         'nav.myAccount': 'My Account',
         'nav.signOut': 'Sign Out',
         'nav.logo': 'ParaGrutaRally',
+        'nav.events': 'Events',
+        'nav.users': 'Users',
+        'nav.kids': 'Kids',
+        'nav.teams': 'Teams',
+        'nav.vehicles': 'Vehicles',
 
         // Dashboard
         'dashboard.title': 'Admin Dashboard',
@@ -337,6 +342,11 @@ const translations = {
         'nav.myAccount': 'החשבון שלי',
         'nav.signOut': 'התנתק',
         'nav.logo': 'פראגרוטרלי',
+        'nav.events': 'אירועים',
+        'nav.users': 'משתמשים',
+        'nav.kids': 'ילדים',
+        'nav.teams': 'קבוצות',
+        'nav.vehicles': 'רכבים',
 
         // Dashboard
         'dashboard.title': 'לוח בקרה ראשי',

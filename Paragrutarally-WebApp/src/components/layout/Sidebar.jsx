@@ -1,4 +1,4 @@
-// src/components/layout/Sidebar.jsx - Beautiful Tabler Icons with Vehicles Added
+// src/components/layout/Sidebar.jsx - Beautiful Tabler Icons with Vehicles Added + Translations
 import React from 'react';
 import {NavLink} from 'react-router-dom';
 import {
@@ -7,15 +7,18 @@ import {
     IconUsers as Users,
     IconUserCircle as Baby,
     IconUsersGroup as UserGroup,
-    IconCar as Car,  // ADDED: Import Car icon for Vehicles
+    IconCar as Car,
     IconFileText as FileText,
     IconRefresh as RefreshCw,
     IconDownload as Download,
     IconPhoto as Photo
 } from '@tabler/icons-react';
+import { useLanguage } from '../../contexts/LanguageContext';
 import './Sidebar.css';
 
 const Sidebar = ({userRole}) => {
+    const { t } = useLanguage();
+
     return (
         <div className="sidebar">
             <div className="sidebar-links">
@@ -28,71 +31,70 @@ const Sidebar = ({userRole}) => {
                             end
                         >
                             <Dashboard className="sidebar-icon" size={20}/>
-                            Dashboard
+                            {t('nav.dashboard', 'Dashboard')}
                         </NavLink>
                         <NavLink
                             to="/admin/events"
                             className={({isActive}) => isActive ? 'active' : ''}
                         >
                             <Calendar className="sidebar-icon" size={20}/>
-                            Events
+                            {t('nav.events', 'Events')}
                         </NavLink>
                         <NavLink
                             to="/admin/users"
                             className={({isActive}) => isActive ? 'active' : ''}
                         >
                             <Users className="sidebar-icon" size={20}/>
-                            Users
+                            {t('nav.users', 'Users')}
                         </NavLink>
                         <NavLink
                             to="/admin/kids"
                             className={({isActive}) => isActive ? 'active' : ''}
                         >
                             <Baby className="sidebar-icon" size={20}/>
-                            Kids
+                            {t('nav.kids', 'Kids')}
                         </NavLink>
                         <NavLink
                             to="/admin/teams"
                             className={({isActive}) => isActive ? 'active' : ''}
                         >
                             <UserGroup className="sidebar-icon" size={20}/>
-                            Teams
+                            {t('nav.teams', 'Teams')}
                         </NavLink>
-                        {/* ADDED: Vehicles menu item for Admin */}
                         <NavLink
                             to="/admin/vehicles"
                             className={({isActive}) => isActive ? 'active' : ''}
                         >
                             <Car className="sidebar-icon" size={20}/>
-                            Vehicles
+                            {t('nav.vehicles', 'Vehicles')}
                         </NavLink>
                         <NavLink
                             to="/admin/forms"
                             className={({isActive}) => isActive ? 'active' : ''}
                         >
                             <FileText className="sidebar-icon" size={20}/>
-                            Forms
+                            {t('nav.forms', 'Forms')}
                         </NavLink>
                         <NavLink
                             to="/admin/backup"
                             className={({isActive}) => isActive ? 'active' : ''}
                         >
                             <RefreshCw className="sidebar-icon" size={20}/>
-                            Backup/Sync
+                            {t('nav.backupSync', 'Backup/Sync')}
                         </NavLink>
                         <NavLink
                             to="/admin/import-export"
                             className={({isActive}) => isActive ? 'active' : ''}
                         >
                             <Download className="sidebar-icon" size={20}/>
-                            Import/Export
+                            {t('nav.importExport', 'Import/Export')}
                         </NavLink>
                         <NavLink
                             to="/gallery"
                             className={({isActive}) => isActive ? 'active' : ''}
                         >
                             <Photo className="sidebar-icon" size={20}/>
-                            Gallery
+                            {t('nav.gallery', 'Gallery')}
                         </NavLink>
                     </>
                 )}
@@ -106,36 +108,35 @@ const Sidebar = ({userRole}) => {
                             end
                         >
                             <Dashboard className="sidebar-icon" size={20}/>
-                            Dashboard
+                            {t('nav.dashboard', 'Dashboard')}
                         </NavLink>
                         <NavLink
                             to="/instructor/events"
                             className={({isActive}) => isActive ? 'active' : ''}
                         >
                             <Calendar className="sidebar-icon" size={20}/>
-                            Events
+                            {t('nav.events', 'Events')}
                         </NavLink>
                         <NavLink
                             to="/instructor/teams"
                             className={({isActive}) => isActive ? 'active' : ''}
                         >
                             <UserGroup className="sidebar-icon" size={20}/>
-                            Teams
+                            {t('nav.teams', 'Teams')}
                         </NavLink>
-                        {/* ADDED: Vehicles menu item for Instructor */}
                         <NavLink
                             to="/admin/vehicles"
                             className={({isActive}) => isActive ? 'active' : ''}
                         >
                             <Car className="sidebar-icon" size={20}/>
-                            Vehicles
+                            {t('nav.vehicles', 'Vehicles')}
                         </NavLink>
                         <NavLink
                             to="/gallery"
                             className={({isActive}) => isActive ? 'active' : ''}
                         >
                             <Photo className="sidebar-icon" size={20}/>
-                            Gallery
+                            {t('nav.gallery', 'Gallery')}
                         </NavLink>
                     </>
                 )}
@@ -149,21 +150,21 @@ const Sidebar = ({userRole}) => {
                             end
                         >
                             <Dashboard className="sidebar-icon" size={20}/>
-                            Dashboard
+                            {t('nav.dashboard', 'Dashboard')}
                         </NavLink>
                         <NavLink
                             to="/host/events"
                             className={({isActive}) => isActive ? 'active' : ''}
                         >
                             <Calendar className="sidebar-icon" size={20}/>
-                            Events
+                            {t('nav.events', 'Events')}
                         </NavLink>
                         <NavLink
                             to="/gallery"
                             className={({isActive}) => isActive ? 'active' : ''}
                         >
                             <Photo className="sidebar-icon" size={20}/>
-                            Gallery
+                            {t('nav.gallery', 'Gallery')}
                         </NavLink>
                     </>
                 )}
