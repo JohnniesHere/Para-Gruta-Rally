@@ -1,14 +1,15 @@
-// src/pages/admin/ViewKidPage.jsx - UPDATED WITH VEHICLE INTEGRATION
+// src/pages/admin/ViewKidPage.jsx - TRANSLATED VERSION
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useLanguage } from '../../contexts/LanguageContext'; // Add this import
 import { usePermissions } from '../../hooks/usePermissions.jsx';
 import { getKidById, deleteKid } from '../../services/kidService';
 import { getTeamById } from '../../services/teamService';
 import { getKidPhotoInfo } from '../../services/kidPhotoService';
-import { getVehicleById } from '../../services/vehicleService'; // Add vehicle service
-import { getVehiclePhotoInfo } from '../../services/vehiclePhotoService'; // Add vehicle photo service
+import { getVehicleById } from '../../services/vehicleService';
+import { getVehiclePhotoInfo } from '../../services/vehiclePhotoService';
 import {
     IconUserCircle as Baby,
     IconEdit as Edit,
@@ -30,18 +31,17 @@ import {
 } from '@tabler/icons-react';
 import './ViewKidPage.css';
 
-// CSS additions for vehicle display will be added to ViewKidPage.css
-
 const ViewKidPage = () => {
     const navigate = useNavigate();
     const { id } = useParams();
     const location = useLocation();
     const { appliedTheme } = useTheme();
+    const { t } = useLanguage(); // Add this hook
     const { userRole } = usePermissions();
 
     const [kidData, setKidData] = useState(null);
     const [teamData, setTeamData] = useState(null);
-    const [vehicleData, setVehicleData] = useState(null); // Add vehicle state
+    const [vehicleData, setVehicleData] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [successMessage, setSuccessMessage] = useState('');
@@ -73,13 +73,13 @@ const ViewKidPage = () => {
 
             const kid = await getKidById(id);
             if (!kid) {
-                setError('Kid not found!');
+                setError(t('viewKid.kidNotFound', 'Kid not found!'));
                 return;
             }
 
             // SIMPLIFIED: Role-based access
             if (userRole !== 'admin') {
-                setError('You do not have permission to view this kid.');
+                setError(t('viewKid.noPermissionView', 'You do not have permission to view this kid.'));
                 return;
             }
 
@@ -108,7 +108,7 @@ const ViewKidPage = () => {
 
         } catch (error) {
             console.error('Error loading kid data:', error);
-            setError('Failed to load kid data. Please try again.');
+            setError(t('viewKid.loadDataError', 'Failed to load kid data. Please try again.'));
         } finally {
             setIsLoading(false);
         }
@@ -128,23 +128,23 @@ const ViewKidPage = () => {
 
     const handleDelete = async () => {
         if (userRole !== 'admin') {
-            alert('You do not have permission to delete this kid.');
+            alert(t('viewKid.deletePermissionDenied', 'You do not have permission to delete this kid.'));
             return;
         }
 
         const kidName = kidData.personalInfo?.firstName || kidData.participantNumber || 'this kid';
-        if (window.confirm(`Are you sure you want to delete ${kidName}? This action cannot be undone.`)) {
+        if (window.confirm(t('viewKid.deleteConfirm', 'Are you sure you want to delete {kidName}? This action cannot be undone.', { kidName }))) {
             try {
                 await deleteKid(id);
                 navigate('/admin/kids', {
                     state: {
-                        message: `${kidName} has been removed from the racing program.`,
+                        message: t('viewKid.deleteSuccess', '{kidName} has been removed from the racing program.', { kidName }),
                         type: 'success'
                     }
                 });
             } catch (error) {
                 console.error('Error deleting kid:', error);
-                alert('Failed to delete kid. Please try again.');
+                alert(t('viewKid.deleteFailed', 'Failed to delete kid. Please try again.'));
             }
         }
     };
@@ -215,8 +215,8 @@ const ViewKidPage = () => {
                     <div className="no-vehicle">
                         <Car size={40} className="no-vehicle-icon" />
                         <div className="no-vehicle-text">
-                            <p>No Vehicle Assigned</p>
-                            <span>Ready for assignment!</span>
+                            <p>{t('viewKid.noVehicleAssigned', 'No Vehicle Assigned')}</p>
+                            <span>{t('viewKid.readyForAssignment', 'Ready for assignment!')}</span>
                         </div>
                     </div>
                 </div>
@@ -234,24 +234,24 @@ const ViewKidPage = () => {
                         </h4>
                         <div className="vehicle-info-grid">
                             <div className="vehicle-detail">
-                                <span className="detail-label">License Plate:</span>
+                                <span className="detail-label">{t('viewKid.licensePlate', 'License Plate:')}</span>
                                 <span className="license-plate">{vehicleData.licensePlate}</span>
                             </div>
                             <div className="vehicle-detail">
-                                <span className="detail-label">Type:</span>
+                                <span className="detail-label">{t('viewKid.type', 'Type:')}</span>
                                 <span>{vehicleData.driveType} • {vehicleData.steeringType}</span>
                             </div>
                             <div className="vehicle-detail">
-                                <span className="detail-label">Battery:</span>
+                                <span className="detail-label">{t('viewKid.battery', 'Battery:')}</span>
                                 <div className="battery-info">
                                     <Battery size={16} />
                                     <span>{vehicleData.batteryType || 'N/A'}</span>
                                 </div>
                             </div>
                             <div className="vehicle-detail">
-                                <span className="detail-label">Status:</span>
+                                <span className="detail-label">{t('viewKid.status', 'Status:')}</span>
                                 <span className={`vehicle-status ${vehicleData.active ? 'active' : 'inactive'}`}>
-                                    {vehicleData.active ? '✅ Active' : '❌ Inactive'}
+                                    {vehicleData.active ? t('viewKid.vehicleActive', '✅ Active') : t('viewKid.vehicleInactive', '❌ Inactive')}
                                 </span>
                             </div>
                         </div>
@@ -265,7 +265,7 @@ const ViewKidPage = () => {
                                 className="btn-vehicle-view"
                             >
                                 <Settings size={16} />
-                                View Vehicle
+                                {t('viewKid.viewVehicle', 'View Vehicle')}
                             </button>
                         </div>
 
@@ -295,7 +295,7 @@ const ViewKidPage = () => {
                 <div className={`view-kid-page ${appliedTheme}-mode`}>
                     <div className="loading-container">
                         <div className="loading-spinner"></div>
-                        <p>Loading racing star data...</p>
+                        <p>{t('viewKid.loadingRacingStarData', 'Loading racing star data...')}</p>
                     </div>
                 </div>
             </Dashboard>
@@ -307,11 +307,11 @@ const ViewKidPage = () => {
             <Dashboard requiredRole={userRole}>
                 <div className={`view-kid-page ${appliedTheme}-mode`}>
                     <div className="error-container">
-                        <h3>Error</h3>
+                        <h3>{t('common.error', 'Error')}</h3>
                         <p>{error}</p>
                         <button onClick={handleBack} className="btn-primary">
                             <ArrowLeft className="btn-icon" size={18} />
-                            Back to Kids
+                            {t('editKid.backToKids', 'Back to Kids')}
                         </button>
                     </div>
                 </div>
@@ -319,34 +319,36 @@ const ViewKidPage = () => {
         );
     }
 
+    const firstName = kidData.personalInfo?.firstName;
+
     return (
         <Dashboard requiredRole={userRole}>
             <div className={`view-kid-page ${appliedTheme}-mode`}>
                 <button onClick={handleBack} className={`back-button ${appliedTheme}-back-button`}>
                     <ArrowLeft className="btn-icon" size={20} />
-                    Back to Kids
+                    {t('editKid.backToKids', 'Back to Kids')}
                 </button>
                 <div className="racing-header">
                     <div className="header-content">
                         <div className="title-section">
                             <h1>
                                 <Star size={32} className="page-title-icon" />
-                                Racing Star Profile!
+                                {t('viewKid.racingStarProfile', 'Racing Star Profile!')}
                                 <Trophy size={24} className="trophy-icon" />
                             </h1>
-                            <p className="subtitle">Meet our amazing racer! 🏁</p>
+                            <p className="subtitle">{t('viewKid.meetOurRacer', 'Meet our amazing racer! 🏁')}</p>
                         </div>
                         <div className="header-actions">
                             {userRole === 'admin' && (
                                 <button onClick={handleEdit} className="edit-button">
                                     <Edit className="btn-icon" size={18} />
-                                    Edit
+                                    {t('general.edit', 'Edit')}
                                 </button>
                             )}
                             {userRole === 'admin' && (
                                 <button onClick={handleDelete} className="delete-button">
                                     <Trash2 className="btn-icon" size={18} />
-                                    Delete
+                                    {t('general.delete', 'Delete')}
                                 </button>
                             )}
                         </div>
@@ -367,31 +369,31 @@ const ViewKidPage = () => {
                             <div className="hero-info">
                                 <h2 className="racer-name">
                                     {userRole === 'admin'
-                                        ? `${kidData.personalInfo?.firstName || ''} ${kidData.personalInfo?.lastName || ''}`.trim() || `Kid #${kidData.participantNumber}`
-                                        : 'Name Restricted'
+                                        ? `${kidData.personalInfo?.firstName || ''} ${kidData.personalInfo?.lastName || ''}`.trim() || t('viewKid.kidNumber', 'Kid #{number}', { number: kidData.participantNumber })
+                                        : t('viewKid.nameRestricted', 'Name Restricted')
                                     }
                                 </h2>
                                 <div className="hero-stats">
                                     <div className="stat-item">
                                         <Calendar className="stat-icon" size={16} />
-                                        <span>Age: {calculateAge(kidData.personalInfo?.dateOfBirth)}</span>
+                                        <span>{t('viewKid.ageLabel', 'Age: {age}', { age: calculateAge(kidData.personalInfo?.dateOfBirth) })}</span>
                                     </div>
                                     <div className="stat-item">
                                         <Flag className="stat-icon" size={16} />
                                         <span className={`status-badge ${getStatusColor(kidData.signedFormStatus)}`}>
-                                            {kidData.signedFormStatus || 'Pending'}
+                                            {t(`status.${kidData.signedFormStatus}`, kidData.signedFormStatus || t('status.pending', 'Pending'))}
                                         </span>
                                     </div>
                                     {teamData && (
                                         <div className="stat-item">
                                             <Car className="stat-icon" size={16} />
-                                            <span>Team: {teamData.name}</span>
+                                            <span>{t('viewKid.teamLabel', 'Team: {teamName}', { teamName: teamData.name })}</span>
                                         </div>
                                     )}
                                     {vehicleData && (
                                         <div className="stat-item">
                                             <Settings className="stat-icon" size={16} />
-                                            <span>Vehicle: {vehicleData.make} {vehicleData.model}</span>
+                                            <span>{t('viewKid.vehicleLabel', 'Vehicle: {make} {model}', { make: vehicleData.make, model: vehicleData.model })}</span>
                                         </div>
                                     )}
                                 </div>
@@ -409,7 +411,7 @@ const ViewKidPage = () => {
                             >
                                 <div className="section-header-content">
                                     <Baby className="section-icon" size={24} />
-                                    <h3>🏎️ {kidData.personalInfo.firstName}'s Profile</h3>
+                                    <h3>{t('viewKid.personalProfile', '🏎️ {firstName}\'s Profile', { firstName: firstName || 'Racer' })}</h3>
                                 </div>
                                 <div className="collapse-indicator">
                                     {collapsedSections.personal ?
@@ -422,12 +424,12 @@ const ViewKidPage = () => {
                             {!collapsedSections.personal && (
                                 <div className="info-grid">
                                     <div className="info-item">
-                                        <label>🏁 Race Number</label>
+                                        <label>{t('editKid.raceNumber', '🏁 Race Number')}</label>
                                         <div className="info-value">{kidData.participantNumber}</div>
                                     </div>
 
                                     <div className="info-item">
-                                        <label>🎂 Date of Birth</label>
+                                        <label>{t('editKid.birthday', '🎂 Date of Birth')}</label>
                                         <div className="info-value">
                                             {kidData.personalInfo?.dateOfBirth || 'N/A'}
                                         </div>
@@ -435,7 +437,7 @@ const ViewKidPage = () => {
 
                                     {/* ADD: Photo section in personal info */}
                                     <div className="info-item">
-                                        <label>📸 Racing Photo</label>
+                                        <label>{t('viewKid.racingPhoto', '📸 Racing Photo')}</label>
                                         <div className="info-value">
                                             {kidData.personalInfo?.photo ? (
                                                 <div className="photo-display">
@@ -444,30 +446,30 @@ const ViewKidPage = () => {
                                                         alt="Racing photo"
                                                         className="inline-photo"
                                                     />
-                                                    <span className="photo-status">✅ Uploaded</span>
+                                                    <span className="photo-status">{t('viewKid.photoUploaded', '✅ Uploaded')}</span>
                                                 </div>
                                             ) : (
-                                                <span className="no-photo">📷 No photo uploaded</span>
+                                                <span className="no-photo">{t('viewKid.noPhotoUploaded', '📷 No photo uploaded')}</span>
                                             )}
                                         </div>
                                     </div>
 
                                     <div className="info-item full-width">
-                                        <label>🏠 Home Base</label>
+                                        <label>{t('viewKid.homeBase', '🏠 Home Base')}</label>
                                         <div className="info-value">
                                             {kidData.personalInfo?.address || 'N/A'}
                                         </div>
                                     </div>
 
                                     <div className="info-item full-width">
-                                        <label>🌟 Super Powers & Abilities</label>
+                                        <label>{t('viewKid.superPowersAbilities', '🌟 Super Powers & Abilities')}</label>
                                         <div className="info-value">
                                             {kidData.personalInfo?.capabilities || 'N/A'}
                                         </div>
                                     </div>
 
                                     <div className="info-item full-width">
-                                        <label>📢 Announcer Notes</label>
+                                        <label>{t('viewKid.announcerNotes', '📢 Announcer Notes')}</label>
                                         <div className="info-value">
                                             {kidData.personalInfo?.announcersNotes || 'N/A'}
                                         </div>
@@ -485,7 +487,7 @@ const ViewKidPage = () => {
                             >
                                 <div className="section-header-content">
                                     <Heart className="section-icon" size={24} />
-                                    <h3>👨‍👩‍👧‍👦 {kidData.personalInfo.firstName}'s Family</h3>
+                                    <h3>{t('viewKid.familyInfo', '👨‍👩‍👧‍👦 {firstName}\'s Family', { firstName: firstName || 'Racer' })}</h3>
                                 </div>
                                 <div className="collapse-indicator">
                                     {collapsedSections.family ?
@@ -498,35 +500,35 @@ const ViewKidPage = () => {
                             {!collapsedSections.family && (
                                 <div className="info-grid">
                                     <div className="info-item">
-                                        <label>👤 Parent/Guardian</label>
+                                        <label>{t('viewKid.parentGuardian', '👤 Parent/Guardian')}</label>
                                         <div className="info-value">
                                             {kidData.parentInfo?.name || 'N/A'}
                                         </div>
                                     </div>
 
                                     <div className="info-item">
-                                        <label>📧 Email</label>
+                                        <label>{t('viewKid.email', '📧 Email')}</label>
                                         <div className="info-value">
                                             {kidData.parentInfo?.email || 'N/A'}
                                         </div>
                                     </div>
 
                                     <div className="info-item">
-                                        <label>📱 Phone</label>
+                                        <label>{t('viewKid.phone', '📱 Phone')}</label>
                                         <div className="info-value">
                                             {kidData.parentInfo?.phone || 'N/A'}
                                         </div>
                                     </div>
 
                                     <div className="info-item">
-                                        <label>👵👴 Grandparents</label>
+                                        <label>{t('viewKid.grandparents', '👵👴 Grandparents')}</label>
                                         <div className="info-value">
                                             {kidData.parentInfo?.grandparentsInfo?.names || 'N/A'}
                                         </div>
                                     </div>
 
                                     <div className="info-item">
-                                        <label>☎️ Grandparents Phone</label>
+                                        <label>{t('viewKid.grandparentsPhone', '☎️ Grandparents Phone')}</label>
                                         <div className="info-value">
                                             {kidData.parentInfo?.grandparentsInfo?.phone || 'N/A'}
                                         </div>
@@ -544,7 +546,7 @@ const ViewKidPage = () => {
                             >
                                 <div className="section-header-content">
                                     <Car className="section-icon" size={24} />
-                                    <h3>🏎️ {kidData.personalInfo.firstName}'s Team & Vehicle</h3>
+                                    <h3>{t('viewKid.teamVehicleInfo', '🏎️ {firstName}\'s Team & Vehicle', { firstName: firstName || 'Racer' })}</h3>
                                 </div>
                                 <div className="collapse-indicator">
                                     {collapsedSections.team ?
@@ -558,32 +560,32 @@ const ViewKidPage = () => {
                                 <div className="team-vehicle-content">
                                     <div className="info-grid">
                                         <div className="info-item">
-                                            <label>🏁 Team</label>
+                                            <label>{t('viewKid.team', '🏁 Team')}</label>
                                             <div className="info-value">
                                                 {teamData ? (
                                                     <span className="team-link" onClick={() => navigate(`/admin/teams/view/${teamData.id}`)}>
                                                         {teamData.name}
                                                     </span>
                                                 ) : (
-                                                    <span className="no-team">No Team Assigned</span>
+                                                    <span className="no-team">{t('viewKid.noTeamAssigned', 'No Team Assigned')}</span>
                                                 )}
                                             </div>
                                         </div>
 
                                         <div className="info-item">
-                                            <label>📋 Form Status</label>
+                                            <label>{t('viewKid.formStatus', '📋 Form Status')}</label>
                                             <div className="info-value">
                                                 <span className={`status-badge ${getStatusColor(kidData.signedFormStatus)}`}>
-                                                    {kidData.signedFormStatus || 'Pending'}
+                                                    {t(`status.${kidData.signedFormStatus}`, kidData.signedFormStatus || t('status.pending', 'Pending'))}
                                                 </span>
                                             </div>
                                         </div>
 
                                         <div className="info-item">
-                                            <label>🛡️ Safety Declaration</label>
+                                            <label>{t('viewKid.safetyDeclaration', '🛡️ Safety Declaration')}</label>
                                             <div className="info-value">
                                                 <span className={`declaration-badge ${kidData.signedDeclaration ? 'signed' : 'pending'}`}>
-                                                    {kidData.signedDeclaration ? '✅ Signed' : '⏳ Pending'}
+                                                    {kidData.signedDeclaration ? t('viewKid.signed', '✅ Signed') : t('viewKid.pending', '⏳ Pending')}
                                                 </span>
                                             </div>
                                         </div>
@@ -593,7 +595,7 @@ const ViewKidPage = () => {
                                     <div className="vehicle-section">
                                         <div className="vehicle-header">
                                             <Settings size={20} />
-                                            <h4>Racing Vehicle Assignment</h4>
+                                            <h4>{t('viewKid.racingVehicleAssignment', 'Racing Vehicle Assignment')}</h4>
                                         </div>
                                         {getVehicleDisplay()}
                                     </div>
@@ -610,7 +612,7 @@ const ViewKidPage = () => {
                             >
                                 <div className="section-header-content">
                                     <FileText className="section-icon" size={24} />
-                                    <h3>💬 {kidData.personalInfo.firstName}'s Notes & Comments</h3>
+                                    <h3>{t('viewKid.notesComments', '💬 {firstName}\'s Notes & Comments', { firstName: firstName || 'Racer' })}</h3>
                                 </div>
                                 <div className="collapse-indicator">
                                     {collapsedSections.comments ?
@@ -623,37 +625,37 @@ const ViewKidPage = () => {
                             {!collapsedSections.comments && (
                                 <div className="comments-grid">
                                     <div className="comment-item">
-                                        <label>👨‍👩‍👧‍👦 Parent Comments</label>
+                                        <label>{t('viewKid.parentComments', '👨‍👩‍👧‍👦 Parent Comments')}</label>
                                         <div className="comment-value">
-                                            {kidData.comments?.parent || 'No comments'}
+                                            {kidData.comments?.parent || t('viewKid.noComments', 'No comments')}
                                         </div>
                                     </div>
 
                                     <div className="comment-item">
-                                        <label>🏢 Organization Comments</label>
+                                        <label>{t('viewKid.organizationComments', '🏢 Organization Comments')}</label>
                                         <div className="comment-value">
-                                            {kidData.comments?.organization || 'No comments'}
+                                            {kidData.comments?.organization || t('viewKid.noComments', 'No comments')}
                                         </div>
                                     </div>
 
                                     <div className="comment-item">
-                                        <label>👨‍🏫 Team Leader Comments</label>
+                                        <label>{t('viewKid.teamLeaderComments', '👨‍🏫 Team Leader Comments')}</label>
                                         <div className="comment-value">
-                                            {kidData.comments?.teamLeader || 'No comments'}
+                                            {kidData.comments?.teamLeader || t('viewKid.noComments', 'No comments')}
                                         </div>
                                     </div>
 
                                     <div className="comment-item">
-                                        <label>🗒️ Additional Notes</label>
+                                        <label>{t('viewKid.additionalNotes', '🗒️ Additional Notes')}</label>
                                         <div className="comment-value">
-                                            {kidData.additionalComments || 'No additional notes'}
+                                            {kidData.additionalComments || t('viewKid.noAdditionalNotes', 'No additional notes')}
                                         </div>
                                     </div>
 
                                     {/* ADD: Instructor Comments Timeline */}
                                     {kidData.instructorsComments && kidData.instructorsComments.length > 0 && (
                                         <div className="comment-item full-width">
-                                            <label>👨‍🏫 Team Notes History</label>
+                                            <label>{t('viewKid.teamNotesHistory', '👨‍🏫 Team Notes History')}</label>
                                             <div className="comment-value">
                                                 <div className="comments-timeline">
                                                     {kidData.instructorsComments.map((comment, index) => (
