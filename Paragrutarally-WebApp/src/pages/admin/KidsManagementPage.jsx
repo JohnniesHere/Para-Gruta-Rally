@@ -1,10 +1,11 @@
-// src/pages/admin/KidsManagementPage.jsx - UPDATED WITH PHOTO SUPPORT
+// src/pages/admin/KidsManagementPage.jsx - TRANSLATED VERSION
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
 import TeamChangeModal from '../../components/modals/TeamChangeModal.jsx';
 import EditKidModal from '../../components/modals/EditKidModal.jsx';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useLanguage } from '../../contexts/LanguageContext'; // Add this import
 import { usePermissions, canUserAccessKid } from '../../hooks/usePermissions.jsx';
 import { db } from '../../firebase/config';
 import {
@@ -14,7 +15,7 @@ import {
     deleteKid
 } from '../../services/kidService';
 import { getAllTeams } from '../../services/teamService';
-import { getKidPhotoInfo } from '../../services/kidPhotoService'; // Import photo service
+import { getKidPhotoInfo } from '../../services/kidPhotoService';
 import {
     IconUserCircle as Baby,
     IconPlus as Plus,
@@ -42,6 +43,7 @@ import './KidsManagementPage.css';
 const KidsManagementPage = () => {
     const navigate = useNavigate();
     const { appliedTheme } = useTheme();
+    const { t } = useLanguage(); // Add this hook
     const { permissions, userRole, userData, user, loading: permissionsLoading, error: permissionsError } = usePermissions();
 
     const [kids, setKids] = useState([]);
@@ -76,7 +78,7 @@ const KidsManagementPage = () => {
 
     // Helper function to get team name by ID
     const getTeamNameById = (teamId) => {
-        if (!teamId) return 'No Team';
+        if (!teamId) return t('kids.noTeam', 'No Team');
         const team = teams.find(t => t.id === teamId);
         return team ? team.name : `Team ${teamId.slice(0, 8)}...`;
     };
@@ -88,13 +90,13 @@ const KidsManagementPage = () => {
                 const firstName = kid.personalInfo?.firstName || '';
                 const lastName = kid.personalInfo?.lastName || '';
                 const fullName = `${firstName} ${lastName}`.trim();
-                return fullName || `Kid #${kid.participantNumber}`;
+                return fullName || `${t('kids.participantNumber', 'Participant #')}${kid.participantNumber}`;
             case 'instructor':
             case 'parent':
                 const instFirstName = kid.personalInfo?.firstName || '';
                 const instLastName = kid.personalInfo?.lastName || '';
                 const instFullName = `${instFirstName} ${instLastName}`.trim();
-                return instFullName || `Kid #${kid.participantNumber}`;
+                return instFullName || `${t('kids.participantNumber', 'Participant #')}${kid.participantNumber}`;
             default:
                 return 'Restricted';
         }
@@ -151,7 +153,7 @@ const KidsManagementPage = () => {
             const accessibleKids = kidsData
                 .filter(kid => canUserAccessKid(userRole, kid, userData, user))
                 .map(kid => {
-                    const photoInfo = getKidPhotoInfo(kid); // Get photo info for each kid
+                    const photoInfo = getKidPhotoInfo(kid);
                     return {
                         id: kid.id,
                         name: getKidDisplayName(kid),
@@ -204,8 +206,8 @@ const KidsManagementPage = () => {
                 kid.participantNumber?.toLowerCase().includes(searchTerm.toLowerCase());
 
             const matchesTeam = teamFilter === 'all' ||
-                (teamFilter === 'no-team' && kid.team === 'No Team') ||
-                (teamFilter === 'with-team' && kid.team !== 'No Team');
+                (teamFilter === 'no-team' && kid.team === t('kids.noTeam', 'No Team')) ||
+                (teamFilter === 'with-team' && kid.team !== t('kids.noTeam', 'No Team'));
 
             const matchesStatus = statusFilter === 'all' || kid.status === statusFilter;
 
@@ -252,17 +254,18 @@ const KidsManagementPage = () => {
 
     const handleDeleteKid = async (kid) => {
         if (userRole !== 'admin') {
-            alert('Only administrators can delete kids.');
+            alert(t('kids.onlyAdminsCanDelete', 'Only administrators can delete kids.'));
             return;
         }
 
-        if (window.confirm(`Are you sure you want to delete ${kid.name}? This action cannot be undone.`)) {
+        if (window.confirm(t('kids.deleteConfirm', 'Are you sure you want to delete {kidName}? This action cannot be undone.', { kidName: kid.name }))) {
             try {
                 await deleteKid(kid.id);
                 setKids(kids.filter(k => k.id !== kid.id));
+                alert(t('kids.deleteSuccess', '{kidName} has been deleted successfully!', { kidName: kid.name }));
             } catch (err) {
                 console.error('Error deleting kid:', err);
-                alert('Failed to delete kid. Please try again.');
+                alert(t('kids.deleteFailed', 'Failed to delete kid. Please try again.'));
             }
         }
     };
@@ -302,7 +305,12 @@ const KidsManagementPage = () => {
 
         const kidName = kids.find(k => k.id === kidId)?.name;
         const teamName = getTeamNameById(newTeamId);
-        alert(`✅ ${kidName} has been ${newTeamId ? 'assigned to' : 'removed from'} ${teamName}`);
+        const action = newTeamId ? t('kids.assignedTo', 'assigned to') : t('kids.removedFrom', 'removed from team');
+        alert(t('kids.teamChanged', '{kidName} has been {action} {teamName}', {
+            kidName,
+            action,
+            teamName
+        }));
     };
 
     // EDIT KID MODAL HANDLERS
@@ -341,7 +349,7 @@ const KidsManagementPage = () => {
         setSelectedKidForEdit(null);
 
         const kidName = kids.find(k => k.id === kidId)?.name;
-        alert(`✅ ${kidName} has been updated successfully! 🏎️`);
+        alert(t('kids.updated', '{kidName} has been updated successfully!', { kidName }));
     };
 
     const handleAddKid = () => {
@@ -349,10 +357,10 @@ const KidsManagementPage = () => {
     };
 
     const stats = {
-        kidsWithoutTeams: kids.filter(k => k.team === 'No Team').length,
+        kidsWithoutTeams: kids.filter(k => k.team === t('kids.noTeam', 'No Team')).length,
         totalKids: kids.length,
         activeKids: kids.filter(k => k.status === 'active' || k.status === 'completed').length,
-        kidsWithTeams: kids.filter(k => k.team !== 'No Team').length
+        kidsWithTeams: kids.filter(k => k.team !== t('kids.noTeam', 'No Team')).length
     };
 
     if (permissionsLoading) {
@@ -362,7 +370,7 @@ const KidsManagementPage = () => {
                     <div className="loading-state">
                         <div className="loading-content">
                             <Clock className="loading-spinner" size={30} />
-                            <p>Loading permissions...</p>
+                            <p>{t('kids.loadingPermissions', 'Loading permissions...')}</p>
                         </div>
                     </div>
                 </div>
@@ -375,11 +383,11 @@ const KidsManagementPage = () => {
             <Dashboard requiredRole={userRole}>
                 <div className={`kids-management-page ${appliedTheme}-mode`}>
                     <div className="error-container">
-                        <h3>Permission Error</h3>
+                        <h3>{t('kids.permissionError', 'Permission Error')}</h3>
                         <p>{permissionsError}</p>
                         <button onClick={() => window.location.reload()} className="btn-primary">
                             <RefreshCw className="btn-icon" size={18} />
-                            Reload Page
+                            {t('kids.reloadPage', 'Reload Page')}
                         </button>
                     </div>
                 </div>
@@ -392,11 +400,11 @@ const KidsManagementPage = () => {
             <Dashboard requiredRole={userRole}>
                 <div className={`kids-management-page ${appliedTheme}-mode`}>
                     <div className="error-container">
-                        <h3>Error</h3>
+                        <h3>{t('common.error', 'Error')}</h3>
                         <p>{error}</p>
                         <button onClick={loadTeamsAndKids} className="btn-primary">
                             <RefreshCw className="btn-icon" size={18} />
-                            Try Again
+                            {t('kids.tryAgain', 'Try Again')}
                         </button>
                     </div>
                 </div>
@@ -407,7 +415,7 @@ const KidsManagementPage = () => {
     return (
         <Dashboard requiredRole={userRole}>
             <div className={`kids-management-page ${appliedTheme}-mode`}>
-                <h1><Baby size={32} className="page-title-icon" /> Kids Management</h1>
+                <h1><Baby size={32} className="page-title-icon" /> {t('kids.title', 'Kids Management')}</h1>
 
                 <div className="kids-management-container">
                     {/* Header with Actions */}
@@ -415,19 +423,19 @@ const KidsManagementPage = () => {
                         {userRole === 'admin' && (
                             <button className="btn-primary" onClick={handleAddKid}>
                                 <Plus className="btn-icon" size={18} />
-                                Add New Kid
+                                {t('kids.addNewKid', 'Add New Kid')}
                             </button>
                         )}
 
                         <div className="header-actions">
                             <button className="btn-secondary" onClick={loadTeamsAndKids}>
                                 <RefreshCw className="btn-icon" size={18} />
-                                Refresh
+                                {t('kids.refresh', 'Refresh')}
                             </button>
                             {(userRole === 'admin' || userRole === 'instructor') && (
                                 <button className="btn-export">
                                     <Download className="btn-icon" size={18} />
-                                    Export Kids
+                                    {t('kids.exportKids', 'Export Kids')}
                                 </button>
                             )}
                         </div>
@@ -446,9 +454,9 @@ const KidsManagementPage = () => {
                             >
                                 <AlertTriangle className="stat-icon warning" size={45} />
                                 <div className="stat-content">
-                                    <h3>Kids without Teams</h3>
+                                    <h3>{t('kids.kidsWithoutTeams', 'Kids without Teams')}</h3>
                                     <div className="stat-value">{stats.kidsWithoutTeams}</div>
-                                    <div className="stat-subtitle">Click to view</div>
+                                    <div className="stat-subtitle">{t('kids.clickToView', 'Click to view')}</div>
                                 </div>
                             </div>
                         )}
@@ -460,7 +468,7 @@ const KidsManagementPage = () => {
                         >
                             <Users className="stat-icon" size={40} />
                             <div className="stat-content">
-                                <h3>{userRole === 'parent' ? 'Your Kids' : 'Total Kids'}</h3>
+                                <h3>{userRole === 'parent' ? t('kids.yourKids', 'Your Kids') : t('kids.totalKids', 'Total Kids')}</h3>
                                 <div className="stat-value">{stats.totalKids}</div>
                             </div>
                         </div>
@@ -472,7 +480,7 @@ const KidsManagementPage = () => {
                         >
                             <Check className="stat-icon" size={40} />
                             <div className="stat-content">
-                                <h3>Active Kids</h3>
+                                <h3>{t('kids.activeKids', 'Active Kids')}</h3>
                                 <div className="stat-value">{stats.activeKids}</div>
                             </div>
                         </div>
@@ -484,7 +492,7 @@ const KidsManagementPage = () => {
                         >
                             <Car className="stat-icon" size={40} />
                             <div className="stat-content">
-                                <h3>Kids with Teams</h3>
+                                <h3>{t('kids.kidsWithTeams', 'Kids with Teams')}</h3>
                                 <div className="stat-value">{stats.kidsWithTeams}</div>
                             </div>
                         </div>
@@ -497,7 +505,7 @@ const KidsManagementPage = () => {
                                 <Search className="search-icon" size={18} />
                                 <input
                                     type="text"
-                                    placeholder="Search by kid name or parent name..."
+                                    placeholder={t('kids.searchPlaceholder', 'Search by kid name or parent name...')}
                                     className="search-input"
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
@@ -513,40 +521,40 @@ const KidsManagementPage = () => {
                         <div className="filter-container">
                             <label className="filter-label">
                                 <Tag className="filter-icon" size={16} />
-                                Team Status
+                                {t('kids.teamStatus', 'Team Status')}
                             </label>
                             <select
                                 className="filter-select"
                                 value={teamFilter}
                                 onChange={(e) => setTeamFilter(e.target.value)}
                             >
-                                <option value="all">⭐ All Kids</option>
-                                <option value="no-team">⚠️ No Team</option>
-                                <option value="with-team">🏎️ With Team</option>
+                                <option value="all">⭐ {t('kids.allKids', 'All Kids')}</option>
+                                <option value="no-team">⚠️ {t('kids.noTeam', 'No Team')}</option>
+                                <option value="with-team">🏎️ {t('kids.withTeam', 'With Team')}</option>
                             </select>
                         </div>
 
                         <div className="filter-container">
                             <label className="filter-label">
                                 <BarChart3 className="filter-icon" size={16} />
-                                Status
+                                {t('kids.status', 'Status')}
                             </label>
                             <select
                                 className="filter-select"
                                 value={statusFilter}
                                 onChange={(e) => setStatusFilter(e.target.value)}
                             >
-                                <option value="all">🌈 All Status</option>
-                                <option value="active">✅ Active</option>
-                                <option value="pending">⏳ Pending</option>
-                                <option value="completed">🏁 Completed</option>
-                                <option value="cancelled">❌ Cancelled</option>
+                                <option value="all">🌈 {t('kids.allStatus', 'All Status')}</option>
+                                <option value="active">✅ {t('status.active', 'Active')}</option>
+                                <option value="pending">⏳ {t('status.pending', 'Pending')}</option>
+                                <option value="completed">🏁 {t('status.completed', 'Completed')}</option>
+                                <option value="cancelled">❌ {t('status.cancelled', 'Cancelled')}</option>
                             </select>
                         </div>
 
                         <button className="btn-clear" onClick={handleClearFilters}>
                             <Eraser className="btn-icon" size={18} />
-                            Clear All
+                            {t('kids.clearAll', 'Clear All')}
                         </button>
                     </div>
 
@@ -554,17 +562,17 @@ const KidsManagementPage = () => {
                     <div className="results-info">
                         <div className="results-content">
                             <FileSpreadsheet className="results-icon" size={18} />
-                            Showing {filteredKids.length} of {kids.length} kids
-                            {showingKidsWithoutTeams && <span className="priority-filter"> • 🚨 PRIORITY: Kids without teams</span>}
-                            {teamFilter !== 'all' && !showingKidsWithoutTeams && <span className="filter-applied"> • Team: {teamFilter}</span>}
-                            {statusFilter !== 'all' && <span className="filter-applied"> • Status: {statusFilter}</span>}
-                            {searchTerm && <span className="search-applied"> • Search: "{searchTerm}"</span>}
+                            {t('kids.showing', 'Showing')} {filteredKids.length} {t('kids.of', 'of')} {kids.length} {t('kids.kids', 'kids')}
+                            {showingKidsWithoutTeams && <span className="priority-filter"> • 🚨 {t('kids.priorityFilter', 'PRIORITY: Kids without teams')}</span>}
+                            {teamFilter !== 'all' && !showingKidsWithoutTeams && <span className="filter-applied"> • {t('kids.team', 'Team')}: {teamFilter}</span>}
+                            {statusFilter !== 'all' && <span className="filter-applied"> • {t('kids.status', 'Status')}: {statusFilter}</span>}
+                            {searchTerm && <span className="search-applied"> • {t('general.search', 'Search')}: "{searchTerm}"</span>}
                         </div>
 
                         {(teamFilter !== 'all' || statusFilter !== 'all' || searchTerm || showingKidsWithoutTeams) && (
-                            <button className="btn-reset" onClick={handleClearFilters} title="Reset all filters">
+                            <button className="btn-reset" onClick={handleClearFilters} title={t('kids.reset', 'Reset all filters')}>
                                 <RefreshCw className="btn-icon" size={16} />
-                                Reset
+                                {t('kids.reset', 'Reset')}
                             </button>
                         )}
                     </div>
@@ -574,12 +582,12 @@ const KidsManagementPage = () => {
                         <table className="data-table">
                             <thead>
                             <tr>
-                                <th><Baby size={16} style={{ marginRight: '8px' }} />Kid Info</th>
-                                <th><Camera size={16} style={{ marginRight: '8px' }} />Photo</th>
-                                <th>🎂 Age</th>
-                                <th><Car size={16} style={{ marginRight: '8px' }} />Team</th>
-                                <th><BarChart3 size={16} style={{ marginRight: '8px' }} />Status</th>
-                                <th>⚡ Actions</th>
+                                <th><Baby size={16} style={{ marginRight: '8px' }} />{t('kids.kidInfo', 'Kid Info')}</th>
+                                <th><Camera size={16} style={{ marginRight: '8px' }} />{t('kids.photo', 'Photo')}</th>
+                                <th>🎂 {t('kids.age', 'Age')}</th>
+                                <th><Car size={16} style={{ marginRight: '8px' }} />{t('kids.team', 'Team')}</th>
+                                <th><BarChart3 size={16} style={{ marginRight: '8px' }} />{t('kids.status', 'Status')}</th>
+                                <th>⚡ {t('kids.actions', 'Actions')}</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -588,7 +596,7 @@ const KidsManagementPage = () => {
                                     <td colSpan="6" className="loading-cell">
                                         <div className="loading-content">
                                             <Clock className="loading-spinner" size={30} />
-                                            Loading kids...
+                                            {t('kids.loadingKids', 'Loading kids...')}
                                         </div>
                                     </td>
                                 </tr>
@@ -597,17 +605,17 @@ const KidsManagementPage = () => {
                                     <td colSpan="6">
                                         <div className="empty-state">
                                             <Baby className="empty-icon" size={60} />
-                                            <h3>No kids found</h3>
+                                            <h3>{t('kids.noKidsFound', 'No kids found')}</h3>
                                             <p>
                                                 {userRole === 'parent'
-                                                    ? 'No kids registered under your account'
-                                                    : 'Try adjusting your search or filters'
+                                                    ? t('kids.noKidsRegistered', 'No kids registered under your account')
+                                                    : t('kids.adjustFilters', 'Try adjusting your search or filters')
                                                 }
                                             </p>
                                             {userRole === 'admin' && (
                                                 <button className="btn-primary" style={{ marginTop: '15px' }} onClick={handleAddKid}>
                                                     <Plus className="btn-icon" size={18} />
-                                                    Add First Kid
+                                                    {t('kids.addFirstKid', 'Add First Kid')}
                                                 </button>
                                             )}
                                         </div>
@@ -617,15 +625,15 @@ const KidsManagementPage = () => {
                                 filteredKids.map(kid => (
                                     <tr
                                         key={kid.id}
-                                        className={`${kid.team === 'No Team' ? 'priority-row' : ''} clickable-row`}
+                                        className={`${kid.team === t('kids.noTeam', 'No Team') ? 'priority-row' : ''} clickable-row`}
                                         onClick={(e) => handleRowClick(kid, e)}
                                         style={{ cursor: 'pointer' }}
-                                        title="Click to view details"
+                                        title={t('kids.clickToView', 'Click to view details')}
                                     >
                                         <td>
                                             <div className="kid-info">
                                                 <div className="kid-name">
-                                                    {kid.team === 'No Team' && <AlertTriangle className="priority-indicator" size={16} />}
+                                                    {kid.team === t('kids.noTeam', 'No Team') && <AlertTriangle className="priority-indicator" size={16} />}
                                                     {kid.name}
                                                 </div>
                                                 <div className="parent-name">👨‍👩‍👧‍👦 {kid.parentName}</div>
@@ -648,11 +656,11 @@ const KidsManagementPage = () => {
                                         </td>
                                         <td>{kid.age}</td>
                                         <td>
-                                            <span className={`team-badge ${kid.team === 'No Team' ? 'no-team' : 'with-team'}`}>
-                                                {kid.team === 'No Team' ? (
+                                            <span className={`team-badge ${kid.team === t('kids.noTeam', 'No Team') ? 'no-team' : 'with-team'}`}>
+                                                {kid.team === t('kids.noTeam', 'No Team') ? (
                                                     <>
                                                         <AlertTriangle size={14} style={{ marginRight: '4px' }} />
-                                                        No Team
+                                                        {t('kids.noTeam', 'No Team')}
                                                     </>
                                                 ) : (
                                                     <>
@@ -668,7 +676,7 @@ const KidsManagementPage = () => {
                                                 {kid.status === 'completed' && <Check size={14} style={{ marginRight: '4px' }} />}
                                                 {kid.status === 'cancelled' && <XCircle size={14} style={{ marginRight: '4px' }} />}
                                                 {kid.status === 'pending' && <Clock size={14} style={{ marginRight: '4px' }} />}
-                                                {kid.status.charAt(0).toUpperCase() + kid.status.slice(1)}
+                                                {t(`status.${kid.status}`, kid.status.charAt(0).toUpperCase() + kid.status.slice(1))}
                                             </span>
                                         </td>
                                         <td>
@@ -679,21 +687,21 @@ const KidsManagementPage = () => {
                                                         e.stopPropagation();
                                                         handleViewKid(kid);
                                                     }}
-                                                    title="View Details"
+                                                    title={t('kids.viewDetails', 'View Details')}
                                                 >
                                                     <Eye size={16} />
                                                 </button>
 
                                                 {(userRole === 'admin' || userRole === 'instructor') && (
                                                     <button
-                                                        className={`btn-action ${kid.team === 'No Team' ? 'assign-team priority' : 'change-team'}`}
+                                                        className={`btn-action ${kid.team === t('kids.noTeam', 'No Team') ? 'assign-team priority' : 'change-team'}`}
                                                         onClick={(e) => {
                                                             e.stopPropagation();
                                                             handleChangeTeam(kid);
                                                         }}
-                                                        title={kid.team === 'No Team' ? 'Assign Team' : 'Change Team'}
+                                                        title={kid.team === t('kids.noTeam', 'No Team') ? t('kids.assignTeam', 'Assign Team') : t('kids.changeTeam', 'Change Team')}
                                                     >
-                                                        {kid.team === 'No Team' ? <Plus size={16} /> : <Car size={16} />}
+                                                        {kid.team === t('kids.noTeam', 'No Team') ? <Plus size={16} /> : <Car size={16} />}
                                                     </button>
                                                 )}
 
@@ -704,7 +712,7 @@ const KidsManagementPage = () => {
                                                             e.stopPropagation();
                                                             handleEditKid(kid);
                                                         }}
-                                                        title="Edit Kid"
+                                                        title={t('kids.editKid', 'Edit Kid')}
                                                     >
                                                         <Edit size={16} />
                                                     </button>
@@ -717,7 +725,7 @@ const KidsManagementPage = () => {
                                                             e.stopPropagation();
                                                             handleDeleteKid(kid);
                                                         }}
-                                                        title="Delete Kid"
+                                                        title={t('kids.deleteKid', 'Delete Kid')}
                                                     >
                                                         <Trash2 size={16} />
                                                     </button>
