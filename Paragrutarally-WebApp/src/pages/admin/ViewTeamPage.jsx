@@ -1,9 +1,10 @@
-// src/pages/admin/ViewTeamPage.jsx - FIXED VERSION (addresses ESLint warnings)
+// src/pages/admin/ViewTeamPage.jsx - TRANSLATED VERSION
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
 import { useTheme } from '../../contexts/ThemeContext';
-import { usePermissions } from '../../hooks/usePermissions.jsx'; // FIXED: Added .jsx extension
+import { useLanguage } from '../../contexts/LanguageContext'; // Add this import
+import { usePermissions } from '../../hooks/usePermissions.jsx';
 import { getTeamWithDetails, deleteTeam } from '../../services/teamService';
 import {
     IconUsers as UsersGroup,
@@ -28,8 +29,9 @@ const ViewTeamPage = () => {
     const navigate = useNavigate();
     const { id } = useParams();
     const location = useLocation();
-    const { appliedTheme } = useTheme(); // FIXED: Removed unused isDarkMode
-    const { userRole } = usePermissions(); // FIXED: Removed unused permissions
+    const { appliedTheme } = useTheme();
+    const { t } = useLanguage(); // Add this hook
+    const { userRole } = usePermissions();
 
     const [teamData, setTeamData] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -44,7 +46,7 @@ const ViewTeamPage = () => {
             // Load team data with details (kids, instructors, team leader)
             const team = await getTeamWithDetails(id);
             if (!team) {
-                setError('Team not found!');
+                setError(t('teams.teamNotFoundView', 'Team not found!'));
                 return;
             }
 
@@ -52,11 +54,11 @@ const ViewTeamPage = () => {
 
         } catch (error) {
             console.error('Error loading team data:', error);
-            setError('Failed to load team data. Please try again.');
+            setError(t('teams.loadTeamDataError', 'Failed to load team data. Please try again.'));
         } finally {
             setIsLoading(false);
         }
-    }, [id]); // FIXED: Added id as dependency
+    }, [id, t]); // FIXED: Added id and t as dependencies
 
     useEffect(() => {
         // Check for success message from location state
@@ -78,22 +80,22 @@ const ViewTeamPage = () => {
 
     const handleDelete = async () => {
         if (userRole !== 'admin') {
-            alert('Only administrators can delete teams.');
+            alert(t('teams.onlyAdminsCanDeleteTeams', 'Only administrators can delete teams.'));
             return;
         }
 
-        if (window.confirm(`Are you sure you want to delete team "${teamData.name}"? This action cannot be undone.`)) {
+        if (window.confirm(t('teams.deleteTeamConfirm', 'Are you sure you want to delete team "{teamName}"? This action cannot be undone.', { teamName: teamData.name }))) {
             try {
                 await deleteTeam(id);
                 navigate('/admin/teams', {
                     state: {
-                        message: `Team "${teamData.name}" has been disbanded.`,
+                        message: t('teams.teamDisbanded', 'Team "{teamName}" has been disbanded.', { teamName: teamData.name }),
                         type: 'success'
                     }
                 });
             } catch (error) {
                 console.error('Error deleting team:', error);
-                alert('Failed to delete team. Please try again.');
+                alert(t('teams.deleteTeamError', 'Failed to delete team. Please try again.'));
             }
         }
     };
@@ -126,7 +128,7 @@ const ViewTeamPage = () => {
                 <div className={`view-team-page ${appliedTheme}-mode`}>
                     <div className="loading-container">
                         <div className="loading-spinner"></div>
-                        <p>Loading racing team data...</p>
+                        <p>{t('teams.loadingRacingTeamData', 'Loading racing team data...')}</p>
                     </div>
                 </div>
             </Dashboard>
@@ -138,11 +140,11 @@ const ViewTeamPage = () => {
             <Dashboard requiredRole={userRole}>
                 <div className={`view-team-page ${appliedTheme}-mode`}>
                     <div className="error-container">
-                        <h3>Error</h3>
+                        <h3>{t('common.error', 'Error')}</h3>
                         <p>{error}</p>
                         <button onClick={handleBack} className="btn-primary">
                             <ArrowLeft className="btn-icon" size={18} />
-                            Back to Teams
+                            {t('teams.backToTeams', 'Back to Teams')}
                         </button>
                     </div>
                 </div>
@@ -160,29 +162,29 @@ const ViewTeamPage = () => {
                     onClick={handleBack}
                     className={`back-button ${appliedTheme}-back-button`}>
                     <ArrowLeft className="btn-icon" size={20} />
-                    Back to Teams
+                    {t('teams.backToTeams', 'Back to Teams')}
                 </button>
                 <div className="racing-header">
                     <div className="header-content">
                         <div className="title-section">
                             <h1>
                                 <Trophy size={32} className="page-title-icon" />
-                                Racing Team Profile!
+                                {t('teams.racingTeamProfile', 'Racing Team Profile!')}
                                 <Star size={24} className="star-icon" />
                             </h1>
-                            <p className="subtitle">Meet the amazing racing squad! 🏁</p>
+                            <p className="subtitle">{t('teams.meetAmazingRacingSquad', 'Meet the amazing racing squad! 🏁')}</p>
                         </div>
                         <div className="header-actions">
                             {(userRole === 'admin' || userRole === 'instructor') && (
                                 <button onClick={handleEdit} className="edit-button">
                                     <Edit className="btn-icon" size={18} />
-                                    Edit
+                                    {t('general.edit', 'Edit')}
                                 </button>
                             )}
                             {userRole === 'admin' && (
                                 <button onClick={handleDelete} className="delete-button">
                                     <Trash2 className="btn-icon" size={18} />
-                                    Delete
+                                    {t('general.delete', 'Delete')}
                                 </button>
                             )}
                         </div>
@@ -205,29 +207,31 @@ const ViewTeamPage = () => {
                                 <UsersGroup size={60} className="avatar-icon" />
                                 <div className="team-status">
                                     <span className={`status-badge ${getStatusColor(teamData.active)}`}>
-                                        {teamData.active ? '✅ Active' : '⏸️ Inactive'}
+                                        {teamData.active ? t('teams.activeRacing', '✅ Active') : t('teams.inactiveStatus', '⏸️ Inactive')}
                                     </span>
                                 </div>
                             </div>
                             <div className="hero-info">
                                 <h2 className="team-name">{teamData.name}</h2>
-                                <p className="team-description">{teamData.description || 'Ready to race and conquer the track!'}</p>
+                                <p className="team-description">
+                                    {teamData.description || t('teams.readyToRaceAndConquer', 'Ready to race and conquer the track!')}
+                                </p>
                                 <div className="hero-stats">
                                     <div className="stat-item">
                                         <Baby className="stat-icon" size={16} />
-                                        <span>{performance.total} Racers</span>
+                                        <span>{t('teams.racersCount', '{count} Racers', { count: performance.total })}</span>
                                     </div>
                                     <div className="stat-item">
                                         <Check className="stat-icon" size={16} />
-                                        <span>{performance.ready} Ready</span>
+                                        <span>{t('teams.readyCount', '{count} Ready', { count: performance.ready })}</span>
                                     </div>
                                     <div className="stat-item">
                                         <Users className="stat-icon" size={16} />
-                                        <span>{teamData.instructors?.length || 0} Instructors</span>
+                                        <span>{t('teams.instructorsCount', '{count} Instructors', { count: teamData.instructors?.length || 0 })}</span>
                                     </div>
                                     <div className="stat-item">
                                         <Target className="stat-icon" size={16} />
-                                        <span>Max: {teamData.maxCapacity}</span>
+                                        <span>{t('teams.maxCapacity', 'Max: {capacity}', { capacity: teamData.maxCapacity })}</span>
                                     </div>
                                 </div>
                             </div>
@@ -239,28 +243,31 @@ const ViewTeamPage = () => {
                         <div className="info-section team-info-section">
                             <div className="section-header">
                                 <Trophy className="section-icon" size={24} />
-                                <h3>🏎️ Team Details</h3>
+                                <h3>{t('teams.teamDetails', '🏎️ Team Details')}</h3>
                             </div>
                             <div className="info-grid">
                                 <div className="info-item">
-                                    <label>🏁 Team Name</label>
+                                    <label>{t('teams.teamNameLabel', '🏁 Team Name')}</label>
                                     <div className="info-value">{teamData.name}</div>
                                 </div>
 
                                 <div className="info-item">
-                                    <label>📊 Status</label>
+                                    <label>{t('teams.statusLabel', '📊 Status')}</label>
                                     <div className="info-value">
                                         <span className={`status-badge ${getStatusColor(teamData.active)}`}>
-                                            {teamData.active ? '✅ Active & Racing' : '⏸️ Inactive'}
+                                            {teamData.active ? t('teams.activeAndRacing', '✅ Active & Racing') : t('teams.inactiveTeam', '⏸️ Inactive')}
                                         </span>
                                     </div>
                                 </div>
 
                                 <div className="info-item">
-                                    <label>👥 Team Capacity</label>
+                                    <label>{t('teams.teamCapacityLabel', '👥 Team Capacity')}</label>
                                     <div className="info-value">
                                         <span className="capacity-display">
-                                            {performance.total} / {teamData.maxCapacity} racers
+                                            {t('teams.capacityDisplay', '{current} / {max} racers', {
+                                                current: performance.total,
+                                                max: teamData.maxCapacity
+                                            })}
                                         </span>
                                         <div className="capacity-bar">
                                             <div
@@ -272,23 +279,23 @@ const ViewTeamPage = () => {
                                 </div>
 
                                 <div className="info-item full-width">
-                                    <label>📝 Team Description</label>
+                                    <label>{t('teams.teamDescriptionLabel', '📝 Team Description')}</label>
                                     <div className="info-value">
-                                        {teamData.description || 'This team is ready to race and show their amazing skills on the track!'}
+                                        {teamData.description || t('teams.defaultTeamDescription', 'This team is ready to race and show their amazing skills on the track!')}
                                     </div>
                                 </div>
 
                                 {teamData.notes && (
                                     <div className="info-item full-width">
-                                        <label>🗒️ Special Notes</label>
+                                        <label>{t('teams.specialNotes', '🗒️ Special Notes')}</label>
                                         <div className="info-value">{teamData.notes}</div>
                                     </div>
                                 )}
 
                                 <div className="info-item">
-                                    <label>📅 Created</label>
+                                    <label>{t('teams.createdLabel', '📅 Created')}</label>
                                     <div className="info-value">
-                                        {teamData.createdAt ? new Date(teamData.createdAt.seconds * 1000).toLocaleDateString() : 'Unknown'}
+                                        {teamData.createdAt ? new Date(teamData.createdAt.seconds * 1000).toLocaleDateString() : t('teams.unknownDate', 'Unknown')}
                                     </div>
                                 </div>
                             </div>
@@ -298,14 +305,14 @@ const ViewTeamPage = () => {
                         <div className="info-section">
                             <div className="section-header">
                                 <Crown className="section-icon" size={24} />
-                                <h3>👨‍🏫 Racing Coaches</h3>
+                                <h3>{t('teams.racingCoaches', '👨‍🏫 Racing Coaches')}</h3>
                             </div>
                             <div className="instructors-section">
                                 {teamData.teamLeader && (
                                     <div className="team-leader-card">
                                         <div className="leader-header">
                                             <Crown className="leader-icon" size={20} />
-                                            <span className="leader-title">Team Leader</span>
+                                            <span className="leader-title">{t('teams.teamLeaderLabel', 'Team Leader')}</span>
                                         </div>
                                         <div className="leader-info">
                                             <h4>{teamData.teamLeader.name}</h4>
@@ -344,7 +351,7 @@ const ViewTeamPage = () => {
                                     ) : (
                                         <div className="empty-state">
                                             <User className="empty-icon" size={30} />
-                                            <p>No instructors assigned yet</p>
+                                            <p>{t('teams.noInstructorsAssignedYet', 'No instructors assigned yet')}</p>
                                         </div>
                                     )}
                                 </div>
@@ -356,7 +363,10 @@ const ViewTeamPage = () => {
                         <div className="info-section racers-section full-width">
                             <div className="section-header">
                                 <Baby className="section-icon" size={24} />
-                                <h3>🏎️ Team Racers ({performance.total}/{teamData.maxCapacity})</h3>
+                                <h3>{t('teams.teamRacersWithCount', '🏎️ Team Racers ({current}/{max})', {
+                                    current: performance.total,
+                                    max: teamData.maxCapacity
+                                })}</h3>
                             </div>
 
                             <div className="racers-stats">
@@ -364,7 +374,7 @@ const ViewTeamPage = () => {
                                     <Check className="stat-icon" size={20} />
                                     <div className="stat-info">
                                         <span className="stat-number">{performance.ready}</span>
-                                        <span className="stat-label">Ready to Race</span>
+                                        <span className="stat-label">{t('teams.readyToRace', 'Ready to Race')}</span>
                                     </div>
                                 </div>
 
@@ -372,7 +382,7 @@ const ViewTeamPage = () => {
                                     <Flag className="stat-icon" size={20} />
                                     <div className="stat-info">
                                         <span className="stat-number">{performance.pending}</span>
-                                        <span className="stat-label">Getting Ready</span>
+                                        <span className="stat-label">{t('teams.gettingReady', 'Getting Ready')}</span>
                                     </div>
                                 </div>
 
@@ -380,7 +390,7 @@ const ViewTeamPage = () => {
                                     <Trophy className="stat-icon" size={20} />
                                     <div className="stat-info">
                                         <span className="stat-number">{performance.total}</span>
-                                        <span className="stat-label">Total Racers</span>
+                                        <span className="stat-label">{t('teams.totalRacers', 'Total Racers')}</span>
                                     </div>
                                 </div>
                             </div>
@@ -400,7 +410,7 @@ const ViewTeamPage = () => {
                                             </div>
                                             <div className="racer-info">
                                                 <h4 className="racer-name">
-                                                    {`${kid.personalInfo?.firstName || ''} ${kid.personalInfo?.lastName || ''}`.trim() || 'Racing Star'}
+                                                    {`${kid.personalInfo?.firstName || ''} ${kid.personalInfo?.lastName || ''}`.trim() || t('teams.racingStar', 'Racing Star')}
                                                 </h4>
                                                 <div className="racer-details">
                                                     {kid.parentInfo?.name && (
@@ -409,7 +419,9 @@ const ViewTeamPage = () => {
                                                         </div>
                                                     )}
                                                     <div className="status-info">
-                                                        Status: {kid.signedFormStatus || 'Pending'}
+                                                        {t('teams.statusInfo', 'Status: {status}', {
+                                                            status: kid.signedFormStatus || t('status.pending', 'Pending')
+                                                        })}
                                                     </div>
                                                 </div>
                                             </div>
@@ -418,15 +430,15 @@ const ViewTeamPage = () => {
                                 ) : (
                                     <div className="empty-state">
                                         <Baby className="empty-icon" size={40} />
-                                        <h4>No racers assigned yet!</h4>
-                                        <p>This team is waiting for some amazing kids to join the race! 🏎️</p>
+                                        <h4>{t('teams.noRacersAssignedYet', 'No racers assigned yet!')}</h4>
+                                        <p>{t('teams.waitingForKidsToJoin', 'This team is waiting for some amazing kids to join the race! 🏎️')}</p>
                                         {(userRole === 'admin' || userRole === 'instructor') && (
                                             <button
                                                 onClick={() => navigate(`/admin/teams/edit/${id}`, { state: { focusKids: true } })}
                                                 className="assign-kids-button"
                                             >
                                                 <Baby className="btn-icon" size={16} />
-                                                Assign Racers
+                                                {t('teams.assignRacers', 'Assign Racers')}
                                             </button>
                                         )}
                                     </div>
