@@ -335,6 +335,18 @@ const translations = {
         'import.includeTimestamp': 'Include timestamp in filename',
         'import.exportButton': 'Export Data',
         'import.recentActivity': 'Recent Activity',
+        'import.usersImport': 'Users Import',
+        'import.eventsExport': 'Events Export',
+        'import.teamsImport': 'Teams Import',
+        'import.daysAgo': '{count} days ago',
+        'import.weekAgo': '1 week ago',
+        'import.success': 'Success',
+        'import.error': 'Error',
+        'import.recordsImported': '{count} records imported',
+        'import.exportedAs': 'Exported as {filename}',
+        'import.invalidFormat': 'Invalid format in row {row}',
+        'import.importingData': 'Importing {type} data from {filename}',
+        'import.exportingData': 'Exporting {type} data',
 
         // Gallery
         'gallery.title': 'Gallery',
@@ -1010,8 +1022,11 @@ const translations = {
         'formsManagement.contact': 'Contact',
         'formsManagement.feedback': 'Feedback',
         'formsManagement.medical': 'Medical',
+
+
     },
     he: {
+
         // Navigation
         'nav.dashboard': 'לוח בקרה',
         'nav.eventManagement': 'ניהול אירועים',
@@ -1338,6 +1353,18 @@ const translations = {
         'import.includeTimestamp': 'כלול חותמת זמן בשם הקובץ',
         'import.exportButton': 'ייצא נתונים',
         'import.recentActivity': 'פעילות אחרונה',
+        'import.usersImport': 'ייבוא משתמשים',
+        'import.eventsExport': 'ייצוא אירועים',
+        'import.teamsImport': 'ייבוא קבוצות',
+        'import.daysAgo': 'לפני {count} ימים',
+        'import.weekAgo': 'לפני שבוע',
+        'import.success': 'הצליח',
+        'import.error': 'שגיאה',
+        'import.recordsImported': '{count} רשומות יובאו',
+        'import.exportedAs': 'יוצא כ-{filename}',
+        'import.invalidFormat': 'פורמט לא תקין בשורה {row}',
+        'import.importingData': 'מייבא נתוני {type} מ-{filename}',
+        'import.exportingData': 'מייצא נתוני {type}',
 
         // Gallery
         'gallery.title': 'גלריה',
