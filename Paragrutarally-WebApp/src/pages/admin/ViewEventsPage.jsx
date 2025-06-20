@@ -1,10 +1,11 @@
-// src/pages/admin/ViewEventsPage.jsx - Updated with Fixed Styling and Teams Section
+// src/pages/admin/ViewEventsPage.jsx - Updated with Complete Translation Support
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../firebase/config';
 import Dashboard from '../../components/layout/Dashboard';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { usePermissions } from '../../hooks/usePermissions.jsx';
 import { getAllTeams } from '../../services/teamService';
 import {
@@ -39,6 +40,7 @@ const ViewEventsPage = () => {
     const navigate = useNavigate();
     const { eventId } = useParams();
     const { isDarkMode, appliedTheme } = useTheme();
+    const { t, isRTL } = useLanguage();
     const { permissions, userRole } = usePermissions();
 
     const [event, setEvent] = useState(null);
@@ -72,13 +74,13 @@ const ViewEventsPage = () => {
                 const eventData = eventDoc.data();
                 setEvent({
                     id: eventDoc.id,
-                    name: eventData.name || 'Unnamed Event',
-                    description: eventData.description || 'No description available',
-                    location: eventData.location || 'Location TBD',
-                    date: eventData.date || 'Date TBD',
-                    time: eventData.time || 'Time TBD',
-                    address: eventData.address || 'Address TBD',
-                    organizer: eventData.organizer || 'TBD',
+                    name: eventData.name || t('events.unnamedEvent', 'Unnamed Event'),
+                    description: eventData.description || t('events.noDescription', 'No description available'),
+                    location: eventData.location || t('events.locationTBD', 'Location TBD'),
+                    date: eventData.date || t('events.dateTBD', 'Date TBD'),
+                    time: eventData.time || t('events.timeTBD', 'Time TBD'),
+                    address: eventData.address || t('events.addressTBD', 'Address TBD'),
+                    organizer: eventData.organizer || t('events.organizerTBD', 'TBD'),
                     participants: eventData.attendees || 0,
                     status: eventData.status || 'upcoming',
                     notes: eventData.notes || '',
@@ -90,11 +92,11 @@ const ViewEventsPage = () => {
                     image: eventData.image || 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400'
                 });
             } else {
-                setError('Event not found');
+                setError(t('events.eventNotFound', 'Event not found'));
             }
         } catch (err) {
             console.error('Error loading event:', err);
-            setError('Failed to load event. Please try again.');
+            setError(t('events.loadError', 'Failed to load event. Please try again.'));
         } finally {
             setIsLoading(false);
         }
@@ -124,7 +126,7 @@ const ViewEventsPage = () => {
         if (event.hasGalleryFolder) {
             navigate(`/gallery/${eventId}`);
         } else {
-            alert('This event does not have a gallery folder.');
+            alert(t('events.noGalleryFolder', 'This event does not have a gallery folder.'));
         }
     };
 
@@ -133,11 +135,11 @@ const ViewEventsPage = () => {
     };
 
     const formatDate = (dateString) => {
-        if (!dateString || dateString === 'Date TBD') return dateString;
+        if (!dateString || dateString === t('events.dateTBD', 'Date TBD')) return dateString;
 
         try {
             const date = new Date(dateString);
-            return date.toLocaleDateString('en-US', {
+            return date.toLocaleDateString(isRTL ? 'he-IL' : 'en-US', {
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric'
@@ -148,12 +150,12 @@ const ViewEventsPage = () => {
     };
 
     const formatTime = (time) => {
-        if (!time || time === 'Time TBD') return 'Time TBD';
+        if (!time || time === t('events.timeTBD', 'Time TBD')) return t('events.timeTBD', 'Time TBD');
         try {
-            return new Date(`2000-01-01T${time}`).toLocaleTimeString('en-US', {
+            return new Date(`2000-01-01T${time}`).toLocaleTimeString(isRTL ? 'he-IL' : 'en-US', {
                 hour: 'numeric',
                 minute: '2-digit',
-                hour12: true
+                hour12: !isRTL
             });
         } catch (error) {
             return time;
@@ -173,14 +175,27 @@ const ViewEventsPage = () => {
         }
     };
 
+    const getStatusText = (status) => {
+        switch (status) {
+            case 'upcoming':
+                return t('events.upcoming', 'Upcoming');
+            case 'completed':
+                return t('events.completed', 'Completed');
+            case 'cancelled':
+                return t('events.cancelled', 'Cancelled');
+            default:
+                return t('events.upcoming', 'Upcoming');
+        }
+    };
+
     if (isLoading) {
         return (
             <Dashboard>
-                <div className={`view-events-page ${appliedTheme}-mode`}>
+                <div className={`view-events-page ${appliedTheme}-mode`} dir={isRTL ? 'rtl' : 'ltr'}>
                     <div className="loading-container">
                         <div className="loading-content">
                             <Clock className="loading-spinner" size={40} />
-                            <p>Loading event...</p>
+                            <p>{t('events.loadingEvent', 'Loading event...')}</p>
                         </div>
                     </div>
                 </div>
@@ -191,13 +206,13 @@ const ViewEventsPage = () => {
     if (error || !event) {
         return (
             <Dashboard>
-                <div className={`view-events-page ${appliedTheme}-mode`}>
+                <div className={`view-events-page ${appliedTheme}-mode`} dir={isRTL ? 'rtl' : 'ltr'}>
                     <div className="error-container">
-                        <h3>Error</h3>
-                        <p>{error || 'Event not found'}</p>
+                        <h3>{t('common.error', 'Error')}</h3>
+                        <p>{error || t('events.eventNotFound', 'Event not found')}</p>
                         <button onClick={handleBackToEvents} className="btn-primary">
                             <ArrowLeft className="btn-icon" size={18} />
-                            Back to Events
+                            {t('events.backToEvents', 'Back to Events')}
                         </button>
                     </div>
                 </div>
@@ -207,14 +222,14 @@ const ViewEventsPage = () => {
 
     return (
         <Dashboard>
-            <div className={`view-events-page ${appliedTheme}-mode`}>
+            <div className={`view-events-page ${appliedTheme}-mode`} dir={isRTL ? 'rtl' : 'ltr'}>
                 {/* Header */}
                 <button
                     onClick={handleBackToEvents}
                     className={`back-button ${appliedTheme}-back-button`}
                 >
                     <ArrowLeft size={20} />
-                    Back to Events
+                    {t('events.backToEvents', 'Back to Events')}
                 </button>
 
                 {/* Racing Header */}
@@ -223,10 +238,10 @@ const ViewEventsPage = () => {
                         <div className="title-section">
                             <h1>
                                 <Trophy size={32} className="page-title-icon" />
-                                Racing Event Details!
+                                {t('events.racingEventDetails', 'Racing Event Details!')}
                                 <Flag size={24} className="trophy-icon" />
                             </h1>
-                            <p className="subtitle">Event information and details 🏁</p>
+                            <p className="subtitle">{t('events.eventInformationSubtitle', 'Event information and details')} 🏁</p>
                         </div>
                         <div className="header-actions">
                             {permissions?.canEdit && (
@@ -235,7 +250,7 @@ const ViewEventsPage = () => {
                                     className="edit-button"
                                 >
                                     <Edit className="btn-icon" size={18} />
-                                    Edit Event
+                                    {t('events.editEvent', 'Edit Event')}
                                 </button>
                             )}
                         </div>
@@ -276,14 +291,14 @@ const ViewEventsPage = () => {
                                     </div>
                                     <div className="stat-item">
                                         <Users className="stat-icon" size={16} />
-                                        <span>{event.participants} participants</span>
+                                        <span>{event.participants} {t('events.participants', 'participants')}</span>
                                     </div>
                                     <div className="stat-item">
                                         <Flag className="stat-icon" size={16} />
                                         <span className={`status-badge ${getStatusBadge(event.status)}`}>
                                             {event.status === 'upcoming' && <Trophy size={14} />}
                                             {event.status === 'completed' && <Check size={14} />}
-                                            {event.status.charAt(0).toUpperCase() + event.status.slice(1)}
+                                            {getStatusText(event.status)}
                                         </span>
                                     </div>
                                 </div>
@@ -298,55 +313,55 @@ const ViewEventsPage = () => {
                             <div className="section-header">
                                 <h2>
                                     <Trophy size={24} className="section-icon" />
-                                    🏎️ Event Details
+                                    🏎️ {t('events.eventDetails', 'Event Details')}
                                 </h2>
                             </div>
 
                             <div className="info-grid">
                                 <div className="info-item">
-                                    <label>📊 Status</label>
+                                    <label>📊 {t('events.status', 'Status')}</label>
                                     <div className="info-value">
                                         <span className={`status-badge ${getStatusBadge(event.status)}`}>
                                             {event.status === 'upcoming' && <Trophy size={14} style={{ marginRight: '4px' }} />}
                                             {event.status === 'completed' && <Check size={14} style={{ marginRight: '4px' }} />}
-                                            {event.status.charAt(0).toUpperCase() + event.status.slice(1)}
+                                            {getStatusText(event.status)}
                                         </span>
                                     </div>
                                 </div>
 
                                 <div className="info-item">
-                                    <label>📅 Date</label>
+                                    <label>📅 {t('events.date', 'Date')}</label>
                                     <div className="info-value">{formatDate(event.date)}</div>
                                 </div>
 
                                 <div className="info-item">
-                                    <label>🕐 Time</label>
+                                    <label>🕐 {t('events.time', 'Time')}</label>
                                     <div className="info-value">{formatTime(event.time)}</div>
                                 </div>
 
                                 <div className="info-item">
-                                    <label>📍 Location</label>
+                                    <label>📍 {t('events.location', 'Location')}</label>
                                     <div className="info-value">{event.location}</div>
                                 </div>
 
                                 <div className="info-item">
-                                    <label>👥 Participants</label>
+                                    <label>👥 {t('events.participants', 'Participants')}</label>
                                     <div className="info-value">{event.participants}</div>
                                 </div>
 
                                 <div className="info-item">
-                                    <label>👨‍💼 Organizer</label>
+                                    <label>👨‍💼 {t('events.organizer', 'Organizer')}</label>
                                     <div className="info-value">{event.organizer}</div>
                                 </div>
 
                                 <div className="info-item full-width">
-                                    <label>🏠 Full Address</label>
+                                    <label>🏠 {t('events.fullAddress', 'Full Address')}</label>
                                     <div className="info-value">{event.address}</div>
                                 </div>
 
                                 {event.notes && (
                                     <div className="info-item full-width">
-                                        <label>📝 Additional Notes</label>
+                                        <label>📝 {t('events.additionalNotes', 'Additional Notes')}</label>
                                         <div className="info-value">{event.notes}</div>
                                     </div>
                                 )}
@@ -359,7 +374,7 @@ const ViewEventsPage = () => {
                                 <div className="section-header">
                                     <h2>
                                         <Users size={24} className="section-icon" />
-                                        🏁 Participating Teams
+                                        🏁 {t('events.participatingTeams', 'Participating Teams')}
                                     </h2>
                                 </div>
 
@@ -367,7 +382,7 @@ const ViewEventsPage = () => {
                                     {loadingTeams ? (
                                         <div className="teams-loading">
                                             <Clock className="loading-spinner" size={20} />
-                                            <span>Loading team data...</span>
+                                            <span>{t('events.loadingTeamData', 'Loading team data...')}</span>
                                         </div>
                                     ) : (
                                         <div className="teams-list-view">
@@ -380,7 +395,7 @@ const ViewEventsPage = () => {
                                                     <div className="team-card-header">
                                                         <Users size={20} className="team-icon" />
                                                         <h3 className="team-name">
-                                                            {teamsData[teamId]?.name || 'Unknown Team'}
+                                                            {teamsData[teamId]?.name || t('events.unknownTeam', 'Unknown Team')}
                                                         </h3>
                                                     </div>
 
@@ -389,12 +404,12 @@ const ViewEventsPage = () => {
                                                             {teamsData[teamId].teamLeader && (
                                                                 <div className="team-leader">
                                                                     <Users size={14} />
-                                                                    <span>Leader: {teamsData[teamId].teamLeader.firstName} {teamsData[teamId].teamLeader.lastName}</span>
+                                                                    <span>{t('events.leader', 'Leader')}: {teamsData[teamId].teamLeader.firstName} {teamsData[teamId].teamLeader.lastName}</span>
                                                                 </div>
                                                             )}
                                                             <div className="team-member-count">
                                                                 <Users size={14} />
-                                                                <span>Kids in team: {teamsData[teamId].kidIds?.length || 0}</span>
+                                                                <span>{t('events.kidsInTeam', 'Kids in team')}: {teamsData[teamId].kidIds?.length || 0}</span>
                                                             </div>
                                                         </div>
                                                     )}
@@ -412,7 +427,7 @@ const ViewEventsPage = () => {
                                 <div className="section-header">
                                     <h2>
                                         <Photo size={24} className="section-icon" />
-                                        📷 Event Gallery
+                                        📷 {t('events.eventGallery', 'Event Gallery')}
                                     </h2>
                                 </div>
 
@@ -420,8 +435,8 @@ const ViewEventsPage = () => {
                                     <div className="gallery-info">
                                         <Folder className="gallery-folder-icon" size={48} />
                                         <div className="gallery-details">
-                                            <h3>{event.name} Album</h3>
-                                            <p>View and manage photos from this event</p>
+                                            <h3>{t('events.eventAlbum', '{eventName} Album', { eventName: event.name })}</h3>
+                                            <p>{t('events.viewManagePhotos', 'View and manage photos from this event')}</p>
                                         </div>
                                     </div>
 
@@ -431,7 +446,7 @@ const ViewEventsPage = () => {
                                             className="btn-primary gallery-button"
                                         >
                                             <Photo size={16} />
-                                            View Gallery
+                                            {t('events.viewGallery', 'View Gallery')}
                                         </button>
                                     </div>
                                 </div>
