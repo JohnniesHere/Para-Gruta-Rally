@@ -1,4 +1,4 @@
-// src/pages/admin/AdminDashboardPage.jsx - Enhanced with Vehicle Statistics
+// src/pages/admin/AdminDashboardPage.jsx - Enhanced with Translation Support
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { collection, getDocs, query, orderBy, where } from 'firebase/firestore';
@@ -6,27 +6,26 @@ import { db } from '../../firebase/config';
 import Dashboard from '../../components/layout/Dashboard';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { getVehicleStats } from '../../services/vehicleService'; // ADDED: Vehicle service
+import { getVehicleStats } from '../../services/vehicleService';
 import {
     IconUsers as Users,
     IconCalendarEvent as Calendar,
     IconUserCircle as Kids,
     IconUsersGroup as Teams,
-    IconCar // ADDED: Vehicle icon
+    IconCar
 } from '@tabler/icons-react';
 import './AdminDashboardPage.css';
 
 const AdminDashboardPage = () => {
     const navigate = useNavigate();
     const { isDarkMode, appliedTheme } = useTheme();
-    const {t, isRTL } = useLanguage();
+    const { t, isRTL } = useLanguage();
     const [dashboardData, setDashboardData] = useState({
         stats: {
             totalUsers: 0,
             totalKids: 0,
             activeTeams: 0,
             upcomingEventsCount: 0,
-            // ADDED: Vehicle statistics
             totalVehicles: 0,
             activeVehicles: 0,
             vehiclesInUse: 0,
@@ -55,27 +54,39 @@ const AdminDashboardPage = () => {
         navigate('/admin/teams');
     };
 
-    // ADDED: Navigation handler for vehicles
     const handleNavigateToVehicles = () => {
         navigate('/admin/vehicles');
     };
 
     // Format time ago utility
     const formatTimeAgo = (timestamp) => {
-        if (!timestamp) return 'Unknown time';
+    if (!timestamp) return t('general.loading');
 
-        const now = new Date();
-        const eventTime = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-        const diffInMilliseconds = now - eventTime;
-        const diffInMinutes = Math.floor(diffInMilliseconds / (1000 * 60));
-        const diffInHours = Math.floor(diffInMinutes / 60);
-        const diffInDays = Math.floor(diffInHours / 24);
+    const now = new Date();
+    const eventTime = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    const diffInMilliseconds = now - eventTime;
+    const diffInMinutes = Math.floor(diffInMilliseconds / (1000 * 60));
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    const diffInDays = Math.floor(diffInHours / 24);
 
-        if (diffInMinutes < 1) return 'Just now';
-        if (diffInMinutes < 60) return `${diffInMinutes} minute${diffInMinutes > 1 ? 's' : ''} ago`;
-        if (diffInHours < 24) return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
-        return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
-    };
+    if (diffInMinutes < 1) return t('dashboard.justNow', 'Just now');
+    if (diffInMinutes < 60) {
+        return t('dashboard.minutesAgo', '{count} minute{plural} ago', {
+            count: diffInMinutes,
+            plural: diffInMinutes > 1 ? 's' : ''
+        });
+    }
+    if (diffInHours < 24) {
+        return t('dashboard.hoursAgo', '{count} hour{plural} ago', {
+            count: diffInHours,
+            plural: diffInHours > 1 ? 's' : ''
+        });
+    }
+    return t('dashboard.daysAgo', '{count} day{plural} ago', {
+        count: diffInDays,
+        plural: diffInDays > 1 ? 's' : ''
+    });
+};
 
     // Format event date utility
     const formatEventDate = (dateString) => {
@@ -83,7 +94,7 @@ const AdminDashboardPage = () => {
 
         try {
             const date = new Date(dateString);
-            return date.toLocaleDateString('en-US', {
+            return date.toLocaleDateString(isRTL ? 'he-IL' : 'en-US', {
                 month: 'short',
                 day: 'numeric',
                 year: 'numeric'
@@ -102,7 +113,6 @@ const AdminDashboardPage = () => {
                     totalKids: 0,
                     activeTeams: 0,
                     upcomingEventsCount: 0,
-                    // ADDED: Vehicle statistics
                     totalVehicles: 0,
                     activeVehicles: 0,
                     vehiclesInUse: 0,
@@ -124,7 +134,7 @@ const AdminDashboardPage = () => {
                 const eventData = doc.data();
                 allEvents.push({
                     id: doc.id,
-                    name: eventData.name || 'Unnamed Event',
+                    name: eventData.name || t('events.unnamedEvent', 'Unnamed Event'),
                     description: eventData.description || 'No description available',
                     location: eventData.location || 'Location TBD',
                     date: eventData.date || 'Date TBD',
@@ -146,7 +156,7 @@ const AdminDashboardPage = () => {
             });
 
             data.stats.upcomingEventsCount = upcomingEvents.length;
-            data.upcomingEvents = upcomingEvents.slice(0, 5); // Show only first 5
+            data.upcomingEvents = upcomingEvents.slice(0, 5);
 
             // Fetch users
             try {
@@ -154,7 +164,6 @@ const AdminDashboardPage = () => {
                 data.stats.totalUsers = usersSnapshot.size;
             } catch (userError) {
                 console.warn('Could not fetch users:', userError);
-                // Use mock data if users collection doesn't exist
                 data.stats.totalUsers = 5;
             }
 
@@ -164,7 +173,6 @@ const AdminDashboardPage = () => {
                 data.stats.totalKids = kidsSnapshot.size;
             } catch (kidError) {
                 console.warn('Could not fetch kids:', kidError);
-                // Use mock data if kids collection doesn't exist
                 data.stats.totalKids = 1;
             }
 
@@ -174,11 +182,10 @@ const AdminDashboardPage = () => {
                 data.stats.activeTeams = teamsSnapshot.size;
             } catch (teamError) {
                 console.warn('Could not fetch teams:', teamError);
-                // Use mock data if teams collection doesn't exist
                 data.stats.activeTeams = 2;
             }
 
-            // ADDED: Fetch vehicles
+            // Fetch vehicles
             try {
                 const vehicleStats = await getVehicleStats();
                 console.log('✅ Vehicle stats loaded:', vehicleStats);
@@ -188,7 +195,6 @@ const AdminDashboardPage = () => {
                 data.stats.availableVehicles = vehicleStats.available;
             } catch (vehicleError) {
                 console.warn('Could not fetch vehicles:', vehicleError);
-                // Use mock data if vehicles collection doesn't exist or fails
                 data.stats.totalVehicles = 0;
                 data.stats.activeVehicles = 0;
                 data.stats.vehiclesInUse = 0;
@@ -204,7 +210,7 @@ const AdminDashboardPage = () => {
                     data.recentActivities.push({
                         timestamp: event.createdAt,
                         icon: '📅',
-                        description: `Event <strong>${event.name}</strong> was created.`
+                        description: t('dashboard.event') + ` <strong>${event.name}</strong> ` + t('dashboard.wasCreated') + '.'
                     });
                 }
             });
@@ -213,23 +219,22 @@ const AdminDashboardPage = () => {
             if (data.recentActivities.length < 3) {
                 const mockActivities = [
                     {
-                        timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
+                        timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
                         icon: '👤',
-                        description: 'User <strong>instructorTest</strong> was updated.'
+                        description: t('dashboard.newUser') + ' <strong>instructorTest</strong> ' + t('dashboard.wasAdded') + '.'
                     },
                     {
-                        timestamp: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000), // 4 days ago
+                        timestamp: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
                         icon: '👥',
-                        description: 'Team <strong>testName</strong> was created.'
+                        description: t('dashboard.teamCreated', 'Team <strong>{teamName}</strong> was created.', { teamName: 'testName' })
                     },
                     {
-                        timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
+                        timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
                         icon: '👤',
-                        description: 'New user <strong>parentTest</strong> was added.'
+                        description: t('dashboard.newUser') + ' <strong>parentTest</strong> ' + t('dashboard.wasAdded') + '.'
                     }
                 ];
 
-                // Fill with mock activities up to 5 total
                 data.recentActivities = [...data.recentActivities, ...mockActivities].slice(0, 5);
             }
 
@@ -258,14 +263,14 @@ const AdminDashboardPage = () => {
                 setDashboardData(data);
             } catch (err) {
                 console.error('Error loading dashboard data:', err);
-                setError('Failed to load dashboard data. Please try again.');
+                setError(t('common.error', 'Failed to load dashboard data. Please try again.'));
             } finally {
                 setIsLoading(false);
             }
         };
 
         loadDashboardData();
-    }, []);
+    }, [t]);
 
     // Refresh data every 5 minutes
     useEffect(() => {
@@ -276,7 +281,7 @@ const AdminDashboardPage = () => {
             } catch (err) {
                 console.error('Error refreshing dashboard data:', err);
             }
-        }, 5 * 60 * 1000); // 5 minutes
+        }, 5 * 60 * 1000);
 
         return () => clearInterval(interval);
     }, []);
@@ -284,20 +289,20 @@ const AdminDashboardPage = () => {
     if (error) {
         return (
             <Dashboard requiredRole="admin">
-                <div className={`admin-page admin-dashboard ${appliedTheme}-mode`}>
+                <div className={`admin-page admin-dashboard ${appliedTheme}-mode`} dir={isRTL ? 'rtl' : 'ltr'}>
                     <h1>
                         <Teams size={32} className="page-title-icon" />
-                        Admin Dashboard
+                        {t('dashboard.title')}
                     </h1>
                     <div className="admin-container">
                         <div className="error-container">
-                            <h3>Oops! Something went wrong</h3>
+                            <h3>{t('common.error', 'Oops! Something went wrong')}</h3>
                             <p>{error}</p>
                             <button
                                 onClick={() => window.location.reload()}
                                 className="btn btn-primary"
                             >
-                                Retry
+                                {t('teams.tryAgain', 'Retry')}
                             </button>
                         </div>
                     </div>
@@ -308,16 +313,16 @@ const AdminDashboardPage = () => {
 
     return (
         <Dashboard requiredRole="admin">
-            <div className={`admin-page admin-dashboard ${appliedTheme}-mode`}>
-                {/* Page Title - Outside container */}
+            <div className={`admin-page admin-dashboard ${appliedTheme}-mode`} dir={isRTL ? 'rtl' : 'ltr'}>
+                {/* Page Title */}
                 <h1>
                     <Teams size={32} className="page-title-icon" />
-                    Admin Dashboard
+                    {t('dashboard.title')}
                 </h1>
 
                 {/* Main Container */}
                 <div className="admin-container">
-                    {/* Stats Grid - ENHANCED with 5 cards */}
+                    {/* Stats Grid - Enhanced with 5 cards */}
                     <div className="stats-grid dashboard-stats">
                         <div
                             className={`stat-card total clickable ${isLoading ? 'loading' : ''}`}
@@ -326,9 +331,9 @@ const AdminDashboardPage = () => {
                             tabIndex={0}
                             onKeyDown={(e) => e.key === 'Enter' && handleNavigateToUsers()}
                         >
-                            <Users className="stat-icon" size={40} />
+                            <Users className="stat-icon" size={40}/>
                             <div className="stat-content">
-                                <h3>Total Users</h3>
+                                <h3>{t('dashboard.totalUsers')}</h3>
                                 <div className="stat-value">
                                     {isLoading ? (
                                         <div className="loading-skeleton">--</div>
@@ -336,7 +341,7 @@ const AdminDashboardPage = () => {
                                         dashboardData.stats.totalUsers
                                     )}
                                 </div>
-                                <div className="stat-subtitle">System Users</div>
+                                <div className="stat-subtitle">{t('dashboard.systemUsers', 'System Users')}</div>
                             </div>
                         </div>
 
@@ -347,9 +352,9 @@ const AdminDashboardPage = () => {
                             tabIndex={0}
                             onKeyDown={(e) => e.key === 'Enter' && handleNavigateToEvents()}
                         >
-                            <Calendar className="stat-icon" size={40} />
+                            <Calendar className="stat-icon" size={40}/>
                             <div className="stat-content">
-                                <h3>Upcoming Events</h3>
+                                <h3>{t('dashboard.upcomingEvents')}</h3>
                                 <div className="stat-value">
                                     {isLoading ? (
                                         <div className="loading-skeleton">--</div>
@@ -357,7 +362,7 @@ const AdminDashboardPage = () => {
                                         dashboardData.stats.upcomingEventsCount
                                     )}
                                 </div>
-                                <div className="stat-subtitle">Scheduled</div>
+                                <div className="stat-subtitle">{t('events.status', 'Scheduled')}</div>
                             </div>
                         </div>
 
@@ -368,9 +373,9 @@ const AdminDashboardPage = () => {
                             tabIndex={0}
                             onKeyDown={(e) => e.key === 'Enter' && handleNavigateToKids()}
                         >
-                            <Kids className="stat-icon" size={40} />
+                            <Kids className="stat-icon" size={40}/>
                             <div className="stat-content">
-                                <h3>Total Kids</h3>
+                                <h3>{t('dashboard.totalKids')}</h3>
                                 <div className="stat-value">
                                     {isLoading ? (
                                         <div className="loading-skeleton">--</div>
@@ -378,7 +383,7 @@ const AdminDashboardPage = () => {
                                         dashboardData.stats.totalKids
                                     )}
                                 </div>
-                                <div className="stat-subtitle">Registered</div>
+                                <div className="stat-subtitle">{t('kids.participantNumber', 'Registered')}</div>
                             </div>
                         </div>
 
@@ -389,9 +394,9 @@ const AdminDashboardPage = () => {
                             tabIndex={0}
                             onKeyDown={(e) => e.key === 'Enter' && handleNavigateToTeams()}
                         >
-                            <Teams className="stat-icon" size={40} />
+                            <Teams className="stat-icon" size={40}/>
                             <div className="stat-content">
-                                <h3>Active Teams</h3>
+                                <h3>{t('dashboard.activeTeams')}</h3>
                                 <div className="stat-value">
                                     {isLoading ? (
                                         <div className="loading-skeleton">--</div>
@@ -399,11 +404,11 @@ const AdminDashboardPage = () => {
                                         dashboardData.stats.activeTeams
                                     )}
                                 </div>
-                                <div className="stat-subtitle">Racing Ready</div>
+                                <div className="stat-subtitle">{t('dashboard.racingReady', 'Racing Ready')}</div>
                             </div>
                         </div>
 
-                        {/* ADDED: Racing Vehicles Card */}
+                        {/* Racing Vehicles Card */}
                         <div
                             className={`stat-card vehicles clickable ${isLoading ? 'loading' : ''}`}
                             onClick={handleNavigateToVehicles}
@@ -411,9 +416,9 @@ const AdminDashboardPage = () => {
                             tabIndex={0}
                             onKeyDown={(e) => e.key === 'Enter' && handleNavigateToVehicles()}
                         >
-                            <IconCar className="stat-icon" size={40} />
+                            <IconCar className="stat-icon" size={40}/>
                             <div className="stat-content">
-                                <h3>Racing Vehicles</h3>
+                                <h3>{t('dashboard.racingVehicles', 'Racing Vehicles')}</h3>
                                 <div className="stat-value">
                                     {isLoading ? (
                                         <div className="loading-skeleton">--</div>
@@ -422,7 +427,7 @@ const AdminDashboardPage = () => {
                                     )}
                                 </div>
                                 <div className="stat-subtitle">
-                                    {dashboardData.stats.availableVehicles} Available
+                                    {dashboardData.stats.availableVehicles} {t('dashboard.available', 'Available')}
                                 </div>
                             </div>
                         </div>
@@ -431,15 +436,14 @@ const AdminDashboardPage = () => {
                     {/* Dashboard Sections */}
                     <div className="dashboard-sections">
                         <div className="recent-activities">
-                            <h2>Recent Activities</h2>
+                            <h2>{t('dashboard.recentActivities')}</h2>
                             <div className="activity-list">
                                 {isLoading ? (
-                                    // Loading skeleton for activities
                                     [...Array(3)].map((_, index) => (
                                         <div key={index} className="activity-item loading">
-                                            <div className="activity-time loading-skeleton">Loading...</div>
+                                            <div className="activity-time loading-skeleton">{t('general.loading')}</div>
                                             <div className="activity-description loading-skeleton">
-                                                Loading activity...
+                                                {t('general.loading')}...
                                             </div>
                                         </div>
                                     ))
@@ -451,13 +455,13 @@ const AdminDashboardPage = () => {
                                             </div>
                                             <div className="activity-description">
                                                 <span className="activity-icon">{activity.icon}</span>
-                                                <span dangerouslySetInnerHTML={{ __html: activity.description }} />
+                                                <span dangerouslySetInnerHTML={{__html: activity.description}}/>
                                             </div>
                                         </div>
                                     ))
                                 ) : (
                                     <div className="empty-state">
-                                        <p>No recent activities found.</p>
+                                        <p>{t('common.noDataFound', 'No recent activities found.')}</p>
                                         <small>Activities will appear here as users interact with the system.</small>
                                     </div>
                                 )}
@@ -465,30 +469,33 @@ const AdminDashboardPage = () => {
                         </div>
 
                         <div className="upcoming-events">
-                            <h2>Upcoming Events</h2>
+                            <h2>{t('dashboard.upcomingEvents')}</h2>
                             <div className="events-list">
                                 {isLoading ? (
-                                    // Loading skeleton for events
                                     <>
                                         <div className="event-headers">
-                                            <div className="event-header-date">📅 Date</div>
-                                            <div className="event-header-name">🎯 Event Name</div>
-                                            <div className="event-header-location">📍 Location</div>
+                                            <div className="event-header-date">📅 {t('events.date')}</div>
+                                            <div className="event-header-name">🎯 {t('events.eventName')}</div>
+                                            <div className="event-header-location">📍 {t('events.location')}</div>
                                         </div>
                                         {[...Array(3)].map((_, index) => (
                                             <div key={index} className="event-item loading">
-                                                <div className="event-date loading-skeleton">Loading...</div>
-                                                <div className="event-name loading-skeleton">Loading event...</div>
-                                                <div className="event-location loading-skeleton">Loading location...</div>
+                                                <div
+                                                    className="event-date loading-skeleton">{t('general.loading')}</div>
+                                                <div className="event-name loading-skeleton">{t('general.loading')}...
+                                                </div>
+                                                <div
+                                                    className="event-location loading-skeleton">{t('general.loading')}...
+                                                </div>
                                             </div>
                                         ))}
                                     </>
                                 ) : dashboardData.upcomingEvents.length > 0 ? (
                                     <>
                                         <div className="event-headers">
-                                            <div className="event-header-date">📅 Date</div>
-                                            <div className="event-header-name">🎯 Event Name</div>
-                                            <div className="event-header-location">📍 Location</div>
+                                            <div className="event-header-date">📅 {t('events.date')}</div>
+                                            <div className="event-header-name">🎯 {t('events.eventName')}</div>
+                                            <div className="event-header-location">📍 {t('events.location')}</div>
                                         </div>
                                         {dashboardData.upcomingEvents.slice(0, 5).map((event) => (
                                             <div key={event.id} className="event-item">
@@ -506,7 +513,7 @@ const AdminDashboardPage = () => {
                                     </>
                                 ) : (
                                     <div className="empty-state">
-                                        <p>No upcoming events scheduled.</p>
+                                        <p>{t('events.noEvents', 'No upcoming events scheduled.')}</p>
                                         <small>Create your first event to get started!</small>
                                     </div>
                                 )}
@@ -516,7 +523,7 @@ const AdminDashboardPage = () => {
 
                     {/* Refresh indicator */}
                     <div className="refresh-info">
-                        <small>Dashboard updates automatically every 5 minutes</small>
+                        <small>{t('dashboard.autoRefresh', 'Dashboard updates automatically every 5 minutes')}</small>
                     </div>
                 </div>
             </div>

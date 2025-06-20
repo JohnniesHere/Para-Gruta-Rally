@@ -35,6 +35,16 @@ const translations = {
         'dashboard.wasCreated': 'was created',
         'dashboard.newPhotos': 'new photos',
         'dashboard.wereAdded': 'were added to the gallery',
+        'dashboard.racingReady': 'Racing Ready',
+        'dashboard.racingVehicles': 'Racing Vehicles',
+        'dashboard.available': 'Available',
+        'dashboard.systemUsers': 'System Users',
+        'dashboard.autoRefresh': 'Dashboard updates automatically every 5 minutes',
+        'dashboard.teamCreated': 'Team <strong>{teamName}</strong> was created.',
+        'dashboard.justNow': 'Just now',
+        'dashboard.minutesAgo': '{count} minute{plural} ago',
+        'dashboard.hoursAgo': '{count} hour{plural} ago',
+        'dashboard.daysAgo': '{count} day{plural} ago',
 
         // Event Management
         'events.title': 'Event Management',
@@ -341,6 +351,16 @@ const translations = {
         'dashboard.wasCreated': 'נוצר',
         'dashboard.newPhotos': 'תמונות חדשות',
         'dashboard.wereAdded': 'נוספו לגלריה',
+        'dashboard.racingReady': 'מוכנים למירוץ',
+        'dashboard.racingVehicles': 'רכבי מירוץ',
+        'dashboard.available': 'זמינים',
+        'dashboard.systemUsers': 'משתמשי מערכת',
+        'dashboard.autoRefresh': 'הלוח מתעדכן אוטומטית כל 5 דקות',
+        'dashboard.teamCreated': 'קבוצה <strong>{teamName}</strong> נוצרה.',
+        'dashboard.justNow': 'עכשיו',
+        'dashboard.minutesAgo': 'לפני {count} דקות',
+        'dashboard.hoursAgo': 'לפני {count} שעות',
+        'dashboard.daysAgo': 'לפני {count} ימים',
 
         // Event Management
         'events.title': 'ניהול אירועים',
