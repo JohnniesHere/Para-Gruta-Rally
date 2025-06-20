@@ -1,8 +1,9 @@
-// src/pages/admin/FormsManagementPage.jsx
+// src/pages/admin/FormsManagementPage.jsx - Full Translation Support
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { usePermissions } from '../../hooks/usePermissions.jsx';
 import {
     IconNotes as FileText,
@@ -31,6 +32,7 @@ import './FormsManagementPage.css';
 const FormsManagementPage = () => {
     const navigate = useNavigate();
     const { isDarkMode, appliedTheme } = useTheme();
+    const { t } = useLanguage();
     const { permissions, userRole } = usePermissions();
 
     const [forms, setForms] = useState([]);
@@ -87,34 +89,35 @@ const FormsManagementPage = () => {
                 }
             ];
 
+            // Mock templates with translated names and descriptions
             const mockTemplates = [
                 {
                     id: 't1',
-                    name: 'Event Registration',
-                    description: 'Standard event registration template',
+                    name: t('formsManagement.eventRegistration', 'Event Registration'),
+                    description: t('formsManagement.eventRegistrationDesc', 'Standard event registration template'),
                     icon: '📋',
-                    category: 'Registration'
+                    category: t('formsManagement.registration', 'Registration')
                 },
                 {
                     id: 't2',
-                    name: 'Contact Information',
-                    description: 'Basic contact details form',
+                    name: t('formsManagement.contactInformation', 'Contact Information'),
+                    description: t('formsManagement.contactInformationDesc', 'Basic contact details form'),
                     icon: '📞',
-                    category: 'Contact'
+                    category: t('formsManagement.contact', 'Contact')
                 },
                 {
                     id: 't3',
-                    name: 'Feedback Survey',
-                    description: 'Post-event feedback collection',
+                    name: t('formsManagement.feedbackSurvey', 'Feedback Survey'),
+                    description: t('formsManagement.feedbackSurveyDesc', 'Post-event feedback collection'),
                     icon: '⭐',
-                    category: 'Feedback'
+                    category: t('formsManagement.feedback', 'Feedback')
                 },
                 {
                     id: 't4',
-                    name: 'Medical Information',
-                    description: 'Health and medical details form',
+                    name: t('formsManagement.medicalInformation', 'Medical Information'),
+                    description: t('formsManagement.medicalInformationDesc', 'Health and medical details form'),
                     icon: '🏥',
-                    category: 'Medical'
+                    category: t('formsManagement.medical', 'Medical')
                 }
             ];
 
@@ -174,7 +177,7 @@ const FormsManagementPage = () => {
     };
 
     const handleDeleteForm = (formId) => {
-        if (window.confirm('Are you sure you want to delete this form?')) {
+        if (window.confirm(t('formsManagement.deleteConfirm', 'Are you sure you want to delete this form?'))) {
             setForms(forms.filter(form => form.id !== formId));
         }
     };
@@ -187,6 +190,26 @@ const FormsManagementPage = () => {
     const handleViewSubmission = (submissionId) => {
         // In a real app, this would show submission details
         console.log('Viewing submission:', submissionId);
+    };
+
+    // Get translated status label
+    const getStatusLabel = (status) => {
+        switch (status) {
+            case 'active':
+                return t('formsManagement.active', 'Active');
+            case 'draft':
+                return t('formsManagement.draft', 'Draft');
+            case 'archived':
+                return t('formsManagement.archived', 'Archived');
+            case 'pending':
+                return t('formsManagement.pending', 'Pending');
+            case 'completed':
+                return t('formsManagement.completed', 'Completed');
+            case 'review':
+                return t('formsManagement.review', 'Review');
+            default:
+                return status.charAt(0).toUpperCase() + status.slice(1);
+        }
     };
 
     const filteredForms = forms.filter(form => {
@@ -202,7 +225,7 @@ const FormsManagementPage = () => {
                 <div className={`forms-management-page ${appliedTheme}-mode`}>
                     <div className="loading-container">
                         <div className="loading-spinner"></div>
-                        <p>Loading permissions...</p>
+                        <p>{t('formsManagement.loadingPermissions', 'Loading permissions...')}</p>
                     </div>
                 </div>
             </Dashboard>
@@ -212,102 +235,102 @@ const FormsManagementPage = () => {
     return (
         <Dashboard requiredRole={userRole}>
             <div className={`forms-management-page ${appliedTheme}-mode`}>
-                {/* Page Title - Outside container */}
+                {/* Page Title - Outside container - TRANSLATED */}
                 <h1>
                     <FileText size={32} className="page-title-icon" />
-                    Forms Management
+                    {t('formsManagement.title', 'Forms Management')}
                     <Sparkles size={24} className="sparkle-icon" />
                 </h1>
 
                 {/* Main Container */}
                 <div className="admin-container forms-management-container">
-                    {/* Racing Theme Header */}
+                    {/* Racing Theme Header - TRANSLATED */}
                     <div className="racing-header">
                         <div className="header-content">
                             <div className="title-section">
                                 <h2>
                                     <Trophy size={28} className="page-title-icon" />
-                                    Racing Forms Control Center
+                                    {t('formsManagement.racingFormsControlCenter', 'Racing Forms Control Center')}
                                 </h2>
-                                <p className="subtitle">Manage registration forms, collect data, and track submissions! 🏁</p>
+                                <p className="subtitle">{t('formsManagement.subtitle', 'Manage registration forms, collect data, and track submissions! 🏁')}</p>
                             </div>
                         </div>
                     </div>
 
-                    {/* Quick Actions */}
+                    {/* Quick Actions - TRANSLATED */}
                     <div className="quick-actions">
                         <div className="quick-actions-title">
                             <Target className="section-icon" size={20} />
-                            Quick Actions
+                            {t('formsManagement.quickActions', 'Quick Actions')}
                         </div>
                         <div className="quick-actions-grid">
                             <button className="quick-action-btn" onClick={handleCreateForm}>
                                 <Plus size={16} />
-                                Create New Form
+                                {t('formsManagement.createNewForm', 'Create New Form')}
                             </button>
                             <button className="quick-action-btn" onClick={loadFormsData}>
                                 <RefreshCw size={16} />
-                                Refresh Data
+                                {t('formsManagement.refreshData', 'Refresh Data')}
                             </button>
                             <button className="quick-action-btn">
                                 <Download size={16} />
-                                Export Submissions
+                                {t('formsManagement.exportSubmissions', 'Export Submissions')}
                             </button>
                             <button className="quick-action-btn">
                                 <Settings size={16} />
-                                Form Settings
+                                {t('formsManagement.formSettings', 'Form Settings')}
                             </button>
                         </div>
                     </div>
 
-                    {/* Analytics Cards */}
+                    {/* Analytics Cards - TRANSLATED */}
                     <div className="analytics-grid">
                         <div className="analytics-card">
                             <FileText className="analytics-icon" size={30} />
                             <div className="analytics-number">{analytics.totalForms}</div>
-                            <div className="analytics-label">Total Forms</div>
+                            <div className="analytics-label">{t('formsManagement.totalForms', 'Total Forms')}</div>
                         </div>
 
                         <div className="analytics-card">
                             <Users className="analytics-icon" size={30} />
                             <div className="analytics-number">{analytics.totalSubmissions}</div>
-                            <div className="analytics-label">Submissions</div>
+                            <div className="analytics-label">{t('formsManagement.submissions', 'Submissions')}</div>
                             <div className="analytics-trend trend-up">
-                                <span>↗</span> +12% this week
+                                <span>↗</span> {t('formsManagement.thisWeek', '+12% this week')}
                             </div>
                         </div>
 
                         <div className="analytics-card">
                             <Clock className="analytics-icon" size={30} />
                             <div className="analytics-number">{analytics.pendingReviews}</div>
-                            <div className="analytics-label">Pending Reviews</div>
+                            <div className="analytics-label">{t('formsManagement.pendingReviews', 'Pending Reviews')}</div>
                         </div>
 
                         <div className="analytics-card">
                             <BarChart3 className="analytics-icon" size={30} />
                             <div className="analytics-number">{analytics.completionRate}%</div>
-                            <div className="analytics-label">Completion Rate</div>
+                            <div className="analytics-label">{t('formsManagement.completionRate', 'Completion Rate')}</div>
                             <div className="analytics-trend trend-up">
-                                <span>↗</span> +5% improvement
+                                <span>↗</span> {t('formsManagement.improvement', '+5% improvement')}
                             </div>
                         </div>
                     </div>
 
-                    {/* Forms Overview */}
+                    {/* Forms Overview - TRANSLATED */}
                     <div className="form-section forms-overview-section">
                         <div className="section-header">
                             <FileText className="section-icon form-icon" size={24} />
-                            <h3>📋 Active Forms</h3>
+                            <h3>{t('formsManagement.activeForms', '📋 Active Forms')}</h3>
                         </div>
 
-                        {/* Search and Filters */}
+                        {/* Search and Filters - TRANSLATED */}
                         <div className="search-filter-section">
                             <div className="search-container">
                                 <div className="search-input-wrapper">
                                     <Search className="search-icon" size={18} />
                                     <input
                                         type="text"
-                                        placeholder="Search forms..."
+                                        placeholder={t('formsManagement.searchForms', 'Search forms...')}
                                         className="search-input"
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
@@ -318,17 +341,17 @@ const FormsManagementPage = () => {
                             <div className="filter-container">
                                 <label className="filter-label">
                                     <Filter className="filter-icon" size={16} />
-                                    Status
+                                    {t('formsManagement.status', 'Status')}
                                 </label>
                                 <select
                                     className="filter-select"
                                     value={statusFilter}
                                     onChange={(e) => setStatusFilter(e.target.value)}
                                 >
-                                    <option value="all">All Forms</option>
-                                    <option value="active">Active</option>
-                                    <option value="draft">Draft</option>
-                                    <option value="archived">Archived</option>
+                                    <option value="all">{t('formsManagement.allForms', 'All Forms')}</option>
+                                    <option value="active">{t('formsManagement.active', 'Active')}</option>
+                                    <option value="draft">{t('formsManagement.draft', 'Draft')}</option>
+                                    <option value="archived">{t('formsManagement.archived', 'Archived')}</option>
                                 </select>
                             </div>
                         </div>
@@ -337,7 +360,7 @@ const FormsManagementPage = () => {
                             <div className="loading-state">
                                 <div className="loading-content">
                                     <Clock className="loading-spinner" size={30} />
-                                    <p>Loading forms...</p>
+                                    <p>{t('formsManagement.loadingForms', 'Loading forms...')}</p>
                                 </div>
                             </div>
                         ) : (
@@ -354,36 +377,36 @@ const FormsManagementPage = () => {
                                         <div className="form-card-stats">
                                             <div className="form-stat">
                                                 <div className="form-stat-number">{form.submissions}</div>
-                                                <div className="form-stat-label">Submissions</div>
+                                                <div className="form-stat-label">{t('formsManagement.submissions', 'Submissions')}</div>
                                             </div>
                                             <div className="form-stat">
                                                 <div className="form-stat-number">
                                                     <span className={`status-badge ${form.status}`}>
-                                                        {form.status.charAt(0).toUpperCase() + form.status.slice(1)}
+                                                        {getStatusLabel(form.status)}
                                                     </span>
                                                 </div>
-                                                <div className="form-stat-label">Status</div>
+                                                <div className="form-stat-label">{t('formsManagement.status', 'Status')}</div>
                                             </div>
                                         </div>
                                         <div className="card-footer">
                                             <button
                                                 className="btn-action view"
                                                 onClick={() => handleViewSubmissions(form.id)}
-                                                title="View Submissions"
+                                                title={t('formsManagement.viewSubmissions', 'View Submissions')}
                                             >
                                                 <Eye size={16} />
                                             </button>
                                             <button
                                                 className="btn-action edit"
                                                 onClick={() => handleEditForm(form.id)}
-                                                title="Edit Form"
+                                                title={t('formsManagement.editForm', 'Edit Form')}
                                             >
                                                 <Edit size={16} />
                                             </button>
                                             <button
                                                 className="btn-action delete"
                                                 onClick={() => handleDeleteForm(form.id)}
-                                                title="Delete Form"
+                                                title={t('formsManagement.deleteForm', 'Delete Form')}
                                             >
                                                 <Trash2 size={16} />
                                             </button>
@@ -394,11 +417,11 @@ const FormsManagementPage = () => {
                         )}
                     </div>
 
-                    {/* Form Templates */}
+                    {/* Form Templates - TRANSLATED */}
                     <div className="form-section form-templates-section">
                         <div className="section-header">
                             <Copy className="section-icon" size={24} />
-                            <h3>📚 Form Templates</h3>
+                            <h3>{t('formsManagement.formTemplates', '📚 Form Templates')}</h3>
                         </div>
                         <div className="template-gallery">
                             {templates.map(template => (
@@ -413,28 +436,28 @@ const FormsManagementPage = () => {
                                         onClick={() => handleUseTemplate(template.id)}
                                     >
                                         <Plus size={14} />
-                                        Use Template
+                                        {t('formsManagement.useTemplate', 'Use Template')}
                                     </button>
                                 </div>
                             ))}
                         </div>
                     </div>
 
-                    {/* Recent Submissions */}
+                    {/* Recent Submissions - TRANSLATED */}
                     <div className="form-section form-submissions-section">
                         <div className="section-header">
                             <Users className="section-icon" size={24} />
-                            <h3>📨 Recent Submissions</h3>
+                            <h3>{t('formsManagement.recentSubmissions', '📨 Recent Submissions')}</h3>
                         </div>
                         <div className="submissions-table-container">
                             <table className="submissions-table">
                                 <thead>
                                 <tr>
-                                    <th>Form Name</th>
-                                    <th>Submitted By</th>
-                                    <th>Date & Time</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
+                                    <th>{t('formsManagement.formName', 'Form Name')}</th>
+                                    <th>{t('formsManagement.submittedBy', 'Submitted By')}</th>
+                                    <th>{t('formsManagement.dateTime', 'Date & Time')}</th>
+                                    <th>{t('formsManagement.status', 'Status')}</th>
+                                    <th>{t('formsManagement.actions', 'Actions')}</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -448,7 +471,7 @@ const FormsManagementPage = () => {
                                                     {submission.status === 'pending' && <Clock size={12} />}
                                                     {submission.status === 'completed' && <Check size={12} />}
                                                     {submission.status === 'review' && <AlertTriangle size={12} />}
-                                                    {submission.status.charAt(0).toUpperCase() + submission.status.slice(1)}
+                                                    {getStatusLabel(submission.status)}
                                                 </span>
                                         </td>
                                         <td>
@@ -456,13 +479,13 @@ const FormsManagementPage = () => {
                                                 <button
                                                     className="btn-action view"
                                                     onClick={() => handleViewSubmission(submission.id)}
-                                                    title="View Submission"
+                                                    title={t('formsManagement.viewSubmission', 'View Submission')}
                                                 >
                                                     <Eye size={14} />
                                                 </button>
                                                 <button
                                                     className="btn-action download"
-                                                    title="Download"
+                                                    title={t('formsManagement.download', 'Download')}
                                                 >
                                                     <Download size={14} />
                                                 </button>
