@@ -902,7 +902,7 @@ const translations = {
         'nav.gallery': 'גלריה',
         'nav.myAccount': 'החשבון שלי',
         'nav.signOut': 'התנתק',
-        'nav.logo': 'פראגרוטרלי',
+        'nav.logo': 'פאראגרוטראלי',
         'nav.events': 'אירועים',
         'nav.users': 'משתמשים',
         'nav.kids': 'ילדים',
@@ -1473,7 +1473,7 @@ const translations = {
         'language.selectLanguage': 'בחר שפה',
 
         // Hebrew login translations
-        'login.appTitle': 'אפליקציית פראגרוטרלי',
+        'login.appTitle': 'אפליקציית פאראגרוטראלי',
         'login.title': 'התחברות',
         'login.email': 'אימייל',
         'login.password': 'סיסמה',
