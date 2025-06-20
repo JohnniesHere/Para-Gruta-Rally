@@ -1,4 +1,4 @@
-// src/pages/shared/GalleryPage.jsx
+// src/pages/shared/GalleryPage.jsx - Full Translation Support
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { collection, getDocs, query, orderBy, doc, deleteDoc } from 'firebase/firestore';
@@ -7,6 +7,7 @@ import { db, storage } from '../../firebase/config';
 import Dashboard from '../../components/layout/Dashboard';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { useStorage } from '../../hooks/useStorage';
 import {
     IconPhoto as Photo,
@@ -30,6 +31,7 @@ import './GalleryPage.css';
 const GalleryPage = () => {
     const { userRole } = useAuth();
     const { isDarkMode } = useTheme();
+    const { t } = useLanguage();
     const { eventId } = useParams(); // For event-specific galleries
     const navigate = useNavigate();
 
@@ -74,7 +76,7 @@ const GalleryPage = () => {
 
         } catch (err) {
             console.error('Error loading gallery data:', err);
-            setError('Failed to load gallery. Please try again.');
+            setError(t('gallery.failedToLoad', 'Failed to load gallery. Please try again.'));
         } finally {
             setIsLoading(false);
         }
@@ -83,8 +85,8 @@ const GalleryPage = () => {
     const loadAlbums = async () => {
         try {
             const albumsList = [
-                { id: 'all', name: 'All Photos', type: 'all' },
-                { id: 'general', name: 'General Photos', type: 'folder' }
+                { id: 'all', name: t('gallery.allPhotos', 'All Photos'), type: 'all' },
+                { id: 'general', name: t('gallery.generalPhotos', 'General Photos'), type: 'folder' }
             ];
 
             // Load events from Firestore to create event albums
@@ -95,7 +97,7 @@ const GalleryPage = () => {
                 const eventData = doc.data();
                 albumsList.push({
                     id: `event_${doc.id}`,
-                    name: `${eventData.name} Album`,
+                    name: t('gallery.eventAlbum', '{eventName} Album', { eventName: eventData.name }),
                     type: 'event',
                     eventId: doc.id,
                     eventName: eventData.name
@@ -264,17 +266,17 @@ const GalleryPage = () => {
             window.URL.revokeObjectURL(url);
         } catch (err) {
             console.error('Error downloading photo:', err);
-            alert('Failed to download photo. Please try again.');
+            alert(t('gallery.downloadFailed', 'Failed to download photo. Please try again.'));
         }
     };
 
     const handleDeletePhoto = async (photo) => {
         if (!canDelete()) {
-            alert('You do not have permission to delete photos.');
+            alert(t('gallery.noPermissionDelete', 'You do not have permission to delete photos.'));
             return;
         }
 
-        if (!window.confirm('Are you sure you want to delete this photo? This action cannot be undone.')) {
+        if (!window.confirm(t('gallery.deleteConfirm', 'Are you sure you want to delete this photo? This action cannot be undone.'))) {
             return;
         }
 
@@ -290,10 +292,10 @@ const GalleryPage = () => {
                 handleCloseModal();
             }
 
-            alert('Photo deleted successfully.');
+            alert(t('gallery.deleteSuccess', 'Photo deleted successfully.'));
         } catch (err) {
             console.error('Error deleting photo:', err);
-            alert('Failed to delete photo. Please try again.');
+            alert(t('gallery.deleteFailed', 'Failed to delete photo. Please try again.'));
         }
     };
 
@@ -302,7 +304,7 @@ const GalleryPage = () => {
         if (files.length === 0) return;
 
         if (!canUpload()) {
-            alert('You do not have permission to upload photos.');
+            alert(t('gallery.noPermissionUpload', 'You do not have permission to upload photos.'));
             return;
         }
 
@@ -334,11 +336,11 @@ const GalleryPage = () => {
 
             // Reload photos after upload
             await loadPhotos();
-            alert(`Successfully uploaded ${files.length} photo(s).`);
+            alert(t('gallery.uploadSuccess', 'Successfully uploaded {count} photo(s).', { count: files.length }));
 
         } catch (err) {
             console.error('Error uploading photos:', err);
-            alert('Failed to upload photos. Please try again.');
+            alert(t('gallery.uploadFailed', 'Failed to upload photos. Please try again.'));
         } finally {
             setIsUploading(false);
         }
@@ -380,8 +382,8 @@ const GalleryPage = () => {
             <Dashboard requiredRole={userRole}>
                 <div className="gallery-page">
                     <div className="error-message">
-                        <h2>Access Denied</h2>
-                        <p>You do not have permission to view the gallery.</p>
+                        <h2>{t('gallery.accessDenied', 'Access Denied')}</h2>
+                        <p>{t('gallery.noPermissionView', 'You do not have permission to view the gallery.')}</p>
                     </div>
                 </div>
             </Dashboard>
@@ -391,12 +393,12 @@ const GalleryPage = () => {
     return (
         <Dashboard requiredRole={userRole}>
             <div className={`gallery-page ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
-                {/* Header */}
+                {/* Header - TRANSLATED */}
                 <div className="gallery-header">
                     <div className="gallery-title-section">
                         <h1>
                             <Photo size={32} className="page-title-icon" />
-                            Photo Gallery
+                            {t('gallery.title', 'Photo Gallery')}
                         </h1>
                         {eventId && (
                             <button
@@ -404,7 +406,7 @@ const GalleryPage = () => {
                                 className="back-to-main-gallery"
                             >
                                 <Home size={16} />
-                                Back to Main Gallery
+                                {t('gallery.backToMainGallery', 'Back to Main Gallery')}
                             </button>
                         )}
                     </div>
@@ -416,7 +418,7 @@ const GalleryPage = () => {
                             disabled={isLoading}
                         >
                             <Refresh size={16} />
-                            Refresh
+                            {t('gallery.refresh', 'Refresh')}
                         </button>
 
                         {canUpload() && (
@@ -437,12 +439,12 @@ const GalleryPage = () => {
                                     {isUploading ? (
                                         <>
                                             <div className="upload-spinner" />
-                                            Uploading...
+                                            {t('gallery.uploading', 'Uploading...')}
                                         </>
                                     ) : (
                                         <>
                                             <Upload size={16} />
-                                            Upload Photos
+                                            {t('gallery.uploadPhotos', 'Upload Photos')}
                                         </>
                                     )}
                                 </button>
@@ -454,7 +456,7 @@ const GalleryPage = () => {
                 {error && (
                     <div className="error-banner">
                         <p>{error}</p>
-                        <button onClick={loadGalleryData}>Try Again</button>
+                        <button onClick={loadGalleryData}>{t('gallery.tryAgain', 'Try Again')}</button>
                     </div>
                 )}
 
@@ -483,27 +485,27 @@ const GalleryPage = () => {
                         ))}
                     </div>
 
-                    {/* View Size Controls */}
+                    {/* View Size Controls - TRANSLATED */}
                     <div className="view-controls">
                         <div className="size-controls">
                             <button
                                 className={`size-button ${viewSize === 'small' ? 'active' : ''}`}
                                 onClick={() => setViewSize('small')}
-                                title="Small view"
+                                title={t('gallery.smallView', 'Small view')}
                             >
                                 <GridSmall size={18} />
                             </button>
                             <button
                                 className={`size-button ${viewSize === 'medium' ? 'active' : ''}`}
                                 onClick={() => setViewSize('medium')}
-                                title="Medium view"
+                                title={t('gallery.mediumView', 'Medium view')}
                             >
                                 <Grid size={18} />
                             </button>
                             <button
                                 className={`size-button ${viewSize === 'large' ? 'active' : ''}`}
                                 onClick={() => setViewSize('large')}
-                                title="Large view"
+                                title={t('gallery.largeView', 'Large view')}
                             >
                                 <GridLarge size={18} />
                             </button>
@@ -511,11 +513,11 @@ const GalleryPage = () => {
                     </div>
                 </div>
 
-                {/* Photos Grid */}
+                {/* Photos Grid - TRANSLATED */}
                 {isLoading ? (
                     <div className="loading-gallery">
                         <div className="loading-spinner" />
-                        <p>Loading photos...</p>
+                        <p>{t('gallery.loadingPhotos', 'Loading photos...')}</p>
                     </div>
                 ) : filteredPhotos.length > 0 ? (
                     <div className={`photo-grid ${getGridClass()}`}>
@@ -530,7 +532,7 @@ const GalleryPage = () => {
                                 <div className="photo-info">
                                     <h3>{photo.name}</h3>
                                     {photo.eventName && (
-                                        <p className="photo-event">From: {photo.eventName}</p>
+                                        <p className="photo-event">{t('gallery.from', 'From:')} {photo.eventName}</p>
                                     )}
                                     <p className="photo-date">
                                         {new Date(photo.uploadDate).toLocaleDateString()}
@@ -539,7 +541,7 @@ const GalleryPage = () => {
                                         <button
                                             onClick={() => handleDownload(photo)}
                                             className="action-button download-button"
-                                            title="Download"
+                                            title={t('gallery.download', 'Download')}
                                         >
                                             <Download size={14} />
                                         </button>
@@ -547,7 +549,7 @@ const GalleryPage = () => {
                                             <button
                                                 onClick={() => handleDeletePhoto(photo)}
                                                 className="action-button delete-button"
-                                                title="Delete"
+                                                title={t('gallery.delete', 'Delete')}
                                             >
                                                 <Trash size={14} />
                                             </button>
@@ -560,11 +562,11 @@ const GalleryPage = () => {
                 ) : (
                     <div className="empty-gallery">
                         <Photo size={64} className="empty-icon" />
-                        <h3>No photos found</h3>
+                        <h3>{t('gallery.noPhotosFound', 'No photos found')}</h3>
                         <p>
                             {activeAlbum === 'all'
-                                ? 'No photos have been uploaded yet.'
-                                : 'This album is empty.'
+                                ? t('gallery.noPhotosUploaded', 'No photos have been uploaded yet.')
+                                : t('gallery.albumEmpty', 'This album is empty.')
                             }
                         </p>
                         {canUpload() && (
@@ -573,13 +575,13 @@ const GalleryPage = () => {
                                 className="primary-button"
                             >
                                 <Upload size={16} />
-                                Upload First Photo
+                                {t('gallery.uploadFirstPhoto', 'Upload First Photo')}
                             </button>
                         )}
                     </div>
                 )}
 
-                {/* Photo Modal */}
+                {/* Photo Modal - TRANSLATED */}
                 {selectedPhoto && (
                     <div className="photo-modal-overlay" onClick={handleCloseModal}>
                         <div className="photo-modal" onClick={(e) => e.stopPropagation()}>
@@ -615,31 +617,31 @@ const GalleryPage = () => {
                                     </button>
                                 </div>
 
-                                {/* Right side - Metadata area */}
+                                {/* Right side - Metadata area - TRANSLATED */}
                                 <div className="modal-meta-area">
                                     <div className="modal-meta-content">
                                         <h3>{selectedPhoto.name}</h3>
 
                                         {selectedPhoto.eventName && (
                                             <div className="meta-item">
-                                                <span className="meta-label">From:</span>
+                                                <span className="meta-label">{t('gallery.from', 'From:')}</span>
                                                 <span className="meta-value event-badge">{selectedPhoto.eventName}</span>
                                             </div>
                                         )}
 
                                         <div className="meta-item">
-                                            <span className="meta-label">Uploaded:</span>
+                                            <span className="meta-label">{t('gallery.uploaded', 'Uploaded:')}</span>
                                             <span className="meta-value">{new Date(selectedPhoto.uploadDate).toLocaleDateString()}</span>
                                         </div>
 
                                         <div className="meta-item">
-                                            <span className="meta-label">Size:</span>
+                                            <span className="meta-label">{t('gallery.size', 'Size:')}</span>
                                             <span className="meta-value">{formatFileSize(selectedPhoto.size)}</span>
                                         </div>
 
                                         <div className="meta-item">
-                                            <span className="meta-label">Position:</span>
-                                            <span className="meta-value">{currentPhotoIndex + 1} of {filteredPhotos.length}</span>
+                                            <span className="meta-label">{t('gallery.position', 'Position:')}</span>
+                                            <span className="meta-value">{currentPhotoIndex + 1} {t('gallery.of', 'of')} {filteredPhotos.length}</span>
                                         </div>
                                     </div>
 
@@ -649,7 +651,7 @@ const GalleryPage = () => {
                                             className="modal-action-btn download-btn"
                                         >
                                             <Download size={18} />
-                                            Download
+                                            {t('gallery.download', 'Download')}
                                         </button>
                                         {canDelete() && (
                                             <button
@@ -657,7 +659,7 @@ const GalleryPage = () => {
                                                 className="modal-action-btn delete-btn"
                                             >
                                                 <Trash size={18} />
-                                                Delete
+                                                {t('gallery.delete', 'Delete')}
                                             </button>
                                         )}
                                     </div>
