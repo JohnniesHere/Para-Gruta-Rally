@@ -1,8 +1,9 @@
-// src/pages/admin/ViewVehiclePage.jsx - Individual Vehicle Details with Schema Integration - FIXED HISTORY RENDERING
+// src/pages/admin/ViewVehiclePage.jsx - Individual Vehicle Details with Schema Integration and Full Translation Support
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { usePermissions } from '../../hooks/usePermissions.jsx';
 import { getVehicleById, assignVehicleToKid, unassignVehicle } from '../../services/vehicleService';
 import { getKidById } from '../../services/kidService';
@@ -36,6 +37,7 @@ const ViewVehiclePage = () => {
     const { id } = useParams();
     const location = useLocation();
     const { appliedTheme } = useTheme();
+    const { t } = useLanguage();
     const { permissions, userRole, userData } = usePermissions();
 
     const [vehicle, setVehicle] = useState(null);
@@ -92,7 +94,7 @@ const ViewVehiclePage = () => {
 
         } catch (error) {
             console.error('Error loading vehicle:', error);
-            setError('Failed to load vehicle details. Please try again.');
+            setError(t('viewVehicle.failedToLoadVehicle', 'Failed to load vehicle details. Please try again.'));
         } finally {
             setIsLoading(false);
         }
@@ -119,7 +121,7 @@ const ViewVehiclePage = () => {
     };
 
     const formatDate = (dateString) => {
-        if (!dateString) return 'Not specified';
+        if (!dateString) return t('viewVehicle.notSpecified', 'Not specified');
         try {
             return new Date(dateString).toLocaleDateString('en-US', {
                 year: 'numeric',
@@ -131,40 +133,42 @@ const ViewVehiclePage = () => {
         }
     };
 
+    // Status info function - TRANSLATED
     const getStatusInfo = () => {
         if (!vehicle?.active) {
             return {
-                status: 'Inactive',
+                status: t('viewVehicle.status.inactive', 'Inactive'),
                 className: 'status-inactive',
                 icon: <XCircle size={20} />,
-                description: 'This vehicle is currently inactive'
+                description: t('viewVehicle.status.inactiveDescription', 'This vehicle is currently inactive')
             };
         }
 
         if (vehicle.currentKidId) {
             return {
-                status: 'In Use',
+                status: t('viewVehicle.status.inUse', 'In Use'),
                 className: 'status-in-use',
                 icon: <User size={20} />,
-                description: 'Currently assigned to a racer'
+                description: t('viewVehicle.status.inUseDescription', 'Currently assigned to a racer')
             };
         }
 
         return {
-            status: 'Available',
+            status: t('viewVehicle.status.available', 'Available'),
             className: 'status-available',
             icon: <CheckCircle size={20} />,
-            description: 'Ready for assignment'
+            description: t('viewVehicle.status.availableDescription', 'Ready for assignment')
         };
     };
 
+    // Battery status function - TRANSLATED
     const getBatteryStatus = () => {
         if (!vehicle?.batteryDate) {
             return {
-                status: 'Unknown',
+                status: t('viewVehicle.battery.unknown', 'Unknown'),
                 className: 'battery-unknown',
                 icon: <InfoCircle size={16} />,
-                description: 'Battery date not recorded'
+                description: t('viewVehicle.battery.unknownDescription', 'Battery date not recorded')
             };
         }
 
@@ -176,43 +180,43 @@ const ViewVehiclePage = () => {
 
             if (diffMonths > 6) {
                 return {
-                    status: 'Needs Attention',
+                    status: t('viewVehicle.battery.needsAttention', 'Needs Attention'),
                     className: 'battery-old',
                     icon: <AlertTriangle size={16} />,
-                    description: 'Battery is over 6 months old'
+                    description: t('viewVehicle.battery.needsAttentionDescription', 'Battery is over 6 months old')
                 };
             } else if (diffMonths > 3) {
                 return {
-                    status: 'Monitor',
+                    status: t('viewVehicle.battery.monitor', 'Monitor'),
                     className: 'battery-aging',
                     icon: <Clock size={16} />,
-                    description: 'Battery should be monitored'
+                    description: t('viewVehicle.battery.monitorDescription', 'Battery should be monitored')
                 };
             } else {
                 return {
-                    status: 'Good',
+                    status: t('viewVehicle.battery.good', 'Good'),
                     className: 'battery-good',
                     icon: <CheckCircle size={16} />,
-                    description: 'Battery is in good condition'
+                    description: t('viewVehicle.battery.goodDescription', 'Battery is in good condition')
                 };
             }
         } catch {
             return {
-                status: 'Error',
+                status: t('viewVehicle.battery.error', 'Error'),
                 className: 'battery-error',
                 icon: <XCircle size={16} />,
-                description: 'Invalid battery date'
+                description: t('viewVehicle.battery.errorDescription', 'Invalid battery date')
             };
         }
     };
 
-    // FIXED: Helper function to render vehicle history correctly
+    // Vehicle history rendering function - TRANSLATED
     const renderVehicleHistory = () => {
         if (!vehicle.history || vehicle.history.length === 0) {
             return (
                 <div className="no-history">
                     <History size={40} className="no-history-icon" />
-                    <p>No usage history recorded</p>
+                    <p>{t('viewVehicle.noUsageHistory', 'No usage history recorded')}</p>
                 </div>
             );
         }
@@ -226,7 +230,7 @@ const ViewVehiclePage = () => {
                         return (
                             <div key={index} className="history-item">
                                 <User size={16} />
-                                <span>Kid ID: {historyItem}</span>
+                                <span>{t('viewVehicle.kidId', 'Kid ID:')} {historyItem}</span>
                             </div>
                         );
                     } else if (typeof historyItem === 'object' && historyItem !== null) {
@@ -236,15 +240,15 @@ const ViewVehiclePage = () => {
                                 <User size={16} />
                                 <div className="history-item-details">
                                     <div className="history-kid-info">
-                                        <span className="kid-name">{historyItem.kidName || `Kid ID: ${historyItem.kidId}`}</span>
+                                        <span className="kid-name">{historyItem.kidName || `${t('viewVehicle.kidId', 'Kid ID:')} ${historyItem.kidId}`}</span>
                                         {historyItem.assignedAt && (
                                             <span className="assignment-date">
-                                                Assigned: {formatDate(historyItem.assignedAt)}
+                                                {t('viewVehicle.assigned', 'Assigned:')} {formatDate(historyItem.assignedAt)}
                                             </span>
                                         )}
                                     </div>
                                     {historyItem.assignedBy && (
-                                        <span className="assigned-by">by {historyItem.assignedBy}</span>
+                                        <span className="assigned-by">{t('viewVehicle.assignedBy', 'by {assignedBy}', { assignedBy: historyItem.assignedBy })}</span>
                                     )}
                                 </div>
                             </div>
@@ -254,7 +258,7 @@ const ViewVehiclePage = () => {
                         return (
                             <div key={index} className="history-item">
                                 <User size={16} />
-                                <span>Unknown assignment</span>
+                                <span>{t('viewVehicle.unknownAssignment', 'Unknown assignment')}</span>
                             </div>
                         );
                     }
@@ -269,7 +273,7 @@ const ViewVehiclePage = () => {
                 <div className={`admin-page view-vehicle-page ${appliedTheme}-mode`}>
                     <div className="loading-container">
                         <div className="loading-spinner"></div>
-                        <p>Loading vehicle details...</p>
+                        <p>{t('viewVehicle.loadingVehicleDetails', 'Loading vehicle details...')}</p>
                     </div>
                 </div>
             </Dashboard>
@@ -281,11 +285,11 @@ const ViewVehiclePage = () => {
             <Dashboard requiredRole={userRole}>
                 <div className={`admin-page view-vehicle-page ${appliedTheme}-mode`}>
                     <div className="error-container">
-                        <h3>Error</h3>
-                        <p>{error || 'Vehicle not found'}</p>
+                        <h3>{t('viewVehicle.error', 'Error')}</h3>
+                        <p>{error || t('viewVehicle.vehicleNotFound', 'Vehicle not found')}</p>
                         <button onClick={handleBack} className="btn-primary">
                             <ArrowLeft className="btn-icon" size={18} />
-                            Back to Vehicles
+                            {t('viewVehicle.backToVehicles', 'Back to Vehicles')}
                         </button>
                     </div>
                 </div>
@@ -299,34 +303,34 @@ const ViewVehiclePage = () => {
     return (
         <Dashboard requiredRole={userRole}>
             <div className={`admin-page view-vehicle-page ${appliedTheme}-mode`}>
-                {/* Page Title */}
+                {/* Page Title - TRANSLATED */}
                 <button onClick={handleBack} className={`back-button ${appliedTheme}-back-button`}>
                     <ArrowLeft className="btn-icon" size={20} />
-                    Back to Vehicles
+                    {t('viewVehicle.backToVehicles', 'Back to Vehicles')}
                 </button>
                 <div className="page-header">
                     <div className="title-section">
                         <h1>
                             <Car size={32} className="page-title-icon" />
-                            {vehicle.make} {vehicle.model}
+                            {t('viewVehicle.title', '{make} {model}', { make: vehicle.make, model: vehicle.model })}
                             <Settings size={24} className="sparkle-icon" />
                         </h1>
                     </div>
                 </div>
 
                 <div className="admin-container">
-                    {/* Header */}
+                    {/* Header - TRANSLATED */}
                     <div className="racing-header">
                         <div className="header-content">
                             <div className="title-section">
                                 <h1>{vehicle.make} {vehicle.model}</h1>
-                                <p className="subtitle">License Plate: {vehicle.licensePlate}</p>
+                                <p className="subtitle">{t('viewVehicle.licensePlateLabel', 'License Plate:')} {vehicle.licensePlate}</p>
                             </div>
                             <div className="header-actions">
                                 {canEdit() && (
                                     <button onClick={handleEdit} className="edit-button">
                                         <Edit size={18} />
-                                        Edit Vehicle
+                                        {t('viewVehicle.editVehicle', 'Edit Vehicle')}
                                     </button>
                                 )}
                             </div>
@@ -343,11 +347,11 @@ const ViewVehiclePage = () => {
 
                     {/* Vehicle Details */}
                     <div className="vehicle-details-grid">
-                        {/* Vehicle Photo and Basic Info */}
+                        {/* Vehicle Photo and Basic Info - TRANSLATED */}
                         <div className="form-section vehicle-photo-section">
                             <div className="section-header">
                                 <Photo className="section-icon" size={24} />
-                                <h2>Vehicle Photo</h2>
+                                <h2>{t('viewVehicle.vehiclePhoto', 'Vehicle Photo')}</h2>
                             </div>
                             <div className="vehicle-photo-container">
                                 {vehicle.photo ? (
@@ -359,17 +363,17 @@ const ViewVehiclePage = () => {
                                 ) : (
                                     <div className="vehicle-photo-placeholder-large">
                                         <Car size={80} />
-                                        <p>No photo available</p>
+                                        <p>{t('viewVehicle.noPhotoAvailable', 'No photo available')}</p>
                                     </div>
                                 )}
                             </div>
                         </div>
 
-                        {/* Status Information */}
+                        {/* Status Information - TRANSLATED */}
                         <div className="form-section status-section">
                             <div className="section-header">
                                 <Settings className="section-icon" size={24} />
-                                <h2>Status Information</h2>
+                                <h2>{t('viewVehicle.statusInformation', 'Status Information')}</h2>
                             </div>
                             <div className="status-grid">
                                 <div className={`status-card ${statusInfo.className}`}>
@@ -383,82 +387,42 @@ const ViewVehiclePage = () => {
                                 <div className={`status-card ${batteryInfo.className}`}>
                                     {batteryInfo.icon}
                                     <div className="status-content">
-                                        <h3>Battery: {batteryInfo.status}</h3>
+                                        <h3>{t('viewVehicle.battery.label', 'Battery:')} {batteryInfo.status}</h3>
                                         <p>{batteryInfo.description}</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Basic Vehicle Information */}
+                        {/* Basic Vehicle Information - TRANSLATED */}
                         <div className="form-section basic-info-section">
                             <div className="section-header">
                                 <Car className="section-icon" size={24} />
-                                <h2>Vehicle Information</h2>
+                                <h2>{t('viewVehicle.vehicleInformation', 'Vehicle Information')}</h2>
                             </div>
                             <div className="info-grid">
-                                <div className="info-item">
-                                    <label>Make</label>
-                                    <span>{vehicle.make}</span>
-                                </div>
-                                <div className="info-item">
-                                    <label>Model</label>
-                                    <span>{vehicle.model}</span>
-                                </div>
-                                <div className="info-item">
-                                    <label>License Plate</label>
-                                    <span>{vehicle.licensePlate}</span>
-                                </div>
-                                <div className="info-item">
-                                    <label>Team</label>
-                                    <span>{assignedTeam ? assignedTeam.name : 'Unassigned'}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Technical Specifications */}
-                        <div className="form-section technical-section">
-                            <div className="section-header">
-                                <Tool className="section-icon" size={24} />
-                                <h2>Technical Specifications</h2>
-                            </div>
-                            <div className="info-grid">
-                                <div className="info-item">
-                                    <label>
-                                        <Engine size={16} />
-                                        Drive Type
-                                    </label>
-                                    <span>{vehicle.driveType || 'Not specified'}</span>
-                                </div>
-                                <div className="info-item">
-                                    <label>
-                                        <Steering size={16} />
-                                        Steering Type
-                                    </label>
-                                    <span>{vehicle.steeringType || 'Not specified'}</span>
-                                </div>
                                 <div className="info-item">
                                     <label>
                                         <Battery size={16} />
-                                        Battery Type
+                                        {t('viewVehicle.batteryType', 'Battery Type')}
                                     </label>
-                                    <span>{vehicle.batteryType || 'Not specified'}</span>
+                                    <span>{vehicle.batteryType || t('viewVehicle.notSpecified', 'Not specified')}</span>
                                 </div>
                                 <div className="info-item">
                                     <label>
                                         <Calendar size={16} />
-                                        Battery Date
+                                        {t('viewVehicle.batteryDate', 'Battery Date')}
                                     </label>
                                     <span>{formatDate(vehicle.batteryDate)}</span>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Current Assignment - IMPROVED ERROR HANDLING */}
+                        {/* Current Assignment - TRANSLATED - IMPROVED ERROR HANDLING */}
                         <div className="form-section assignment-section">
                             <div className="section-header">
                                 <User className="section-icon" size={24} />
-                                <h2>Current Assignment</h2>
+                                <h2>{t('viewVehicle.currentAssignment', 'Current Assignment')}</h2>
                             </div>
                             <div className="assignment-content">
                                 {vehicle.currentKidId ? (
@@ -472,7 +436,7 @@ const ViewVehiclePage = () => {
                                                             onClick={() => navigate(`/admin/kids/view/${currentKid.id}`)}
                                                             className="btn-secondary btn-sm"
                                                         >
-                                                            View Kid's Profile
+                                                            {t('viewVehicle.viewKidProfile', 'View Kid\'s Profile')}
                                                         </button>
                                                     )}
                                                 </div>
@@ -481,9 +445,9 @@ const ViewVehiclePage = () => {
                                             <div className="assignment-error">
                                                 <AlertTriangle size={20} />
                                                 <div>
-                                                    <p><strong>Assignment Issue:</strong> Vehicle is assigned to kid ID: {vehicle.currentKidId}</p>
-                                                    <p>However, the racer profile could not be loaded. The racer may have been deleted or there's a data inconsistency.</p>
-                                                    <p className="suggestion">💡 Consider reassigning this vehicle to resolve the issue.</p>
+                                                    <p><strong>{t('viewVehicle.assignmentIssue', 'Assignment Issue:')}</strong> {t('viewVehicle.vehicleAssignedTo', 'Vehicle is assigned to kid ID: {kidId}', { kidId: vehicle.currentKidId })}</p>
+                                                    <p>{t('viewVehicle.racerProfileNotLoaded', 'However, the racer profile could not be loaded. The racer may have been deleted or there\'s a data inconsistency.')}</p>
+                                                    <p className="suggestion">{t('viewVehicle.suggestionReassign', '💡 Consider reassigning this vehicle to resolve the issue.')}</p>
                                                 </div>
                                             </div>
                                         )}
@@ -491,61 +455,61 @@ const ViewVehiclePage = () => {
                                 ) : (
                                     <div className="no-assignment">
                                         <Users size={40} className="no-assignment-icon" />
-                                        <h4>Available for Assignment</h4>
-                                        <p>This vehicle is not currently assigned to any racer</p>
+                                        <h4>{t('viewVehicle.availableForAssignment', 'Available for Assignment')}</h4>
+                                        <p>{t('viewVehicle.notAssignedToRacer', 'This vehicle is not currently assigned to any racer')}</p>
                                     </div>
                                 )}
                             </div>
                         </div>
 
-                        {/* Modifications and Notes - Only for admins and instructors */}
+                        {/* Modifications and Notes - Only for admins and instructors - TRANSLATED */}
                         {canViewSensitiveInfo() && (
                             <div className="form-section notes-section">
                                 <div className="section-header">
                                     <FileText className="section-icon" size={24} />
-                                    <h2>Modifications & Notes</h2>
+                                    <h2>{t('viewVehicle.modificationsNotes', 'Modifications & Notes')}</h2>
                                 </div>
                                 <div className="notes-content">
                                     <div className="info-item full-width">
-                                        <label>Modifications</label>
-                                        <p>{vehicle.modifications || 'No modifications recorded'}</p>
+                                        <label>{t('viewVehicle.modifications', 'Modifications')}</label>
+                                        <p>{vehicle.modifications || t('viewVehicle.noModificationsRecorded', 'No modifications recorded')}</p>
                                     </div>
                                     <div className="info-item full-width">
-                                        <label>Additional Notes</label>
-                                        <p>{vehicle.notes || 'No additional notes'}</p>
+                                        <label>{t('viewVehicle.additionalNotes', 'Additional Notes')}</label>
+                                        <p>{vehicle.notes || t('viewVehicle.noAdditionalNotes', 'No additional notes')}</p>
                                     </div>
                                 </div>
                             </div>
                         )}
 
-                        {/* Vehicle History - Only for admins and instructors - FIXED */}
+                        {/* Vehicle History - Only for admins and instructors - TRANSLATED */}
                         {canViewSensitiveInfo() && vehicle.history && vehicle.history.length > 0 && (
                             <div className="form-section history-section">
                                 <div className="section-header">
                                     <History className="section-icon" size={24} />
-                                    <h2>Usage History</h2>
+                                    <h2>{t('viewVehicle.usageHistory', 'Usage History')}</h2>
                                 </div>
                                 <div className="history-content">
-                                    <p>Previous racers who used this vehicle:</p>
+                                    <p>{t('viewVehicle.previousRacersUsed', 'Previous racers who used this vehicle:')}</p>
                                     {renderVehicleHistory()}
                                 </div>
                             </div>
                         )}
 
-                        {/* Timestamps - Only for admins */}
+                        {/* Timestamps - Only for admins - TRANSLATED */}
                         {userRole === 'admin' && (
                             <div className="form-section timestamps-section">
                                 <div className="section-header">
                                     <Clock className="section-icon" size={24} />
-                                    <h2>Record Information</h2>
+                                    <h2>{t('viewVehicle.recordInformation', 'Record Information')}</h2>
                                 </div>
                                 <div className="info-grid">
                                     <div className="info-item">
-                                        <label>Created</label>
+                                        <label>{t('viewVehicle.created', 'Created')}</label>
                                         <span>{formatDate(vehicle.createdAt)}</span>
                                     </div>
                                     <div className="info-item">
-                                        <label>Last Updated</label>
+                                        <label>{t('viewVehicle.lastUpdated', 'Last Updated')}</label>
                                         <span>{formatDate(vehicle.updatedAt)}</span>
                                     </div>
                                 </div>
