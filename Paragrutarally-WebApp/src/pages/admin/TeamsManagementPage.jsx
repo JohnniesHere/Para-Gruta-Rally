@@ -1,8 +1,9 @@
-// src/pages/admin/TeamsManagementPage.jsx - PROFESSIONAL VERSION
+// src/pages/admin/TeamsManagementPage.jsx - TRANSLATED VERSION
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useLanguage } from '../../contexts/LanguageContext'; // Add this import
 import { usePermissions } from '../../hooks/usePermissions.jsx';
 import { getAllTeams, deleteTeam } from '../../services/teamService';
 import {
@@ -32,6 +33,7 @@ import './TeamsManagementPage.css';
 const TeamsManagementPage = () => {
     const navigate = useNavigate();
     const { appliedTheme } = useTheme();
+    const { t } = useLanguage(); // Add this hook
     const { permissions, userRole, loading: permissionsLoading, error: permissionsError } = usePermissions();
 
     const [teams, setTeams] = useState([]);
@@ -69,11 +71,11 @@ const TeamsManagementPage = () => {
             // Transform teams data for display
             const processedTeams = teamsData.map(team => ({
                 id: team.id,
-                name: team.name || 'Unnamed Team',
-                instructorName: team.instructorName || 'No Instructor',
+                name: team.name || t('teams.unnamedTeam', 'Unnamed Team'),
+                instructorName: team.instructorName || t('teams.noInstructor', 'No Instructor'),
                 instructorId: team.instructorId,
                 currentMembers: team.currentMembers || 0,
-                maxMembers: team.maxMembers || 'Unlimited',
+                maxMembers: team.maxMembers || t('teams.unlimited', 'Unlimited'),
                 status: team.active !== false ? 'active' : 'inactive',
                 description: team.description || '',
                 createdAt: team.createdAt,
@@ -83,7 +85,7 @@ const TeamsManagementPage = () => {
             setTeams(processedTeams);
         } catch (err) {
             console.error('💥 Error loading teams:', err);
-            setError(`Failed to load teams: ${err.message}`);
+            setError(t('teams.loadError', 'Failed to load teams') + `: ${err.message}`);
         } finally {
             setIsLoading(false);
         }
@@ -144,23 +146,26 @@ const TeamsManagementPage = () => {
 
     const handleDeleteTeam = async (team) => {
         if (userRole !== 'admin') {
-            alert('Only administrators can delete teams.');
+            alert(t('teams.onlyAdminsCanDelete', 'Only administrators can delete teams.'));
             return;
         }
 
         if (team.currentMembers > 0) {
-            alert(`Cannot delete ${team.name} because it has ${team.currentMembers} members. Please move the kids to other teams first.`);
+            alert(t('teams.cannotDelete', 'Cannot delete {teamName} because it has {memberCount} members. Please move the kids to other teams first.', {
+                teamName: team.name,
+                memberCount: team.currentMembers
+            }));
             return;
         }
 
-        if (window.confirm(`Are you sure you want to delete ${team.name}? This action cannot be undone.`)) {
+        if (window.confirm(t('teams.deleteConfirm', 'Are you sure you want to delete {teamName}? This action cannot be undone.', { teamName: team.name }))) {
             try {
                 await deleteTeam(team.id);
                 setTeams(teams.filter(t => t.id !== team.id));
-                alert(`✅ ${team.name} has been deleted successfully!`);
+                alert(t('teams.deleteSuccess', '{teamName} has been deleted successfully!', { teamName: team.name }));
             } catch (err) {
                 console.error('Error deleting team:', err);
-                alert('Failed to delete team. Please try again.');
+                alert(t('teams.deleteFailed', 'Failed to delete team. Please try again.'));
             }
         }
     };
@@ -191,7 +196,7 @@ const TeamsManagementPage = () => {
                     <div className="loading-state">
                         <div className="loading-content">
                             <Clock className="loading-spinner" size={30} />
-                            <p>Loading permissions...</p>
+                            <p>{t('common.loadingPermissions', 'Loading permissions...')}</p>
                         </div>
                     </div>
                 </div>
@@ -204,11 +209,11 @@ const TeamsManagementPage = () => {
             <Dashboard requiredRole={userRole}>
                 <div className={`teams-management-page ${appliedTheme}-mode`}>
                     <div className="error-container">
-                        <h3>Permission Error</h3>
+                        <h3>{t('teams.permissionError', 'Permission Error')}</h3>
                         <p>{permissionsError}</p>
                         <button onClick={() => window.location.reload()} className="btn-primary">
                             <RefreshCw className="btn-icon" size={18} />
-                            Reload Page
+                            {t('teams.reloadPage', 'Reload Page')}
                         </button>
                     </div>
                 </div>
@@ -221,11 +226,11 @@ const TeamsManagementPage = () => {
             <Dashboard requiredRole={userRole}>
                 <div className={`teams-management-page ${appliedTheme}-mode`}>
                     <div className="error-container">
-                        <h3>Error</h3>
+                        <h3>{t('common.error', 'Error')}</h3>
                         <p>{error}</p>
                         <button onClick={loadTeams} className="btn-primary">
                             <RefreshCw className="btn-icon" size={18} />
-                            Try Again
+                            {t('teams.tryAgain', 'Try Again')}
                         </button>
                     </div>
                 </div>
@@ -236,7 +241,7 @@ const TeamsManagementPage = () => {
     return (
         <Dashboard requiredRole={userRole}>
             <div className={`teams-management-page ${appliedTheme}-mode`}>
-                <h1><Team size={32} className="page-title-icon" /> Teams Management</h1>
+                <h1><Team size={32} className="page-title-icon" /> {t('teams.title', 'Teams Management')}</h1>
 
                 <div className="teams-management-container">
                     {/* Header with Actions */}
@@ -244,19 +249,19 @@ const TeamsManagementPage = () => {
                         {userRole === 'admin' && (
                             <button className="btn-primary" onClick={handleAddTeam}>
                                 <Plus className="btn-icon" size={18} />
-                                Add New Team
+                                {t('teams.addNewTeam', 'Add New Team')}
                             </button>
                         )}
 
                         <div className="header-actions">
                             <button className="btn-secondary" onClick={loadTeams}>
                                 <RefreshCw className="btn-icon" size={18} />
-                                Refresh
+                                {t('teams.refresh', 'Refresh')}
                             </button>
                             {(userRole === 'admin' || userRole === 'instructor') && (
                                 <button className="btn-export">
                                     <Download className="btn-icon" size={18} />
-                                    Export Teams
+                                    {t('teams.exportTeams', 'Export Teams')}
                                 </button>
                             )}
                         </div>
@@ -271,7 +276,7 @@ const TeamsManagementPage = () => {
                         >
                             <Users className="stat-icon" size={40} />
                             <div className="stat-content">
-                                <h3>Total Teams</h3>
+                                <h3>{t('teams.totalTeams', 'Total Teams')}</h3>
                                 <div className="stat-value">{stats.totalTeams}</div>
                             </div>
                         </div>
@@ -283,7 +288,7 @@ const TeamsManagementPage = () => {
                         >
                             <Check className="stat-icon" size={40} />
                             <div className="stat-content">
-                                <h3>Active Teams</h3>
+                                <h3>{t('teams.activeTeams', 'Active Teams')}</h3>
                                 <div className="stat-value">{stats.activeTeams}</div>
                             </div>
                         </div>
@@ -295,9 +300,9 @@ const TeamsManagementPage = () => {
                         >
                             <AlertTriangle className="stat-icon warning" size={45} />
                             <div className="stat-content">
-                                <h3>Teams without Kids</h3>
+                                <h3>{t('teams.teamsWithoutKids', 'Teams without Kids')}</h3>
                                 <div className="stat-value">{stats.teamsWithoutKids}</div>
-                                <div className="stat-subtitle">Click to view</div>
+                                <div className="stat-subtitle">{t('common.clickToView', 'Click to view')}</div>
                             </div>
                         </div>
 
@@ -308,7 +313,7 @@ const TeamsManagementPage = () => {
                         >
                             <Car className="stat-icon" size={40} />
                             <div className="stat-content">
-                                <h3>Teams with Kids</h3>
+                                <h3>{t('teams.teamsWithKids', 'Teams with Kids')}</h3>
                                 <div className="stat-value">{stats.teamsWithKids}</div>
                             </div>
                         </div>
@@ -321,7 +326,7 @@ const TeamsManagementPage = () => {
                                 <Search className="search-icon" size={18} />
                                 <input
                                     type="text"
-                                    placeholder="Search by team name or instructor..."
+                                    placeholder={t('teams.searchPlaceholder', 'Search by team name or instructor...')}
                                     className="search-input"
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
@@ -337,39 +342,39 @@ const TeamsManagementPage = () => {
                         <div className="filter-container">
                             <label className="filter-label">
                                 <BarChart3 className="filter-icon" size={16} />
-                                Status
+                                {t('teams.status', 'Status')}
                             </label>
                             <select
                                 className="filter-select"
                                 value={statusFilter}
                                 onChange={(e) => setStatusFilter(e.target.value)}
                             >
-                                <option value="all">🌈 All Status</option>
-                                <option value="active">✅ Active</option>
-                                <option value="inactive">❌ Inactive</option>
+                                <option value="all">🌈 {t('teams.allStatus', 'All Status')}</option>
+                                <option value="active">✅ {t('teams.active', 'Active')}</option>
+                                <option value="inactive">❌ {t('teams.inactive', 'Inactive')}</option>
                             </select>
                         </div>
 
                         <div className="filter-container">
                             <label className="filter-label">
                                 <Tag className="filter-icon" size={16} />
-                                Capacity
+                                {t('teams.capacity', 'Capacity')}
                             </label>
                             <select
                                 className="filter-select"
                                 value={capacityFilter}
                                 onChange={(e) => setCapacityFilter(e.target.value)}
                             >
-                                <option value="all">⭐ All Teams</option>
-                                <option value="empty">⚠️ Empty Teams</option>
-                                <option value="available">🟢 Available Spots</option>
-                                <option value="full">🔴 Full Teams</option>
+                                <option value="all">⭐ {t('teams.allTeams', 'All Teams')}</option>
+                                <option value="empty">⚠️ {t('teams.emptyTeams', 'Empty Teams')}</option>
+                                <option value="available">🟢 {t('teams.availableSpots', 'Available Spots')}</option>
+                                <option value="full">🔴 {t('teams.fullTeams', 'Full Teams')}</option>
                             </select>
                         </div>
 
                         <button className="btn-clear" onClick={handleClearFilters}>
                             <Eraser className="btn-icon" size={18} />
-                            Clear All
+                            {t('teams.clearAll', 'Clear All')}
                         </button>
                     </div>
 
@@ -377,17 +382,17 @@ const TeamsManagementPage = () => {
                     <div className="results-info">
                         <div className="results-content">
                             <FileSpreadsheet className="results-icon" size={18} />
-                            Showing {filteredTeams.length} of {teams.length} teams
-                            {showingTeamsWithoutKids && <span className="priority-filter"> • 🚨 PRIORITY: Teams without kids</span>}
-                            {statusFilter !== 'all' && <span className="filter-applied"> • Status: {statusFilter}</span>}
-                            {capacityFilter !== 'all' && <span className="filter-applied"> • Capacity: {capacityFilter}</span>}
-                            {searchTerm && <span className="search-applied"> • Search: "{searchTerm}"</span>}
+                            {t('teams.showing', 'Showing')} {filteredTeams.length} {t('teams.of', 'of')} {teams.length} {t('teams.teams', 'teams')}
+                            {showingTeamsWithoutKids && <span className="priority-filter"> • 🚨 {t('teams.priorityFilter', 'PRIORITY: Teams without kids')}</span>}
+                            {statusFilter !== 'all' && <span className="filter-applied"> • {t('teams.status', 'Status')}: {statusFilter}</span>}
+                            {capacityFilter !== 'all' && <span className="filter-applied"> • {t('teams.capacity', 'Capacity')}: {capacityFilter}</span>}
+                            {searchTerm && <span className="search-applied"> • {t('general.search', 'Search')}: "{searchTerm}"</span>}
                         </div>
 
                         {(statusFilter !== 'all' || capacityFilter !== 'all' || searchTerm || showingTeamsWithoutKids) && (
-                            <button className="btn-reset" onClick={handleClearFilters} title="Reset all filters">
+                            <button className="btn-reset" onClick={handleClearFilters} title={t('teams.reset', 'Reset all filters')}>
                                 <RefreshCw className="btn-icon" size={16} />
-                                Reset
+                                {t('teams.reset', 'Reset')}
                             </button>
                         )}
                     </div>
@@ -397,11 +402,11 @@ const TeamsManagementPage = () => {
                         <table className="data-table">
                             <thead>
                             <tr>
-                                <th><Team size={16} style={{ marginRight: '8px' }} />Team Info</th>
-                                <th>👨‍🏫 Instructor</th>
-                                <th>👥 Members</th>
-                                <th><BarChart3 size={16} style={{ marginRight: '8px' }} />Status</th>
-                                <th>⚡ Actions</th>
+                                <th><Team size={16} style={{ marginRight: '8px' }} />{t('teams.teamInfo', 'Team Info')}</th>
+                                <th>👨‍🏫 {t('teams.instructor', 'Instructor')}</th>
+                                <th>👥 {t('teams.members', 'Members')}</th>
+                                <th><BarChart3 size={16} style={{ marginRight: '8px' }} />{t('teams.status', 'Status')}</th>
+                                <th>⚡ {t('teams.actions', 'Actions')}</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -410,7 +415,7 @@ const TeamsManagementPage = () => {
                                     <td colSpan="5" className="loading-cell">
                                         <div className="loading-content">
                                             <Clock className="loading-spinner" size={30} />
-                                            Loading teams...
+                                            {t('teams.loadingTeams', 'Loading teams...')}
                                         </div>
                                     </td>
                                 </tr>
@@ -419,12 +424,12 @@ const TeamsManagementPage = () => {
                                     <td colSpan="5">
                                         <div className="empty-state">
                                             <Team className="empty-icon" size={60} />
-                                            <h3>No teams found</h3>
-                                            <p>Try adjusting your search or filters</p>
+                                            <h3>{t('teams.noTeamsFound', 'No teams found')}</h3>
+                                            <p>{t('teams.adjustFilters', 'Try adjusting your search or filters')}</p>
                                             {userRole === 'admin' && (
                                                 <button className="btn-primary" style={{ marginTop: '15px' }} onClick={handleAddTeam}>
                                                     <Plus className="btn-icon" size={18} />
-                                                    Add First Team
+                                                    {t('teams.addFirstTeam', 'Add First Team')}
                                                 </button>
                                             )}
                                         </div>
@@ -446,11 +451,11 @@ const TeamsManagementPage = () => {
                                         </td>
                                         <td>
                                             <div className="instructor-info">
-                                                <span className={team.instructorName === 'No Instructor' ? 'no-instructor' : 'has-instructor'}>
-                                                    {team.instructorName === 'No Instructor' ? (
+                                                <span className={team.instructorName === t('teams.noInstructor', 'No Instructor') ? 'no-instructor' : 'has-instructor'}>
+                                                    {team.instructorName === t('teams.noInstructor', 'No Instructor') ? (
                                                         <>
                                                             <AlertTriangle size={14} style={{ marginRight: '4px' }} />
-                                                            No Instructor
+                                                            {t('teams.noInstructor', 'No Instructor')}
                                                         </>
                                                     ) : (
                                                         <>
@@ -464,7 +469,10 @@ const TeamsManagementPage = () => {
                                         <td>
                                             <div className="members-info">
                                                 <span className={`members-count ${team.currentMembers === 0 ? 'empty' : team.currentMembers >= team.maxMembers ? 'full' : 'available'}`}>
-                                                    {team.currentMembers}/{team.maxMembers === 'Unlimited' ? '∞' : team.maxMembers}
+                                                    {t('teams.membersCount', '{current}/{max}', {
+                                                        current: team.currentMembers,
+                                                        max: team.maxMembers === t('teams.unlimited', 'Unlimited') ? '∞' : team.maxMembers
+                                                    })}
                                                 </span>
                                             </div>
                                         </td>
@@ -472,7 +480,7 @@ const TeamsManagementPage = () => {
                                             <span className={`status-badge status-${team.status}`}>
                                                 {team.status === 'active' && <Check size={14} style={{ marginRight: '4px' }} />}
                                                 {team.status === 'inactive' && <XCircle size={14} style={{ marginRight: '4px' }} />}
-                                                {team.status.charAt(0).toUpperCase() + team.status.slice(1)}
+                                                {t(`status.${team.status}`, team.status.charAt(0).toUpperCase() + team.status.slice(1))}
                                             </span>
                                         </td>
                                         <td>
@@ -480,7 +488,7 @@ const TeamsManagementPage = () => {
                                                 <button
                                                     className="btn-action view"
                                                     onClick={() => handleViewTeam(team)}
-                                                    title="View Details"
+                                                    title={t('teams.viewDetails', 'View Details')}
                                                 >
                                                     <Eye size={16} />
                                                 </button>
@@ -490,7 +498,7 @@ const TeamsManagementPage = () => {
                                                     <button
                                                         className="btn-action edit"
                                                         onClick={() => handleEditTeam(team)}
-                                                        title="Edit Team"
+                                                        title={t('teams.editTeam', 'Edit Team')}
                                                     >
                                                         <Edit size={16} />
                                                     </button>
@@ -501,7 +509,7 @@ const TeamsManagementPage = () => {
                                                     <button
                                                         className="btn-action delete"
                                                         onClick={() => handleDeleteTeam(team)}
-                                                        title="Delete Team"
+                                                        title={t('teams.deleteTeam', 'Delete Team')}
                                                     >
                                                         <Trash2 size={16} />
                                                     </button>
