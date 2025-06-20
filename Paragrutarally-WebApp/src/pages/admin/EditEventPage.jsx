@@ -1,4 +1,4 @@
-// src/pages/admin/EditEventPage.jsx - Event editing with team assignment
+// src/pages/admin/EditEventPage.jsx - Event editing with team assignment and translation
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
@@ -6,6 +6,7 @@ import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage
 import { db, storage } from '../../firebase/config';
 import Dashboard from '../../components/layout/Dashboard';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { usePermissions } from '../../hooks/usePermissions.jsx';
 import TeamAssignmentModal from '../../components/modals/TeamAssignmentModal';
 import { getAllTeams } from '../../services/teamService';
@@ -37,6 +38,7 @@ const EditEventPage = () => {
     const navigate = useNavigate();
     const { eventId } = useParams();
     const { isDarkMode, appliedTheme } = useTheme();
+    const { t, isRTL } = useLanguage();
     const { permissions, userRole, userData, user, loading } = usePermissions();
 
     // Form state
@@ -70,20 +72,20 @@ const EditEventPage = () => {
     const eventTypes = [
         {
             id: 'race',
-            name: 'Racing Event',
-            description: 'Competitive racing event with winners',
+            name: t('events.racingEvent', 'Racing Event'),
+            description: t('events.racingEventDescription', 'Competitive racing event with winners'),
             icon: '🏁🏎️'
         },
         {
             id: 'newcomers',
-            name: 'New Families Event',
-            description: 'Welcome new families with a fun racing day',
+            name: t('events.newFamiliesEvent', 'New Families Event'),
+            description: t('events.newFamiliesEventDescription', 'Welcome new families with a fun racing day'),
             icon: '👨‍👩‍👧‍👦'
         },
         {
             id: 'social',
-            name: 'Social Event',
-            description: 'Community gathering and activities',
+            name: t('events.socialEvent', 'Social Event'),
+            description: t('events.socialEventDescription', 'Community gathering and activities'),
             icon: '🎉🎊'
         }
     ];
@@ -137,11 +139,11 @@ const EditEventPage = () => {
                     setImagePreview(eventData.image);
                 }
             } else {
-                setError('Event not found');
+                setError(t('events.eventNotFound', 'Event not found'));
             }
         } catch (err) {
             console.error('Error loading event:', err);
-            setError('Failed to load event. Please try again.');
+            setError(t('events.loadError', 'Failed to load event. Please try again.'));
         } finally {
             setIsLoading(false);
         }
@@ -288,7 +290,7 @@ const EditEventPage = () => {
                     console.log('New image uploaded successfully:', newImageUrl);
                 } catch (imageError) {
                     console.error('Error uploading new image:', imageError);
-                    alert('Warning: Failed to upload new image, but event will be updated with other changes.');
+                    alert(t('events.imageUploadWarning', 'Warning: Failed to upload new image, but event will be updated with other changes.'));
                     newImageUrl = originalImageUrl; // Keep original image
                 } finally {
                     setIsUploadingImage(false);
@@ -304,7 +306,7 @@ const EditEventPage = () => {
                 date: formData.date,
                 time: formData.time,
                 organizer: formData.organizer,
-                notes: formData.requirements || "Additional notes about the event",
+                notes: formData.requirements || t('events.additionalNotesDefault', 'Additional notes about the event'),
                 participatingTeams: formData.participatingTeams,
                 image: newImageUrl,
                 updatedAt: serverTimestamp()
@@ -313,11 +315,11 @@ const EditEventPage = () => {
             await updateDoc(doc(db, 'events', eventId), eventDoc);
             console.log('Event updated successfully');
 
-            alert('Event updated successfully!');
+            alert(t('events.updateSuccess', 'Event updated successfully!'));
             navigate(`/admin/events/view/${eventId}`);
         } catch (error) {
             console.error('Error updating event:', error);
-            alert('Error updating event: ' + error.message);
+            alert(t('events.updateError', 'Error updating event: {error}', { error: error.message }));
         } finally {
             setIsSubmitting(false);
             setIsUploadingImage(false);
@@ -328,11 +330,11 @@ const EditEventPage = () => {
     if (!permissions || isLoading) {
         return (
             <Dashboard>
-                <div className="create-event-page">
+                <div className="create-event-page" dir={isRTL ? 'rtl' : 'ltr'}>
                     <div className="loading-container">
                         <div className="loading-content">
                             <Clock className="loading-spinner" size={40} />
-                            <p>Loading event data...</p>
+                            <p>{t('events.loadingEventData', 'Loading event data...')}</p>
                         </div>
                     </div>
                 </div>
@@ -343,13 +345,13 @@ const EditEventPage = () => {
     if (error) {
         return (
             <Dashboard>
-                <div className="create-event-page">
+                <div className="create-event-page" dir={isRTL ? 'rtl' : 'ltr'}>
                     <div className="error-container">
-                        <h3>Error</h3>
+                        <h3>{t('common.error', 'Error')}</h3>
                         <p>{error}</p>
                         <button onClick={() => navigate('/admin/events')} className="btn-primary">
                             <ArrowLeft className="btn-icon" size={18} />
-                            Back to Events
+                            {t('events.backToEvents', 'Back to Events')}
                         </button>
                     </div>
                 </div>
@@ -359,20 +361,20 @@ const EditEventPage = () => {
 
     return (
         <Dashboard>
-            <div className={`create-event-page admin-page ${appliedTheme}-mode`}>
+            <div className={`create-event-page admin-page ${appliedTheme}-mode`} dir={isRTL ? 'rtl' : 'ltr'}>
                 {/* Header */}
                 <button
                     onClick={() => navigate('/admin/events')}
                     className={`back-button ${appliedTheme}-back-button`}
                 >
                     <ArrowLeft size={20} />
-                    Back to Events
+                    {t('events.backToEvents', 'Back to Events')}
                 </button>
                 <div className="page-header">
                     <div className="title-section">
                         <h1 className="page-title">
                             <Trophy size={32} className="page-title-icon" />
-                            Edit Racing Event
+                            {t('events.editRacingEvent', 'Edit Racing Event')}
                         </h1>
                     </div>
                 </div>
@@ -383,23 +385,23 @@ const EditEventPage = () => {
                         <div className="form-section event-basic-section">
                             <div className="section-header">
                                 <Trophy className="section-icon" size={24} />
-                                <h3>📋 Basic Information</h3>
+                                <h3>📋 {t('events.basicInformation', 'Basic Information')}</h3>
                             </div>
 
                             <div className="form-group">
-                                <label className="form-label">Event Name *</label>
+                                <label className="form-label">{t('events.eventName', 'Event Name')} *</label>
                                 <input
                                     type="text"
                                     className={`form-input ${fieldErrors.name ? 'error' : ''}`}
-                                    placeholder="e.g., Summer Racing Championship 2025"
+                                    placeholder={t('events.eventNamePlaceholder', 'e.g., Summer Racing Championship 2025')}
                                     value={formData.name}
                                     onChange={(e) => handleInputChange('name', e.target.value)}
                                 />
-                                {fieldErrors.name && <div className="field-error">*Required field</div>}
+                                {fieldErrors.name && <div className="field-error">{t('events.requiredField', '*Required field')}</div>}
                             </div>
 
                             <div className="form-group">
-                                <label className="form-label">Event Type *</label>
+                                <label className="form-label">{t('events.eventType', 'Event Type')} *</label>
                                 <div className="event-types">
                                     {eventTypes.map(type => (
                                         <div
@@ -419,27 +421,27 @@ const EditEventPage = () => {
                             </div>
 
                             <div className="form-group">
-                                <label className="form-label">Description *</label>
+                                <label className="form-label">{t('events.description', 'Description')} *</label>
                                 <textarea
                                     className={`form-textarea ${fieldErrors.description ? 'error' : ''}`}
                                     rows="4"
-                                    placeholder="Describe your racing event in detail..."
+                                    placeholder={t('events.descriptionPlaceholder', 'Describe your racing event in detail...')}
                                     value={formData.description}
                                     onChange={(e) => handleInputChange('description', e.target.value)}
                                 />
-                                {fieldErrors.description && <div className="field-error">*Required field</div>}
+                                {fieldErrors.description && <div className="field-error">{t('events.requiredField', '*Required field')}</div>}
                             </div>
 
                             <div className="form-group">
-                                <label className="form-label">Organizer *</label>
+                                <label className="form-label">{t('events.organizer', 'Organizer')} *</label>
                                 <input
                                     type="text"
                                     className={`form-input ${fieldErrors.organizer ? 'error' : ''}`}
-                                    placeholder="Event organizer name"
+                                    placeholder={t('events.organizerPlaceholder', 'Event organizer name')}
                                     value={formData.organizer}
                                     onChange={(e) => handleInputChange('organizer', e.target.value)}
                                 />
-                                {fieldErrors.organizer && <div className="field-error">*Required field</div>}
+                                {fieldErrors.organizer && <div className="field-error">{t('events.requiredField', '*Required field')}</div>}
                             </div>
                         </div>
 
@@ -447,12 +449,12 @@ const EditEventPage = () => {
                         <div className="form-section event-datetime-section">
                             <div className="section-header">
                                 <Calendar className="section-icon calendar-icon" size={24} />
-                                <h3>📅 Date & Time</h3>
+                                <h3>📅 {t('events.dateAndTime', 'Date & Time')}</h3>
                             </div>
 
                             <div className="datetime-group">
                                 <div className="form-group">
-                                    <label className="form-label">Event Date *</label>
+                                    <label className="form-label">{t('events.eventDate', 'Event Date')} *</label>
                                     <input
                                         type="date"
                                         className={`date-input ${fieldErrors.date ? 'error' : ''}`}
@@ -460,52 +462,52 @@ const EditEventPage = () => {
                                         onChange={(e) => handleInputChange('date', e.target.value)}
                                         min={new Date().toISOString().split('T')[0]}
                                     />
-                                    {fieldErrors.date && <div className="field-error">*Required field</div>}
+                                    {fieldErrors.date && <div className="field-error">{t('events.requiredField', '*Required field')}</div>}
                                 </div>
 
                                 <div className="form-group">
-                                    <label className="form-label">Event Time *</label>
+                                    <label className="form-label">{t('events.eventTime', 'Event Time')} *</label>
                                     <input
                                         type="time"
                                         className={`time-input ${fieldErrors.time ? 'error' : ''}`}
                                         value={formData.time}
                                         onChange={(e) => handleInputChange('time', e.target.value)}
                                     />
-                                    {fieldErrors.time && <div className="field-error">*Required field</div>}
+                                    {fieldErrors.time && <div className="field-error">{t('events.requiredField', '*Required field')}</div>}
                                 </div>
                             </div>
-                            {fieldErrors.dateTime && <div className="field-error">*Event date and time must be in the future</div>}
+                            {fieldErrors.dateTime && <div className="field-error">{t('events.futureDateTime', '*Event date and time must be in the future')}</div>}
                         </div>
 
                         {/* Location */}
                         <div className="form-section event-location-section">
                             <div className="section-header">
                                 <MapPin className="section-icon" size={24} />
-                                <h3>📍 Location Details</h3>
+                                <h3>📍 {t('events.locationDetails', 'Location Details')}</h3>
                             </div>
 
                             <div className="form-group">
-                                <label className="form-label">Location Name *</label>
+                                <label className="form-label">{t('events.locationName', 'Location Name')} *</label>
                                 <input
                                     type="text"
                                     className={`form-input ${fieldErrors.location ? 'error' : ''}`}
-                                    placeholder="e.g., Jerusalem Racing Park"
+                                    placeholder={t('events.locationPlaceholder', 'e.g., Jerusalem Racing Park')}
                                     value={formData.location}
                                     onChange={(e) => handleInputChange('location', e.target.value)}
                                 />
-                                {fieldErrors.location && <div className="field-error">*Required field</div>}
+                                {fieldErrors.location && <div className="field-error">{t('events.requiredField', '*Required field')}</div>}
                             </div>
 
                             <div className="form-group">
-                                <label className="form-label">Full Address *</label>
+                                <label className="form-label">{t('events.fullAddress', 'Full Address')} *</label>
                                 <input
                                     type="text"
                                     className={`form-input ${fieldErrors.address ? 'error' : ''}`}
-                                    placeholder="Complete address of the event"
+                                    placeholder={t('events.addressPlaceholder', 'Complete address of the event')}
                                     value={formData.address}
                                     onChange={(e) => handleInputChange('address', e.target.value)}
                                 />
-                                {fieldErrors.address && <div className="field-error">*Required field</div>}
+                                {fieldErrors.address && <div className="field-error">{t('events.requiredField', '*Required field')}</div>}
                             </div>
                         </div>
 
@@ -513,13 +515,16 @@ const EditEventPage = () => {
                         <div className="form-section event-teams-section">
                             <div className="section-header">
                                 <Users className="section-icon" size={24} />
-                                <h3>🏁 Participating Teams</h3>
+                                <h3>🏁 {t('events.participatingTeams', 'Participating Teams')}</h3>
                             </div>
 
                             <div className="teams-management">
                                 <div className="teams-header">
                                     <div className="teams-count">
-                                        {formData.participatingTeams.length} team{formData.participatingTeams.length !== 1 ? 's' : ''} assigned
+                                        {t('events.teamsAssigned', '{count} team{plural} assigned', {
+                                            count: formData.participatingTeams.length,
+                                            plural: formData.participatingTeams.length !== 1 ? 's' : ''
+                                        })}
                                     </div>
                                     <button
                                         type="button"
@@ -527,7 +532,7 @@ const EditEventPage = () => {
                                         className="btn-add-teams"
                                     >
                                         <UserPlus size={16} />
-                                        Add Teams
+                                        {t('events.addTeams', 'Add Teams')}
                                     </button>
                                 </div>
 
@@ -538,14 +543,14 @@ const EditEventPage = () => {
                                                 <div className="team-info">
                                                     <Users size={16} className="team-icon" />
                                                     <span className="team-name">
-                                                        {loadingTeams ? 'Loading...' : (teamsData[teamId]?.name || 'Unknown Team')}
+                                                        {loadingTeams ? t('general.loading', 'Loading...') : (teamsData[teamId]?.name || t('events.unknownTeam', 'Unknown Team'))}
                                                     </span>
                                                 </div>
                                                 <button
                                                     type="button"
                                                     onClick={() => handleRemoveTeam(teamId)}
                                                     className="btn-remove-team"
-                                                    title="Remove team"
+                                                    title={t('events.removeTeam', 'Remove team')}
                                                 >
                                                     <X size={14} />
                                                 </button>
@@ -555,8 +560,8 @@ const EditEventPage = () => {
                                 ) : (
                                     <div className="no-teams-assigned">
                                         <Users size={24} className="no-teams-icon" />
-                                        <p>No teams assigned to this event yet.</p>
-                                        <p className="no-teams-hint">Click "Add Teams" to assign teams to participate.</p>
+                                        <p>{t('events.noTeamsAssigned', 'No teams assigned to this event yet.')}</p>
+                                        <p className="no-teams-hint">{t('events.addTeamsHint', 'Click "Add Teams" to assign teams to participate.')}</p>
                                     </div>
                                 )}
                             </div>
@@ -566,11 +571,11 @@ const EditEventPage = () => {
                         <div className="form-section event-gallery-section">
                             <div className="section-header">
                                 <Upload className="section-icon" size={24} />
-                                <h3>📷 Event Image</h3>
+                                <h3>📷 {t('events.eventImage', 'Event Image')}</h3>
                             </div>
 
                             <div className="form-group">
-                                <label className="form-label">Event Image (Optional)</label>
+                                <label className="form-label">{t('events.eventImageOptional', 'Event Image (Optional)')}</label>
                                 <div className="image-upload-area" onClick={() => document.getElementById('image-upload').click()}>
                                     <input
                                         id="image-upload"
@@ -582,8 +587,8 @@ const EditEventPage = () => {
                                     {!imagePreview ? (
                                         <>
                                             <Upload className="upload-icon" size={48} />
-                                            <div className="upload-text">Click to upload event image</div>
-                                            <div className="upload-hint">Recommended: 1200x600px, JPG or PNG</div>
+                                            <div className="upload-text">{t('events.clickToUpload', 'Click to upload event image')}</div>
+                                            <div className="upload-hint">{t('events.imageRecommendation', 'Recommended: 1200x600px, JPG or PNG')}</div>
                                         </>
                                     ) : (
                                         <div className="image-preview">
@@ -598,10 +603,10 @@ const EditEventPage = () => {
                                                             handleRemoveImage();
                                                         }}
                                                     >
-                                                        Cancel New Image
+                                                        {t('events.cancelNewImage', 'Cancel New Image')}
                                                     </button>
                                                 )}
-                                                <div className="upload-text">Click to change image</div>
+                                                <div className="upload-text">{t('events.clickToChange', 'Click to change image')}</div>
                                             </div>
                                         </div>
                                     )}
@@ -613,15 +618,15 @@ const EditEventPage = () => {
                         <div className="form-section event-details-section">
                             <div className="section-header">
                                 <Target className="section-icon" size={24} />
-                                <h3>📝 Additional Details</h3>
+                                <h3>📝 {t('events.additionalDetails', 'Additional Details')}</h3>
                             </div>
 
                             <div className="form-group">
-                                <label className="form-label">Notes (Optional)</label>
+                                <label className="form-label">{t('events.notesOptional', 'Notes (Optional)')}</label>
                                 <textarea
                                     className="form-textarea"
                                     rows="3"
-                                    placeholder="Additional notes about the event..."
+                                    placeholder={t('events.notesPlaceholder', 'Additional notes about the event...')}
                                     value={formData.requirements}
                                     onChange={(e) => handleInputChange('requirements', e.target.value)}
                                 />
@@ -636,7 +641,7 @@ const EditEventPage = () => {
                                 onClick={() => navigate(`/admin/events/view/${eventId}`)}
                                 disabled={isSubmitting}
                             >
-                                Cancel
+                                {t('general.cancel', 'Cancel')}
                             </button>
 
                             <button
@@ -647,12 +652,12 @@ const EditEventPage = () => {
                                 {isSubmitting ? (
                                     <>
                                         <Clock className="loading-spinner" size={16} />
-                                        {isUploadingImage ? 'Uploading Image...' : 'Updating Event...'}
+                                        {isUploadingImage ? t('events.uploadingImage', 'Uploading Image...') : t('events.updatingEvent', 'Updating Event...')}
                                     </>
                                 ) : (
                                     <>
                                         <Save size={16} />
-                                        Update Event
+                                        {t('events.updateEvent', 'Update Event')}
                                     </>
                                 )}
                             </button>
