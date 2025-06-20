@@ -1,14 +1,15 @@
-// src/pages/admin/EditKidPage.jsx - Updated with Vehicle Integration
+// src/pages/admin/EditKidPage.jsx - TRANSLATED VERSION
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
 import CreateUserModal from '../../components/modals/CreateUserModal';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useLanguage } from '../../contexts/LanguageContext'; // Add this import
 import { usePermissions } from '../../hooks/usePermissions.jsx';
 import { getKidById, updateKid } from '../../services/kidService';
 import { uploadKidPhoto, deleteKidPhoto, getKidPhotoInfo } from '../../services/kidPhotoService';
 import { getAllTeams } from '../../services/teamService';
-import { getAllVehicles, updateVehicle, getVehicleById } from '../../services/vehicleService'; // Add vehicle services
+import { getAllVehicles, updateVehicle, getVehicleById } from '../../services/vehicleService';
 import { getVehiclePhotoInfo } from '../../services/vehiclePhotoService';
 import { validateKid, formStatusOptions } from '../../schemas/kidSchema';
 import { getDocs, collection, query, where } from 'firebase/firestore';
@@ -40,19 +41,20 @@ import {
     IconSettings as Settings,
     IconBattery as Battery
 } from '@tabler/icons-react';
-import { updateKidVehicleAssignments } from '../../services/vehicleAssignmentService'; // Add the new service
+import { updateKidVehicleAssignments } from '../../services/vehicleAssignmentService';
 
 const EditKidPage = () => {
     const navigate = useNavigate();
     const { id } = useParams();
     const location = useLocation();
     const { isDarkMode, appliedTheme } = useTheme();
+    const { t } = useLanguage(); // Add this hook
     const { permissions, userRole, userData } = usePermissions();
 
     const [isLoading, setIsLoading] = useState(true);
     const [teams, setTeams] = useState([]);
-    const [vehicles, setVehicles] = useState([]); // Add vehicles state
-    const [availableVehicles, setAvailableVehicles] = useState([]); // Available vehicles for assignment
+    const [vehicles, setVehicles] = useState([]);
+    const [availableVehicles, setAvailableVehicles] = useState([]);
     const [instructors, setInstructors] = useState([]);
     const [parents, setParents] = useState([]);
     const [originalData, setOriginalData] = useState(null);
@@ -85,7 +87,7 @@ const EditKidPage = () => {
         },
         instructorId: '',
         teamId: '',
-        vehicleIds: [], // Vehicle assignment
+        vehicleIds: [],
         signedDeclaration: false,
         signedFormStatus: 'pending',
         additionalComments: '',
@@ -121,13 +123,13 @@ const EditKidPage = () => {
             // Load kid data
             const kidData = await getKidById(id);
             if (!kidData) {
-                setErrors({ general: 'Kid not found!' });
+                setErrors({ general: t('editKid.kidNotFound', 'Kid not found!') });
                 return;
             }
 
             // Check permissions (simplified for now)
             if (userRole !== 'admin' && userRole !== 'instructor') {
-                setErrors({ general: 'You do not have permission to edit this kid.' });
+                setErrors({ general: t('editKid.noPermission', 'You do not have permission to edit this kid.') });
                 return;
             }
 
@@ -143,7 +145,7 @@ const EditKidPage = () => {
             // Load supporting data
             const [teamsData, vehiclesData, instructorsData, parentsData] = await Promise.all([
                 getAllTeams({ active: true }),
-                getAllVehicles(), // Load all vehicles
+                getAllVehicles(),
                 getDocs(query(collection(db, 'instructors'))),
                 getDocs(query(collection(db, 'users'), where('role', '==', 'parent')))
             ]);
@@ -163,7 +165,7 @@ const EditKidPage = () => {
 
         } catch (error) {
             console.error('Error loading kid data:', error);
-            setErrors({ general: 'Failed to load kid data. Please try again.' });
+            setErrors({ general: t('editKid.loadError', 'Failed to load kid data. Please try again.') });
         } finally {
             setIsLoading(false);
         }
@@ -221,7 +223,7 @@ const EditKidPage = () => {
 
         } catch (error) {
             console.error('Error handling vehicle assignment:', error);
-            alert('Failed to update vehicle assignment. Please try again.');
+            alert(t('editKid.vehicleAssignmentError', 'Failed to update vehicle assignment. Please try again.'));
         }
     };
 
@@ -242,13 +244,13 @@ const EditKidPage = () => {
             // Basic validation
             const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
             if (!allowedTypes.includes(file.type)) {
-                setPhotoError('Please upload a JPEG, PNG, or WebP image file.');
+                setPhotoError(t('editKid.photoUploadError.invalidType', 'Please upload a JPEG, PNG, or WebP image file.'));
                 return;
             }
 
             const maxSize = 5 * 1024 * 1024; // 5MB
             if (file.size > maxSize) {
-                setPhotoError('Photo file size must be less than 5MB.');
+                setPhotoError(t('editKid.photoUploadError.tooLarge', 'Photo file size must be less than 5MB.'));
                 return;
             }
 
@@ -263,7 +265,7 @@ const EditKidPage = () => {
 
         } catch (error) {
             console.error('Error processing photo:', error);
-            setPhotoError('Failed to process photo. Please try again.');
+            setPhotoError(t('editKid.photoUploadError.processingFailed', 'Failed to process photo. Please try again.'));
         }
     };
 
@@ -298,7 +300,7 @@ const EditKidPage = () => {
 
         } catch (error) {
             console.error('❌ Error removing photo:', error);
-            setPhotoError('Failed to remove photo. Please try again.');
+            setPhotoError(t('editKid.photoError', 'Failed to remove photo. Please try again.'));
         }
     };
 
@@ -334,7 +336,7 @@ const EditKidPage = () => {
 
         } catch (error) {
             console.error('Error adding comment:', error);
-            alert('Failed to add comment. Please try again.');
+            alert(t('editKid.commentError', 'Failed to add comment. Please try again.'));
         } finally {
             setIsAddingComment(false);
         }
@@ -351,7 +353,7 @@ const EditKidPage = () => {
                 newFieldErrors[field] = true;
             });
             setFieldErrors(newFieldErrors);
-            alert(`Please fix the following errors:\n${Object.values(validation.errors).join('\n')}`);
+            alert(t('editKid.validation.fixErrors', 'Please fix the following errors:') + '\n' + Object.values(validation.errors).join('\n'));
         } else {
             setErrors({});
             setFieldErrors({});
@@ -422,7 +424,7 @@ const EditKidPage = () => {
                     console.log('✅ New photo uploaded successfully:', photoUrl);
                 } catch (photoError) {
                     console.error('❌ Photo upload failed:', photoError);
-                    alert(`Photo upload failed: ${photoError.message}. The kid will be updated without the new photo.`);
+                    alert(t('editKid.photoUploadError', 'Photo upload failed: {error}. The kid will be updated without the new photo.', { error: photoError.message }));
                 } finally {
                     setIsUploadingPhoto(false);
                 }
@@ -442,16 +444,21 @@ const EditKidPage = () => {
             await updateKid(id, finalFormData);
 
             // Navigate with success message
+            const firstName = finalFormData.personalInfo?.firstName;
+            const successMessage = firstName
+                ? t('editKid.updateSuccess', '🎉 {firstName} has been updated successfully! 🏎️', { firstName })
+                : t('editKid.updateSuccessGeneric', '🎉 Racer has been updated successfully! 🏎️');
+
             navigate(`/admin/kids/view/${id}`, {
                 state: {
-                    message: `🎉 ${finalFormData.personalInfo?.firstName || 'Racer'} has been updated successfully! 🏎️`,
+                    message: successMessage,
                     type: 'success'
                 }
             });
         } catch (error) {
             console.error('Error updating kid:', error);
-            setErrors({ general: `Failed to update kid: ${error.message}` });
-            alert(`Failed to update kid: ${error.message}`);
+            setErrors({ general: t('editKid.updateError', 'Failed to update kid: {error}', { error: error.message }) });
+            alert(t('editKid.updateError', 'Failed to update kid: {error}', { error: error.message }));
         } finally {
             setIsSubmitting(false);
         }
@@ -490,23 +497,27 @@ const EditKidPage = () => {
             <div className="vehicle-assignment-section">
                 <div className="vehicle-assignment-header">
                     <Settings size={20} />
-                    <h4>Racing Vehicle Assignment</h4>
+                    <h4>{t('editKid.racingVehicleAssignment', 'Racing Vehicle Assignment')}</h4>
                 </div>
 
                 <div className="vehicle-selection">
                     <label className="form-label">
                         <Car className="label-icon" size={16} />
-                        Assigned Vehicle
+                        {t('editKid.assignedVehicle', 'Assigned Vehicle')}
                     </label>
                     <select
                         value={formData.vehicleIds[0] || ''}
                         onChange={(e) => handleVehicleAssignment(e.target.value)}
                         className="form-select vehicle-select"
                     >
-                        <option value="">🚫 No Vehicle Assigned</option>
+                        <option value="">{t('editKid.noVehicleAssigned', '🚫 No Vehicle Assigned')}</option>
                         {availableVehicles.map(vehicle => (
                             <option key={vehicle.id} value={vehicle.id}>
-                                🏎️ {vehicle.make} {vehicle.model} ({vehicle.licensePlate})
+                                {t('editKid.vehicleOption', '🏎️ {make} {model} ({licensePlate})', {
+                                    make: vehicle.make,
+                                    model: vehicle.model,
+                                    licensePlate: vehicle.licensePlate
+                                })}
                             </option>
                         ))}
                     </select>
@@ -514,7 +525,7 @@ const EditKidPage = () => {
 
                 {assignedVehicle && (
                     <div className="assigned-vehicle-preview">
-                        <h5>Current Assignment:</h5>
+                        <h5>{t('editKid.currentAssignment', 'Current Assignment:')}</h5>
                         <div className="vehicle-preview-card">
                             <div className="vehicle-preview-photo">
                                 {(() => {
@@ -547,7 +558,7 @@ const EditKidPage = () => {
                                     className="btn-preview-vehicle"
                                 >
                                     <Settings size={14} />
-                                    View Vehicle Details
+                                    {t('editKid.viewVehicleDetails', 'View Vehicle Details')}
                                 </button>
                             </div>
                         </div>
@@ -573,7 +584,7 @@ const EditKidPage = () => {
                 <div className={`admin-page add-kid-page ${appliedTheme}-mode`}>
                     <div className="loading-container">
                         <div className="loading-spinner"></div>
-                        <p>Loading racer data...</p>
+                        <p>{t('editKid.loadingRacerData', 'Loading racer data...')}</p>
                     </div>
                 </div>
             </Dashboard>
@@ -585,11 +596,11 @@ const EditKidPage = () => {
             <Dashboard requiredRole={userRole}>
                 <div className={`admin-page add-kid-page ${appliedTheme}-mode`}>
                     <div className="error-container">
-                        <h3>Error</h3>
+                        <h3>{t('editKid.error', 'Error')}</h3>
                         <p>{errors.general}</p>
                         <button onClick={() => navigate('/admin/kids')} className="btn-primary">
                             <ArrowLeft className="btn-icon" size={18} />
-                            Back to Kids
+                            {t('editKid.backToKids', 'Back to Kids')}
                         </button>
                     </div>
                 </div>
@@ -598,6 +609,7 @@ const EditKidPage = () => {
     }
 
     const photoDisplay = getPhotoDisplay();
+    const firstName = formData.personalInfo?.firstName;
 
     return (
         <Dashboard requiredRole={userRole}>
@@ -605,13 +617,16 @@ const EditKidPage = () => {
                 {/* Page Title */}
                 <button onClick={handleCancel} className={`back-button ${appliedTheme}-back-button`}>
                     <ArrowLeft className="btn-icon" size={20} />
-                    Back to Profile
+                    {t('editKid.backToProfile', 'Back to Profile')}
                 </button>
                 <div className="page-header">
                     <div className="title-section">
                         <h1>
                             <Edit size={32} className="page-title-icon" />
-                            Update {formData.personalInfo.firstName}'s Info!
+                            {firstName
+                                ? t('editKid.title', 'Update {firstName}\'s Info!', { firstName })
+                                : t('editKid.titleGeneric', 'Update Racer\'s Info!')
+                            }
                             <Sparkles size={24} className="sparkle-icon" />
                         </h1>
                     </div>
@@ -625,15 +640,15 @@ const EditKidPage = () => {
                         </div>
                     )}
 
-                    {!formData.personalInfo?.firstName ? (
+                    {!firstName ? (
                         <div className="alert info-alert">
                             <Check size={20} />
-                            You're editing this racer's information. Make changes below to update! 🏎️
+                            {t('editKid.editingInfoGeneric', 'You\'re editing this racer\'s information. Make changes below to update! 🏎️')}
                         </div>
                     ) : (
                         <div className="alert info-alert">
                             <Check size={20} />
-                            You're editing {formData.personalInfo.firstName}'s information. Make changes below to update! 🏎️
+                            {t('editKid.editingInfo', 'You\'re editing {firstName}\'s information. Make changes below to update! 🏎️', { firstName })}
                         </div>
                     )}
 
@@ -642,12 +657,12 @@ const EditKidPage = () => {
                         <div className="form-section racing-section">
                             <div className="section-header">
                                 <Baby className="section-icon" size={24} />
-                                <h2>🏎️ Racer Profile</h2>
+                                <h2>{t('editKid.racerProfile', '🏎️ Racer Profile')}</h2>
                             </div>
                             <div className="form-grid">
                                 {/* Enhanced Photo Upload Section */}
                                 <div className="form-group full-width">
-                                    <label className="form-label">📸 Racing Photo</label>
+                                    <label className="form-label">{t('editKid.racingPhoto', '📸 Racing Photo')}</label>
                                     <div className="photo-upload-section">
                                         <div className="photo-preview-container">
                                             {/* Photo Display */}
@@ -671,10 +686,12 @@ const EditKidPage = () => {
                                                     type="button"
                                                     className="photo-action-btn upload-btn"
                                                     onClick={() => document.getElementById('photo-upload').click()}
-                                                    title={photoDisplay.hasPhoto ? "Change Photo" : "Upload Photo"}
+                                                    title={photoDisplay.hasPhoto ? t('editKid.changePhoto', 'Change Photo') : t('editKid.uploadPhoto', 'Upload Photo')}
                                                 >
                                                     <Camera size={18} />
-                                                    <span className="btn-text">{photoDisplay.hasPhoto ? "Change" : "Upload"}</span>
+                                                    <span className="btn-text">
+                                                        {photoDisplay.hasPhoto ? t('editKid.changePhoto', 'Change') : t('editKid.uploadPhoto', 'Upload')}
+                                                    </span>
                                                 </button>
 
                                                 {photoDisplay.hasPhoto && (
@@ -682,10 +699,10 @@ const EditKidPage = () => {
                                                         type="button"
                                                         className="photo-action-btn remove-btn"
                                                         onClick={handleRemovePhoto}
-                                                        title="Remove Photo"
+                                                        title={t('editKid.removePhoto', 'Remove Photo')}
                                                     >
                                                         <Trash2 size={18} />
-                                                        <span className="btn-text">Remove</span>
+                                                        <span className="btn-text">{t('editKid.removePhoto', 'Remove')}</span>
                                                     </button>
                                                 )}
                                             </div>
@@ -701,7 +718,7 @@ const EditKidPage = () => {
                                         />
 
                                         <div className="photo-upload-info">
-                                            <p>📸 Update racing photo! (Max 5MB, JPEG/PNG)</p>
+                                            <p>{t('editKid.photoRequirements', '📸 Update racing photo! (Max 5MB, JPEG/PNG)')}</p>
                                             {photoError && (
                                                 <p className="photo-error">{photoError}</p>
                                             )}
@@ -710,11 +727,11 @@ const EditKidPage = () => {
                                 </div>
 
                                 <div className="form-group">
-                                    <label className="form-label">🏁 Race Number *</label>
+                                    <label className="form-label">{t('editKid.raceNumber', '🏁 Race Number')} {t('editKid.required', '*')}</label>
                                     <input
                                         type="text"
                                         className={`form-input ${hasFieldError('participantNumber') ? 'error' : ''}`}
-                                        placeholder="001"
+                                        placeholder={t('editKid.raceNumberPlaceholder', '001')}
                                         value={formData.participantNumber}
                                         onChange={(e) => handleInputChange('participantNumber', e.target.value)}
                                     />
@@ -724,11 +741,11 @@ const EditKidPage = () => {
                                 </div>
 
                                 <div className="form-group">
-                                    <label className="form-label">👤 First Name *</label>
+                                    <label className="form-label">{t('editKid.firstName', '👤 First Name')} {t('editKid.required', '*')}</label>
                                     <input
                                         type="text"
                                         className={`form-input ${hasFieldError('personalInfo.firstName') ? 'error' : ''}`}
-                                        placeholder="Future champion's first name"
+                                        placeholder={t('editKid.firstNamePlaceholder', 'Future champion\'s first name')}
                                         value={formData.personalInfo.firstName}
                                         onChange={(e) => handleInputChange('personalInfo.firstName', e.target.value)}
                                     />
@@ -738,11 +755,11 @@ const EditKidPage = () => {
                                 </div>
 
                                 <div className="form-group">
-                                    <label className="form-label">👨‍👩‍👧‍👦 Last Name *</label>
+                                    <label className="form-label">{t('editKid.lastName', '👨‍👩‍👧‍👦 Last Name')} {t('editKid.required', '*')}</label>
                                     <input
                                         type="text"
                                         className={`form-input ${hasFieldError('personalInfo.lastName') ? 'error' : ''}`}
-                                        placeholder="Racing family name"
+                                        placeholder={t('editKid.lastNamePlaceholder', 'Racing family name')}
                                         value={formData.personalInfo.lastName}
                                         onChange={(e) => handleInputChange('personalInfo.lastName', e.target.value)}
                                     />
@@ -752,7 +769,7 @@ const EditKidPage = () => {
                                 </div>
 
                                 <div className="form-group">
-                                    <label className="form-label">🎂 Birthday *</label>
+                                    <label className="form-label">{t('editKid.birthday', '🎂 Birthday')} {t('editKid.required', '*')}</label>
                                     <input
                                         type="date"
                                         className={`form-input ${hasFieldError('personalInfo.dateOfBirth') ? 'error' : ''}`}
@@ -765,11 +782,11 @@ const EditKidPage = () => {
                                 </div>
 
                                 <div className="form-group full-width">
-                                    <label className="form-label">🏠 Home Base Location</label>
+                                    <label className="form-label">{t('editKid.homeBaseLocation', '🏠 Home Base Location')}</label>
                                     <input
                                         type="text"
                                         className="form-input"
-                                        placeholder="Where our racer calls home"
+                                        placeholder={t('editKid.homeBaseLocationPlaceholder', 'Where our racer calls home')}
                                         value={formData.personalInfo.address}
                                         onChange={(e) => handleInputChange('personalInfo.address', e.target.value)}
                                     />
@@ -781,14 +798,14 @@ const EditKidPage = () => {
                         <div className="form-section skills-section">
                             <div className="section-header">
                                 <Sparkles className="section-icon" size={24} />
-                                <h2>💪 Super Powers & Skills</h2>
+                                <h2>{t('editKid.superPowersSkills', '💪 Super Powers & Skills')}</h2>
                             </div>
                             <div className="form-grid">
                                 <div className="form-group full-width">
-                                    <label className="form-label">🌟 Amazing Abilities</label>
+                                    <label className="form-label">{t('editKid.amazingAbilities', '🌟 Amazing Abilities')}</label>
                                     <textarea
                                         className="form-textarea"
-                                        placeholder="Tell us about this racer's awesome skills and abilities!"
+                                        placeholder={t('editKid.amazingAbilitiesPlaceholder', 'Tell us about this racer\'s awesome skills and abilities!')}
                                         value={formData.personalInfo.capabilities}
                                         onChange={(e) => handleInputChange('personalInfo.capabilities', e.target.value)}
                                         rows="3"
@@ -796,10 +813,10 @@ const EditKidPage = () => {
                                 </div>
 
                                 <div className="form-group full-width">
-                                    <label className="form-label">📢 Announcer's Special Notes</label>
+                                    <label className="form-label">{t('editKid.announcerNotes', '📢 Announcer\'s Special Notes')}</label>
                                     <textarea
                                         className="form-textarea"
-                                        placeholder="Fun facts to share during the race!"
+                                        placeholder={t('editKid.announcerNotesPlaceholder', 'Fun facts to share during the race!')}
                                         value={formData.personalInfo.announcersNotes}
                                         onChange={(e) => handleInputChange('personalInfo.announcersNotes', e.target.value)}
                                         rows="3"
@@ -812,12 +829,12 @@ const EditKidPage = () => {
                         <div className="form-section parent-section">
                             <div className="section-header">
                                 <Heart className="section-icon" size={24} />
-                                <h2>👨‍👩‍👧‍👦 Racing Family Info</h2>
+                                <h2>{t('editKid.racingFamilyInfo', '👨‍👩‍👧‍👦 Racing Family Info')}</h2>
                             </div>
                             <div className="form-grid">
                                 <div className="form-group">
                                     <label className="form-label">
-                                        👤 Parent/Guardian Name *
+                                        {t('editKid.parentGuardianName', '👤 Parent/Guardian Name')} {t('editKid.required', '*')}
                                         <Lock size={14} className="lock-icon" />
                                     </label>
                                     <input
@@ -826,12 +843,13 @@ const EditKidPage = () => {
                                         value={formData.parentInfo.name}
                                         readOnly
                                         disabled
+                                        title={t('editKid.lockedField', 'This field cannot be edited')}
                                     />
                                 </div>
 
                                 <div className="form-group">
                                     <label className="form-label">
-                                        📧 Email Address *
+                                        {t('editKid.emailAddress', '📧 Email Address')} {t('editKid.required', '*')}
                                         <Lock size={14} className="lock-icon" />
                                     </label>
                                     <input
@@ -840,12 +858,13 @@ const EditKidPage = () => {
                                         value={formData.parentInfo.email}
                                         readOnly
                                         disabled
+                                        title={t('editKid.lockedField', 'This field cannot be edited')}
                                     />
                                 </div>
 
                                 <div className="form-group">
                                     <label className="form-label">
-                                        📱 Phone Number *
+                                        {t('editKid.phoneNumber', '📱 Phone Number')} {t('editKid.required', '*')}
                                         <Lock size={14} className="lock-icon" />
                                     </label>
                                     <input
@@ -854,27 +873,28 @@ const EditKidPage = () => {
                                         value={formData.parentInfo.phone}
                                         readOnly
                                         disabled
+                                        title={t('editKid.lockedField', 'This field cannot be edited')}
                                     />
                                 </div>
 
                                 {/* Grandparents Info - EDITABLE */}
                                 <div className="form-group">
-                                    <label className="form-label">👵👴 Grandparents Names</label>
+                                    <label className="form-label">{t('editKid.grandparentsNames', '👵👴 Grandparents Names')}</label>
                                     <input
                                         type="text"
                                         className="form-input"
-                                        placeholder="Racing legends in the family"
+                                        placeholder={t('editKid.grandparentsNamesPlaceholder', 'Racing legends in the family')}
                                         value={formData.parentInfo.grandparentsInfo.names}
                                         onChange={(e) => handleInputChange('parentInfo.grandparentsInfo.names', e.target.value)}
                                     />
                                 </div>
 
                                 <div className="form-group">
-                                    <label className="form-label">☎️ Grandparents Phone</label>
+                                    <label className="form-label">{t('editKid.grandparentsPhone', '☎️ Grandparents Phone')}</label>
                                     <input
                                         type="tel"
                                         className="form-input"
-                                        placeholder="Backup racing support"
+                                        placeholder={t('editKid.grandparentsPhonePlaceholder', 'Backup racing support')}
                                         value={formData.parentInfo.grandparentsInfo.phone}
                                         onChange={(e) => handleInputChange('parentInfo.grandparentsInfo.phone', e.target.value)}
                                     />
@@ -886,24 +906,30 @@ const EditKidPage = () => {
                         <div className={`form-section team-section ${focusTeam ? 'highlight-section' : ''}`}>
                             <div className="section-header">
                                 <Car className="section-icon" size={24} />
-                                <h2>🏎️ Team & Vehicle Assignment {focusTeam && <span className="focus-indicator">← Update Here!</span>}</h2>
+                                <h2>
+                                    {t('editKid.teamVehicleAssignment', '🏎️ Team & Vehicle Assignment')}
+                                    {focusTeam && <span className="focus-indicator">{t('editKid.focusIndicator', '← Update Here!')}</span>}
+                                </h2>
                             </div>
                             <div className="form-grid">
                                 <div className="form-group">
                                     <div className="field-wrapper">
                                         <label className="form-label">
                                             <Users className="label-icon" size={16} />
-                                            Racing Team
+                                            {t('editKid.racingTeam', 'Racing Team')}
                                         </label>
                                         <select
                                             value={formData.teamId}
                                             onChange={(e) => handleInputChange('teamId', e.target.value)}
                                             className={`form-select ${focusTeam ? 'focus-field' : ''}`}
                                         >
-                                            <option value="">🚫 No Team Assigned (Yet!)</option>
+                                            <option value="">{t('editKid.noTeamAssigned', '🚫 No Team Assigned (Yet!)')}</option>
                                             {teams.map(team => (
                                                 <option key={team.id} value={team.id}>
-                                                    🏁 {team.name} ({team.kidIds?.length || 0} racers)
+                                                    {t('editKid.teamOption', '🏁 {teamName} ({memberCount} racers)', {
+                                                        teamName: team.name,
+                                                        memberCount: team.kidIds?.length || 0
+                                                    })}
                                                 </option>
                                             ))}
                                         </select>
@@ -914,17 +940,17 @@ const EditKidPage = () => {
                                     <div className="field-wrapper">
                                         <label className="form-label">
                                             <User className="label-icon" size={16} />
-                                            Racing Instructor
+                                            {t('editKid.racingInstructor', 'Racing Instructor')}
                                         </label>
                                         <select
                                             value={formData.instructorId}
                                             onChange={(e) => handleInputChange('instructorId', e.target.value)}
                                             className="form-select"
                                         >
-                                            <option value="">👨‍🏫 No Instructor Assigned</option>
+                                            <option value="">{t('editKid.noInstructorAssigned', '👨‍🏫 No Instructor Assigned')}</option>
                                             {instructors.map(instructor => (
                                                 <option key={instructor.id} value={instructor.id}>
-                                                    🏎️ {instructor.name}
+                                                    {t('editKid.instructorOption', '🏎️ {instructorName}', { instructorName: instructor.name })}
                                                 </option>
                                             ))}
                                         </select>
@@ -942,14 +968,14 @@ const EditKidPage = () => {
                         <div className="form-section status-section">
                             <div className="section-header">
                                 <Check className="section-icon" size={24} />
-                                <h2>📋 Racing Status & Forms</h2>
+                                <h2>{t('editKid.racingStatusForms', '📋 Racing Status & Forms')}</h2>
                             </div>
                             <div className="form-grid">
                                 <div className="form-group">
                                     <div className="field-wrapper">
                                         <label className="form-label">
                                             <FileText className="label-icon" size={16} />
-                                            Form Status
+                                            {t('editKid.formStatus', 'Form Status')}
                                         </label>
                                         <select
                                             value={formData.signedFormStatus}
@@ -972,7 +998,7 @@ const EditKidPage = () => {
                                             checked={formData.signedDeclaration}
                                             onChange={(e) => handleInputChange('signedDeclaration', e.target.checked)}
                                         />
-                                        🛡️ Health Declaration Signed
+                                        {t('editKid.healthDeclarationSigned', '🛡️ Health Declaration Signed')}
                                     </label>
                                 </div>
                             </div>
@@ -982,7 +1008,7 @@ const EditKidPage = () => {
                         <div className="form-section comments-section">
                             <div className="section-header">
                                 <MessageCircle className="section-icon" size={24} />
-                                <h2>💬 Racing Notes & Team Communication</h2>
+                                <h2>{t('editKid.racingNotesCommunication', '💬 Racing Notes & Team Communication')}</h2>
                             </div>
 
                             {/* Existing Comments Display */}
@@ -1008,7 +1034,7 @@ const EditKidPage = () => {
                                 ) : (
                                     <div className="no-comments">
                                         <MessageCircle size={40} className="no-comments-icon" />
-                                        <p>No team notes yet. Be the first to add one!</p>
+                                        <p>{t('editKid.noTeamNotesYet', 'No team notes yet. Be the first to add one!')}</p>
                                     </div>
                                 )}
                             </div>
@@ -1022,14 +1048,14 @@ const EditKidPage = () => {
                                         onClick={() => setShowAddComment(true)}
                                     >
                                         <Plus size={16} />
-                                        Add Team Note
+                                        {t('editKid.addTeamNote', 'Add Team Note')}
                                     </button>
                                 ) : (
                                     <div className="comment-form">
                                         <textarea
                                             value={newComment}
                                             onChange={(e) => setNewComment(e.target.value)}
-                                            placeholder="Add a note about this racer's progress, behavior, or any important information..."
+                                            placeholder={t('editKid.commentPlaceholder', 'Add a note about this racer\'s progress, behavior, or any important information...')}
                                             className="comment-textarea"
                                             rows="3"
                                         />
@@ -1042,7 +1068,7 @@ const EditKidPage = () => {
                                                     setNewComment('');
                                                 }}
                                             >
-                                                Cancel
+                                                {t('editKid.cancel', 'Cancel')}
                                             </button>
                                             <button
                                                 type="button"
@@ -1053,12 +1079,12 @@ const EditKidPage = () => {
                                                 {isAddingComment ? (
                                                     <>
                                                         <div className="loading-spinner-mini"></div>
-                                                        Adding...
+                                                        {t('editKid.adding', 'Adding...')}
                                                     </>
                                                 ) : (
                                                     <>
                                                         <Send size={16} />
-                                                        Add Note
+                                                        {t('editKid.addNote', 'Add Note')}
                                                     </>
                                                 )}
                                             </button>
@@ -1070,10 +1096,10 @@ const EditKidPage = () => {
                             {/* Additional Comments Field */}
                             <div className="form-grid">
                                 <div className="form-group full-width">
-                                    <label className="form-label">🗒️ Additional Racing Notes</label>
+                                    <label className="form-label">{t('editKid.additionalRacingNotes', '🗒️ Additional Racing Notes')}</label>
                                     <textarea
                                         className="form-textarea"
-                                        placeholder="Any special notes about our racing star!"
+                                        placeholder={t('editKid.additionalRacingNotesPlaceholder', 'Any special notes about our racing star!')}
                                         value={formData.additionalComments}
                                         onChange={(e) => handleInputChange('additionalComments', e.target.value)}
                                         rows="3"
@@ -1086,7 +1112,7 @@ const EditKidPage = () => {
                         <div className="racing-actions">
                             <button type="button" onClick={handleCancel} className="btn btn-cancel">
                                 <ArrowLeft className="btn-icon" size={18} />
-                                Cancel
+                                {t('editKid.cancelButton', 'Cancel')}
                             </button>
 
                             <button
@@ -1097,12 +1123,15 @@ const EditKidPage = () => {
                                 {isSubmitting ? (
                                     <>
                                         <div className="loading-spinner-mini"></div>
-                                        {isUploadingPhoto ? 'Uploading Photo...' : 'Updating Racer...'}
+                                        {isUploadingPhoto
+                                            ? t('editKid.uploadingPhoto', 'Uploading Photo...')
+                                            : t('editKid.updatingRacer', 'Updating Racer...')
+                                        }
                                     </>
                                 ) : (
                                     <>
                                         <Save className="btn-icon" size={18} />
-                                        Save Updates! 🏁
+                                        {t('editKid.saveUpdates', 'Save Updates! 🏁')}
                                     </>
                                 )}
                             </button>
