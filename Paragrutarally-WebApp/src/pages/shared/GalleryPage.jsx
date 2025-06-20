@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { collection, getDocs, query, orderBy, doc, deleteDoc } from 'firebase/firestore';
-import { ref, listAll, getDownloadURL, deleteObject, uploadBytes } from 'firebase/storage';
+import { ref, listAll, getDownloadURL, deleteObject, uploadBytes, getMetadata } from 'firebase/storage';
 import { db, storage } from '../../firebase/config';
 import Dashboard from '../../components/layout/Dashboard';
 import { useAuth } from '../../contexts/AuthContext';
@@ -122,17 +122,24 @@ const GalleryPage = () => {
             await loadPhotosFromFolder('gallery/general', 'general', allPhotos);
 
             // Load photos from each event folder
-            const eventsQuery = query(collection(db, 'events'));
-            const eventsSnapshot = await getDocs(eventsQuery);
+            try {
+                const eventsQuery = query(collection(db, 'events'));
+                const eventsSnapshot = await getDocs(eventsQuery);
 
-            for (const eventDoc of eventsSnapshot.docs) {
-                const eventData = eventDoc.data();
-                await loadPhotosFromFolder(
-                    `gallery/events/${eventData.name}`,
-                    `event_${eventDoc.id}`,
-                    allPhotos,
-                    eventData.name
-                );
+                for (const eventDoc of eventsSnapshot.docs) {
+                    const eventData = eventDoc.data();
+                    if (eventData.name) {
+                        await loadPhotosFromFolder(
+                            `gallery/events/${eventData.name}`,
+                            `event_${eventDoc.id}`,
+                            allPhotos,
+                            eventData.name
+                        );
+                    }
+                }
+            } catch (eventsError) {
+                console.warn('Error loading events for albums:', eventsError);
+                // Continue even if events loading fails
             }
 
             setPhotos(allPhotos);
@@ -142,34 +149,70 @@ const GalleryPage = () => {
         }
     };
 
+    // Helper function to check if a file is an image
+    const isImageFile = (filename) => {
+        const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.svg'];
+        const extension = filename.toLowerCase().substring(filename.lastIndexOf('.'));
+        return imageExtensions.includes(extension);
+    };
+
     const loadPhotosFromFolder = async (folderPath, albumId, photosArray, eventName = null) => {
         try {
+            console.log(`Loading photos from: ${folderPath}`);
             const folderRef = ref(storage, folderPath);
             const result = await listAll(folderRef);
 
+            console.log(`Found ${result.items.length} items in ${folderPath}`);
+
             for (const itemRef of result.items) {
                 try {
-                    const url = await getDownloadURL(itemRef);
-                    const metadata = await itemRef.getMetadata();
+                    // Skip placeholder files and non-image files
+                    if (itemRef.name === '.folder_info.json' ||
+                        itemRef.name.startsWith('.') ||
+                        !isImageFile(itemRef.name)) {
+                        console.log(`Skipping non-image file: ${itemRef.name}`);
+                        continue;
+                    }
 
-                    photosArray.push({
+                    // Get download URL first
+                    const url = await getDownloadURL(itemRef);
+
+                    // Try to get metadata, but don't fail if it's not available
+                    let metadata = null;
+                    try {
+                        metadata = await getMetadata(itemRef);
+                    } catch (metadataError) {
+                        console.warn(`Failed to get metadata for ${itemRef.name}:`, metadataError);
+                        // Use default values if metadata is not available
+                        metadata = {
+                            timeCreated: new Date().toISOString(),
+                            size: 0
+                        };
+                    }
+
+                    const photo = {
                         id: `${albumId}_${itemRef.name}`,
                         name: itemRef.name,
                         url: url,
                         albumId: albumId,
                         eventName: eventName,
-                        uploadDate: metadata.timeCreated,
-                        size: metadata.size,
+                        uploadDate: metadata.timeCreated || new Date().toISOString(),
+                        size: metadata.size || 0,
                         fullPath: itemRef.fullPath,
                         storageRef: itemRef
-                    });
-                } catch (urlError) {
-                    console.warn(`Failed to get URL for ${itemRef.name}:`, urlError);
+                    };
+
+                    photosArray.push(photo);
+                    console.log(`Successfully loaded photo: ${itemRef.name}`);
+
+                } catch (photoError) {
+                    console.warn(`Failed to load photo ${itemRef.name}:`, photoError);
+                    // Continue with next photo instead of failing completely
                 }
             }
         } catch (err) {
             // Folder might not exist yet, which is okay
-            console.log(`Folder ${folderPath} not found or empty`);
+            console.log(`Folder ${folderPath} not found or empty:`, err.message);
         }
     };
 
@@ -540,66 +583,84 @@ const GalleryPage = () => {
                 {selectedPhoto && (
                     <div className="photo-modal-overlay" onClick={handleCloseModal}>
                         <div className="photo-modal" onClick={(e) => e.stopPropagation()}>
+                            {/* Close button */}
                             <button className="modal-close" onClick={handleCloseModal}>
                                 <X size={24} />
                             </button>
 
-                            <div className="modal-navigation">
-                                <button
-                                    className="nav-button prev-button"
-                                    onClick={handlePreviousPhoto}
-                                    disabled={filteredPhotos.length <= 1}
-                                >
-                                    <ChevronLeft size={24} />
-                                </button>
-
-                                <div className="modal-image-container">
-                                    <img src={selectedPhoto.url} alt={selectedPhoto.name} />
-                                </div>
-
-                                <button
-                                    className="nav-button next-button"
-                                    onClick={handleNextPhoto}
-                                    disabled={filteredPhotos.length <= 1}
-                                >
-                                    <ChevronRight size={24} />
-                                </button>
-                            </div>
-
-                            <div className="modal-info">
-                                <div className="modal-details">
-                                    <h3>{selectedPhoto.name}</h3>
-                                    {selectedPhoto.eventName && (
-                                        <p className="modal-event">From: {selectedPhoto.eventName}</p>
-                                    )}
-                                    <p className="modal-date">
-                                        Uploaded: {new Date(selectedPhoto.uploadDate).toLocaleDateString()}
-                                    </p>
-                                    <p className="modal-size">
-                                        Size: {formatFileSize(selectedPhoto.size)}
-                                    </p>
-                                    <p className="modal-position">
-                                        {currentPhotoIndex + 1} of {filteredPhotos.length}
-                                    </p>
-                                </div>
-
-                                <div className="modal-actions">
+                            {/* Main content container */}
+                            <div className="modal-main-content">
+                                {/* Left side - Photo area */}
+                                <div className="modal-photo-area">
+                                    {/* Navigation buttons */}
                                     <button
-                                        onClick={() => handleDownload(selectedPhoto)}
-                                        className="action-button download-button"
+                                        className="nav-button prev-button"
+                                        onClick={handlePreviousPhoto}
+                                        disabled={filteredPhotos.length <= 1}
                                     >
-                                        <Download size={16} />
-                                        Download
+                                        <ChevronLeft size={24} />
                                     </button>
-                                    {canDelete() && (
+
+                                    {/* Photo container */}
+                                    <div className="modal-photo-container">
+                                        <img src={selectedPhoto.url} alt={selectedPhoto.name} />
+                                    </div>
+
+                                    <button
+                                        className="nav-button next-button"
+                                        onClick={handleNextPhoto}
+                                        disabled={filteredPhotos.length <= 1}
+                                    >
+                                        <ChevronRight size={24} />
+                                    </button>
+                                </div>
+
+                                {/* Right side - Metadata area */}
+                                <div className="modal-meta-area">
+                                    <div className="modal-meta-content">
+                                        <h3>{selectedPhoto.name}</h3>
+
+                                        {selectedPhoto.eventName && (
+                                            <div className="meta-item">
+                                                <span className="meta-label">From:</span>
+                                                <span className="meta-value event-badge">{selectedPhoto.eventName}</span>
+                                            </div>
+                                        )}
+
+                                        <div className="meta-item">
+                                            <span className="meta-label">Uploaded:</span>
+                                            <span className="meta-value">{new Date(selectedPhoto.uploadDate).toLocaleDateString()}</span>
+                                        </div>
+
+                                        <div className="meta-item">
+                                            <span className="meta-label">Size:</span>
+                                            <span className="meta-value">{formatFileSize(selectedPhoto.size)}</span>
+                                        </div>
+
+                                        <div className="meta-item">
+                                            <span className="meta-label">Position:</span>
+                                            <span className="meta-value">{currentPhotoIndex + 1} of {filteredPhotos.length}</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="modal-actions">
                                         <button
-                                            onClick={() => handleDeletePhoto(selectedPhoto)}
-                                            className="action-button delete-button"
+                                            onClick={() => handleDownload(selectedPhoto)}
+                                            className="modal-action-btn download-btn"
                                         >
-                                            <Trash size={16} />
-                                            Delete
+                                            <Download size={18} />
+                                            Download
                                         </button>
-                                    )}
+                                        {canDelete() && (
+                                            <button
+                                                onClick={() => handleDeletePhoto(selectedPhoto)}
+                                                className="modal-action-btn delete-btn"
+                                            >
+                                                <Trash size={18} />
+                                                Delete
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </div>

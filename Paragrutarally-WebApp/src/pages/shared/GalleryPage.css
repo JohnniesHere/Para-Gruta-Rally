@@ -488,7 +488,7 @@
 }
 
 /* ========================================
-   PHOTO MODAL
+   PHOTO MODAL - COMPLETELY NEW DESIGN
    ======================================== */
 
 .photo-modal-overlay {
@@ -508,22 +508,23 @@
 .photo-modal {
     background: var(--bg-primary);
     border-radius: 12px;
-    max-width: 95vw;
-    max-height: 95vh;
-    overflow: hidden;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+    width: 90vw;
+    height: 85vh;
+    max-width: 1200px;
+    max-height: 800px;
     position: relative;
-    display: flex;
-    flex-direction: column;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+    border: 2px solid var(--border-color);
 }
 
 .modal-close {
     position: absolute;
     top: 15px;
     right: 15px;
-    background: rgba(0, 0, 0, 0.5);
-    border: none;
-    color: white;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
     cursor: pointer;
     padding: 8px;
     border-radius: 50%;
@@ -535,26 +536,55 @@
 }
 
 .modal-close:hover {
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(255, 255, 255, 0.2);
     transform: scale(1.1);
 }
 
-.modal-navigation {
+/* Main content container - side by side layout */
+.modal-main-content {
     display: flex;
-    align-items: center;
-    position: relative;
-    background: #000;
+    height: 100%;
+    border-radius: 12px;
+    overflow: hidden;
 }
 
+/* Left side - Photo area (blue box in your drawing) */
+.modal-photo-area {
+    flex: 1;
+    background: #000;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+}
+
+.modal-photo-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.modal-photo-container img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: 8px;
+}
+
+/* Navigation buttons */
 .nav-button {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    background: rgba(0, 0, 0, 0.5);
-    border: none;
+    background: rgba(0, 0, 0, 0.6);
+    border: 2px solid rgba(255, 255, 255, 0.2);
     color: white;
     cursor: pointer;
-    padding: 15px;
+    padding: 12px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -564,184 +594,226 @@
 }
 
 .nav-button:hover:not(:disabled) {
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(0, 0, 0, 0.8);
+    border-color: rgba(255, 255, 255, 0.4);
     transform: translateY(-50%) scale(1.1);
 }
 
 .nav-button:disabled {
     opacity: 0.3;
     cursor: not-allowed;
+    border-color: rgba(255, 255, 255, 0.1);
 }
 
 .prev-button {
-    left: 15px;
+    left: 20px;
 }
 
 .next-button {
-    right: 15px;
+    right: 20px;
 }
 
-.modal-image-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 60vh;
-    max-height: 70vh;
-    background: #000;
-}
-
-.modal-image-container img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-}
-
-.modal-info {
+/* Right side - Metadata area (green box in your drawing) */
+.modal-meta-area {
+    width: 280px;
     background: var(--bg-primary);
-    padding: 20px;
+    border-left: 1px solid var(--border-color);
     display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 20px;
-    border-top: 1px solid var(--border-color);
+    flex-direction: column;
+    padding: 0;
 }
 
-.modal-details {
+.modal-meta-content {
     flex: 1;
+    padding: 25px;
+    overflow-y: auto;
 }
 
-.modal-details h3 {
-    margin: 0 0 10px 0;
+.modal-meta-content h3 {
+    margin: 0 0 20px 0;
     color: var(--text-primary);
     font-size: 18px;
     font-weight: 600;
+    word-wrap: break-word;
+    line-height: 1.3;
 }
 
-.modal-event {
-    margin: 0 0 8px 0;
-    color: var(--accent-color);
-    font-size: 14px;
-    font-weight: 500;
-}
-
-.modal-date, .modal-size, .modal-position {
-    margin: 0 0 5px 0;
-    color: var(--text-secondary);
-    font-size: 14px;
-}
-
-.modal-position {
-    font-weight: 500;
-    color: var(--text-primary);
-}
-
-.modal-actions {
+/* Metadata items */
+.meta-item {
     display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
+    gap: 4px;
+}
+
+.meta-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.meta-value {
+    font-size: 14px;
+    color: var(--text-primary);
+    font-weight: 400;
+}
+
+.event-badge {
+    background: var(--accent-color);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    display: inline-block;
+    width: fit-content;
+}
+
+/* Action buttons */
+.modal-actions {
+    padding: 20px 25px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
     gap: 10px;
-    flex-shrink: 0;
+}
+
+.modal-action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 100%;
+}
+
+.download-btn {
+    background: var(--info-color);
+    color: white;
+}
+
+.download-btn:hover {
+    background: var(--info-hover);
+    transform: translateY(-1px);
+}
+
+.delete-btn {
+    background: var(--error-color);
+    color: white;
+}
+
+.delete-btn:hover {
+    background: var(--error-hover);
+    transform: translateY(-1px);
 }
 
 /* ========================================
    RESPONSIVE DESIGN
    ======================================== */
 
-@media (max-width: 1200px) {
-    .photo-grid-large {
-        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+@media (max-width: 1024px) {
+    .modal-meta-area {
+        width: 250px;
+    }
+
+    .modal-meta-content {
+        padding: 20px;
+    }
+
+    .modal-actions {
+        padding: 15px 20px;
     }
 }
 
 @media (max-width: 768px) {
-    .gallery-page {
+    .photo-modal {
+        width: 95vw;
+        height: 90vh;
+    }
+
+    .modal-main-content {
+        flex-direction: column;
+    }
+
+    .modal-photo-area {
+        height: 65%;
+    }
+
+    .modal-meta-area {
+        width: 100%;
+        height: 35%;
+        border-left: none;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .modal-meta-content {
         padding: 15px;
-    }
-
-    .gallery-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 15px;
-    }
-
-    .gallery-title-section {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-        width: 100%;
-    }
-
-    .gallery-actions {
-        width: 100%;
-        justify-content: flex-end;
-    }
-
-    .gallery-controls {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 15px;
-        padding: 15px;
-    }
-
-    .album-selector {
-        width: 100%;
-        justify-content: flex-start;
-    }
-
-    .view-controls {
-        width: 100%;
-        justify-content: flex-end;
-    }
-
-    .photo-grid-small {
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-        gap: 10px;
-    }
-
-    .photo-grid-medium {
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 15px;
-    }
-
-    .photo-grid-large {
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: 20px;
-    }
-
-    .photo-grid-small .photo-thumbnail {
-        height: 100px;
-    }
-
-    .photo-grid-medium .photo-thumbnail {
-        height: 150px;
-    }
-
-    .photo-grid-large .photo-thumbnail {
-        height: 200px;
-    }
-
-    .photo-info {
-        padding: 10px;
-    }
-
-    .photo-info h3 {
-        font-size: 12px;
-    }
-
-    .photo-date, .photo-event {
-        font-size: 11px;
-    }
-
-    .modal-info {
-        flex-direction: column;
-        gap: 15px;
     }
 
     .modal-actions {
-        width: 100%;
-        justify-content: center;
+        padding: 15px;
+        flex-direction: row;
+        gap: 10px;
+    }
+
+    .modal-action-btn {
+        flex: 1;
+        padding: 10px 12px;
     }
 
     .nav-button {
+        padding: 10px;
+    }
+
+    .prev-button {
+        left: 15px;
+    }
+
+    .next-button {
+        right: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .photo-modal {
+        width: 100vw;
+        height: 100vh;
+        border-radius: 0;
+        margin: 0;
+    }
+
+    .modal-photo-container {
+        padding: 15px;
+    }
+
+    .modal-meta-content h3 {
+        font-size: 16px;
+    }
+
+    .modal-meta-content {
         padding: 12px;
+    }
+
+    .modal-actions {
+        padding: 12px;
+    }
+
+    .modal-close {
+        top: 10px;
+        right: 10px;
+        padding: 6px;
+    }
+
+    .nav-button {
+        padding: 8px;
     }
 
     .prev-button {
@@ -753,88 +825,27 @@
     }
 }
 
-@media (max-width: 480px) {
-    .gallery-page h1 {
-        font-size: 1.5rem;
-    }
-
-    .album-selector {
-        flex-direction: column;
-        width: 100%;
-    }
-
-    .album-button {
-        width: 100%;
-        justify-content: space-between;
-        text-align: left;
-    }
-
-    .photo-grid-small,
-    .photo-grid-medium,
-    .photo-grid-large {
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-        gap: 10px;
-    }
-
-    .photo-grid-small .photo-thumbnail,
-    .photo-grid-medium .photo-thumbnail,
-    .photo-grid-large .photo-thumbnail {
-        height: 120px;
-    }
-
-    .photo-modal {
-        margin: 10px;
-        max-width: calc(100vw - 20px);
-        max-height: calc(100vh - 20px);
-    }
-
-    .modal-image-container {
-        min-height: 50vh;
-        max-height: 60vh;
-    }
-
-    .modal-close {
-        top: 10px;
-        right: 10px;
-        padding: 6px;
-    }
-
-    .nav-button {
-        padding: 10px;
-    }
-
-    .prev-button {
-        left: 5px;
-    }
-
-    .next-button {
-        right: 5px;
-    }
-
-    .modal-info {
-        padding: 15px;
-    }
-
-    .modal-details h3 {
-        font-size: 16px;
-    }
-}
-
 /* ========================================
    DARK MODE ADJUSTMENTS
    ======================================== */
 
 .dark-mode .photo-modal {
     background: var(--bg-secondary);
+    border-color: var(--border-color);
 }
 
-.dark-mode .modal-info {
+.dark-mode .modal-meta-area {
     background: var(--bg-secondary);
-    border-top-color: var(--border-color);
+    border-left-color: var(--border-color);
 }
 
-.dark-mode .photo-overlay {
-    background: rgba(0, 0, 0, 0.7);
+.dark-mode .modal-close {
+    background: rgba(0, 0, 0, 0.3);
+    border-color: var(--border-color);
+}
+
+.dark-mode .modal-close:hover {
+    background: rgba(0, 0, 0, 0.5);
 }
 
 /* ========================================

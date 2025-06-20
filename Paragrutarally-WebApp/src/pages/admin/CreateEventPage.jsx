@@ -8,6 +8,7 @@ import Dashboard from '../../components/layout/Dashboard';
 import { useTheme } from '../../contexts/ThemeContext';
 import { usePermissions } from '../../hooks/usePermissions.jsx';
 import TeamAssignmentModal from '../../components/modals/TeamAssignmentModal';
+import { useLanguage } from '../../contexts/LanguageContext.jsx';
 import { getAllTeams } from '../../services/teamService';
 import {
     IconCalendarEvent as Calendar,
@@ -36,6 +37,7 @@ import './CreateEventPage.css';
 const CreateEventPage = () => {
     const navigate = useNavigate();
     const { isDarkMode, appliedTheme } = useTheme();
+    const { t, isRTL } = useLanguage();
     const { permissions, userRole, userData, user, loading } = usePermissions();
 
     // Form state
