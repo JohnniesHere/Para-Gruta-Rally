@@ -696,3 +696,450 @@
         font-size: 20px;
     }
 }
+
+/* Additional CSS for CreateEventPage.css - Gallery Section */
+
+/* ========================================
+   GALLERY SECTION SPECIFIC STYLING
+   ======================================== */
+
+.event-gallery-section {
+    border-color: #8B5CF6;
+}
+
+.event-gallery-section:hover {
+    border-color: #7C3AED;
+    box-shadow: 0 8px 25px rgba(139, 92, 246, 0.2);
+}
+
+/* ========================================
+   CHECKBOX GROUP STYLING
+   ======================================== */
+
+.checkbox-group {
+    margin-top: 15px;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    cursor: pointer;
+    padding: 15px;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    background: var(--bg-tertiary);
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.checkbox-label:hover {
+    border-color: var(--accent-color);
+    background: var(--bg-secondary);
+    transform: translateY(-1px);
+}
+
+.checkbox-input {
+    display: none;
+}
+
+.checkbox-custom {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--border-color);
+    border-radius: 4px;
+    background: var(--bg-primary);
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+    position: relative;
+    margin-top: 2px;
+}
+
+.checkbox-input:checked + .checkbox-custom {
+    background: var(--accent-color);
+    border-color: var(--accent-color);
+}
+
+.checkbox-input:checked + .checkbox-custom::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 6px;
+    width: 6px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.checkbox-content {
+    flex: 1;
+}
+
+.checkbox-title {
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 16px;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.checkbox-description {
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+/* Checked state styling */
+.checkbox-input:checked + .checkbox-custom + .checkbox-content .checkbox-title {
+    color: var(--accent-color);
+}
+
+.checkbox-input:checked + .checkbox-custom + .checkbox-content .checkbox-description {
+    color: var(--text-primary);
+}
+
+/* ========================================
+   GALLERY INFO BOX
+   ======================================== */
+
+.gallery-info {
+    margin-top: 15px;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.info-box {
+    background: linear-gradient(135deg, #E0F2FE 0%, #BAE6FD 100%);
+    border: 1px solid #0EA5E9;
+    border-radius: 8px;
+    padding: 12px 15px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+/* Dark mode adjustments for info box */
+[data-theme="dark"] .info-box,
+.dark-mode .info-box,
+.dark .info-box {
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.15) 0%, rgba(14, 165, 233, 0.1) 100%);
+    border-color: rgba(14, 165, 233, 0.3);
+}
+
+.info-icon {
+    color: #0369A1;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+[data-theme="dark"] .info-icon,
+.dark-mode .info-icon,
+.dark .info-icon {
+    color: #38BDF8;
+}
+
+.info-content {
+    color: #0C4A6E;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+[data-theme="dark"] .info-content,
+.dark-mode .info-content,
+.dark .info-content {
+    color: #E0F2FE;
+}
+
+.info-content strong {
+    color: #0369A1;
+    font-weight: 600;
+}
+
+[data-theme="dark"] .info-content strong,
+.dark-mode .info-content strong,
+.dark .info-content strong {
+    color: #7DD3FC;
+}
+
+/* ========================================
+   RESPONSIVE ADJUSTMENTS
+   ======================================== */
+
+@media (max-width: 768px) {
+    .checkbox-label {
+        padding: 12px;
+    }
+
+    .checkbox-title {
+        font-size: 15px;
+    }
+
+    .checkbox-description {
+        font-size: 13px;
+    }
+
+    .info-box {
+        padding: 10px 12px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .info-content {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .checkbox-label {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .checkbox-custom {
+        align-self: flex-start;
+    }
+}
+
+/* ========================================
+   TEAMS MANAGEMENT SECTION
+   ======================================== */
+
+.event-teams-section {
+    border-color: var(--accent-color) !important;
+}
+
+.teams-management {
+    padding: 25px;
+}
+
+.teams-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.teams-count {
+    font-size: 14px;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.btn-add-teams {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
+    color: white;
+    border: none;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.btn-add-teams:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.assigned-teams {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.assigned-team-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.assigned-team-item:hover {
+    background: var(--bg-quaternary);
+    border-color: var(--accent-color);
+}
+
+.team-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.team-icon {
+    color: var(--accent-color);
+    flex-shrink: 0;
+}
+
+.team-name {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.btn-remove-team {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: var(--error-color);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    opacity: 0.7;
+}
+
+.btn-remove-team:hover {
+    opacity: 1;
+    background: var(--error-hover);
+    transform: scale(1.1);
+}
+
+.no-teams-assigned {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--text-muted);
+    background: var(--bg-quaternary);
+    border: 2px dashed var(--border-color);
+    border-radius: 12px;
+}
+
+.no-teams-icon {
+    margin-bottom: 16px;
+    opacity: 0.6;
+}
+
+.no-teams-assigned p {
+    margin: 0 0 8px 0;
+    color: var(--text-secondary);
+}
+
+.no-teams-hint {
+    font-size: 14px;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+/* Image actions for edit mode */
+.image-actions {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+}
+
+.image-actions .upload-text {
+    color: white;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.image-actions .remove-image {
+    background: var(--error-color);
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.image-actions .remove-image:hover {
+    background: var(--error-hover);
+    transform: scale(1.05);
+}
+
+/* Responsive design for teams section */
+@media (max-width: 768px) {
+    .teams-header {
+        flex-direction: column;
+        gap: 12px;
+        align-items: flex-start;
+    }
+
+    .btn-add-teams {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .assigned-team-item {
+        padding: 10px 12px;
+    }
+
+    .team-name {
+        font-size: 14px;
+    }
+
+    .no-teams-assigned {
+        padding: 30px 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .teams-management {
+        padding: 20px;
+    }
+
+    .teams-header {
+        padding-bottom: 12px;
+    }
+
+    .teams-count {
+        font-size: 13px;
+    }
+
+    .btn-add-teams {
+        font-size: 13px;
+        padding: 6px 12px;
+    }
+
+    .assigned-team-item {
+        padding: 8px 10px;
+    }
+
+    .team-name {
+        font-size: 13px;
+    }
+
+    .btn-remove-team {
+        width: 20px;
+        height: 20px;
+    }
+}

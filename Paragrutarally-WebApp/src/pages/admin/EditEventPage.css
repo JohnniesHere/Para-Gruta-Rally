@@ -1,0 +1,546 @@
+/* src/pages/admin/EditEventPage.css */
+@import url('./../../styles/global.css');
+
+/* ========================================
+   EDIT EVENT PAGE SPECIFIC STYLES
+   ======================================== */
+
+/* Page uses .admin-page class from global.css */
+.edit-event-page {
+    /* No additional styles needed - inherits from .admin-page */
+}
+
+/* Container uses .admin-container class from global.css */
+.edit-event-container {
+    /* No additional styles needed - inherits from .admin-container */
+}
+
+/* ========================================
+   FIELD ERROR STYLING
+   ======================================== */
+
+.form-input.error,
+.form-textarea.error,
+.date-input.error,
+.time-input.error,
+.form-select.error {
+    border-color: #dc2626 !important;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1) !important;
+}
+
+.field-error {
+    color: #dc2626;
+    font-size: 14px;
+    margin-top: 5px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.field-error::before {
+    content: "⚠️";
+    font-size: 12px;
+}
+
+/* ========================================
+   DARK MODE BACK BUTTON FIX
+   ======================================== */
+
+/* Dark mode back button fix */
+.back-button.dark-back-button {
+    background: #374151;
+    color: #f9fafb;
+    border: 1px solid #4b5563;
+}
+
+.back-button.dark-back-button:hover {
+    background: #4b5563;
+    color: #ffffff;
+    border-color: #6b7280;
+}
+
+/* Light mode back button (default) */
+.back-button {
+    background: #f8fafc;
+    color: #334155;
+    border: 1px solid #e2e8f0;
+    padding: 8px 16px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.back-button:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+    border-color: #cbd5e1;
+}
+
+/* Racing header text color fixes for dark mode */
+.racing-header .title-section h2 {
+    color: #2D3748; /* Dark text for light background */
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    font-weight: 700;
+    text-align: center;
+}
+
+.racing-header .subtitle {
+    color: #4B5563; /* Darker gray for better contrast */
+    font-weight: 600;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+/* Dark mode overrides for racing header text */
+[data-theme="dark"] .racing-header .title-section h2,
+.dark-mode .racing-header .title-section h2,
+.dark .racing-header .title-section h2 {
+    color: #2D3748 !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .racing-header .subtitle,
+.dark-mode .racing-header .subtitle,
+.dark .racing-header .subtitle {
+    color: #374151 !important;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+}
+
+/* ========================================
+   BUTTON TEXT COLOR FIXES
+   ======================================== */
+
+/* UPDATE EVENT button text fix */
+.edit-event-page .btn-primary {
+    color: #2D3748 !important;
+    font-weight: 700;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+/* Ensure button text stays dark in all modes */
+[data-theme="dark"] .edit-event-page .btn-primary,
+.dark-mode .edit-event-page .btn-primary,
+.dark .edit-event-page .btn-primary {
+    color: #2D3748 !important;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+/* Fix for button icons to be visible */
+.edit-event-page .btn-primary svg {
+    color: #2D3748 !important;
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.1));
+}
+
+/* ========================================
+   EVENT SECTION SPECIFIC COLORS
+   ======================================== */
+
+.event-basic-section {
+    border-color: #3B82F6;
+}
+
+.event-basic-section:hover {
+    border-color: #2563EB;
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.2);
+}
+
+.event-datetime-section {
+    border-color: #8B5CF6;
+}
+
+.event-datetime-section:hover {
+    border-color: #7C3AED;
+    box-shadow: 0 8px 25px rgba(139, 92, 246, 0.2);
+}
+
+.event-location-section {
+    border-color: #EC4899;
+}
+
+.event-location-section:hover {
+    border-color: #DB2777;
+    box-shadow: 0 8px 25px rgba(236, 72, 153, 0.2);
+}
+
+.event-image-section {
+    border-color: #10B981;
+}
+
+.event-image-section:hover {
+    border-color: #059669;
+    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.2);
+}
+
+.event-status-section {
+    border-color: #F59E0B;
+}
+
+.event-status-section:hover {
+    border-color: #D97706;
+    box-shadow: 0 8px 25px rgba(245, 158, 11, 0.2);
+}
+
+.event-details-section {
+    border-color: #EF4444;
+}
+
+.event-details-section:hover {
+    border-color: #DC2626;
+    box-shadow: 0 8px 25px rgba(239, 68, 68, 0.2);
+}
+
+/* ========================================
+   EVENT SPECIFIC ICONS & ANIMATIONS
+   ======================================== */
+
+.calendar-icon {
+    color: #FBBF24;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.8; }
+}
+
+/* ========================================
+   DATE TIME PICKER STYLING
+   ======================================== */
+
+.datetime-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    align-items: end;
+}
+
+.date-input,
+.time-input {
+    padding: 15px 20px;
+    border: 2px solid var(--input-border);
+    border-radius: 12px;
+    background: var(--input-bg);
+    color: var(--text-primary);
+    font-size: 16px;
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+.date-input:focus,
+.time-input:focus {
+    outline: none;
+    border-color: var(--input-focus);
+    box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.2);
+    transform: translateY(-1px);
+}
+
+/* ========================================
+   EVENT TYPE SELECTION
+   ======================================== */
+
+.event-types {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.event-type-card {
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-radius: 15px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    position: relative;
+}
+
+.event-type-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px var(--shadow-color);
+    border-color: var(--racing-gold);
+}
+
+.event-type-card.selected {
+    border-color: var(--racing-gold);
+    background: linear-gradient(135deg, #FFF9E6 0%, #FFFBEF 100%);
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+}
+
+/* Dark mode adjustments for event type cards */
+[data-theme="dark"] .event-type-card.selected,
+.dark-mode .event-type-card.selected,
+.dark .event-type-card.selected {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 215, 0, 0.1) 100%);
+}
+
+.event-type-icon {
+    font-size: 40px;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.event-type-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 5px;
+}
+
+.event-type-description {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.selected-indicator {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: var(--racing-gold);
+    background: white;
+    border-radius: 50%;
+    padding: 2px;
+}
+
+/* ========================================
+   IMAGE UPLOAD SECTION
+   ======================================== */
+
+.image-upload-area {
+    border: 2px dashed var(--racing-gold);
+    border-radius: 15px;
+    padding: 30px;
+    text-align: center;
+    background: linear-gradient(135deg, #FFF9E6 0%, #FFFBEF 100%);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+/* Dark mode adjustments for image upload */
+[data-theme="dark"] .image-upload-area,
+.dark-mode .image-upload-area,
+.dark .image-upload-area {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 215, 0, 0.05) 100%);
+}
+
+.image-upload-area:hover {
+    border-color: var(--racing-orange);
+    background: linear-gradient(135deg, #FFEAA7 0%, #FDCB6E 100%);
+    transform: translateY(-2px);
+}
+
+.upload-icon {
+    font-size: 48px;
+    color: var(--racing-gold);
+    margin-bottom: 15px;
+}
+
+.upload-text {
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.upload-hint {
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.image-preview {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.preview-image {
+    max-width: 200px;
+    max-height: 150px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px var(--shadow-color);
+}
+
+.remove-image {
+    margin-top: 10px;
+    background: var(--error-color);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.remove-image:hover {
+    background: var(--error-hover);
+    transform: scale(1.05);
+}
+
+/* ========================================
+   FORM SELECT STYLING
+   ======================================== */
+
+.form-select {
+    padding: 15px 20px;
+    border: 2px solid var(--input-border);
+    border-radius: 12px;
+    background: var(--input-bg);
+    color: var(--text-primary);
+    font-size: 16px;
+    transition: all 0.3s ease;
+    width: 100%;
+    cursor: pointer;
+}
+
+.form-select:focus {
+    outline: none;
+    border-color: var(--input-focus);
+    box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.2);
+    transform: translateY(-1px);
+}
+
+.form-select:hover {
+    border-color: var(--racing-orange);
+}
+
+/* ========================================
+   LOADING STATES
+   ======================================== */
+
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+.loading-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.loading-spinner {
+    width: 30px;
+    height: 30px;
+    border: 3px solid var(--border-color);
+    border-top: 3px solid var(--racing-gold);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading-container p {
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.error-container {
+    text-align: center;
+    padding: 60px 20px;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+}
+
+.error-container h3 {
+    color: var(--error-color);
+    margin-bottom: 10px;
+}
+
+.error-container p {
+    color: var(--text-secondary);
+    margin: 0 0 20px 0;
+}
+
+/* ========================================
+   ALERT STYLING
+   ======================================== */
+
+.alert {
+    padding: 15px 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 500;
+}
+
+.error-alert {
+    background-color: var(--error-light);
+    color: var(--error-color);
+    border: 1px solid var(--error-color);
+}
+
+.info-alert {
+    background-color: var(--info-light);
+    color: var(--info-color);
+    border: 1px solid var(--info-color);
+}
+
+.success-alert {
+    background-color: var(--success-light);
+    color: var(--success-color);
+    border: 1px solid var(--success-color);
+}
+
+/* ========================================
+   RESPONSIVE OVERRIDES
+   ======================================== */
+
+@media (max-width: 768px) {
+    .edit-event-page {
+        padding: 15px;
+    }
+
+    .datetime-group {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .event-types {
+        grid-template-columns: 1fr;
+    }
+
+    .image-upload-area {
+        padding: 20px;
+    }
+
+    .upload-icon {
+        font-size: 36px;
+    }
+}
+
+@media (max-width: 480px) {
+    .edit-event-page h1 {
+        font-size: 1.5rem;
+    }
+
+    .form-actions {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+        width: 100%;
+        justify-content: center;
+    }
+}

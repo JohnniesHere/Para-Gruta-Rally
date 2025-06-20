@@ -1,7 +1,7 @@
-// src/pages/admin/CreateEventPage.jsx - Updated with Gallery Integration and Image Cleanup
+// src/pages/admin/EditEventPage.jsx - Event editing with team assignment
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { collection, addDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { useNavigate, useParams } from 'react-router-dom';
+import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { db, storage } from '../../firebase/config';
 import Dashboard from '../../components/layout/Dashboard';
@@ -31,10 +31,11 @@ import {
     IconUserPlus as UserPlus,
     IconTrash as Trash
 } from '@tabler/icons-react';
-import './CreateEventPage.css';
+import './CreateEventPage.css'; // Reuse create event styles
 
-const CreateEventPage = () => {
+const EditEventPage = () => {
     const navigate = useNavigate();
+    const { eventId } = useParams();
     const { isDarkMode, appliedTheme } = useTheme();
     const { permissions, userRole, userData, user, loading } = usePermissions();
 
@@ -47,19 +48,19 @@ const CreateEventPage = () => {
         time: '',
         location: '',
         address: '',
-        maxParticipants: 50,
-        image: null,
         organizer: '',
         requirements: '',
-        createGalleryFolder: true, // New option for gallery folder creation
-        participatingTeams: [] // Add participating teams
+        participatingTeams: []
     });
 
+    const [originalImageUrl, setOriginalImageUrl] = useState(null);
     const [fieldErrors, setFieldErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isUploadingImage, setIsUploadingImage] = useState(false);
     const [imagePreview, setImagePreview] = useState(null);
-    const [showPreview, setShowPreview] = useState(false);
+    const [newImageFile, setNewImageFile] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     // Team assignment modal state
     const [showTeamModal, setShowTeamModal] = useState(false);
@@ -87,19 +88,19 @@ const CreateEventPage = () => {
         }
     ];
 
-    // Debug user claims on mount
-    useEffect(() => {
-        if (user && !loading) {
-            debugUserClaims();
-        }
-    }, [user, loading]);
-
     // Check permissions on load
     useEffect(() => {
-        if (!loading && permissions && !permissions.canCreate) {
+        if (!loading && permissions && !permissions.canEdit) {
             navigate('/admin/events');
         }
     }, [permissions, navigate, loading]);
+
+    // Load event data
+    useEffect(() => {
+        if (eventId) {
+            loadEventData();
+        }
+    }, [eventId]);
 
     // Load teams data for participating teams display
     useEffect(() => {
@@ -108,20 +109,41 @@ const CreateEventPage = () => {
         }
     }, [formData.participatingTeams]);
 
-    // Debug function to check user permissions
-    const debugUserClaims = async () => {
+    const loadEventData = async () => {
+        setIsLoading(true);
+        setError(null);
+
         try {
-            if (user) {
-                const idTokenResult = await user.getIdTokenResult();
-                console.log('User ID Token Claims:', idTokenResult.claims);
-                console.log('User Role from Claims:', idTokenResult.claims.role);
-                console.log('User Data from Hook:', userData);
-                console.log('User Role from Hook:', userRole);
+            const eventDoc = await getDoc(doc(db, 'events', eventId));
+
+            if (eventDoc.exists()) {
+                const eventData = eventDoc.data();
+
+                setFormData({
+                    name: eventData.name || '',
+                    description: eventData.description || '',
+                    type: eventData.type || 'race',
+                    date: eventData.date || '',
+                    time: eventData.time || '',
+                    location: eventData.location || '',
+                    address: eventData.address || '',
+                    organizer: eventData.organizer || '',
+                    requirements: eventData.notes || '',
+                    participatingTeams: eventData.participatingTeams || []
+                });
+
+                if (eventData.image && !eventData.image.includes('unsplash.com')) {
+                    setOriginalImageUrl(eventData.image);
+                    setImagePreview(eventData.image);
+                }
             } else {
-                console.log('No user logged in');
+                setError('Event not found');
             }
-        } catch (error) {
-            console.error('Error getting user claims:', error);
+        } catch (err) {
+            console.error('Error loading event:', err);
+            setError('Failed to load event. Please try again.');
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -158,7 +180,7 @@ const CreateEventPage = () => {
     const handleImageUpload = (event) => {
         const file = event.target.files[0];
         if (file) {
-            setFormData(prev => ({ ...prev, image: file }));
+            setNewImageFile(file);
 
             // Create preview
             const reader = new FileReader();
@@ -168,15 +190,8 @@ const CreateEventPage = () => {
     };
 
     const handleRemoveImage = () => {
-        setFormData(prev => ({ ...prev, image: null }));
-        setImagePreview(null);
-    };
-
-    const adjustCapacity = (increment) => {
-        const newValue = formData.maxParticipants + increment;
-        if (newValue >= 1 && newValue <= 500) {
-            handleInputChange('maxParticipants', newValue);
-        }
+        setNewImageFile(null);
+        setImagePreview(originalImageUrl);
     };
 
     const validateForm = () => {
@@ -189,9 +204,8 @@ const CreateEventPage = () => {
         if (!formData.location.trim()) errors.location = true;
         if (!formData.address.trim()) errors.address = true;
         if (!formData.organizer.trim()) errors.organizer = true;
-        if (formData.maxParticipants < 1) errors.maxParticipants = true;
 
-        // Check if date is in the future
+        // Check if date is in the future (only for upcoming events)
         const eventDateTime = new Date(`${formData.date}T${formData.time}`);
         if (formData.date && formData.time && eventDateTime <= new Date()) {
             errors.dateTime = true;
@@ -216,77 +230,12 @@ const CreateEventPage = () => {
         }));
     };
 
-    /**
-     * Create gallery folder for the event by uploading a placeholder file
-     * Uses only the event name (same format as when photos are uploaded)
-     * @param {string} eventName - Name of the event to create folder for
-     */
-    const createEventGalleryFolder = async (eventName) => {
-        try {
-            // Debug logging
-            console.log('createEventGalleryFolder called with:');
-            console.log('- eventName:', eventName);
-
-            // Validate inputs
-            if (!eventName) {
-                throw new Error(`Missing required parameter: eventName=${eventName}`);
-            }
-
-            // Use the event name directly as the folder path (same as photo upload logic)
-            const folderPath = `gallery/events/${eventName}`;
-
-            console.log('Creating folder at path:', folderPath);
-
-            // Create a placeholder file to establish the folder structure
-            const placeholderContent = JSON.stringify({
-                eventName: eventName,
-                createdAt: new Date().toISOString(),
-                description: "This folder contains photos for the event: " + eventName,
-                instructions: "Upload event photos to this folder. This placeholder file can be deleted once photos are uploaded.",
-                folderType: "event_gallery"
-            }, null, 2);
-
-            // Convert the content to a blob
-            const blob = new Blob([placeholderContent], { type: 'application/json' });
-
-            // Create storage reference for the placeholder file
-            const placeholderRef = ref(storage, `${folderPath}/.folder_info.json`);
-
-            // Upload the placeholder file
-            console.log(`Uploading placeholder file to: ${folderPath}/.folder_info.json`);
-            const snapshot = await uploadBytes(placeholderRef, blob);
-            console.log('Gallery folder created successfully with placeholder file');
-
-            // Return the folder path for reference
-            return {
-                success: true,
-                folderPath: folderPath,
-                placeholderUrl: await getDownloadURL(snapshot.ref)
-            };
-        } catch (error) {
-            console.error('Error creating gallery folder:', error);
-            console.error('Error details:', {
-                eventName,
-                errorMessage: error.message,
-                errorStack: error.stack
-            });
-            return {
-                success: false,
-                error: error.message
-            };
-        }
-    };
-
-    /**
-     * Delete event image from Firebase Storage
-     * @param {string} imageUrl - The full URL of the image to delete
-     */
     const deleteEventImage = async (imageUrl) => {
         try {
-            if (!imageUrl) return;
+            if (!imageUrl || imageUrl.includes('unsplash.com')) {
+                return true;
+            }
 
-            // Extract the storage path from the URL
-            // Firebase Storage URLs have format: https://firebasestorage.googleapis.com/v0/b/{bucket}/o/{path}?alt=media&token={token}
             const url = new URL(imageUrl);
             const pathMatch = url.pathname.match(/\/o\/(.+)$/);
 
@@ -294,17 +243,15 @@ const CreateEventPage = () => {
                 const encodedPath = pathMatch[1];
                 const decodedPath = decodeURIComponent(encodedPath);
 
-                console.log('Deleting image from storage:', decodedPath);
+                console.log('Deleting old image from storage:', decodedPath);
                 const imageRef = ref(storage, decodedPath);
                 await deleteObject(imageRef);
-                console.log('Image deleted successfully from storage');
+                console.log('Old image deleted successfully');
                 return true;
-            } else {
-                console.warn('Could not extract storage path from URL:', imageUrl);
-                return false;
             }
+            return false;
         } catch (error) {
-            console.error('Error deleting image from storage:', error);
+            console.error('Error deleting old image:', error);
             return false;
         }
     };
@@ -317,138 +264,75 @@ const CreateEventPage = () => {
         }
 
         setIsSubmitting(true);
-        let imageUrl = null;
-        let uploadedImageRef = null;
+        let newImageUrl = originalImageUrl;
 
         try {
-            // Upload image to Firebase Storage if one was selected
-            if (formData.image) {
+            // Handle image upload/replacement
+            if (newImageFile) {
                 try {
                     setIsUploadingImage(true);
-                    // Create a unique filename
+
+                    // Delete old image if it exists and is not default
+                    if (originalImageUrl && !originalImageUrl.includes('unsplash.com')) {
+                        await deleteEventImage(originalImageUrl);
+                    }
+
+                    // Upload new image
                     const timestamp = Date.now();
-                    const fileName = `events/${timestamp}_${formData.image.name}`;
+                    const fileName = `events/${timestamp}_${newImageFile.name}`;
                     const storageRef = ref(storage, fileName);
-                    uploadedImageRef = storageRef;
 
-                    // Upload the file
-                    console.log('Uploading image...');
-                    const snapshot = await uploadBytes(storageRef, formData.image);
-
-                    // Get the download URL
-                    imageUrl = await getDownloadURL(snapshot.ref);
-                    console.log('Image uploaded successfully:', imageUrl);
+                    console.log('Uploading new image...');
+                    const snapshot = await uploadBytes(storageRef, newImageFile);
+                    newImageUrl = await getDownloadURL(snapshot.ref);
+                    console.log('New image uploaded successfully:', newImageUrl);
                 } catch (imageError) {
-                    console.error('Error uploading image:', imageError);
-                    alert('Warning: Failed to upload image, but event will be created without it.');
-                    uploadedImageRef = null;
+                    console.error('Error uploading new image:', imageError);
+                    alert('Warning: Failed to upload new image, but event will be updated with other changes.');
+                    newImageUrl = originalImageUrl; // Keep original image
                 } finally {
                     setIsUploadingImage(false);
                 }
             }
 
-            // Create event document structure matching Firestore
+            // Update event document
             const eventDoc = {
                 name: formData.name,
                 description: formData.description,
                 location: formData.location,
+                address: formData.address,
                 date: formData.date,
+                time: formData.time,
+                organizer: formData.organizer,
                 notes: formData.requirements || "Additional notes about the event",
-                status: "upcoming", // Default status for new events
-                attendees: 0, // Start with 0 attendees
-                participatingTeams: formData.participatingTeams, // Add participating teams
-                image: imageUrl, // Add the uploaded image URL
-                hasGalleryFolder: formData.createGalleryFolder, // Track if gallery folder was created
-                galleryFolderPath: null, // Will be updated after folder creation
-                createdAt: serverTimestamp(),
+                participatingTeams: formData.participatingTeams,
+                image: newImageUrl,
                 updatedAt: serverTimestamp()
             };
 
-            // Add document to Firestore
-            console.log('Creating event document...');
-            const docRef = await addDoc(collection(db, 'events'), eventDoc);
+            await updateDoc(doc(db, 'events', eventId), eventDoc);
+            console.log('Event updated successfully');
 
-            // Extract the document ID
-            const eventId = docRef.id;
-            console.log('Event created with document ID:', eventId);
-            console.log('DocRef object:', docRef);
-
-            // Ensure we have a valid document ID
-            if (!eventId || eventId === undefined) {
-                throw new Error('Failed to get event document ID from Firestore');
-            }
-
-            // Create gallery folder if requested
-            let galleryResult = null;
-            if (formData.createGalleryFolder) {
-                console.log('Creating gallery folder for event:', formData.name);
-                galleryResult = await createEventGalleryFolder(formData.name);
-
-                if (galleryResult.success) {
-                    console.log('Gallery folder created successfully at:', galleryResult.folderPath);
-
-                    // Update the event document with the gallery folder path
-                    try {
-                        await updateDoc(docRef, {
-                            galleryFolderPath: galleryResult.folderPath,
-                            updatedAt: serverTimestamp()
-                        });
-                        console.log('Event document updated with gallery path');
-                    } catch (updateError) {
-                        console.error('Failed to update event document with gallery path:', updateError);
-                    }
-
-                    alert(`Event created successfully!\nGallery folder created at: ${galleryResult.folderPath}`);
-                } else {
-                    console.warn('Gallery folder creation failed:', galleryResult.error);
-                    alert(`Event created successfully, but gallery folder creation failed: ${galleryResult.error}`);
-                }
-            } else {
-                alert('Event created successfully!');
-            }
-
-            // Navigate back to events list
-            navigate('/admin/events');
+            alert('Event updated successfully!');
+            navigate(`/admin/events/view/${eventId}`);
         } catch (error) {
-            console.error('Error creating event:', error);
-
-            // If event creation failed and we uploaded an image, clean it up
-            if (uploadedImageRef && imageUrl) {
-                console.log('Cleaning up uploaded image due to event creation failure...');
-                try {
-                    await deleteObject(uploadedImageRef);
-                    console.log('Uploaded image cleaned up successfully');
-                } catch (cleanupError) {
-                    console.error('Failed to cleanup uploaded image:', cleanupError);
-                }
-            }
-
-            alert('Error creating event: ' + error.message);
+            console.error('Error updating event:', error);
+            alert('Error updating event: ' + error.message);
         } finally {
             setIsSubmitting(false);
             setIsUploadingImage(false);
         }
     };
 
-    const handlePreview = () => {
-        if (validateForm()) {
-            setShowPreview(true);
-        }
-    };
-
-    const handleClosePreview = () => {
-        setShowPreview(false);
-    };
-
     // Show loading if permissions not loaded yet
-    if (!permissions) {
+    if (!permissions || isLoading) {
         return (
             <Dashboard>
                 <div className="create-event-page">
                     <div className="loading-container">
                         <div className="loading-content">
                             <Clock className="loading-spinner" size={40} />
-                            <p>Loading permissions...</p>
+                            <p>Loading event data...</p>
                         </div>
                     </div>
                 </div>
@@ -456,16 +340,22 @@ const CreateEventPage = () => {
         );
     }
 
-    // Format date for display
-    const formatEventDate = () => {
-        if (!formData.date) return 'Not set';
-        const date = new Date(formData.date);
-        return date.toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
-    };
+    if (error) {
+        return (
+            <Dashboard>
+                <div className="create-event-page">
+                    <div className="error-container">
+                        <h3>Error</h3>
+                        <p>{error}</p>
+                        <button onClick={() => navigate('/admin/events')} className="btn-primary">
+                            <ArrowLeft className="btn-icon" size={18} />
+                            Back to Events
+                        </button>
+                    </div>
+                </div>
+            </Dashboard>
+        );
+    }
 
     return (
         <Dashboard>
@@ -482,26 +372,12 @@ const CreateEventPage = () => {
                     <div className="title-section">
                         <h1 className="page-title">
                             <Trophy size={32} className="page-title-icon" />
-                            Create Racing Event
+                            Edit Racing Event
                         </h1>
                     </div>
                 </div>
 
                 <div className="admin-container create-event-container">
-                    {/* Racing Theme Header */}
-                    <div className="racing-header">
-                        <div className="header-content">
-                            <div className="title-section">
-                                <h2>
-                                    <Flag size={28} className="page-title-icon" />
-                                    Event Control Center
-                                    <Flag size={28} className="page-title-icon" />
-                                </h2>
-                                <p className="subtitle">Choose one of the event types below 🏁</p>
-                            </div>
-                        </div>
-                    </div>
-
                     <form onSubmit={handleSubmit} className="create-event-form">
                         {/* Event Basic Information */}
                         <div className="form-section event-basic-section">
@@ -600,6 +476,7 @@ const CreateEventPage = () => {
                             </div>
                             {fieldErrors.dateTime && <div className="field-error">*Event date and time must be in the future</div>}
                         </div>
+
                         {/* Location */}
                         <div className="form-section event-location-section">
                             <div className="section-header">
@@ -689,7 +566,7 @@ const CreateEventPage = () => {
                         <div className="form-section event-gallery-section">
                             <div className="section-header">
                                 <Upload className="section-icon" size={24} />
-                                <h3>📷 Gallery & Media</h3>
+                                <h3>📷 Event Image</h3>
                             </div>
 
                             <div className="form-group">
@@ -711,55 +588,24 @@ const CreateEventPage = () => {
                                     ) : (
                                         <div className="image-preview">
                                             <img src={imagePreview} alt="Preview" className="preview-image" />
-                                            <button
-                                                type="button"
-                                                className="remove-image"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleRemoveImage();
-                                                }}
-                                            >
-                                                Remove Image
-                                            </button>
+                                            <div className="image-actions">
+                                                {newImageFile && (
+                                                    <button
+                                                        type="button"
+                                                        className="remove-image"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleRemoveImage();
+                                                        }}
+                                                    >
+                                                        Cancel New Image
+                                                    </button>
+                                                )}
+                                                <div className="upload-text">Click to change image</div>
+                                            </div>
                                         </div>
                                     )}
                                 </div>
-                            </div>
-
-                            <div className="form-group">
-                                <div className="checkbox-group">
-                                    <label className="checkbox-label">
-                                        <input
-                                            type="checkbox"
-                                            checked={formData.createGalleryFolder}
-                                            onChange={(e) => handleInputChange('createGalleryFolder', e.target.checked)}
-                                            className="checkbox-input"
-                                        />
-                                        <span className="checkbox-custom"></span>
-                                        <div className="checkbox-content">
-                                            <div className="checkbox-title">
-                                                <Folder size={16} />
-                                                Create Gallery Folder
-                                            </div>
-                                            <div className="checkbox-description">
-                                                Automatically create a dedicated photo gallery folder for this event.
-                                                Participants and organizers can upload photos that will be organized under "{formData.name} Album".
-                                            </div>
-                                        </div>
-                                    </label>
-                                </div>
-                                {formData.createGalleryFolder && (
-                                    <div className="gallery-info">
-                                        <div className="info-box">
-                                            <Folder className="info-icon" size={16} />
-                                            <div className="info-content">
-                                                <strong>Gallery Location:</strong> gallery/events/{formData.name || '[Event Name]'}
-                                                <br />
-                                                <strong>Album Name:</strong> {formData.name ? `${formData.name} Album` : '[Event Name] Album'}
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
                             </div>
                         </div>
 
@@ -787,20 +633,10 @@ const CreateEventPage = () => {
                             <button
                                 type="button"
                                 className="btn-secondary"
-                                onClick={() => navigate('/admin/events')}
+                                onClick={() => navigate(`/admin/events/view/${eventId}`)}
                                 disabled={isSubmitting}
                             >
                                 Cancel
-                            </button>
-
-                            <button
-                                type="button"
-                                className="btn-outline"
-                                onClick={handlePreview}
-                                disabled={isSubmitting}
-                            >
-                                <Eye size={16} />
-                                Preview
                             </button>
 
                             <button
@@ -811,96 +647,18 @@ const CreateEventPage = () => {
                                 {isSubmitting ? (
                                     <>
                                         <Clock className="loading-spinner" size={16} />
-                                        {isUploadingImage ? 'Uploading Image...' : 'Creating Event...'}
+                                        {isUploadingImage ? 'Uploading Image...' : 'Updating Event...'}
                                     </>
                                 ) : (
                                     <>
                                         <Save size={16} />
-                                        Create Event
+                                        Update Event
                                     </>
                                 )}
                             </button>
                         </div>
                     </form>
                 </div>
-
-                {/* Preview Modal */}
-                {showPreview && (
-                    <div className="modal-overlay" onClick={handleClosePreview}>
-                        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                            <div className="modal-header">
-                                <h2>{formData.name || 'Event Preview'}</h2>
-                                <button
-                                    className="modal-close"
-                                    onClick={handleClosePreview}
-                                >
-                                    <X size={20} />
-                                </button>
-                            </div>
-                            <div className="modal-body">
-                                {imagePreview && (
-                                    <img
-                                        src={imagePreview}
-                                        alt={formData.name}
-                                        className="event-modal-image"
-                                    />
-                                )}
-                                {!imagePreview && (
-                                    <img
-                                        src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400"
-                                        alt="Default event"
-                                        className="event-modal-image"
-                                        style={{ opacity: 0.6 }}
-                                    />
-                                )}
-                                <div className="event-modal-details">
-                                    <div className="event-detail-item">
-                                        <strong>Date:</strong>
-                                        <p>{formatEventDate()}</p>
-                                    </div>
-                                    <div className="event-detail-item">
-                                        <strong>Location:</strong>
-                                        <p>{formData.location || 'Not specified'}</p>
-                                    </div>
-                                    <div className="event-detail-item">
-                                        <strong>Address:</strong>
-                                        <p>{formData.address || 'Not specified'}</p>
-                                    </div>
-                                    <div className="event-detail-item">
-                                        <strong>Organizer:</strong>
-                                        <p>{formData.organizer || 'Not specified'}</p>
-                                    </div>
-                                    <div className="event-detail-item">
-                                        <strong>Status:</strong>
-                                        <span className="status-badge status-upcoming">
-                                            <Trophy size={14} style={{ marginRight: '4px' }} />
-                                            Upcoming
-                                        </span>
-                                    </div>
-                                    <div className="event-detail-item">
-                                        <strong>Description:</strong>
-                                        <p>{formData.description || 'No description provided'}</p>
-                                    </div>
-                                    {formData.requirements && (
-                                        <div className="event-detail-item">
-                                            <strong>Notes:</strong>
-                                            <p>{formData.requirements}</p>
-                                        </div>
-                                    )}
-                                    {formData.createGalleryFolder && (
-                                        <div className="event-detail-item">
-                                            <strong>Gallery:</strong>
-                                            <p>
-                                                <Folder size={14} style={{ marginRight: '4px', verticalAlign: 'text-bottom' }} />
-                                                {formData.name ? `${formData.name} Album` : 'Event Album'} will be created
-                                            </p>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
 
                 {/* Team Assignment Modal */}
                 <TeamAssignmentModal
@@ -915,4 +673,4 @@ const CreateEventPage = () => {
     );
 };
 
-export default CreateEventPage;
+export default EditEventPage;

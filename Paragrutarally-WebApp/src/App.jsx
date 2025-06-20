@@ -45,6 +45,7 @@ import KidDetailView from './components/kids/KidDetail.jsx'; // Use existing com
 // Import styles
 import './styles/theme.css';
 import './App.css';
+import EditEventPage from "./pages/admin/EditEventPage.jsx";
 
 // Protected Route component
 const ProtectedRoute = ({ children, requiredRole }) => {
@@ -115,7 +116,7 @@ function App() {
                                             }
                                         />
 
-                                        {/* NEW: Event management routes */}
+                                        {/* Event management routes - UPDATED */}
                                         <Route
                                             path="/admin/events/create"
                                             element={
@@ -135,16 +136,17 @@ function App() {
                                         />
 
                                         <Route
-                                            path="/admin/events/edit/:id"
+                                            path="/admin/events/edit/:eventId"
                                             element={
                                                 <ProtectedRoute requiredRole="admin">
-                                                    <CreateEventPage />
+                                                    <EditEventPage />
                                                 </ProtectedRoute>
                                             }
                                         />
 
+                                        {/* FIXED: Event view route with correct parameter name */}
                                         <Route
-                                            path="/admin/events/view/:id"
+                                            path="/admin/events/view/:eventId"
                                             element={
                                                 <ProtectedRoute requiredRole="admin">
                                                     <ViewEventsPage />
@@ -194,7 +196,7 @@ function App() {
                                             }
                                         />
 
-                                        {/* NEW: Permission-aware kid detail route for testing */}
+                                        {/* Permission-aware kid detail route for testing */}
                                         <Route
                                             path="/kid/:kidId"
                                             element={
@@ -238,7 +240,7 @@ function App() {
                                         />
 
                                         {/* ========================================
-                                           VEHICLES MANAGEMENT ROUTES - NEW
+                                           VEHICLES MANAGEMENT ROUTES
                                            ======================================== */}
 
                                         {/* Main vehicles page - accessible to admin, instructor, parent */}
@@ -327,7 +329,7 @@ function App() {
                                             }
                                         />
 
-                                        {/* ALTERNATIVE: Instructor-specific vehicle routes (if you want separate URLs) */}
+                                        {/* Instructor-specific vehicle routes */}
                                         <Route
                                             path="/instructor/vehicles"
                                             element={
@@ -347,9 +349,23 @@ function App() {
                                             }
                                         />
 
-                                        {/* Shared routes */}
+                                        {/* ========================================
+                                           GALLERY ROUTES - NEW
+                                           ======================================== */}
+
+                                        {/* Main gallery - accessible to all authenticated users */}
                                         <Route
                                             path="/gallery"
+                                            element={
+                                                <ProtectedRoute>
+                                                    <GalleryPage />
+                                                </ProtectedRoute>
+                                            }
+                                        />
+
+                                        {/* Event-specific gallery - accessible to all authenticated users */}
+                                        <Route
+                                            path="/gallery/:eventId"
                                             element={
                                                 <ProtectedRoute>
                                                     <GalleryPage />

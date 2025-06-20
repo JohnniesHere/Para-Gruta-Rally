@@ -770,3 +770,401 @@
         font-size: 12px;
     }
 }
+
+/* Additional CSS for EventManagementPage.css - Gallery Features */
+
+/* ========================================
+   GALLERY INDICATOR & ACTIONS
+   ======================================== */
+
+.gallery-indicator {
+    color: var(--accent-color);
+    margin-left: 8px;
+    opacity: 0.8;
+}
+
+.btn-action.gallery {
+    background: linear-gradient(135deg, var(--racing-purple) 0%, #8B5CF6 100%);
+    color: white;
+}
+
+.btn-action.gallery:hover {
+    background: linear-gradient(135deg, #7C3AED 0%, var(--racing-purple) 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+}
+
+.gallery-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+/* ========================================
+   DELETE MODAL STYLING
+   ======================================== */
+
+.delete-modal {
+    max-width: 600px;
+    width: 90vw;
+}
+
+.delete-warning {
+    text-align: center;
+    padding: 20px;
+    background: linear-gradient(135deg, #FEF3F2 0%, #FEE2E2 100%);
+    border: 2px solid #F87171;
+    border-radius: 12px;
+    margin-bottom: 25px;
+}
+
+.dark-mode .delete-warning {
+    background: linear-gradient(135deg, rgba(248, 113, 113, 0.15) 0%, rgba(248, 113, 113, 0.1) 100%);
+    border-color: rgba(248, 113, 113, 0.3);
+}
+
+.warning-icon {
+    color: #DC2626;
+    margin-bottom: 15px;
+}
+
+.dark-mode .warning-icon {
+    color: #F87171;
+}
+
+.delete-warning h3 {
+    color: #991B1B;
+    margin-bottom: 10px;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.dark-mode .delete-warning h3 {
+    color: #FCA5A5;
+}
+
+.delete-warning p {
+    color: #7F1D1D;
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+.dark-mode .delete-warning p {
+    color: #FEE2E2;
+}
+
+.delete-warning strong {
+    color: #991B1B;
+    font-weight: 700;
+}
+
+.dark-mode .delete-warning strong {
+    color: #FCA5A5;
+}
+
+/* ========================================
+   GALLERY DELETE SECTION
+   ======================================== */
+
+.gallery-delete-section {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 25px;
+}
+
+.gallery-warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.folder-icon {
+    color: var(--racing-purple);
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.gallery-warning-content h4 {
+    color: var(--text-primary);
+    margin: 0 0 8px 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.gallery-warning-content p {
+    color: var(--text-secondary);
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+/* ========================================
+   DELETE OPTIONS
+   ======================================== */
+
+.delete-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.delete-option {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 15px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-secondary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.delete-option:hover {
+    border-color: var(--accent-color);
+    background: var(--bg-primary);
+}
+
+.delete-option.danger:hover {
+    border-color: var(--error-color);
+    background: var(--error-light);
+}
+
+.delete-option input[type="radio"] {
+    margin: 0;
+    margin-top: 3px;
+    width: 16px;
+    height: 16px;
+    accent-color: var(--accent-color);
+}
+
+.delete-option.danger input[type="radio"] {
+    accent-color: var(--error-color);
+}
+
+.option-content {
+    flex: 1;
+}
+
+.option-content strong {
+    display: block;
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-bottom: 4px;
+    font-size: 14px;
+}
+
+.option-content p {
+    color: var(--text-secondary);
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.3;
+}
+
+.delete-option.danger .option-content strong {
+    color: var(--error-color);
+}
+
+.delete-option.danger .option-content p {
+    color: var(--error-dark);
+}
+
+.dark-mode .delete-option.danger .option-content p {
+    color: var(--error-light);
+}
+
+/* ========================================
+   DANGER BUTTON STYLING
+   ======================================== */
+
+.btn-danger {
+    background: linear-gradient(135deg, var(--error-color) 0%, var(--error-hover) 100%);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.btn-danger:hover:not(:disabled) {
+    background: linear-gradient(135deg, var(--error-hover) 0%, #B91C1C 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(220, 38, 38, 0.4);
+}
+
+.btn-danger:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ========================================
+   MODAL ACTIONS LAYOUT
+   ======================================== */
+
+.modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+/* ========================================
+   LOADING SPINNER IN BUTTONS
+   ======================================== */
+
+.btn-danger .loading-spinner,
+.btn-primary .loading-spinner,
+.btn-secondary .loading-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid transparent;
+    border-top: 2px solid currentColor;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* ========================================
+   RESPONSIVE DESIGN FOR DELETE MODAL
+   ======================================== */
+
+@media (max-width: 768px) {
+    .delete-modal {
+        width: 95vw;
+        margin: 10px;
+    }
+
+    .gallery-warning {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .delete-options {
+        gap: 10px;
+    }
+
+    .delete-option {
+        padding: 12px;
+    }
+
+    .modal-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .btn-danger,
+    .btn-secondary {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .delete-warning {
+        padding: 15px;
+    }
+
+    .delete-warning h3 {
+        font-size: 18px;
+    }
+
+    .delete-warning p {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .gallery-delete-section {
+        padding: 15px;
+    }
+
+    .option-content strong {
+        font-size: 13px;
+    }
+
+    .option-content p {
+        font-size: 12px;
+    }
+
+    .delete-option {
+        padding: 10px;
+    }
+
+    .delete-warning {
+        padding: 12px;
+    }
+
+    .warning-icon {
+        width: 40px;
+        height: 40px;
+    }
+}
+
+/* ========================================
+   ACCESSIBILITY IMPROVEMENTS
+   ======================================== */
+
+.delete-option:focus-within {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+}
+
+.delete-option.danger:focus-within {
+    outline-color: var(--error-color);
+}
+
+.btn-danger:focus,
+.btn-secondary:focus {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+}
+
+.btn-danger:focus {
+    outline-color: var(--error-color);
+}
+
+/* ========================================
+   ANIMATION FOR MODAL APPEARANCE
+   ======================================== */
+
+.delete-modal {
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.delete-warning {
+    animation: warningPulse 0.5s ease-out;
+}
+
+@keyframes warningPulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.02);
+    }
+    100% {
+        transform: scale(1);
+    }
+}

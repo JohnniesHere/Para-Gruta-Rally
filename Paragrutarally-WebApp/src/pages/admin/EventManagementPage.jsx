@@ -1,8 +1,9 @@
-// src/pages/admin/EventManagementPage.jsx
+// src/pages/admin/EventManagementPage.jsx - Updated with Complete Image and Gallery Cleanup
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { collection, getDocs, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
-import { db } from '../../firebase/config';
+import { ref, listAll, deleteObject } from 'firebase/storage';
+import { db, storage } from '../../firebase/config';
 import Dashboard from '../../components/layout/Dashboard';
 import { useTheme } from '../../contexts/ThemeContext.jsx';
 import { usePermissions } from '../../hooks/usePermissions.jsx';
@@ -24,7 +25,9 @@ import {
     IconAlertTriangle as AlertTriangle,
     IconTrophy as Trophy,
     IconMapPin as MapPin,
-    IconUsers as Users
+    IconUsers as Users,
+    IconPhoto as Photo,
+    IconFolder as Folder
 } from '@tabler/icons-react';
 import './EventManagementPage.css';
 
@@ -43,6 +46,10 @@ const EventManagementPage = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [error, setError] = useState(null);
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+    const [eventToDelete, setEventToDelete] = useState(null);
+    const [deleteGalleryToo, setDeleteGalleryToo] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     // Pagination settings
     const eventsPerPage = 4;
@@ -73,9 +80,11 @@ const EventManagementPage = () => {
                     status: data.status || 'upcoming',
                     notes: data.notes || '',
                     participatingTeams: data.participatingTeams || [],
+                    hasGalleryFolder: data.hasGalleryFolder || false,
+                    galleryFolderPath: data.galleryFolderPath || null,
                     createdAt: data.createdAt,
                     updatedAt: data.updatedAt,
-                    // Use uploaded image or default image
+                    // Store the image URL for cleanup
                     image: data.image || 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400'
                 });
             });
@@ -157,9 +166,9 @@ const EventManagementPage = () => {
         setLocationFilter('all');
     };
 
-    // Handle view event
+    // Handle view event - navigate to view page
     const handleViewEvent = (event) => {
-        setSelectedEvent(event);
+        navigate(`/admin/events/view/${event.id}`);
     };
 
     // Handle close event details
@@ -177,19 +186,210 @@ const EventManagementPage = () => {
         navigate(`/admin/events/edit/${eventId}`);
     };
 
-    // Handle delete event
-    const handleDeleteEvent = async (eventId) => {
-        if (window.confirm('Are you sure you want to delete this event?')) {
-            try {
-                await deleteDoc(doc(db, 'events', eventId));
-                // Remove from local state
-                setEvents(events.filter(event => event.id !== eventId));
-                console.log('Event deleted successfully');
-            } catch (error) {
-                console.error('Error deleting event:', error);
-                alert('Failed to delete event. Please try again.');
-            }
+    // Handle view gallery
+    const handleViewGallery = (event) => {
+        if (event.hasGalleryFolder) {
+            navigate(`/gallery/${event.id}`);
+        } else {
+            alert('This event does not have a gallery folder.');
         }
+    };
+
+    // Check if gallery folder exists and has photos
+    const checkGalleryExists = async (eventName) => {
+        try {
+            const folderRef = ref(storage, `gallery/events/${eventName}`);
+            const result = await listAll(folderRef);
+            return result.items.length > 0; // Returns true if folder has any files
+        } catch (error) {
+            console.log(`Gallery folder for ${eventName} does not exist or is empty`);
+            return false;
+        }
+    };
+
+    /**
+     * Delete event image from Firebase Storage
+     * @param {string} imageUrl - The full URL of the image to delete
+     */
+    const deleteEventImage = async (imageUrl) => {
+        try {
+            if (!imageUrl || imageUrl.includes('unsplash.com')) {
+                // Skip deletion for default images or empty URLs
+                return true;
+            }
+
+            // Extract the storage path from the URL
+            const url = new URL(imageUrl);
+            const pathMatch = url.pathname.match(/\/o\/(.+)$/);
+
+            if (pathMatch) {
+                const encodedPath = pathMatch[1];
+                const decodedPath = decodeURIComponent(encodedPath);
+
+                console.log('Deleting event image from storage:', decodedPath);
+                const imageRef = ref(storage, decodedPath);
+                await deleteObject(imageRef);
+                console.log('Event image deleted successfully from storage');
+                return true;
+            } else {
+                console.warn('Could not extract storage path from URL:', imageUrl);
+                return false;
+            }
+        } catch (error) {
+            console.error('Error deleting event image from storage:', error);
+            return false;
+        }
+    };
+
+    /**
+     * Delete gallery folder and all its contents
+     * @param {string} eventName - Name of the event
+     * @param {string} galleryFolderPath - Optional specific path to gallery folder
+     */
+    const deleteGalleryFolder = async (eventName, galleryFolderPath = null) => {
+        try {
+            // Use provided path or construct default path
+            const folderPath = galleryFolderPath || `gallery/events/${eventName}`;
+            console.log('Deleting gallery folder:', folderPath);
+
+            const folderRef = ref(storage, folderPath);
+            const result = await listAll(folderRef);
+
+            if (result.items.length === 0) {
+                console.log('Gallery folder is empty or does not exist');
+                return true;
+            }
+
+            // Delete all files in the folder
+            const deletePromises = result.items.map(itemRef => {
+                console.log('Deleting file:', itemRef.fullPath);
+                return deleteObject(itemRef);
+            });
+
+            await Promise.all(deletePromises);
+
+            console.log(`Gallery folder deleted successfully. Removed ${result.items.length} files.`);
+            return true;
+        } catch (error) {
+            console.error(`Error deleting gallery folder for ${eventName}:`, error);
+            return false;
+        }
+    };
+
+    // Handle delete event - show modal
+    const handleDeleteEvent = (event) => {
+        setEventToDelete(event);
+        setDeleteGalleryToo(false);
+        setDeleteModalOpen(true);
+    };
+
+    /**
+     * Complete event deletion with proper cleanup
+     * @param {Object} eventData - The event object from Firestore
+     * @param {string} eventId - The document ID of the event
+     * @param {boolean} includeGallery - Whether to delete gallery folder
+     */
+    const deleteEventWithCleanup = async (eventData, eventId, includeGallery = false) => {
+        try {
+            console.log('Starting event deletion with cleanup for:', eventData.name);
+            const cleanupResults = {
+                eventImage: false,
+                gallery: false,
+                firestoreDoc: false
+            };
+
+            // Step 1: Delete the event image if it exists and is not a default image
+            if (eventData.image && !eventData.image.includes('unsplash.com')) {
+                console.log('Deleting event image...');
+                cleanupResults.eventImage = await deleteEventImage(eventData.image);
+                if (!cleanupResults.eventImage) {
+                    console.warn('Failed to delete event image, but continuing with event deletion');
+                }
+            } else {
+                cleanupResults.eventImage = true; // No image to delete or default image
+            }
+
+            // Step 2: Delete the gallery folder if requested and it exists
+            if (includeGallery && (eventData.hasGalleryFolder || eventData.galleryFolderPath)) {
+                console.log('Deleting gallery folder...');
+                cleanupResults.gallery = await deleteGalleryFolder(
+                    eventData.name,
+                    eventData.galleryFolderPath
+                );
+                if (!cleanupResults.gallery) {
+                    console.warn('Failed to delete gallery folder, but continuing with event deletion');
+                }
+            } else {
+                cleanupResults.gallery = true; // No gallery to delete or not requested
+            }
+
+            // Step 3: Delete the event document from Firestore
+            console.log('Deleting event document from Firestore...');
+            await deleteDoc(doc(db, 'events', eventId));
+            cleanupResults.firestoreDoc = true;
+
+            console.log('Event deletion completed successfully', cleanupResults);
+
+            // Generate success message based on what was deleted
+            let message = `Event "${eventData.name}" deleted successfully`;
+            if (includeGallery && eventData.hasGalleryFolder) {
+                message += ' (including gallery photos)';
+            }
+
+            return {
+                success: true,
+                message: message,
+                cleanupResults: cleanupResults
+            };
+
+        } catch (error) {
+            console.error('Error during event deletion:', error);
+            return {
+                success: false,
+                message: 'Failed to delete event: ' + error.message,
+                cleanupResults: null
+            };
+        }
+    };
+
+    // Confirm delete event
+    const confirmDeleteEvent = async () => {
+        if (!eventToDelete) return;
+
+        setIsDeleting(true);
+
+        try {
+            const result = await deleteEventWithCleanup(
+                eventToDelete,
+                eventToDelete.id,
+                deleteGalleryToo
+            );
+
+            if (result.success) {
+                // Remove from local state
+                setEvents(events.filter(event => event.id !== eventToDelete.id));
+                console.log('Event deleted successfully');
+                alert(result.message);
+            } else {
+                alert(result.message);
+            }
+
+        } catch (error) {
+            console.error('Error deleting event:', error);
+            alert('Failed to delete event. Please try again.');
+        } finally {
+            setIsDeleting(false);
+            setDeleteModalOpen(false);
+            setEventToDelete(null);
+            setDeleteGalleryToo(false);
+        }
+    };
+
+    // Cancel delete
+    const cancelDelete = () => {
+        setDeleteModalOpen(false);
+        setEventToDelete(null);
+        setDeleteGalleryToo(false);
     };
 
     // Handle refresh
@@ -438,7 +638,12 @@ const EventManagementPage = () => {
                                             <div className="event-info">
                                                 <img src={event.image} alt={event.name} className="event-image" />
                                                 <div className="event-details">
-                                                    <div className="event-name">{event.name}</div>
+                                                    <div className="event-name">
+                                                        {event.name}
+                                                        {event.hasGalleryFolder && (
+                                                            <Photo size={14} className="gallery-indicator" title="Has Gallery" />
+                                                        )}
+                                                    </div>
                                                     <div className="event-description">
                                                         {event.description.length > 50
                                                             ? `${event.description.substring(0, 50)}...`
@@ -474,9 +679,18 @@ const EventManagementPage = () => {
                                                 >
                                                     <Edit size={16} />
                                                 </button>
+                                                {event.hasGalleryFolder && (
+                                                    <button
+                                                        className="btn-action gallery"
+                                                        onClick={() => handleViewGallery(event)}
+                                                        title="View Gallery"
+                                                    >
+                                                        <Photo size={16} />
+                                                    </button>
+                                                )}
                                                 <button
                                                     className="btn-action delete"
-                                                    onClick={() => handleDeleteEvent(event.id)}
+                                                    onClick={() => handleDeleteEvent(event)}
                                                     title="Delete Event"
                                                 >
                                                     <Trash2 size={16} />
@@ -578,6 +792,125 @@ const EventManagementPage = () => {
                                             <p>{selectedEvent.participatingTeams.length} teams registered</p>
                                         </div>
                                     )}
+                                    {selectedEvent.hasGalleryFolder && (
+                                        <div className="event-detail-item">
+                                            <strong>Gallery:</strong>
+                                            <div className="gallery-actions">
+                                                <button
+                                                    className="btn-action gallery"
+                                                    onClick={() => handleViewGallery(selectedEvent)}
+                                                >
+                                                    <Photo size={16} />
+                                                    View Gallery
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Delete Confirmation Modal */}
+                {deleteModalOpen && eventToDelete && (
+                    <div className="modal-overlay" onClick={cancelDelete}>
+                        <div className="modal-content delete-modal" onClick={(e) => e.stopPropagation()}>
+                            <div className="modal-header">
+                                <h2>Delete Event</h2>
+                                <button className="modal-close" onClick={cancelDelete}>
+                                    <X size={20} />
+                                </button>
+                            </div>
+                            <div className="modal-body">
+                                <div className="delete-warning">
+                                    <AlertTriangle className="warning-icon" size={48} />
+                                    <h3>Are you sure you want to delete this event?</h3>
+                                    <p>
+                                        You are about to delete "<strong>{eventToDelete.name}</strong>".
+                                        This action cannot be undone.
+                                    </p>
+
+                                    {/* Show what will be deleted */}
+                                    <div className="deletion-summary">
+                                        <h4>The following will be permanently deleted:</h4>
+                                        <ul>
+                                            <li>✅ Event information and details</li>
+                                            {eventToDelete.image && !eventToDelete.image.includes('unsplash.com') && (
+                                                <li>🖼️ Event cover image</li>
+                                            )}
+                                            {deleteGalleryToo && eventToDelete.hasGalleryFolder && (
+                                                <li>📷 All photos in the event gallery</li>
+                                            )}
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                {eventToDelete.hasGalleryFolder && (
+                                    <div className="gallery-delete-section">
+                                        <div className="gallery-warning">
+                                            <Folder className="folder-icon" size={24} />
+                                            <div className="gallery-warning-content">
+                                                <h4>Gallery Folder Detected</h4>
+                                                <p>This event has an associated photo gallery. What would you like to do with the photos?</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="delete-options">
+                                            <label className="delete-option">
+                                                <input
+                                                    type="radio"
+                                                    name="galleryAction"
+                                                    checked={!deleteGalleryToo}
+                                                    onChange={() => setDeleteGalleryToo(false)}
+                                                />
+                                                <div className="option-content">
+                                                    <strong>Keep Gallery Photos</strong>
+                                                    <p>Delete only the event, preserve all photos in the gallery</p>
+                                                </div>
+                                            </label>
+
+                                            <label className="delete-option danger">
+                                                <input
+                                                    type="radio"
+                                                    name="galleryAction"
+                                                    checked={deleteGalleryToo}
+                                                    onChange={() => setDeleteGalleryToo(true)}
+                                                />
+                                                <div className="option-content">
+                                                    <strong>Delete Gallery Too</strong>
+                                                    <p>Delete the event AND permanently remove all photos from the gallery</p>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div className="modal-actions">
+                                    <button
+                                        className="btn-secondary"
+                                        onClick={cancelDelete}
+                                        disabled={isDeleting}
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        className="btn-danger"
+                                        onClick={confirmDeleteEvent}
+                                        disabled={isDeleting}
+                                    >
+                                        {isDeleting ? (
+                                            <>
+                                                <Clock className="loading-spinner" size={16} />
+                                                Deleting...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Trash2 size={16} />
+                                                {deleteGalleryToo ? 'Delete Event & Gallery' : 'Delete Event Only'}
+                                            </>
+                                        )}
+                                    </button>
                                 </div>
                             </div>
                         </div>

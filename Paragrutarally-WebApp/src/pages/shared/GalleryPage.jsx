@@ -1,82 +1,608 @@
 // src/pages/shared/GalleryPage.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { collection, getDocs, query, orderBy, doc, deleteDoc } from 'firebase/firestore';
+import { ref, listAll, getDownloadURL, deleteObject, uploadBytes } from 'firebase/storage';
+import { db, storage } from '../../firebase/config';
 import Dashboard from '../../components/layout/Dashboard';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useStorage } from '../../hooks/useStorage';
+import {
+    IconPhoto as Photo,
+    IconUpload as Upload,
+    IconDownload as Download,
+    IconTrash as Trash,
+    IconEye as Eye,
+    IconX as X,
+    IconChevronLeft as ChevronLeft,
+    IconChevronRight as ChevronRight,
+    IconGrid3x3 as Grid,
+    IconGridDots as GridLarge,
+    IconGridPattern as GridSmall,
+    IconFolderOpen as Folder,
+    IconRefresh as Refresh,
+    IconPlus as Plus,
+    IconHome as Home
+} from '@tabler/icons-react';
 import './GalleryPage.css';
 
 const GalleryPage = () => {
     const { userRole } = useAuth();
-    const { isDarkMode } = useTheme(); // Fixed: was isDark, should be isDarkMode
+    const { isDarkMode } = useTheme();
+    const { eventId } = useParams(); // For event-specific galleries
+    const navigate = useNavigate();
+
+    // Gallery state
+    const [albums, setAlbums] = useState([]);
+    const [photos, setPhotos] = useState([]);
+    const [filteredPhotos, setFilteredPhotos] = useState([]);
     const [activeAlbum, setActiveAlbum] = useState('all');
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-    // Sample gallery data - in a real application, this would come from your database
-    const albums = [
-        { id: 'all', name: 'All Photos' },
-        { id: 'events', name: 'Events' },
-        { id: 'races', name: 'Races' },
-        { id: 'teams', name: 'Teams' },
-        { id: 'awards', name: 'Award Ceremonies' }
-    ];
+    // UI state
+    const [viewSize, setViewSize] = useState('medium'); // small, medium, large
+    const [selectedPhoto, setSelectedPhoto] = useState(null);
+    const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+    const [isUploading, setIsUploading] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState(0);
 
-    const photos = [
-        { id: 1, albumId: 'races', title: 'Summer Race 2025', thumbnailUrl: '/api/placeholder/300/200', date: 'May 20, 2025' },
-        { id: 2, albumId: 'races', title: 'Beach Racing Day', thumbnailUrl: '/api/placeholder/300/200', date: 'June 15, 2025' },
-        { id: 3, albumId: 'teams', title: 'Team Red', thumbnailUrl: '/api/placeholder/300/200', date: 'April 5, 2025' },
-        { id: 4, albumId: 'teams', title: 'Team Blue', thumbnailUrl: '/api/placeholder/300/200', date: 'April 5, 2025' },
-        { id: 5, albumId: 'awards', title: 'Awards Ceremony', thumbnailUrl: '/api/placeholder/300/200', date: 'March 12, 2025' },
-        { id: 6, albumId: 'events', title: 'Charity Gala', thumbnailUrl: '/api/placeholder/300/200', date: 'February 28, 2025' },
-        { id: 7, albumId: 'events', title: 'Registration Day', thumbnailUrl: '/api/placeholder/300/200', date: 'January 15, 2025' },
-        { id: 8, albumId: 'races', title: 'Winter Challenge', thumbnailUrl: '/api/placeholder/300/200', date: 'January 25, 2025' }
-    ];
+    // Storage hook for uploads
+    const { startUpload, progress, error: uploadError, url, isComplete, resetUpload } = useStorage('gallery');
 
-    // Filter photos based on active album
-    const filteredPhotos = activeAlbum === 'all'
-        ? photos
-        : photos.filter(photo => photo.albumId === activeAlbum);
+    // Load albums and photos on mount
+    useEffect(() => {
+        loadGalleryData();
+    }, [eventId]);
+
+    // Filter photos when active album changes
+    useEffect(() => {
+        filterPhotos();
+    }, [activeAlbum, photos]);
+
+    const loadGalleryData = async () => {
+        setIsLoading(true);
+        setError(null);
+
+        try {
+            // Load albums (events + general)
+            await loadAlbums();
+
+            // Load photos
+            await loadPhotos();
+
+        } catch (err) {
+            console.error('Error loading gallery data:', err);
+            setError('Failed to load gallery. Please try again.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const loadAlbums = async () => {
+        try {
+            const albumsList = [
+                { id: 'all', name: 'All Photos', type: 'all' },
+                { id: 'general', name: 'General Photos', type: 'folder' }
+            ];
+
+            // Load events from Firestore to create event albums
+            const eventsQuery = query(collection(db, 'events'), orderBy('createdAt', 'desc'));
+            const eventsSnapshot = await getDocs(eventsQuery);
+
+            eventsSnapshot.forEach((doc) => {
+                const eventData = doc.data();
+                albumsList.push({
+                    id: `event_${doc.id}`,
+                    name: `${eventData.name} Album`,
+                    type: 'event',
+                    eventId: doc.id,
+                    eventName: eventData.name
+                });
+            });
+
+            setAlbums(albumsList);
+
+            // If we're viewing a specific event gallery, set it as active
+            if (eventId) {
+                setActiveAlbum(`event_${eventId}`);
+            }
+        } catch (err) {
+            console.error('Error loading albums:', err);
+            throw err;
+        }
+    };
+
+    const loadPhotos = async () => {
+        try {
+            const allPhotos = [];
+
+            // Load photos from general folder
+            await loadPhotosFromFolder('gallery/general', 'general', allPhotos);
+
+            // Load photos from each event folder
+            const eventsQuery = query(collection(db, 'events'));
+            const eventsSnapshot = await getDocs(eventsQuery);
+
+            for (const eventDoc of eventsSnapshot.docs) {
+                const eventData = eventDoc.data();
+                await loadPhotosFromFolder(
+                    `gallery/events/${eventData.name}`,
+                    `event_${eventDoc.id}`,
+                    allPhotos,
+                    eventData.name
+                );
+            }
+
+            setPhotos(allPhotos);
+        } catch (err) {
+            console.error('Error loading photos:', err);
+            throw err;
+        }
+    };
+
+    const loadPhotosFromFolder = async (folderPath, albumId, photosArray, eventName = null) => {
+        try {
+            const folderRef = ref(storage, folderPath);
+            const result = await listAll(folderRef);
+
+            for (const itemRef of result.items) {
+                try {
+                    const url = await getDownloadURL(itemRef);
+                    const metadata = await itemRef.getMetadata();
+
+                    photosArray.push({
+                        id: `${albumId}_${itemRef.name}`,
+                        name: itemRef.name,
+                        url: url,
+                        albumId: albumId,
+                        eventName: eventName,
+                        uploadDate: metadata.timeCreated,
+                        size: metadata.size,
+                        fullPath: itemRef.fullPath,
+                        storageRef: itemRef
+                    });
+                } catch (urlError) {
+                    console.warn(`Failed to get URL for ${itemRef.name}:`, urlError);
+                }
+            }
+        } catch (err) {
+            // Folder might not exist yet, which is okay
+            console.log(`Folder ${folderPath} not found or empty`);
+        }
+    };
+
+    const filterPhotos = () => {
+        if (activeAlbum === 'all') {
+            setFilteredPhotos(photos);
+        } else {
+            setFilteredPhotos(photos.filter(photo => photo.albumId === activeAlbum));
+        }
+    };
+
+    const handleAlbumChange = (albumId) => {
+        setActiveAlbum(albumId);
+        setSelectedPhoto(null);
+    };
+
+    const handlePhotoClick = (photo, index) => {
+        setSelectedPhoto(photo);
+        setCurrentPhotoIndex(index);
+    };
+
+    const handleCloseModal = () => {
+        setSelectedPhoto(null);
+    };
+
+    const handlePreviousPhoto = () => {
+        const prevIndex = currentPhotoIndex > 0 ? currentPhotoIndex - 1 : filteredPhotos.length - 1;
+        setCurrentPhotoIndex(prevIndex);
+        setSelectedPhoto(filteredPhotos[prevIndex]);
+    };
+
+    const handleNextPhoto = () => {
+        const nextIndex = currentPhotoIndex < filteredPhotos.length - 1 ? currentPhotoIndex + 1 : 0;
+        setCurrentPhotoIndex(nextIndex);
+        setSelectedPhoto(filteredPhotos[nextIndex]);
+    };
+
+    const handleDownload = async (photo) => {
+        try {
+            const response = await fetch(photo.url);
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = photo.name;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error('Error downloading photo:', err);
+            alert('Failed to download photo. Please try again.');
+        }
+    };
+
+    const handleDeletePhoto = async (photo) => {
+        if (!canDelete()) {
+            alert('You do not have permission to delete photos.');
+            return;
+        }
+
+        if (!window.confirm('Are you sure you want to delete this photo? This action cannot be undone.')) {
+            return;
+        }
+
+        try {
+            // Delete from Firebase Storage
+            await deleteObject(photo.storageRef);
+
+            // Remove from local state
+            setPhotos(photos.filter(p => p.id !== photo.id));
+
+            // Close modal if this photo was selected
+            if (selectedPhoto && selectedPhoto.id === photo.id) {
+                handleCloseModal();
+            }
+
+            alert('Photo deleted successfully.');
+        } catch (err) {
+            console.error('Error deleting photo:', err);
+            alert('Failed to delete photo. Please try again.');
+        }
+    };
+
+    const handleFileUpload = async (event) => {
+        const files = Array.from(event.target.files);
+        if (files.length === 0) return;
+
+        if (!canUpload()) {
+            alert('You do not have permission to upload photos.');
+            return;
+        }
+
+        setIsUploading(true);
+
+        try {
+            for (const file of files) {
+                // Determine upload path based on active album
+                let uploadPath = 'gallery/general'; // default
+
+                if (activeAlbum.startsWith('event_')) {
+                    const album = albums.find(a => a.id === activeAlbum);
+                    if (album && album.eventName) {
+                        uploadPath = `gallery/events/${album.eventName}`;
+                    }
+                } else if (activeAlbum === 'general') {
+                    uploadPath = 'gallery/general';
+                }
+
+                // Create unique filename
+                const timestamp = Date.now();
+                const fileName = `${timestamp}_${file.name}`;
+                const storageRef = ref(storage, `${uploadPath}/${fileName}`);
+
+                // Upload file
+                await uploadBytes(storageRef, file);
+                console.log(`Uploaded ${fileName} to ${uploadPath}`);
+            }
+
+            // Reload photos after upload
+            await loadPhotos();
+            alert(`Successfully uploaded ${files.length} photo(s).`);
+
+        } catch (err) {
+            console.error('Error uploading photos:', err);
+            alert('Failed to upload photos. Please try again.');
+        } finally {
+            setIsUploading(false);
+        }
+    };
+
+    // Permission checks
+    const canUpload = () => {
+        return ['admin', 'host', 'instructor'].includes(userRole);
+    };
+
+    const canDelete = () => {
+        return userRole === 'admin';
+    };
+
+    const canView = () => {
+        return ['admin', 'host', 'instructor', 'parent'].includes(userRole);
+    };
+
+    // Get grid class based on view size
+    const getGridClass = () => {
+        switch (viewSize) {
+            case 'small': return 'photo-grid-small';
+            case 'large': return 'photo-grid-large';
+            default: return 'photo-grid-medium';
+        }
+    };
+
+    // Format file size
+    const formatFileSize = (bytes) => {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    };
+
+    if (!canView()) {
+        return (
+            <Dashboard requiredRole={userRole}>
+                <div className="gallery-page">
+                    <div className="error-message">
+                        <h2>Access Denied</h2>
+                        <p>You do not have permission to view the gallery.</p>
+                    </div>
+                </div>
+            </Dashboard>
+        );
+    }
 
     return (
         <Dashboard requiredRole={userRole}>
             <div className={`gallery-page ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
-                <h1>Gallery</h1>
+                {/* Header */}
+                <div className="gallery-header">
+                    <div className="gallery-title-section">
+                        <h1>
+                            <Photo size={32} className="page-title-icon" />
+                            Photo Gallery
+                        </h1>
+                        {eventId && (
+                            <button
+                                onClick={() => navigate('/gallery')}
+                                className="back-to-main-gallery"
+                            >
+                                <Home size={16} />
+                                Back to Main Gallery
+                            </button>
+                        )}
+                    </div>
 
+                    <div className="gallery-actions">
+                        <button
+                            onClick={loadGalleryData}
+                            className="action-button refresh-button"
+                            disabled={isLoading}
+                        >
+                            <Refresh size={16} />
+                            Refresh
+                        </button>
+
+                        {canUpload() && (
+                            <>
+                                <input
+                                    type="file"
+                                    id="photo-upload"
+                                    multiple
+                                    accept="image/*"
+                                    onChange={handleFileUpload}
+                                    style={{ display: 'none' }}
+                                />
+                                <button
+                                    onClick={() => document.getElementById('photo-upload').click()}
+                                    className="primary-button upload-button"
+                                    disabled={isUploading}
+                                >
+                                    {isUploading ? (
+                                        <>
+                                            <div className="upload-spinner" />
+                                            Uploading...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Upload size={16} />
+                                            Upload Photos
+                                        </>
+                                    )}
+                                </button>
+                            </>
+                        )}
+                    </div>
+                </div>
+
+                {error && (
+                    <div className="error-banner">
+                        <p>{error}</p>
+                        <button onClick={loadGalleryData}>Try Again</button>
+                    </div>
+                )}
+
+                {/* Controls */}
                 <div className="gallery-controls">
+                    {/* Album Selector */}
                     <div className="album-selector">
                         {albums.map(album => (
                             <button
                                 key={album.id}
                                 className={`album-button ${activeAlbum === album.id ? 'active' : ''}`}
-                                onClick={() => setActiveAlbum(album.id)}
+                                onClick={() => handleAlbumChange(album.id)}
                             >
+                                {album.type === 'folder' && <Folder size={16} />}
+                                {album.type === 'event' && <Photo size={16} />}
                                 {album.name}
+                                {album.type === 'all' && (
+                                    <span className="photo-count">({photos.length})</span>
+                                )}
+                                {album.type !== 'all' && (
+                                    <span className="photo-count">
+                                        ({photos.filter(p => p.albumId === album.id).length})
+                                    </span>
+                                )}
                             </button>
                         ))}
                     </div>
 
-                    <div className="gallery-actions">
-                        <button className="primary-button">
-                            <span className="icon">+</span> Upload Photos
-                        </button>
+                    {/* View Size Controls */}
+                    <div className="view-controls">
+                        <div className="size-controls">
+                            <button
+                                className={`size-button ${viewSize === 'small' ? 'active' : ''}`}
+                                onClick={() => setViewSize('small')}
+                                title="Small view"
+                            >
+                                <GridSmall size={18} />
+                            </button>
+                            <button
+                                className={`size-button ${viewSize === 'medium' ? 'active' : ''}`}
+                                onClick={() => setViewSize('medium')}
+                                title="Medium view"
+                            >
+                                <Grid size={18} />
+                            </button>
+                            <button
+                                className={`size-button ${viewSize === 'large' ? 'active' : ''}`}
+                                onClick={() => setViewSize('large')}
+                                title="Large view"
+                            >
+                                <GridLarge size={18} />
+                            </button>
+                        </div>
                     </div>
                 </div>
 
-                {filteredPhotos.length > 0 ? (
-                    <div className="photo-grid">
-                        {filteredPhotos.map(photo => (
-                            <div className="photo-card" key={photo.id}>
-                                <div className="photo-thumbnail">
-                                    <img src={photo.thumbnailUrl} alt={photo.title} />
+                {/* Photos Grid */}
+                {isLoading ? (
+                    <div className="loading-gallery">
+                        <div className="loading-spinner" />
+                        <p>Loading photos...</p>
+                    </div>
+                ) : filteredPhotos.length > 0 ? (
+                    <div className={`photo-grid ${getGridClass()}`}>
+                        {filteredPhotos.map((photo, index) => (
+                            <div key={photo.id} className="photo-card">
+                                <div className="photo-thumbnail" onClick={() => handlePhotoClick(photo, index)}>
+                                    <img src={photo.url} alt={photo.name} />
+                                    <div className="photo-overlay">
+                                        <Eye size={24} />
+                                    </div>
                                 </div>
                                 <div className="photo-info">
-                                    <h3>{photo.title}</h3>
-                                    <p className="photo-date">{photo.date}</p>
+                                    <h3>{photo.name}</h3>
+                                    {photo.eventName && (
+                                        <p className="photo-event">From: {photo.eventName}</p>
+                                    )}
+                                    <p className="photo-date">
+                                        {new Date(photo.uploadDate).toLocaleDateString()}
+                                    </p>
+                                    <div className="photo-actions">
+                                        <button
+                                            onClick={() => handleDownload(photo)}
+                                            className="action-button download-button"
+                                            title="Download"
+                                        >
+                                            <Download size={14} />
+                                        </button>
+                                        {canDelete() && (
+                                            <button
+                                                onClick={() => handleDeletePhoto(photo)}
+                                                className="action-button delete-button"
+                                                title="Delete"
+                                            >
+                                                <Trash size={14} />
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         ))}
                     </div>
                 ) : (
                     <div className="empty-gallery">
-                        <p>No photos found in this album.</p>
+                        <Photo size={64} className="empty-icon" />
+                        <h3>No photos found</h3>
+                        <p>
+                            {activeAlbum === 'all'
+                                ? 'No photos have been uploaded yet.'
+                                : 'This album is empty.'
+                            }
+                        </p>
+                        {canUpload() && (
+                            <button
+                                onClick={() => document.getElementById('photo-upload').click()}
+                                className="primary-button"
+                            >
+                                <Upload size={16} />
+                                Upload First Photo
+                            </button>
+                        )}
+                    </div>
+                )}
+
+                {/* Photo Modal */}
+                {selectedPhoto && (
+                    <div className="photo-modal-overlay" onClick={handleCloseModal}>
+                        <div className="photo-modal" onClick={(e) => e.stopPropagation()}>
+                            <button className="modal-close" onClick={handleCloseModal}>
+                                <X size={24} />
+                            </button>
+
+                            <div className="modal-navigation">
+                                <button
+                                    className="nav-button prev-button"
+                                    onClick={handlePreviousPhoto}
+                                    disabled={filteredPhotos.length <= 1}
+                                >
+                                    <ChevronLeft size={24} />
+                                </button>
+
+                                <div className="modal-image-container">
+                                    <img src={selectedPhoto.url} alt={selectedPhoto.name} />
+                                </div>
+
+                                <button
+                                    className="nav-button next-button"
+                                    onClick={handleNextPhoto}
+                                    disabled={filteredPhotos.length <= 1}
+                                >
+                                    <ChevronRight size={24} />
+                                </button>
+                            </div>
+
+                            <div className="modal-info">
+                                <div className="modal-details">
+                                    <h3>{selectedPhoto.name}</h3>
+                                    {selectedPhoto.eventName && (
+                                        <p className="modal-event">From: {selectedPhoto.eventName}</p>
+                                    )}
+                                    <p className="modal-date">
+                                        Uploaded: {new Date(selectedPhoto.uploadDate).toLocaleDateString()}
+                                    </p>
+                                    <p className="modal-size">
+                                        Size: {formatFileSize(selectedPhoto.size)}
+                                    </p>
+                                    <p className="modal-position">
+                                        {currentPhotoIndex + 1} of {filteredPhotos.length}
+                                    </p>
+                                </div>
+
+                                <div className="modal-actions">
+                                    <button
+                                        onClick={() => handleDownload(selectedPhoto)}
+                                        className="action-button download-button"
+                                    >
+                                        <Download size={16} />
+                                        Download
+                                    </button>
+                                    {canDelete() && (
+                                        <button
+                                            onClick={() => handleDeletePhoto(selectedPhoto)}
+                                            className="action-button delete-button"
+                                        >
+                                            <Trash size={16} />
+                                            Delete
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 )}
             </div>

@@ -1,0 +1,407 @@
+/* src/components/modals/TeamAssignmentModal.css */
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.team-assignment-modal {
+    background: var(--bg-primary);
+    border-radius: 16px;
+    max-width: 800px;
+    width: 90vw;
+    max-height: 85vh;
+    overflow: hidden;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-header {
+    padding: 24px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+}
+
+.modal-header h2 {
+    margin: 0;
+    color: var(--text-primary);
+    font-size: 20px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.modal-close:hover {
+    background: var(--bg-quaternary);
+    color: var(--text-primary);
+    transform: scale(1.1);
+}
+
+.modal-body {
+    padding: 24px;
+    flex: 1;
+    overflow-y: auto;
+}
+
+.error-message {
+    background: var(--error-light);
+    border: 1px solid var(--error-color);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.error-message p {
+    color: var(--error-color);
+    margin: 0 0 12px 0;
+    font-weight: 500;
+}
+
+.retry-button {
+    background: var(--error-color);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.retry-button:hover {
+    background: var(--error-hover);
+    transform: translateY(-1px);
+}
+
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    color: var(--text-muted);
+}
+
+.loading-spinner {
+    animation: spin 1s linear infinite;
+    margin-bottom: 16px;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-muted);
+}
+
+.empty-icon {
+    margin-bottom: 16px;
+    opacity: 0.6;
+}
+
+.empty-state h3 {
+    color: var(--text-primary);
+    margin-bottom: 8px;
+    font-size: 18px;
+}
+
+.empty-state p {
+    margin: 0;
+    line-height: 1.5;
+}
+
+.modal-instructions {
+    margin-bottom: 24px;
+    padding: 16px;
+    background: var(--bg-tertiary);
+    border-radius: 8px;
+    border-left: 4px solid var(--accent-color);
+}
+
+.modal-instructions p {
+    margin: 0 0 12px 0;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.selection-count {
+    color: var(--accent-color);
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.teams-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 4px;
+}
+
+.team-card {
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.team-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px var(--shadow-color);
+    border-color: var(--accent-color);
+}
+
+.team-card.selected {
+    border-color: var(--success-color);
+    background: linear-gradient(135deg, var(--success-light) 0%, rgba(16, 185, 129, 0.1) 100%);
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+}
+
+.team-card.selected:hover {
+    border-color: var(--success-hover);
+    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+}
+
+.selection-indicator {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: var(--success-color);
+    color: white;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+}
+
+.team-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.team-icon {
+    color: var(--accent-color);
+    flex-shrink: 0;
+}
+
+.team-card-header h3 {
+    margin: 0;
+    color: var(--text-primary);
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.team-details {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.team-leader,
+.team-member-count {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.team-leader svg,
+.team-member-count svg {
+    color: var(--text-muted);
+    flex-shrink: 0;
+}
+
+.team-description {
+    color: var(--text-muted);
+    font-size: 13px;
+    line-height: 1.4;
+    margin-top: 4px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.modal-actions {
+    padding: 20px 24px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    background: var(--bg-secondary);
+}
+
+.btn-cancel {
+    padding: 10px 20px;
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 14px;
+}
+
+.btn-cancel:hover {
+    background: var(--bg-quaternary);
+    border-color: var(--text-muted);
+    color: var(--text-primary);
+}
+
+.btn-accept {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, var(--success-color) 0%, var(--success-hover) 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 14px;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.btn-accept:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.btn-accept:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Dark mode adjustments */
+[data-theme="dark"] .team-assignment-modal,
+.dark-mode .team-assignment-modal {
+    background: var(--bg-secondary);
+}
+
+[data-theme="dark"] .modal-header,
+.dark-mode .modal-header {
+    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-quaternary) 100%);
+}
+
+[data-theme="dark"] .team-card.selected,
+.dark-mode .team-card.selected {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.1) 100%);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .team-assignment-modal {
+        width: 95vw;
+        max-height: 90vh;
+    }
+
+    .modal-header {
+        padding: 20px;
+    }
+
+    .modal-header h2 {
+        font-size: 18px;
+    }
+
+    .modal-body {
+        padding: 20px;
+    }
+
+    .teams-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .modal-actions {
+        padding: 16px 20px;
+        flex-direction: column;
+    }
+
+    .btn-cancel,
+    .btn-accept {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .team-assignment-modal {
+        width: 100vw;
+        height: 100vh;
+        max-height: 100vh;
+        border-radius: 0;
+    }
+
+    .modal-header {
+        padding: 16px;
+    }
+
+    .modal-body {
+        padding: 16px;
+    }
+
+    .team-card {
+        padding: 12px;
+    }
+
+    .team-card-header h3 {
+        font-size: 15px;
+    }
+
+    .team-leader,
+    .team-member-count {
+        font-size: 13px;
+    }
+
+    .team-description {
+        font-size: 12px;
+    }
+}
