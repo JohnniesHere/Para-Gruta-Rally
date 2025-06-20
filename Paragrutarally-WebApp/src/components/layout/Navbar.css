@@ -96,6 +96,66 @@
     margin-left: 10px;
 }
 
+/* ===============================================
+   RTL SUPPORT - NEW ADDITIONS
+   =============================================== */
+
+/* RTL Support for Navbar */
+.navbar.rtl {
+    direction: rtl;
+    /* Keep the same justify-content: space-between to maintain proper spacing */
+}
+
+.navbar.rtl .logo {
+    /* Logo will naturally be on the right in RTL due to direction: rtl */
+    /* Remove order changes, let flexbox handle it naturally */
+    /* Ensure logo stays at the far right */
+    margin-left: auto;
+    margin-right: 0;
+}
+
+.navbar.rtl .nav-links {
+    /* Nav-links will naturally be on the left in RTL due to direction: rtl */
+    /* Reset margins and let RTL handle positioning */
+    margin-left: 0;
+    margin-right: 0;
+    padding-left: 10px;
+    padding-right: 0;
+    /* Maintain the same order as LTR */
+    flex-direction: row;
+}
+
+.navbar.rtl .nav-links a,
+.navbar.rtl .sign-out-btn {
+    /* Keep proper text alignment for RTL */
+    text-align: right;
+}
+
+.navbar.rtl .logo a {
+    /* Keep normal flex direction since JSX handles the order */
+    flex-direction: row;
+    /* Ensure proper gap is maintained */
+    gap: 12px;
+}
+
+.navbar.rtl .logo img {
+    /* Adjust logo image spacing for RTL - no margin needed since flex-direction handles it */
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.navbar.rtl .sign-out-btn {
+    /* Adjust sign out button margin for RTL */
+    margin-right: 0;
+    margin-left: 5px;
+}
+
+.navbar.rtl .navbar-theme-toggle {
+    /* Adjust theme toggle margin for RTL */
+    margin-left: 0;
+    margin-right: 10px;
+}
+
 /* For smaller screens, make adjustments */
 @media (max-width: 768px) {
     .navbar {
@@ -120,6 +180,12 @@
         font-size: 0.9rem;
     }
 
+    /* RTL adjustments for smaller screens */
+    .navbar.rtl .nav-links {
+        padding-left: 5px;
+        padding-right: 0;
+    }
+
     /* On very small screens, make sure logo and text fit */
     @media (max-width: 480px) {
         .navbar .logo a {
@@ -128,6 +194,17 @@
 
         .navbar .logo img {
             height: 24px;
+        }
+
+        /* RTL adjustments for very small screens */
+        .navbar.rtl .nav-links {
+            padding-left: 5px;
+            padding-right: 0;
+        }
+
+        .navbar.rtl .sign-out-btn {
+            margin-left: 2px;
+            margin-right: 0;
         }
     }
 }

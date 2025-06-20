@@ -12,7 +12,7 @@ import './Navbar.css';
 const Navbar = ({ userRole }) => {
     const { currentUser, signOut } = useAuth();
     const { isDarkMode } = useTheme();
-    const { t } = useLanguage();
+    const { t, isRTL } = useLanguage();
     const navigate = useNavigate();
 
     const handleSignOut = async () => {
@@ -31,13 +31,16 @@ const Navbar = ({ userRole }) => {
     const dashboardLink = getDashboardLink();
 
     return (
-        <nav className={`navbar ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
+        <nav className={`navbar ${isDarkMode ? 'dark-mode' : 'light-mode'} ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+            {/* Logo - Will be on the right in RTL, left in LTR */}
             <div className="logo">
                 <Link to={dashboardLink}>
-                    <img src={logoImage} alt="ParaGrutaRally Logo" />
-                    {t('nav.logo', 'ParaGrutaRally')}
+                    <img src={logoImage} alt="ParaGrutaRally Logo" className="logo-image" />
+                    <span className="logo-text">{t('nav.logo', 'ParaGrutaRally')}</span>
                 </Link>
             </div>
+
+            {/* Navigation Links - Will be on the left in RTL, right in LTR */}
             <div className="nav-links">
                 {currentUser && (
                     <>
