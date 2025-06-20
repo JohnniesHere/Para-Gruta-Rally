@@ -11,7 +11,8 @@ import {
     IconFileText as FileText,
     IconRefresh as RefreshCw,
     IconDownload as Download,
-    IconPhoto as Photo
+    IconPhoto as Photo,
+    IconChartBar as Analytics
 } from '@tabler/icons-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import './Sidebar.css';
@@ -96,6 +97,19 @@ const Sidebar = ({userRole}) => {
                             <Photo className="sidebar-icon" size={20}/>
                             {t('nav.gallery', 'Gallery')}
                         </NavLink>
+                        {userRole === 'admin' && (
+                            <li>
+                                <NavLink
+                                    to="/admin/analytics"
+                                    className={({ isActive }) =>
+                                        `sidebar-link ${isActive ? 'active' : ''}`
+                                    }
+                                >
+                                    <Analytics size={20} />
+                                    <span>Analytics</span>
+                                </NavLink>
+                            </li>
+                        )}
                     </>
                 )}
 

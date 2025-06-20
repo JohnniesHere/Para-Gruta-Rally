@@ -1,0 +1,85 @@
+/* src/components/modals/TooltipModal.css */
+
+.tooltip-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: transparent;
+    z-index: 9999998;
+    pointer-events: none; /* Allow clicks to pass through except on modal */
+}
+
+.tooltip-modal {
+    position: fixed;
+    pointer-events: auto; /* Re-enable pointer events on the modal itself */
+    animation: tooltipFadeIn 0.2s ease-out;
+    filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.5));
+}
+
+.tooltip-modal-content {
+    background: var(--bg-secondary);
+    border: 3px solid var(--racing-gold);
+    border-radius: 12px;
+    padding: 16px 20px;
+    min-width: 280px;
+    max-width: 400px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Racing theme top stripe */
+.tooltip-modal-content::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--racing-gold), var(--racing-orange), var(--racing-gold));
+    z-index: 1;
+}
+
+.tooltip-modal-title {
+    color: var(--racing-gold);
+    font-weight: 700;
+    font-size: 14px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    position: relative;
+    z-index: 2;
+}
+
+.tooltip-modal-description {
+    color: var(--text-secondary);
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 10px;
+    position: relative;
+    z-index: 2;
+}
+
+.tooltip-modal-action {
+    color: var(--text-primary);
+    font-size: 12px;
+    font-weight: 600;
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 165, 0, 0.1) 100%);
+    padding: 8px 12px;
+    border-radius: 8px;
+    border-left: 3px solid var(--racing-gold);
+    position: relative;
+    z-index: 2;
+}
+
+@keyframes tooltipFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}

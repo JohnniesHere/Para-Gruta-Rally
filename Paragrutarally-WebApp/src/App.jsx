@@ -21,6 +21,8 @@ import GalleryPage from './pages/shared/GalleryPage';
 import InstructorDashboardPage from './pages/instructor/InstructorDashboardPage';
 import HostDashboardPage from './pages/host/HostDashboardPage';
 import MyAccountPage from './pages/shared/MyAccountPage';
+import AnalyticsDashboardPage from './pages/admin/AnalyticsDashboardPage';
+
 
 // Import vehicle management components
 import VehiclesPage from './pages/admin/VehiclesPage';
@@ -369,6 +371,20 @@ function App() {
                                             element={
                                                 <ProtectedRoute>
                                                     <GalleryPage />
+                                                </ProtectedRoute>
+                                            }
+                                        />
+
+                                         {/* ========================================
+                                             ANALYTICS ROUTES - NEW
+                                            ======================================== */}
+
+                                        {/* Analytics Dashboard - Admin only */}
+                                        <Route
+                                            path="/admin/analytics"
+                                            element={
+                                                <ProtectedRoute requiredRole="admin">
+                                                    <AnalyticsDashboardPage />
                                                 </ProtectedRoute>
                                             }
                                         />
