@@ -244,6 +244,20 @@ const translations = {
         'users.update': 'Update',
         'users.noSearchResults': 'No users match your search: "{searchTerm}"',
         'users.clearSearchButton': 'Clear Search',
+        'users.displayNameRequired': 'Display name is required',
+        'users.nameRequired': 'Name is required',
+        'users.phoneRequired': 'Phone number is required',
+        'users.roleRequired': 'Role is required',
+        'users.updateError': 'Failed to update user. Please try again.',
+        'users.displayNamePlaceholder': 'Enter display name',
+        'users.emailAddress': 'Email Address',
+        'users.emailCannotChange': 'Email cannot be changed',
+        'users.emailLinkedToAuth': 'Email cannot be changed as it\'s linked to authentication',
+        'users.fullNamePlaceholder': 'Enter full name',
+        'users.phoneNumber': 'Phone Number',
+        'users.phoneNumberPlaceholder': 'Enter phone number',
+        'users.updating': 'Updating...',
+        'users.updateUserButton': 'Update User',
 
 
         // My Account
@@ -723,7 +737,21 @@ const translations = {
         'users.update': 'עדכן',
         'users.noSearchResults': 'אין משתמשים התואמים לחיפוש שלך: "{searchTerm}"',
         'users.clearSearchButton': 'נקה חיפוש',
-
+        'users.editUser': 'ערוך משתמש',
+        'users.displayNameRequired': 'שם תצוגה הוא שדה חובה',
+        'users.nameRequired': 'שם הוא שדה חובה',
+        'users.phoneRequired': 'מספר טלפון הוא שדה חובה',
+        'users.roleRequired': 'תפקיד הוא שדה חובה',
+        'users.updateError': 'עדכון המשתמש נכשל. אנא נסה שוב.',
+        'users.displayNamePlaceholder': 'הכנס שם תצוגה',
+        'users.emailAddress': 'כתובת אימייל',
+        'users.emailCannotChange': 'לא ניתן לשנות אימייל',
+        'users.emailLinkedToAuth': 'לא ניתן לשנות אימייל מכיוון שהוא מקושר לאימות',
+        'users.fullNamePlaceholder': 'הכנס שם מלא',
+        'users.phoneNumber': 'מספר טלפון',
+        'users.phoneNumberPlaceholder': 'הכנס מספר טלפון',
+        'users.updating': 'מעדכן...',
+        'users.updateUserButton': 'עדכן משתמש',
 
         // My Account
         'account.title': 'החשבון שלי',

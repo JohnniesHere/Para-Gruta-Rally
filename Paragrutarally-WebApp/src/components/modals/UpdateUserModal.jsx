@@ -1,9 +1,11 @@
-// src/components/modals/UpdateUserModal.jsx
+// src/components/modals/UpdateUserModal.jsx - With Translation Support
 import React, { useState, useEffect } from 'react';
 import { doc, updateDoc } from 'firebase/firestore';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { db } from '../../firebase/config';
 
 const UpdateUserModal = ({ isOpen, onClose, user, onUserUpdated }) => {
+    const { t, isRTL } = useLanguage();
     const [formData, setFormData] = useState({
         displayName: '',
         name: '',
@@ -29,19 +31,19 @@ const UpdateUserModal = ({ isOpen, onClose, user, onUserUpdated }) => {
         const newErrors = {};
 
         if (!formData.displayName.trim()) {
-            newErrors.displayName = 'Display name is required';
+            newErrors.displayName = t('users.displayNameRequired', 'Display name is required');
         }
 
         if (!formData.name.trim()) {
-            newErrors.name = 'Name is required';
+            newErrors.name = t('users.nameRequired', 'Name is required');
         }
 
         if (!formData.phone.trim()) {
-            newErrors.phone = 'Phone number is required';
+            newErrors.phone = t('users.phoneRequired', 'Phone number is required');
         }
 
         if (!formData.role) {
-            newErrors.role = 'Role is required';
+            newErrors.role = t('users.roleRequired', 'Role is required');
         }
 
         setErrors(newErrors);
@@ -96,7 +98,7 @@ const UpdateUserModal = ({ isOpen, onClose, user, onUserUpdated }) => {
             onClose();
         } catch (error) {
             console.error('Error updating user:', error);
-            setErrors({ general: 'Failed to update user. Please try again.' });
+            setErrors({ general: t('users.updateError', 'Failed to update user. Please try again.') });
         } finally {
             setIsLoading(false);
         }
@@ -112,10 +114,10 @@ const UpdateUserModal = ({ isOpen, onClose, user, onUserUpdated }) => {
     if (!isOpen || !user) return null;
 
     return (
-        <div className="modal-overlay" onClick={handleClose}>
+        <div className="modal-overlay" onClick={handleClose} dir={isRTL ? 'rtl' : 'ltr'}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                 <div className="modal-header">
-                    <h3>Update User</h3>
+                    <h3>{t('users.updateUser', 'Update User')}</h3>
                     <button
                         className="modal-close"
                         onClick={handleClose}
@@ -134,7 +136,7 @@ const UpdateUserModal = ({ isOpen, onClose, user, onUserUpdated }) => {
                     )}
 
                     <div className={`form-group ${errors.displayName ? 'error' : ''}`}>
-                        <label htmlFor="displayName">Display Name *</label>
+                        <label htmlFor="displayName">{t('users.displayName', 'Display Name')} *</label>
                         <input
                             type="text"
                             id="displayName"
@@ -142,7 +144,7 @@ const UpdateUserModal = ({ isOpen, onClose, user, onUserUpdated }) => {
                             value={formData.displayName}
                             onChange={handleInputChange}
                             disabled={isLoading}
-                            placeholder="Enter display name"
+                            placeholder={t('users.displayNamePlaceholder', 'Enter display name')}
                         />
                         {errors.displayName && (
                             <div className="error-message">{errors.displayName}</div>
@@ -150,7 +152,7 @@ const UpdateUserModal = ({ isOpen, onClose, user, onUserUpdated }) => {
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="email">Email Address</label>
+                        <label htmlFor="email">{t('users.emailAddress', 'Email Address')}</label>
                         <input
                             type="email"
                             id="email"
@@ -162,15 +164,15 @@ const UpdateUserModal = ({ isOpen, onClose, user, onUserUpdated }) => {
                                 cursor: 'not-allowed',
                                 opacity: 0.6
                             }}
-                            placeholder="Email cannot be changed"
+                            placeholder={t('users.emailCannotChange', 'Email cannot be changed')}
                         />
                         <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px' }}>
-                            Email cannot be changed as it's linked to authentication
+                            {t('users.emailLinkedToAuth', 'Email cannot be changed as it\'s linked to authentication')}
                         </div>
                     </div>
 
                     <div className={`form-group ${errors.name ? 'error' : ''}`}>
-                        <label htmlFor="name">Full Name *</label>
+                        <label htmlFor="name">{t('users.fullName', 'Full Name')} *</label>
                         <input
                             type="text"
                             id="name"
@@ -178,7 +180,7 @@ const UpdateUserModal = ({ isOpen, onClose, user, onUserUpdated }) => {
                             value={formData.name}
                             onChange={handleInputChange}
                             disabled={isLoading}
-                            placeholder="Enter full name"
+                            placeholder={t('users.fullNamePlaceholder', 'Enter full name')}
                         />
                         {errors.name && (
                             <div className="error-message">{errors.name}</div>
@@ -186,7 +188,7 @@ const UpdateUserModal = ({ isOpen, onClose, user, onUserUpdated }) => {
                     </div>
 
                     <div className={`form-group ${errors.phone ? 'error' : ''}`}>
-                        <label htmlFor="phone">Phone Number *</label>
+                        <label htmlFor="phone">{t('users.phoneNumber', 'Phone Number')} *</label>
                         <input
                             type="tel"
                             id="phone"
@@ -194,7 +196,7 @@ const UpdateUserModal = ({ isOpen, onClose, user, onUserUpdated }) => {
                             value={formData.phone}
                             onChange={handleInputChange}
                             disabled={isLoading}
-                            placeholder="Enter phone number"
+                            placeholder={t('users.phoneNumberPlaceholder', 'Enter phone number')}
                         />
                         {errors.phone && (
                             <div className="error-message">{errors.phone}</div>
@@ -202,7 +204,7 @@ const UpdateUserModal = ({ isOpen, onClose, user, onUserUpdated }) => {
                     </div>
 
                     <div className={`form-group ${errors.role ? 'error' : ''}`}>
-                        <label htmlFor="role">Role *</label>
+                        <label htmlFor="role">{t('users.role', 'Role')} *</label>
                         <select
                             id="role"
                             name="role"
@@ -210,9 +212,10 @@ const UpdateUserModal = ({ isOpen, onClose, user, onUserUpdated }) => {
                             onChange={handleInputChange}
                             disabled={isLoading}
                         >
-                            <option value="parent">Parent</option>
-                            <option value="instructor">Instructor</option>
-                            <option value="admin">Admin</option>
+                            <option value="parent">{t('users.parent', 'Parent')}</option>
+                            <option value="instructor">{t('users.instructor', 'Instructor')}</option>
+                            <option value="admin">{t('users.admin', 'Admin')}</option>
+                            <option value="host">{t('users.host', 'Host')}</option>
                         </select>
                         {errors.role && (
                             <div className="error-message">{errors.role}</div>
@@ -226,14 +229,14 @@ const UpdateUserModal = ({ isOpen, onClose, user, onUserUpdated }) => {
                             onClick={handleClose}
                             disabled={isLoading}
                         >
-                            Cancel
+                            {t('general.cancel', 'Cancel')}
                         </button>
                         <button
                             type="submit"
                             className="btn-primary"
                             disabled={isLoading}
                         >
-                            {isLoading ? 'Updating...' : 'Update User'}
+                            {isLoading ? t('users.updating', 'Updating...') : t('users.updateUserButton', 'Update User')}
                         </button>
                     </div>
                 </form>
