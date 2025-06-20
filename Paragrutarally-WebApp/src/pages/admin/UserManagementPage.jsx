@@ -1,8 +1,9 @@
-// src/pages/admin/UserManagementPage.jsx - Fun & Reorganized with Clickable Stats
+// src/pages/admin/UserManagementPage.jsx - Fun & Reorganized with Clickable Stats and Translation
 import React, {useState, useEffect, useCallback} from 'react';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import Dashboard from '../../components/layout/Dashboard';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 import CreateUserModal from '../../components/modals/CreateUserModal';
 import ExportUsersModal from '../../components/modals/ExportUsersModal';
 import UpdateUserModal from '../../components/modals/UpdateUserModal';
@@ -25,6 +26,7 @@ import './UserManagement.css';
 
 const UserManagementPage = () => {
     const { isDarkMode, appliedTheme } = useTheme();
+    const { t, isRTL } = useLanguage();
     const [users, setUsers] = useState([]);
     const [filteredUsers, setFilteredUsers] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -183,10 +185,26 @@ const UserManagementPage = () => {
         hosts: users.filter(u => u.role === 'host').length
     };
 
+    // Get translated role names
+    const getRoleName = (role) => {
+        switch (role) {
+            case 'admin':
+                return t('users.admin', 'Admin');
+            case 'instructor':
+                return t('users.instructor', 'Instructor');
+            case 'parent':
+                return t('users.parent', 'Parent');
+            case 'host':
+                return t('users.host', 'Host');
+            default:
+                return role;
+        }
+    };
+
     return (
         <Dashboard requiredRole="admin">
-            <div className={`user-management-page ${appliedTheme}-mode`}>
-                <h1><Users size={32} className="page-title-icon" /> User Management</h1>
+            <div className={`user-management-page ${appliedTheme}-mode`} dir={isRTL ? 'rtl' : 'ltr'}>
+                <h1><Users size={32} className="page-title-icon" /> {t('users.title', 'User Management')}</h1>
 
                 <div className="user-management-container">
                     {/* Header with Export in top-right */}
@@ -196,7 +214,7 @@ const UserManagementPage = () => {
                             onClick={handleCreateUser}
                         >
                             <UserPlus className="btn-icon" size={18} />
-                            Create New User
+                            {t('users.createNewUser', 'Create New User')}
                         </button>
 
                         <button
@@ -204,7 +222,7 @@ const UserManagementPage = () => {
                             onClick={handleExportUsers}
                         >
                             <Download className="btn-icon" size={18} />
-                            Export Users
+                            {t('users.exportUsers', 'Export Users')}
                         </button>
                     </div>
 
@@ -217,7 +235,7 @@ const UserManagementPage = () => {
                         >
                             <Users className="stat-icon" size={40} />
                             <div className="stat-content">
-                                <h3>Total Users</h3>
+                                <h3>{t('users.totalUsers', 'Total Users')}</h3>
                                 <div className="stat-value">{stats.totalUsers}</div>
                             </div>
                         </div>
@@ -229,7 +247,7 @@ const UserManagementPage = () => {
                         >
                             <Crown className="stat-icon" size={40} />
                             <div className="stat-content">
-                                <h3>Admins</h3>
+                                <h3>{t('users.admins', 'Admins')}</h3>
                                 <div className="stat-value">{stats.admins}</div>
                             </div>
                         </div>
@@ -241,7 +259,7 @@ const UserManagementPage = () => {
                         >
                             <Car className="stat-icon" size={40} />
                             <div className="stat-content">
-                                <h3>Instructors</h3>
+                                <h3>{t('users.instructors', 'Instructors')}</h3>
                                 <div className="stat-value">{stats.instructors}</div>
                             </div>
                         </div>
@@ -253,7 +271,7 @@ const UserManagementPage = () => {
                         >
                             <UserCheck className="stat-icon" size={40} />
                             <div className="stat-content">
-                                <h3>Parents</h3>
+                                <h3>{t('users.parents', 'Parents')}</h3>
                                 <div className="stat-value">{stats.parents}</div>
                             </div>
                         </div>
@@ -266,7 +284,7 @@ const UserManagementPage = () => {
                                 <Search className="search-icon" size={18} />
                                 <input
                                     type="text"
-                                    placeholder="Search users by name or email..."
+                                    placeholder={t('users.searchPlaceholder', 'Search users by name or email...')}
                                     className="search-input"
                                     value={searchTerm}
                                     onChange={handleSearchChange}
@@ -282,33 +300,33 @@ const UserManagementPage = () => {
                         <div className="filter-container">
                             <label className="filter-label">
                                 <Tag className="filter-icon" size={16} />
-                                Filter by Role
+                                {t('users.filterByRole', 'Filter by Role')}
                             </label>
                             <select
                                 className="filter-select"
                                 value={roleFilter}
                                 onChange={handleRoleFilterChange}
                             >
-                                <option value="all">⭐ All Roles</option>
-                                <option value="admin">👑 Admin</option>
-                                <option value="instructor">🏎️ Instructor</option>
-                                <option value="parent">👨‍👩‍👧‍👦 Parent</option>
-                                <option value="host">🏠 Host</option>
+                                <option value="all">⭐ {t('users.allRoles', 'All Roles')}</option>
+                                <option value="admin">👑 {t('users.admin', 'Admin')}</option>
+                                <option value="instructor">🏎️ {t('users.instructor', 'Instructor')}</option>
+                                <option value="parent">👨‍👩‍👧‍👦 {t('users.parent', 'Parent')}</option>
+                                <option value="host">🏠 {t('users.host', 'Host')}</option>
                             </select>
                         </div>
 
                         <button className="btn-clear" onClick={handleClearFilters}>
                             <Eraser className="btn-icon" size={18} />
-                            Clear Filters
+                            {t('users.clearFilters', 'Clear Filters')}
                         </button>
                     </div>
 
                     {/* Results Info */}
                     <div className="results-info">
                         <FileSpreadsheet className="results-icon" size={18} />
-                        Showing {filteredUsers.length} of {users.length} users
-                        {roleFilter !== 'all' && <span className="filter-applied"> • Filtered by: {roleFilter}</span>}
-                        {searchTerm && <span className="search-applied"> • Searching: "{searchTerm}"</span>}
+                        {t('users.showing', 'Showing')} {filteredUsers.length} {t('teams.of', 'of')} {users.length} {t('users.usersLowercase', 'users')}
+                        {roleFilter !== 'all' && <span className="filter-applied"> • {t('users.filteredBy', 'Filtered by')}: {getRoleName(roleFilter)}</span>}
+                        {searchTerm && <span className="search-applied"> • {t('users.searching', 'Searching')}: "{searchTerm}"</span>}
                     </div>
 
                     <UsersTable
