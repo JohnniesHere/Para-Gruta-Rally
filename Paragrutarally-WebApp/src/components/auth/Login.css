@@ -150,7 +150,8 @@
     margin-top: 24px;
 }
 
-.mobile-login-btn, .google-login-btn {
+.google-login-btn {
+    width: 100%;
     padding: 12px;
     background-color: var(--bg-secondary);
     border: 1px solid var(--border-color);
@@ -162,35 +163,34 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
 }
 
-.mobile-login-btn:hover, .google-login-btn:hover {
+.google-login-btn:hover:not(:disabled) {
     background-color: var(--bg-tertiary);
     border-color: var(--text-secondary);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px var(--shadow-color);
 }
 
-.mobile-login-btn:before, .google-login-btn:before {
+.google-login-btn:disabled {
+    background-color: var(--text-muted);
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.google-login-btn:before {
     content: "";
     display: inline-block;
     margin-right: 10px;
     width: 18px;
     height: 18px;
-}
-
-.mobile-login-btn:before {
-    background: url('../../assets/images/PGR Logo.png') no-repeat center center;
-    background-size: contain;
-    filter: var(--icon-filter, none);
-}
-
-.google-login-btn:before {
-    background: url('../../assets/images/PGR Logo.png') no-repeat center center;
+    background: url('../../assets/images/google-icon.png') no-repeat center center;
     background-size: contain;
     filter: var(--icon-filter, none);
 }
 
 /* Dark mode icon filter */
-.dark-mode .mobile-login-btn:before,
 .dark-mode .google-login-btn:before {
     --icon-filter: brightness(1.5);
 }
@@ -254,8 +254,10 @@
 .toggle-password-btn {
     position: absolute;
     right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
+    top: 0;
+    bottom: 0;
+    margin: auto 0;
+    height: fit-content;
     background: transparent;
     color: var(--text-secondary);
     border: none;

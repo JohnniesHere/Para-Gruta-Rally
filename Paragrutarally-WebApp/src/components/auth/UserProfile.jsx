@@ -1,4 +1,4 @@
-// src/components/auth/UserProfile.jsx
+// src/components/auth/UserProfile.jsx - Updated with Google Auth Support
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -32,6 +32,9 @@ const UserProfile = () => {
     });
 
     const [passwordErrors, setPasswordErrors] = useState({});
+
+    // Check if user is Google authenticated
+    const isGoogleUser = currentUser?.providerData?.some(provider => provider.providerId === 'google.com') || false;
 
     // Load user data from Firestore
     useEffect(() => {
@@ -135,40 +138,55 @@ const UserProfile = () => {
     const handlePasswordUpdate = async (e) => {
         e.preventDefault();
 
+        console.log('🔐 Password update form submitted');
+
+        // Clear previous messages
+        setMessage({ type: '', text: '' });
+
         // Validate form
         const newErrors = {};
 
-        if (!passwordData.currentPassword) {
+        if (!passwordData.currentPassword.trim()) {
             newErrors.currentPassword = 'Current password is required';
         }
 
-        if (!passwordData.newPassword) {
+        if (!passwordData.newPassword.trim()) {
             newErrors.newPassword = 'New password is required';
-        } else {
-            const validation = validatePassword(passwordData.newPassword);
-            if (!validation.isValid) {
-                newErrors.newPassword = validation.message;
-            }
+        } else if (passwordData.newPassword.length < 6) {
+            newErrors.newPassword = 'New password must be at least 6 characters long';
         }
 
-        if (!passwordData.confirmPassword) {
+        if (!passwordData.confirmPassword.trim()) {
             newErrors.confirmPassword = 'Please confirm your new password';
         } else if (passwordData.newPassword !== passwordData.confirmPassword) {
             newErrors.confirmPassword = 'New passwords do not match';
         }
 
+        // Check if trying to use the same password
+        if (passwordData.currentPassword === passwordData.newPassword) {
+            newErrors.newPassword = 'New password must be different from current password';
+        }
+
         if (Object.keys(newErrors).length > 0) {
+            console.log('❌ Form validation failed:', newErrors);
             setPasswordErrors(newErrors);
             return;
         }
 
         setIsPasswordLoading(true);
-        setMessage({ type: '', text: '' });
+        setPasswordErrors({});
 
         try {
+            console.log('🔄 Attempting to update password...');
+
             await updateUserPassword(passwordData.currentPassword, passwordData.newPassword);
 
-            setMessage({ type: 'success', text: 'Password updated successfully!' });
+            console.log('✅ Password updated successfully');
+
+            setMessage({
+                type: 'success',
+                text: 'Password updated successfully! Your account is now more secure.'
+            });
 
             // Reset form
             setPasswordData({
@@ -177,8 +195,34 @@ const UserProfile = () => {
                 confirmPassword: '',
             });
             setPasswordErrors({});
+
+            // Scroll to top to show success message
+            document.querySelector('.user-profile')?.scrollTo({ top: 0, behavior: 'smooth' });
+
         } catch (error) {
-            setMessage({ type: 'error', text: error.message });
+            console.error('❌ Password update failed:', error);
+
+            // Show user-friendly error message
+            setMessage({
+                type: 'error',
+                text: error.message || 'Failed to update password. Please try again.'
+            });
+
+            // If it's an authentication error, clear the current password field
+            if (error.message.includes('Current password is incorrect') ||
+                error.message.includes('invalid-credential')) {
+                setPasswordData(prev => ({
+                    ...prev,
+                    currentPassword: ''
+                }));
+                setPasswordErrors({
+                    currentPassword: 'Please re-enter your current password'
+                });
+            }
+
+            // Scroll to top to show error message
+            document.querySelector('.user-profile')?.scrollTo({ top: 0, behavior: 'smooth' });
+
         } finally {
             setIsPasswordLoading(false);
         }
@@ -194,6 +238,13 @@ const UserProfile = () => {
                     <h2>{profileData.displayName || 'User'}</h2>
                     <p>{profileData.email}</p>
                     <p className="user-role">Role: {profileData.role || 'User'}</p>
+                    {isGoogleUser && (
+                        <p className="auth-provider">
+                            <span style={{ color: '#4285f4', fontWeight: '500' }}>
+                                🔗 Signed in with Google
+                            </span>
+                        </p>
+                    )}
                 </div>
             </div>
 
@@ -208,7 +259,7 @@ const UserProfile = () => {
                     className={`tab-button ${activeTab === 'security' ? 'active' : ''}`}
                     onClick={() => setActiveTab('security')}
                 >
-                    Security Settings
+                    Password Settings
                 </button>
                 <button
                     className={`tab-button ${activeTab === 'preferences' ? 'active' : ''}`}
@@ -350,113 +401,111 @@ const UserProfile = () => {
                 {activeTab === 'security' && (
                     <div className="security-section">
                         <div className="section-header">
-                            <h3>Security Settings</h3>
+                            <h3>Password Settings</h3>
                         </div>
 
-                        <div className="password-change">
-                            <h4>Change Password</h4>
-                            <form onSubmit={handlePasswordUpdate} className="password-form">
-                                <div className={`form-group ${passwordErrors.currentPassword ? 'error' : ''}`}>
-                                    <label htmlFor="currentPassword">Current Password *</label>
-                                    <input
-                                        type="password"
-                                        id="currentPassword"
-                                        name="currentPassword"
-                                        value={passwordData.currentPassword}
-                                        onChange={handlePasswordChange}
-                                        disabled={isPasswordLoading}
-                                        placeholder="Enter your current password"
-                                    />
-                                    {passwordErrors.currentPassword && (
-                                        <div className="error-message">{passwordErrors.currentPassword}</div>
-                                    )}
-                                </div>
-
-                                <div className={`form-group ${passwordErrors.newPassword ? 'error' : ''}`}>
-                                    <label htmlFor="newPassword">New Password *</label>
-                                    <input
-                                        type="password"
-                                        id="newPassword"
-                                        name="newPassword"
-                                        value={passwordData.newPassword}
-                                        onChange={handlePasswordChange}
-                                        disabled={isPasswordLoading}
-                                        placeholder="Enter your new password"
-                                    />
-                                    {passwordErrors.newPassword && (
-                                        <div className="error-message">{passwordErrors.newPassword}</div>
-                                    )}
-                                </div>
-
-                                <div className={`form-group ${passwordErrors.confirmPassword ? 'error' : ''}`}>
-                                    <label htmlFor="confirmPassword">Confirm New Password *</label>
-                                    <input
-                                        type="password"
-                                        id="confirmPassword"
-                                        name="confirmPassword"
-                                        value={passwordData.confirmPassword}
-                                        onChange={handlePasswordChange}
-                                        disabled={isPasswordLoading}
-                                        placeholder="Confirm your new password"
-                                    />
-                                    {passwordErrors.confirmPassword && (
-                                        <div className="error-message">{passwordErrors.confirmPassword}</div>
-                                    )}
-                                </div>
-
-                                <button
-                                    type="submit"
-                                    className="save-button"
-                                    disabled={isPasswordLoading}
-                                >
-                                    {isPasswordLoading ? 'Updating...' : 'Update Password'}
-                                </button>
-                            </form>
-                        </div>
-
-                        <div className="two-factor">
-                            <h4>Two-Factor Authentication</h4>
-                            <p>Enhance your account security by enabling two-factor authentication.</p>
-                            <button className="secondary-button">
-                                Enable Two-Factor Authentication
-                            </button>
-                        </div>
-
-                        <div className="login-history">
-                            <h4>Recent Login Activity</h4>
-                            <div className="activity-list">
-                                <div className="activity-item">
-                                    <div className="activity-details">
-                                        <div className="activity-info">
-                                            <span className="device">Chrome on Windows</span>
-                                            <span className="location">Jerusalem, Israel</span>
-                                        </div>
-                                        <div className="activity-time">Today, {new Date().toLocaleTimeString()}</div>
+                        {isGoogleUser ? (
+                            <div className="google-auth-notice">
+                                <div className="notice-card">
+                                    <div className="notice-icon">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="#4285f4"/>
+                                        </svg>
                                     </div>
-                                    <div className="activity-status current">Current</div>
-                                </div>
-
-                                <div className="activity-item">
-                                    <div className="activity-details">
-                                        <div className="activity-info">
-                                            <span className="device">Firefox on Windows</span>
-                                            <span className="location">Tel Aviv, Israel</span>
-                                        </div>
-                                        <div className="activity-time">Yesterday, 10:15 AM</div>
+                                    <div className="notice-content">
+                                        <h4>Google Account Authentication</h4>
+                                        <p>
+                                            Your account is authenticated through Google. Password management is handled
+                                            by Google's secure systems. To change your password, please visit your
+                                            Google Account settings.
+                                        </p>
+                                        <a
+                                            href="https://myaccount.google.com/security"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="google-settings-link"
+                                        >
+                                            Manage Google Account Security
+                                        </a>
                                     </div>
                                 </div>
 
-                                <div className="activity-item">
-                                    <div className="activity-details">
-                                        <div className="activity-info">
-                                            <span className="device">Safari on iPhone</span>
-                                            <span className="location">Haifa, Israel</span>
-                                        </div>
-                                        <div className="activity-time">2 days ago, 3:22 PM</div>
-                                    </div>
+                                <div className="security-benefits">
+                                    <h4>Security Benefits</h4>
+                                    <ul>
+                                        <li>✅ Two-factor authentication managed by Google</li>
+                                        <li>✅ Advanced threat protection</li>
+                                        <li>✅ Automatic security updates</li>
+                                        <li>✅ Sign-in alerts and monitoring</li>
+                                    </ul>
                                 </div>
                             </div>
-                        </div>
+                        ) : (
+                            <div className="password-change">
+                                <h4>Change Password</h4>
+                                <p style={{ color: 'var(--text-secondary)', marginBottom: '20px', fontSize: '0.9rem' }}>
+                                    Update your password to keep your account secure. Use a strong, unique password.
+                                </p>
+
+                                <form onSubmit={handlePasswordUpdate} className="password-form">
+                                    <div className={`form-group ${passwordErrors.currentPassword ? 'error' : ''}`}>
+                                        <label htmlFor="currentPassword">Current Password *</label>
+                                        <input
+                                            type="password"
+                                            id="currentPassword"
+                                            name="currentPassword"
+                                            value={passwordData.currentPassword}
+                                            onChange={handlePasswordChange}
+                                            disabled={isPasswordLoading}
+                                            placeholder="Enter your current password"
+                                        />
+                                        {passwordErrors.currentPassword && (
+                                            <div className="error-message">{passwordErrors.currentPassword}</div>
+                                        )}
+                                    </div>
+
+                                    <div className={`form-group ${passwordErrors.newPassword ? 'error' : ''}`}>
+                                        <label htmlFor="newPassword">New Password *</label>
+                                        <input
+                                            type="password"
+                                            id="newPassword"
+                                            name="newPassword"
+                                            value={passwordData.newPassword}
+                                            onChange={handlePasswordChange}
+                                            disabled={isPasswordLoading}
+                                            placeholder="Enter your new password"
+                                        />
+                                        {passwordErrors.newPassword && (
+                                            <div className="error-message">{passwordErrors.newPassword}</div>
+                                        )}
+                                    </div>
+
+                                    <div className={`form-group ${passwordErrors.confirmPassword ? 'error' : ''}`}>
+                                        <label htmlFor="confirmPassword">Confirm New Password *</label>
+                                        <input
+                                            type="password"
+                                            id="confirmPassword"
+                                            name="confirmPassword"
+                                            value={passwordData.confirmPassword}
+                                            onChange={handlePasswordChange}
+                                            disabled={isPasswordLoading}
+                                            placeholder="Confirm your new password"
+                                        />
+                                        {passwordErrors.confirmPassword && (
+                                            <div className="error-message">{passwordErrors.confirmPassword}</div>
+                                        )}
+                                    </div>
+
+                                    <button
+                                        type="submit"
+                                        className="save-button"
+                                        disabled={isPasswordLoading}
+                                    >
+                                        {isPasswordLoading ? 'Updating...' : 'Update Password'}
+                                    </button>
+                                </form>
+                            </div>
+                        )}
                     </div>
                 )}
 

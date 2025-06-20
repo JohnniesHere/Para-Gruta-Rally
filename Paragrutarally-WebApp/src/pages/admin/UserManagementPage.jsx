@@ -1,4 +1,4 @@
-// src/pages/admin/UserManagementPage.jsx - Fun & Reorganized with Clickable Stats and Translation
+// src/pages/admin/UserManagementPage.jsx - Updated with Delete Functionality
 import React, {useState, useEffect, useCallback} from 'react';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import Dashboard from '../../components/layout/Dashboard';
@@ -41,6 +41,7 @@ const UserManagementPage = () => {
     const fetchUsers = async () => {
         setIsLoading(true);
         try {
+            console.log('Fetching users from Firestore...');
             const usersQuery = query(
                 collection(db, 'users'),
                 orderBy('createdAt', 'desc')
@@ -56,10 +57,12 @@ const UserManagementPage = () => {
                 });
             });
 
+            console.log(`✅ Fetched ${usersData.length} users`);
             setUsers(usersData);
             setFilteredUsers(usersData);
         } catch (error) {
             console.error('Error fetching users:', error);
+            alert(t('users.fetchError', 'Failed to load users. Please refresh the page.'));
         } finally {
             setIsLoading(false);
         }
@@ -79,7 +82,7 @@ const UserManagementPage = () => {
             filtered = filtered.filter(user =>
                 user.displayName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                user.fullName?.toLowerCase().includes(searchTerm.toLowerCase())
+                user.name?.toLowerCase().includes(searchTerm.toLowerCase())
             );
         }
 
@@ -124,56 +127,63 @@ const UserManagementPage = () => {
 
     // Modal handlers
     const handleCreateUser = () => {
+        console.log('Opening create user modal');
         setIsCreateModalOpen(true);
     };
 
     const handleCloseCreateModal = () => {
+        console.log('Closing create user modal');
         setIsCreateModalOpen(false);
     };
 
     const handleUserCreated = () => {
+        console.log('User created successfully, refreshing list');
         fetchUsers();
-        console.log('User created successfully!');
     };
 
     const handleUserUpdated = () => {
+        console.log('User updated successfully, refreshing list');
         fetchUsers();
         setSelectedUser(null);
-        console.log('User updated successfully!');
+        setIsUpdateModalOpen(false);
+    };
+
+    const handleUserDeleted = () => {
+        console.log('User deleted successfully, refreshing list');
+        fetchUsers();
     };
 
     const handleCloseUpdateModal = () => {
+        console.log('Closing update user modal');
         setIsUpdateModalOpen(false);
         setSelectedUser(null);
     };
 
     const handleExportUsers = () => {
+        console.log('Opening export users modal');
         setIsExportModalOpen(true);
     };
 
     const handleCloseExportModal = () => {
+        console.log('Closing export users modal');
         setIsExportModalOpen(false);
     };
 
     const handleUpdateUser = (user) => {
+        console.log('Opening update modal for user:', user.id);
         setSelectedUser(user);
         setIsUpdateModalOpen(true);
     };
 
     // Load users on component mount
     useEffect(() => {
-        const fetchData = async () => {
-            await fetchUsers();
-        };
-        fetchData();
+        console.log('UserManagementPage mounted, loading users...');
+        fetchUsers();
     }, []);
 
     // Re-filter when filters change
     useEffect(() => {
-        const applyFilters = async () => {
-            await filterUsers();
-        };
-        applyFilters();
+        filterUsers();
     }, [filterUsers]);
 
     // Calculate stats
@@ -236,7 +246,7 @@ const UserManagementPage = () => {
                             <Users className="stat-icon" size={40} />
                             <div className="stat-content">
                                 <h3>{t('users.totalUsers', 'Total Users')}</h3>
-                                <div className="stat-value">{stats.totalUsers}</div>
+                                <div className="stat-value">{stats.totalUsers + 1}</div>
                             </div>
                         </div>
 
@@ -333,6 +343,7 @@ const UserManagementPage = () => {
                         users={filteredUsers}
                         isLoading={isLoading}
                         onUpdateUser={handleUpdateUser}
+                        onUserDeleted={handleUserDeleted}
                     />
                 </div>
             </div>

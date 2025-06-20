@@ -1,10 +1,11 @@
-// src/components/modals/ExportUsersModal.jsx
+// src/components/modals/ExportUsersModal.jsx - FIXED VERSION
 import React, { useState } from 'react';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../../firebase/config';
-import ExcelJS from 'exceljs';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 const ExportUsersModal = ({ isOpen, onClose }) => {
+    const { t, isRTL } = useLanguage();
     const [exportOptions, setExportOptions] = useState({
         roleFilter: 'all',
         includeTimestamps: true
@@ -48,74 +49,37 @@ const ExportUsersModal = ({ isOpen, onClose }) => {
                 users.push(user);
             });
 
-            // Create workbook and worksheet using ExcelJS
-            const workbook = new ExcelJS.Workbook();
-            const sheetName = exportOptions.roleFilter === 'all'
-                ? 'All Users'
-                : `${exportOptions.roleFilter.charAt(0).toUpperCase() + exportOptions.roleFilter.slice(1)} Users`;
-
-            const worksheet = workbook.addWorksheet(sheetName);
-
-            // Define columns
-            const columns = [
-                { header: 'Display Name', key: 'displayName', width: 20 },
-                { header: 'Full Name', key: 'fullName', width: 25 },
-                { header: 'Email', key: 'email', width: 30 },
-                { header: 'Phone', key: 'phone', width: 15 },
-                { header: 'Role', key: 'role', width: 12 },
-            ];
-
+            // Create CSV content instead of Excel (simpler approach)
+            const headers = ['Display Name', 'Full Name', 'Email', 'Phone', 'Role'];
             if (exportOptions.includeTimestamps) {
-                columns.push(
-                    { header: 'Created At', key: 'createdAt', width: 20 },
-                    { header: 'Last Login', key: 'lastLogin', width: 20 }
-                );
+                headers.push('Created At', 'Last Login');
             }
 
-            worksheet.columns = columns;
+            let csvContent = headers.join(',') + '\n';
 
-            // Style the header row
-            worksheet.getRow(1).eachCell((cell) => {
-                cell.font = { bold: true };
-                cell.fill = {
-                    type: 'pattern',
-                    pattern: 'solid',
-                    fgColor: { argb: 'FFE0E0E0' }
-                };
-                cell.border = {
-                    top: { style: 'thin' },
-                    left: { style: 'thin' },
-                    bottom: { style: 'thin' },
-                    right: { style: 'thin' }
-                };
-            });
+            users.forEach(user => {
+                const row = [
+                    `"${user.displayName}"`,
+                    `"${user.fullName}"`,
+                    `"${user.email}"`,
+                    `"${user.phone}"`,
+                    `"${user.role}"`
+                ];
 
-            // Add data rows
-            users.forEach((user) => {
-                const row = worksheet.addRow(user);
-                // Add borders to data cells
-                row.eachCell((cell) => {
-                    cell.border = {
-                        top: { style: 'thin' },
-                        left: { style: 'thin' },
-                        bottom: { style: 'thin' },
-                        right: { style: 'thin' }
-                    };
-                });
+                if (exportOptions.includeTimestamps) {
+                    row.push(`"${user.createdAt}"`, `"${user.lastLogin}"`);
+                }
+
+                csvContent += row.join(',') + '\n';
             });
 
             // Generate filename
             const timestamp = new Date().toISOString().split('T')[0];
             const roleFilter = exportOptions.roleFilter === 'all' ? 'all' : exportOptions.roleFilter;
-            const filename = `users_export_${roleFilter}_${timestamp}.xlsx`;
+            const filename = `users_export_${roleFilter}_${timestamp}.csv`;
 
-            // Generate and download file
-            const buffer = await workbook.xlsx.writeBuffer();
-            const blob = new Blob([buffer], {
-                type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-            });
-
-            // Create download link
+            // Create and download file
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
@@ -125,10 +89,11 @@ const ExportUsersModal = ({ isOpen, onClose }) => {
             document.body.removeChild(link);
             window.URL.revokeObjectURL(url);
 
+            console.log(`✅ Successfully exported ${users.length} users to ${filename}`);
             onClose();
         } catch (error) {
             console.error('Error exporting users:', error);
-            alert('Failed to export users. Please try again.');
+            alert(t('users.exportError', 'Failed to export users. Please try again.'));
         } finally {
             setIsExporting(false);
         }
@@ -147,10 +112,10 @@ const ExportUsersModal = ({ isOpen, onClose }) => {
     if (!isOpen) return null;
 
     return (
-        <div className="modal-overlay" onClick={handleClose}>
-            <div className="export-modal-content" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-overlay active" onClick={handleClose} dir={isRTL ? 'rtl' : 'ltr'}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                 <div className="modal-header">
-                    <h3>Export Users</h3>
+                    <h3>{t('users.exportUsers', 'Export Users')}</h3>
                     <button
                         className="modal-close"
                         onClick={handleClose}
@@ -161,9 +126,9 @@ const ExportUsersModal = ({ isOpen, onClose }) => {
                     </button>
                 </div>
 
-                <div className="export-options">
+                <div className="modal-body">
                     <div className="form-group">
-                        <label htmlFor="roleFilter">Filter by Role</label>
+                        <label htmlFor="roleFilter">{t('users.filterByRole', 'Filter by Role')}</label>
                         <select
                             id="roleFilter"
                             value={exportOptions.roleFilter}
@@ -174,10 +139,11 @@ const ExportUsersModal = ({ isOpen, onClose }) => {
                             disabled={isExporting}
                             className="filter-select"
                         >
-                            <option value="all">All Roles</option>
-                            <option value="admin">Admin</option>
-                            <option value="instructor">Instructor</option>
-                            <option value="parent">Parent</option>
+                            <option value="all">{t('users.allRoles', 'All Roles')}</option>
+                            <option value="admin">{t('users.admin', 'Admin')}</option>
+                            <option value="instructor">{t('users.instructor', 'Instructor')}</option>
+                            <option value="parent">{t('users.parent', 'Parent')}</option>
+                            <option value="host">{t('users.host', 'Host')}</option>
                         </select>
                     </div>
 
@@ -193,19 +159,19 @@ const ExportUsersModal = ({ isOpen, onClose }) => {
                                 disabled={isExporting}
                                 style={{ marginRight: '8px' }}
                             />
-                            Include Created At and Last Login timestamps
+                            {t('users.includeTimestamps', 'Include Created At and Last Login timestamps')}
                         </label>
                     </div>
                 </div>
 
-                <div className="form-actions">
+                <div className="modal-footer">
                     <button
                         type="button"
                         className="btn-secondary"
                         onClick={handleClose}
                         disabled={isExporting}
                     >
-                        Cancel
+                        {t('general.cancel', 'Cancel')}
                     </button>
                     <button
                         type="button"
@@ -213,7 +179,7 @@ const ExportUsersModal = ({ isOpen, onClose }) => {
                         onClick={handleExport}
                         disabled={isExporting}
                     >
-                        {isExporting ? 'Exporting...' : 'Export to Excel'}
+                        {isExporting ? t('users.exporting', 'Exporting...') : t('users.exportToCsv', 'Export to CSV')}
                     </button>
                 </div>
             </div>

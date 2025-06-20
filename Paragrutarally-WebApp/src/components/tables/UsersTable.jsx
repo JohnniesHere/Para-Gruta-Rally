@@ -1,14 +1,25 @@
-// src/components/tables/UsersTable.jsx - With Translation Support
+// src/components/tables/UsersTable.jsx - Fixed with Delete Functionality
 import React, { useState, useMemo } from 'react';
+import { doc, deleteDoc } from 'firebase/firestore';
+import { initializeApp, deleteApp } from 'firebase/app';
+import { getAuth, signInWithEmailAndPassword, deleteUser } from 'firebase/auth';
+import { db } from '../../firebase/config';
 import { useLanguage } from '../../contexts/LanguageContext';
+import {
+    IconEdit as Edit,
+    IconTrash as Trash,
+    IconAlertTriangle as AlertTriangle
+} from '@tabler/icons-react';
 
-const UsersTable = ({ users, isLoading, onUpdateUser }) => {
+const UsersTable = ({ users, isLoading, onUpdateUser, onUserDeleted }) => {
     const { t, isRTL } = useLanguage();
     const [sortConfig, setSortConfig] = useState({
         key: null,
         direction: 'asc'
     });
-    const [searchTerm, setSearchTerm] = useState('');
+    const [deletingUser, setDeletingUser] = useState(null);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [userToDelete, setUserToDelete] = useState(null);
 
     const formatDate = (timestamp) => {
         if (!timestamp || !timestamp.toDate) return t('common.notAvailable', 'N/A');
@@ -49,33 +60,13 @@ const UsersTable = ({ users, isLoading, onUpdateUser }) => {
         }
     };
 
-    // Filter users based on search term
-    const filteredUsers = useMemo(() => {
-        if (!users) return [];
-        if (!searchTerm.trim()) return users;
-
-        const lowercaseSearch = searchTerm.toLowerCase().trim();
-
-        return users.filter(user => {
-            const searchableFields = [
-                user.displayName,
-                user.name,
-                user.email,
-                user.phone,
-                user.role
-            ];
-
-            return searchableFields.some(field =>
-                field && field.toString().toLowerCase().includes(lowercaseSearch)
-            );
-        });
-    }, [users, searchTerm]);
+    // Removed getRoleIcon function - no symbols needed
 
     // Sort users based on current sort configuration
     const sortedUsers = useMemo(() => {
-        if (!filteredUsers || !sortConfig.key) return filteredUsers;
+        if (!users || !sortConfig.key) return users || [];
 
-        return [...filteredUsers].sort((a, b) => {
+        return [...users].sort((a, b) => {
             let aValue = a[sortConfig.key];
             let bValue = b[sortConfig.key];
 
@@ -104,7 +95,7 @@ const UsersTable = ({ users, isLoading, onUpdateUser }) => {
             }
             return 0;
         });
-    }, [filteredUsers, sortConfig]);
+    }, [users, sortConfig]);
 
     // Handle column header click
     const handleSort = (key) => {
@@ -122,16 +113,6 @@ const UsersTable = ({ users, isLoading, onUpdateUser }) => {
         });
     };
 
-    // Handle search input change
-    const handleSearchChange = (e) => {
-        setSearchTerm(e.target.value);
-    };
-
-    // Clear search
-    const clearSearch = () => {
-        setSearchTerm('');
-    };
-
     // Get sort indicator for column headers
     const getSortIndicator = (columnKey) => {
         if (sortConfig.key !== columnKey) {
@@ -140,10 +121,72 @@ const UsersTable = ({ users, isLoading, onUpdateUser }) => {
         return sortConfig.direction === 'asc' ? ' ↑' : ' ↓';
     };
 
+    // Delete functionality
+    const handleDeleteClick = (user) => {
+        console.log('Delete clicked for user:', user.id);
+        setUserToDelete(user);
+        setShowDeleteModal(true);
+    };
+
+    const handleDeleteConfirm = async () => {
+        if (!userToDelete) return;
+
+        setDeletingUser(userToDelete.id);
+
+        try {
+            console.log('Deleting user:', userToDelete.id, userToDelete.email);
+
+            // Delete user document from Firestore
+            const userDocRef = doc(db, 'users', userToDelete.id);
+            await deleteDoc(userDocRef);
+
+            console.log('✅ User document deleted from Firestore');
+
+            // Show success message
+            alert(
+                `✅ ${t('users.deleteSuccess', 'User Deleted Successfully!')}\n\n` +
+                `${t('users.userDeleted', 'User has been removed from the system.')}\n\n` +
+                `📧 ${t('users.email', 'Email')}: ${userToDelete.email}\n` +
+                `👤 ${t('users.name', 'Name')}: ${userToDelete.displayName}\n\n` +
+                `⚠️ ${t('users.authNote', 'Note: For complete removal, the authentication account may need to be deleted separately.')}`
+            );
+
+            // Notify parent component
+            if (onUserDeleted) {
+                onUserDeleted();
+            }
+
+            setShowDeleteModal(false);
+            setUserToDelete(null);
+
+        } catch (error) {
+            console.error('Error deleting user:', error);
+
+            let errorMessage = t('users.deleteError', 'Failed to delete user. Please try again.');
+
+            if (error.code === 'permission-denied') {
+                errorMessage = t('users.deletePermissionError', 'Permission denied. You may not have rights to delete this user.');
+            } else if (error.code === 'not-found') {
+                errorMessage = t('users.deleteNotFoundError', 'User not found. They may have already been deleted.');
+            }
+
+            alert(`❌ ${t('users.error', 'Error')}\n\n${errorMessage}`);
+        } finally {
+            setDeletingUser(null);
+        }
+    };
+
+    const handleDeleteCancel = () => {
+        console.log('Delete cancelled');
+        setShowDeleteModal(false);
+        setUserToDelete(null);
+    };
+
     if (isLoading) {
         return (
             <div className="loading-container" dir={isRTL ? 'rtl' : 'ltr'}>
-                <div>{t('users.loadingUsers', 'Loading users...')}</div>
+                <div className="loading-spinner"></div>
+                <p>{t('users.loadingUsers', 'Loading users...')}</p>
             </div>
         );
     }
@@ -158,41 +201,8 @@ const UsersTable = ({ users, isLoading, onUpdateUser }) => {
     }
 
     return (
-        <div dir={isRTL ? 'rtl' : 'ltr'}>
-            {/* Search Input */}
-            <div className="search-container">
-                <input
-                    type="text"
-                    className="search-input"
-                    placeholder={t('users.searchInUsers', 'Search in users')}
-                    value={searchTerm}
-                    onChange={handleSearchChange}
-                />
-                {searchTerm && (
-                    <button
-                        className="clear-search"
-                        onClick={clearSearch}
-                        title={t('users.clearSearch', 'Clear search')}
-                    >
-                        ✕
-                    </button>
-                )}
-                <div className="search-results-info">
-                    {searchTerm ? (
-                        t('users.searchResults', '{count} of {total} users', {
-                            count: sortedUsers.length,
-                            total: users.length
-                        })
-                    ) : (
-                        t('users.totalUsersCount', '{count} users total', {
-                            count: users.length
-                        })
-                    )}
-                </div>
-            </div>
-
-            {/* Users Table */}
-            <div className="users-table-container">
+        <>
+            <div className="table-container" dir={isRTL ? 'rtl' : 'ltr'}>
                 <table className="users-table">
                     <thead>
                     <tr>
@@ -232,13 +242,6 @@ const UsersTable = ({ users, isLoading, onUpdateUser }) => {
                             {t('users.role', 'Role')}{getSortIndicator('role')}
                         </th>
                         <th
-                            onClick={() => handleSort('createdAt')}
-                            className="sortable-header"
-                            title={t('users.sortByCreatedDate', 'Click to sort by Created Date')}
-                        >
-                            {t('users.createdAt', 'Created At')}{getSortIndicator('createdAt')}
-                        </th>
-                        <th
                             onClick={() => handleSort('lastLogin')}
                             className="sortable-header"
                             title={t('users.sortByLastLogin', 'Click to sort by Last Login')}
@@ -252,50 +255,76 @@ const UsersTable = ({ users, isLoading, onUpdateUser }) => {
                     {sortedUsers.length > 0 ? (
                         sortedUsers.map((user) => (
                             <tr key={user.id}>
-                                <td>{user.displayName || t('common.notAvailable', 'N/A')}</td>
-                                <td>{user.name || t('common.notAvailable', 'N/A')}</td>
-                                <td>{user.email || t('common.notAvailable', 'N/A')}</td>
-                                <td>{user.phone || t('common.notAvailable', 'N/A')}</td>
                                 <td>
-                                    <span className={getRoleBadgeClass(user.role)}>
-                                        {getRoleDisplayName(user.role)}
-                                    </span>
+                                    <div className="user-display-name">
+                                        {user.displayName || t('common.notAvailable', 'N/A')}
+                                    </div>
                                 </td>
-                                <td>{formatDate(user.createdAt)}</td>
-                                <td>{formatDate(user.lastLogin)}</td>
                                 <td>
-                                    <button
-                                        className="btn-update"
-                                        onClick={() => onUpdateUser(user)}
-                                        title={t('users.updateUser', 'Update user')}
-                                    >
-                                        {t('users.update', 'Update')}
-                                    </button>
+                                    <div className="user-full-name">
+                                        {user.name || t('common.notAvailable', 'N/A')}
+                                    </div>
+                                </td>
+                                <td>
+                                    <div className="user-email">
+                                        {user.email || t('common.notAvailable', 'N/A')}
+                                    </div>
+                                </td>
+                                <td>
+                                    <div className="user-phone">
+                                        {user.phone || t('common.notAvailable', 'N/A')}
+                                    </div>
+                                </td>
+                                <td>
+                                    <div className="user-role">
+                                            <span className={getRoleBadgeClass(user.role)}>
+                                                {getRoleDisplayName(user.role)}
+                                            </span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div className="user-last-login">
+                                        {formatDate(user.lastLogin)}
+                                    </div>
+                                </td>
+                                <td>
+                                    <div className="actions-cell">
+                                        <div className="action-buttons">
+                                            <button
+                                                className="btn-update"
+                                                onClick={() => onUpdateUser(user)}
+                                                title={t('users.updateUser', 'Update User')}
+                                            >
+                                                <Edit size={14} />
+                                                {t('users.update', 'Update')}
+                                            </button>
+                                            <button
+                                                className="btn-delete"
+                                                onClick={() => handleDeleteClick(user)}
+                                                disabled={deletingUser === user.id}
+                                                title={t('users.deleteUser', 'Delete User')}
+                                            >
+                                                {deletingUser === user.id ? (
+                                                    <div className="loading-spinner"></div>
+                                                ) : (
+                                                    <Trash size={14} />
+                                                )}
+                                                {deletingUser === user.id
+                                                    ? t('users.deleting', 'Deleting...')
+                                                    : t('users.delete', 'Delete')
+                                                }
+                                            </button>
+                                        </div>
+                                    </div>
                                 </td>
                             </tr>
                         ))
                     ) : (
                         <tr>
-                            <td colSpan="8" style={{ textAlign: 'center', padding: '40px' }}>
+                            <td colSpan="7" style={{ textAlign: 'center', padding: '40px' }}>
                                 <div className="empty-state">
-                                    {searchTerm ? (
-                                        <>
-                                            <h3>{t('users.noUsersFound', 'No users found')}</h3>
-                                            <p>{t('users.noSearchResults', 'No users match your search: "{searchTerm}"', { searchTerm })}</p>
-                                            <button
-                                                className="btn-secondary"
-                                                onClick={clearSearch}
-                                                style={{ marginTop: '10px' }}
-                                            >
-                                                {t('users.clearSearchButton', 'Clear Search')}
-                                            </button>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <h3>{t('users.noUsersFound', 'No users found')}</h3>
-                                            <p>{t('users.createFirstUser', 'Start by creating your first user.')}</p>
-                                        </>
-                                    )}
+                                    <h3>{t('users.noUsersFound', 'No users found')}</h3>
+                                    <p>{t('users.createFirstUser', 'Start by creating your first user.')}</p>
                                 </div>
                             </td>
                         </tr>
@@ -303,7 +332,93 @@ const UsersTable = ({ users, isLoading, onUpdateUser }) => {
                     </tbody>
                 </table>
             </div>
-        </div>
+
+            {/* Delete Confirmation Modal */}
+            {showDeleteModal && userToDelete && (
+                <div className="modal-overlay active" onClick={handleDeleteCancel}>
+                    <div className="modal-content delete-modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header danger">
+                            <AlertTriangle className="danger-icon" size={24} />
+                            <h2>{t('users.deleteUserTitle', 'Delete User')}</h2>
+                        </div>
+
+                        <div className="modal-body">
+                            <div className="delete-warning">
+                                ⚠️ {t('users.deleteWarning', 'This action cannot be undone!')}
+                            </div>
+
+                            <div className="user-delete-info">
+                                <div className="delete-info-item">
+                                    <strong>{t('users.displayName', 'Display Name')}:</strong>
+                                    <span>{userToDelete.displayName || t('common.notAvailable', 'N/A')}</span>
+                                </div>
+                                <div className="delete-info-item">
+                                    <strong>{t('users.email', 'Email')}:</strong>
+                                    <span>{userToDelete.email}</span>
+                                </div>
+                                <div className="delete-info-item">
+                                    <strong>{t('users.fullName', 'Full Name')}:</strong>
+                                    <span>{userToDelete.name || t('common.notAvailable', 'N/A')}</span>
+                                </div>
+                                <div className="delete-info-item">
+                                    <strong>{t('users.role', 'Role')}:</strong>
+                                    <span>{getRoleDisplayName(userToDelete.role)}</span>
+                                </div>
+                            </div>
+
+                            <div className="delete-consequences">
+                                <h4>{t('users.deleteConsequences', 'This will permanently delete:')}</h4>
+                                <ul>
+                                    <li>{t('users.deleteConsequence1', 'User profile and all associated data')}</li>
+                                    <li>{t('users.deleteConsequence2', 'All user-generated content and records')}</li>
+                                    <li>{t('users.deleteConsequence3', 'User access to the system')}</li>
+                                    <li>{t('users.deleteConsequence4', 'All user preferences and settings')}</li>
+                                </ul>
+                            </div>
+
+                            <p style={{
+                                marginTop: '20px',
+                                fontSize: '14px',
+                                color: 'var(--text-secondary)',
+                                textAlign: 'center',
+                                fontStyle: 'italic'
+                            }}>
+                                {t('users.deleteConfirmText', 'Are you absolutely sure you want to delete this user?')}
+                            </p>
+                        </div>
+
+                        <div className="modal-footer">
+                            <button
+                                type="button"
+                                className="btn-secondary"
+                                onClick={handleDeleteCancel}
+                                disabled={deletingUser === userToDelete.id}
+                            >
+                                {t('general.cancel', 'Cancel')}
+                            </button>
+                            <button
+                                type="button"
+                                className="btn-danger"
+                                onClick={handleDeleteConfirm}
+                                disabled={deletingUser === userToDelete.id}
+                            >
+                                {deletingUser === userToDelete.id ? (
+                                    <>
+                                        <div className="loading-spinner"></div>
+                                        {t('users.deleting', 'Deleting...')}
+                                    </>
+                                ) : (
+                                    <>
+                                        <Trash size={16} />
+                                        {t('users.deleteConfirm', 'Yes, Delete User')}
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </>
     );
 };
 

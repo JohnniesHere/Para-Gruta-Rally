@@ -1,4 +1,4 @@
-/* src/components/auth/UserProfile.css */
+/* src/components/auth/UserProfile.css - Updated with Google Auth Support */
 .user-profile {
     background-color: var(--bg-secondary);
     border: 1px solid var(--border-color);
@@ -52,6 +52,22 @@
     color: var(--accent-color) !important;
     font-weight: 500;
     transition: color 0.3s ease;
+}
+
+/* Auth provider indicator in profile header */
+.auth-provider {
+    margin-top: 8px !important;
+    font-size: 0.85rem !important;
+}
+
+.auth-provider span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    background-color: rgba(66, 133, 244, 0.1);
+    border-radius: 12px;
+    border: 1px solid rgba(66, 133, 244, 0.2);
 }
 
 .profile-tabs {
@@ -195,6 +211,12 @@
     min-height: 100px;
 }
 
+/* Form group error state */
+.form-group.error input {
+    border-color: var(--error-color);
+    box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+}
+
 .form-actions {
     display: flex;
     margin-top: 25px;
@@ -235,17 +257,177 @@
     white-space: pre-line;
 }
 
-.password-change,
-.two-factor,
-.login-history,
+/* Google Authentication Notice Styles */
+.google-auth-notice {
+    margin-top: 20px;
+}
+
+.notice-card {
+    background-color: var(--bg-tertiary);
+    border: 1px solid #4285f4;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 25px;
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    transition: all 0.3s ease;
+}
+
+.notice-card:hover {
+    box-shadow: 0 4px 15px rgba(66, 133, 244, 0.1);
+}
+
+.notice-icon {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    background-color: rgba(66, 133, 244, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.notice-content {
+    flex: 1;
+}
+
+.notice-content h4 {
+    color: var(--text-primary);
+    margin: 0 0 10px 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.notice-content p {
+    color: var(--text-secondary);
+    margin: 0 0 15px 0;
+    line-height: 1.6;
+    font-size: 0.95rem;
+    transition: color 0.3s ease;
+}
+
+.google-settings-link {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 16px;
+    background-color: #4285f4;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    gap: 8px;
+}
+
+.google-settings-link:hover {
+    background-color: #3367d6;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(66, 133, 244, 0.3);
+}
+
+.google-settings-link::after {
+    content: "↗";
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+.security-benefits {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 20px;
+    transition: all 0.3s ease;
+}
+
+.security-benefits h4 {
+    color: var(--text-primary);
+    margin: 0 0 15px 0;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.security-benefits ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.security-benefits li {
+    color: var(--text-secondary);
+    padding: 8px 0;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: color 0.3s ease;
+}
+
+.security-benefits li:first-child {
+    padding-top: 0;
+}
+
+.security-benefits li:last-child {
+    padding-bottom: 0;
+}
+
+/* Enhanced password form styling for non-Google users */
+.password-change {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+}
+
+.password-change h4 {
+    color: var(--text-primary);
+    margin: 0 0 10px 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    transition: color 0.3s ease;
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.password-change p {
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+    line-height: 1.5;
+    transition: color 0.3s ease;
+}
+
+.password-form .save-button {
+    margin-top: 10px;
+}
+
+/* Error message improvements */
+.error-message {
+    color: var(--error-color);
+    font-size: 0.85rem;
+    margin-top: 5px;
+    padding: 5px 0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.error-message::before {
+    content: "⚠";
+    font-size: 14px;
+}
+
+/* Theme and notification settings */
 .theme-settings,
 .notification-settings {
     margin-bottom: 30px;
 }
 
-.password-change h4,
-.two-factor h4,
-.login-history h4,
 .theme-settings h4,
 .notification-settings h4 {
     color: var(--text-primary);
@@ -255,82 +437,6 @@
     font-size: 1.1rem;
     font-weight: 600;
     transition: color 0.3s ease, border-color 0.3s ease;
-}
-
-.two-factor p,
-.notification-settings p {
-    color: var(--text-secondary);
-    margin-bottom: 15px;
-    line-height: 1.5;
-    transition: color 0.3s ease;
-}
-
-.password-form .save-button {
-    margin-top: 10px;
-}
-
-.activity-list {
-    margin-top: 15px;
-}
-
-.activity-item {
-    display: flex;
-    padding: 15px;
-    border-bottom: 1px solid var(--border-color);
-    justify-content: space-between;
-    align-items: center;
-    transition: background-color 0.3s ease, border-color 0.3s ease;
-    border-radius: 6px;
-}
-
-.activity-item:last-child {
-    border-bottom: none;
-}
-
-.activity-item:hover {
-    background-color: var(--bg-tertiary);
-}
-
-.activity-details {
-    flex: 1;
-}
-
-.activity-info {
-    display: flex;
-    margin-bottom: 5px;
-    gap: 10px;
-}
-
-.device {
-    font-weight: 500;
-    color: var(--text-primary);
-    transition: color 0.3s ease;
-}
-
-.location {
-    color: var(--text-secondary);
-    transition: color 0.3s ease;
-}
-
-.activity-time {
-    color: var(--text-muted);
-    font-size: 0.85rem;
-    transition: color 0.3s ease;
-}
-
-.activity-status {
-    padding: 4px 12px;
-    border-radius: 12px;
-    font-size: 0.8rem;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.activity-status.current {
-    background-color: rgba(46, 204, 113, 0.2);
-    color: var(--success-color);
-    border: 1px solid rgba(46, 204, 113, 0.3);
 }
 
 .preference-group {
@@ -443,6 +549,24 @@
     100% { transform: rotate(360deg); }
 }
 
+/* Dark mode adjustments */
+.dark-mode .notice-card {
+    background-color: rgba(66, 133, 244, 0.05);
+    border-color: rgba(66, 133, 244, 0.3);
+}
+
+.dark-mode .notice-icon {
+    background-color: rgba(66, 133, 244, 0.15);
+}
+
+.dark-mode .security-benefits {
+    background-color: var(--bg-tertiary);
+}
+
+.dark-mode .password-change {
+    background-color: var(--bg-tertiary);
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
     .profile-header {
@@ -493,12 +617,6 @@
         letter-spacing: 0.5px;
     }
 
-    .activity-item {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-    }
-
     .form-actions {
         flex-direction: column;
         gap: 10px;
@@ -506,6 +624,26 @@
 
     .form-actions button {
         width: 100%;
+    }
+
+    .notice-card {
+        flex-direction: column;
+        text-align: center;
+        padding: 15px;
+    }
+
+    .notice-icon {
+        align-self: center;
+        margin-bottom: 10px;
+    }
+
+    .google-settings-link {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .security-benefits {
+        padding: 15px;
     }
 }
 
@@ -527,5 +665,17 @@
     .form-group input,
     .form-group textarea {
         font-size: 16px; /* Prevent zoom on iOS */
+    }
+
+    .notice-card {
+        padding: 12px;
+    }
+
+    .security-benefits {
+        padding: 12px;
+    }
+
+    .password-change {
+        padding: 15px;
     }
 }

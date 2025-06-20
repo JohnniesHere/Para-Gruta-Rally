@@ -101,6 +101,243 @@
 }
 
 /* ========================================
+   ACTION BUTTONS - UPDATE & DELETE
+   ======================================== */
+
+.actions-cell {
+    text-align: center;
+    padding: 8px;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* Update button - specific styling for user management */
+.btn-update {
+    background: linear-gradient(135deg, var(--racing-gold) 0%, var(--racing-orange) 100%);
+    color: var(--text-primary);
+    padding: 6px 12px;
+    border: none;
+    border-radius: 16px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-update:hover {
+    background: linear-gradient(135deg, var(--racing-orange) 0%, #e67e22 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.5);
+}
+
+/* Delete button styles */
+.btn-delete {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 16px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-delete:hover:not(:disabled) {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.5);
+}
+
+.btn-delete:active {
+    transform: translateY(0);
+}
+
+.btn-delete:disabled {
+    background-color: var(--text-muted);
+    cursor: not-allowed;
+    opacity: 0.7;
+    transform: none;
+}
+
+/* ========================================
+   DELETE CONFIRMATION MODAL
+   ======================================== */
+
+.delete-modal {
+    max-width: 500px;
+    width: 90%;
+}
+
+.modal-header.danger {
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+    border-bottom: 2px solid #fecaca;
+    color: #dc2626;
+    padding: 20px;
+    border-radius: 12px 12px 0 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.dark-mode .modal-header.danger {
+    background: linear-gradient(135deg, #450a0a 0%, #7f1d1d 100%);
+    border-bottom: 2px solid #991b1b;
+    color: #fca5a5;
+}
+
+.modal-header.danger h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.danger-icon {
+    color: #ef4444;
+    flex-shrink: 0;
+}
+
+.delete-warning {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    padding: 16px;
+    margin: 16px 0;
+    color: #991b1b;
+    font-weight: 500;
+    text-align: center;
+}
+
+.dark-mode .delete-warning {
+    background: #450a0a;
+    border-color: #7f1d1d;
+    color: #fca5a5;
+}
+
+.user-delete-info {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 16px;
+    margin: 16px 0;
+}
+
+.delete-info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.delete-info-item:last-child {
+    border-bottom: none;
+}
+
+.delete-info-item strong {
+    color: var(--text-secondary);
+    font-weight: 600;
+    margin-right: 12px;
+}
+
+.delete-info-item span {
+    color: var(--text-primary);
+    text-align: right;
+}
+
+.delete-consequences {
+    margin: 20px 0;
+}
+
+.delete-consequences h4 {
+    color: #dc2626;
+    margin-bottom: 12px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.dark-mode .delete-consequences h4 {
+    color: #fca5a5;
+}
+
+.delete-consequences ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.delete-consequences li {
+    padding: 6px 0;
+    padding-left: 20px;
+    position: relative;
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.delete-consequences li::before {
+    content: "•";
+    color: #ef4444;
+    font-weight: bold;
+    position: absolute;
+    left: 0;
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+.btn-danger:hover:not(:disabled) {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.5);
+}
+
+.btn-danger:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.loading-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ========================================
    USER ROLE MANAGEMENT
    ======================================== */
 
@@ -200,6 +437,78 @@
 }
 
 /* ========================================
+   MODAL OVERLAY AND GENERAL MODAL STYLES
+   ======================================== */
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-content {
+    background: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+    overflow: hidden;
+}
+
+.modal-overlay.active .modal-content {
+    transform: scale(1);
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.modal-footer {
+    padding: 20px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+.btn-secondary {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background: var(--bg-tertiary);
+    border-color: var(--accent-color);
+    transform: translateY(-1px);
+}
+
+.btn-secondary:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* ========================================
    RESPONSIVE OVERRIDES
    ======================================== */
 
@@ -216,11 +525,64 @@
     .role-option {
         justify-content: flex-start;
     }
+
+    .action-buttons {
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .btn-update,
+    .btn-delete {
+        width: 100%;
+        justify-content: center;
+        font-size: 11px;
+        padding: 4px 8px;
+    }
+
+    .delete-modal {
+        width: 95%;
+        margin: 10px;
+    }
+
+    .delete-info-item {
+        flex-direction: column;
+        gap: 4px;
+        align-items: flex-start;
+    }
+
+    .delete-info-item span {
+        text-align: left;
+    }
+
+    .modal-footer {
+        flex-direction: column;
+    }
+
+    .modal-footer button {
+        width: 100%;
+    }
 }
 
 @media (max-width: 480px) {
     .export-button {
         width: 100%;
         justify-content: center;
+    }
+
+    .delete-modal {
+        width: 98%;
+        margin: 5px;
+    }
+
+    .modal-header.danger {
+        padding: 15px;
+    }
+
+    .modal-body {
+        padding: 15px;
+    }
+
+    .modal-footer {
+        padding: 15px;
     }
 }

@@ -1,12 +1,14 @@
-// src/components/modals/CreateUserModal.jsx
+// src/components/modals/CreateUserModal.jsx - FIXED VERSION
 import React, { useState } from 'react';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { initializeApp, deleteApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { db } from '../../firebase/config';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 const CreateUserModal = ({ isOpen, onClose, onUserCreated }) => {
+    const { t, isRTL } = useLanguage();
     const [formData, setFormData] = useState({
         displayName: '',
         email: '',
@@ -21,25 +23,25 @@ const CreateUserModal = ({ isOpen, onClose, onUserCreated }) => {
         const newErrors = {};
 
         if (!formData.displayName.trim()) {
-            newErrors.displayName = 'Display name is required';
+            newErrors.displayName = t('users.displayNameRequired', 'Display name is required');
         }
 
         if (!formData.email.trim()) {
-            newErrors.email = 'Email is required';
+            newErrors.email = t('users.emailRequired', 'Email is required');
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-            newErrors.email = 'Please enter a valid email address';
+            newErrors.email = t('users.emailInvalid', 'Please enter a valid email address');
         }
 
         if (!formData.name.trim()) {
-            newErrors.name = 'Name is required';
+            newErrors.name = t('users.nameRequired', 'Name is required');
         }
 
         if (!formData.phone.trim()) {
-            newErrors.phone = 'Phone number is required';
+            newErrors.phone = t('users.phoneRequired', 'Phone number is required');
         }
 
         if (!formData.role) {
-            newErrors.role = 'Role is required';
+            newErrors.role = t('users.roleRequired', 'Role is required');
         }
 
         setErrors(newErrors);
@@ -71,19 +73,10 @@ const CreateUserModal = ({ isOpen, onClose, onUserCreated }) => {
 
         setIsLoading(true);
 
-        // Store current admin info
-        const { auth } = await import('../../firebase/config');
-        const currentAdmin = auth.currentUser;
-        const adminEmail = currentAdmin?.email;
-
-        if (!adminEmail) {
-            setErrors({ general: 'You must be logged in as admin to create users' });
-            setIsLoading(false);
-            return;
-        }
-
         try {
-            // Get Firebase config
+            console.log('Creating user with data:', formData);
+
+            // Get Firebase config from environment variables
             const firebaseConfig = {
                 apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
                 authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -103,27 +96,30 @@ const CreateUserModal = ({ isOpen, onClose, onUserCreated }) => {
                 const userCredential = await createUserWithEmailAndPassword(
                     secondaryAuth,
                     formData.email,
-                    '123456'
+                    '123456' // Default password
                 );
 
                 const uid = userCredential.user.uid;
                 const now = serverTimestamp();
 
+                console.log('User created in auth, UID:', uid);
+
                 // Create user document in Firestore
                 const userDoc = {
                     createdAt: now,
-                    displayName: formData.displayName,
-                    email: formData.email,
+                    displayName: formData.displayName.trim(),
+                    email: formData.email.trim(),
                     lastLogin: now,
-                    name: formData.name,
-                    phone: formData.phone,
+                    name: formData.name.trim(),
+                    phone: formData.phone.trim(),
                     role: formData.role,
-                    updatedAt: now // Initialize updatedAt same as createdAt
+                    updatedAt: now
                 };
 
                 await setDoc(doc(db, 'users', uid), userDoc);
+                console.log('User document created in Firestore');
 
-                // Success! Clean up and close
+                // Clean up secondary app
                 await deleteApp(secondaryApp);
 
                 // Reset form
@@ -138,12 +134,12 @@ const CreateUserModal = ({ isOpen, onClose, onUserCreated }) => {
 
                 // Show success message
                 alert(
-                    `✅ SUCCESS!\n\n` +
-                    `User "${formData.displayName}" has been created successfully!\n\n` +
-                    `📧 Email: ${formData.email}\n` +
-                    `🔑 Password: 123456\n` +
-                    `👤 Role: ${formData.role}\n\n` +
-                    `✨ You remain logged in as admin!`
+                    `✅ ${t('users.createSuccess', 'SUCCESS!')}\n\n` +
+                    `${t('users.userCreated', 'User has been created successfully!')}\n\n` +
+                    `📧 ${t('users.email', 'Email')}: ${formData.email}\n` +
+                    `🔑 ${t('users.password', 'Password')}: TempPass123!\n` +
+                    `👤 ${t('users.role', 'Role')}: ${formData.role}\n\n` +
+                    `${t('users.remainLoggedIn', 'You remain logged in as admin!')}`
                 );
 
                 // Notify parent and close
@@ -154,7 +150,11 @@ const CreateUserModal = ({ isOpen, onClose, onUserCreated }) => {
 
             } catch (userCreationError) {
                 // Clean up secondary app on error
-                await deleteApp(secondaryApp);
+                try {
+                    await deleteApp(secondaryApp);
+                } catch (cleanupError) {
+                    console.warn('Error cleaning up secondary app:', cleanupError);
+                }
                 throw userCreationError;
             }
 
@@ -163,18 +163,19 @@ const CreateUserModal = ({ isOpen, onClose, onUserCreated }) => {
 
             // Handle specific Firebase errors
             if (error.code === 'auth/email-already-in-use') {
-                setErrors({ email: 'This email is already registered' });
+                setErrors({ email: t('users.emailInUse', 'This email is already registered') });
             } else if (error.code === 'auth/invalid-email') {
-                setErrors({ email: 'Invalid email address' });
+                setErrors({ email: t('users.emailInvalid', 'Invalid email address') });
             } else if (error.code === 'auth/weak-password') {
-                setErrors({ general: 'Password is too weak' });
+                setErrors({ general: t('users.weakPassword', 'Password is too weak') });
             } else if (error.code === 'app/duplicate-app') {
-                // If secondary app already exists, try a different approach
                 setErrors({
-                    general: 'Please wait a moment and try again. (App instance conflict)'
+                    general: t('users.tryAgain', 'Please wait a moment and try again. (App instance conflict)')
                 });
             } else {
-                setErrors({ general: 'Failed to create user. Please try again.' });
+                setErrors({
+                    general: t('users.createError', 'Failed to create user. Please try again.')
+                });
             }
         } finally {
             setIsLoading(false);
@@ -198,10 +199,10 @@ const CreateUserModal = ({ isOpen, onClose, onUserCreated }) => {
     if (!isOpen) return null;
 
     return (
-        <div className="modal-overlay" onClick={handleClose}>
+        <div className="modal-overlay active" onClick={handleClose} dir={isRTL ? 'rtl' : 'ltr'}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                 <div className="modal-header">
-                    <h3>Create New User</h3>
+                    <h3>{t('users.createNewUser', 'Create New User')}</h3>
                     <button
                         className="modal-close"
                         onClick={handleClose}
@@ -212,113 +213,117 @@ const CreateUserModal = ({ isOpen, onClose, onUserCreated }) => {
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className={isLoading ? 'loading' : ''}>
-                    {errors.general && (
-                        <div className="error-message" style={{ marginBottom: '20px', textAlign: 'center' }}>
-                            {errors.general}
+                <div className="modal-body">
+                    <form onSubmit={handleSubmit} className={isLoading ? 'loading' : ''}>
+                        {errors.general && (
+                            <div className="error-message" style={{ marginBottom: '20px', textAlign: 'center' }}>
+                                {errors.general}
+                            </div>
+                        )}
+
+                        <div className={`form-group ${errors.displayName ? 'error' : ''}`}>
+                            <label htmlFor="displayName">{t('users.displayName', 'Display Name')} *</label>
+                            <input
+                                type="text"
+                                id="displayName"
+                                name="displayName"
+                                value={formData.displayName}
+                                onChange={handleInputChange}
+                                disabled={isLoading}
+                                placeholder={t('users.displayNamePlaceholder', 'Enter display name')}
+                            />
+                            {errors.displayName && (
+                                <div className="error-message">{errors.displayName}</div>
+                            )}
                         </div>
-                    )}
 
-                    <div className={`form-group ${errors.displayName ? 'error' : ''}`}>
-                        <label htmlFor="displayName">Display Name *</label>
-                        <input
-                            type="text"
-                            id="displayName"
-                            name="displayName"
-                            value={formData.displayName}
-                            onChange={handleInputChange}
-                            disabled={isLoading}
-                            placeholder="Enter display name"
-                        />
-                        {errors.displayName && (
-                            <div className="error-message">{errors.displayName}</div>
-                        )}
-                    </div>
+                        <div className={`form-group ${errors.email ? 'error' : ''}`}>
+                            <label htmlFor="email">{t('users.emailAddress', 'Email Address')} *</label>
+                            <input
+                                type="email"
+                                id="email"
+                                name="email"
+                                value={formData.email}
+                                onChange={handleInputChange}
+                                disabled={isLoading}
+                                placeholder={t('users.emailPlaceholder', 'Enter email address')}
+                            />
+                            {errors.email && (
+                                <div className="error-message">{errors.email}</div>
+                            )}
+                        </div>
 
-                    <div className={`form-group ${errors.email ? 'error' : ''}`}>
-                        <label htmlFor="email">Email Address *</label>
-                        <input
-                            type="email"
-                            id="email"
-                            name="email"
-                            value={formData.email}
-                            onChange={handleInputChange}
-                            disabled={isLoading}
-                            placeholder="Enter email address"
-                        />
-                        {errors.email && (
-                            <div className="error-message">{errors.email}</div>
-                        )}
-                    </div>
+                        <div className={`form-group ${errors.name ? 'error' : ''}`}>
+                            <label htmlFor="name">{t('users.fullName', 'Full Name')} *</label>
+                            <input
+                                type="text"
+                                id="name"
+                                name="name"
+                                value={formData.name}
+                                onChange={handleInputChange}
+                                disabled={isLoading}
+                                placeholder={t('users.fullNamePlaceholder', 'Enter full name')}
+                            />
+                            {errors.name && (
+                                <div className="error-message">{errors.name}</div>
+                            )}
+                        </div>
 
-                    <div className={`form-group ${errors.name ? 'error' : ''}`}>
-                        <label htmlFor="name">Full Name *</label>
-                        <input
-                            type="text"
-                            id="name"
-                            name="name"
-                            value={formData.name}
-                            onChange={handleInputChange}
-                            disabled={isLoading}
-                            placeholder="Enter full name"
-                        />
-                        {errors.name && (
-                            <div className="error-message">{errors.name}</div>
-                        )}
-                    </div>
+                        <div className={`form-group ${errors.phone ? 'error' : ''}`}>
+                            <label htmlFor="phone">{t('users.phoneNumber', 'Phone Number')} *</label>
+                            <input
+                                type="tel"
+                                id="phone"
+                                name="phone"
+                                value={formData.phone}
+                                onChange={handleInputChange}
+                                disabled={isLoading}
+                                placeholder={t('users.phoneNumberPlaceholder', 'Enter phone number')}
+                            />
+                            {errors.phone && (
+                                <div className="error-message">{errors.phone}</div>
+                            )}
+                        </div>
 
-                    <div className={`form-group ${errors.phone ? 'error' : ''}`}>
-                        <label htmlFor="phone">Phone Number *</label>
-                        <input
-                            type="tel"
-                            id="phone"
-                            name="phone"
-                            value={formData.phone}
-                            onChange={handleInputChange}
-                            disabled={isLoading}
-                            placeholder="Enter phone number"
-                        />
-                        {errors.phone && (
-                            <div className="error-message">{errors.phone}</div>
-                        )}
-                    </div>
+                        <div className={`form-group ${errors.role ? 'error' : ''}`}>
+                            <label htmlFor="role">{t('users.role', 'Role')} *</label>
+                            <select
+                                id="role"
+                                name="role"
+                                value={formData.role}
+                                onChange={handleInputChange}
+                                disabled={isLoading}
+                            >
+                                <option value="parent">{t('users.parent', 'Parent')}</option>
+                                <option value="instructor">{t('users.instructor', 'Instructor')}</option>
+                                <option value="admin">{t('users.admin', 'Admin')}</option>
+                                <option value="host">{t('users.host', 'Host')}</option>
+                            </select>
+                            {errors.role && (
+                                <div className="error-message">{errors.role}</div>
+                            )}
+                        </div>
+                    </form>
+                </div>
 
-                    <div className={`form-group ${errors.role ? 'error' : ''}`}>
-                        <label htmlFor="role">Role *</label>
-                        <select
-                            id="role"
-                            name="role"
-                            value={formData.role}
-                            onChange={handleInputChange}
-                            disabled={isLoading}
-                        >
-                            <option value="parent">Parent</option>
-                            <option value="instructor">Instructor</option>
-                            <option value="admin">Admin</option>
-                        </select>
-                        {errors.role && (
-                            <div className="error-message">{errors.role}</div>
-                        )}
-                    </div>
-
-                    <div className="form-actions">
-                        <button
-                            type="button"
-                            className="btn-secondary"
-                            onClick={handleClose}
-                            disabled={isLoading}
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            type="submit"
-                            className="btn-primary"
-                            disabled={isLoading}
-                        >
-                            {isLoading ? 'Creating...' : 'Create User'}
-                        </button>
-                    </div>
-                </form>
+                <div className="modal-footer">
+                    <button
+                        type="button"
+                        className="btn-secondary"
+                        onClick={handleClose}
+                        disabled={isLoading}
+                    >
+                        {t('general.cancel', 'Cancel')}
+                    </button>
+                    <button
+                        type="submit"
+                        className="btn-primary"
+                        onClick={handleSubmit}
+                        disabled={isLoading}
+                    >
+                        {isLoading ? t('users.creating', 'Creating...') : t('users.createUser', 'Create User')}
+                    </button>
+                </div>
             </div>
         </div>
     );

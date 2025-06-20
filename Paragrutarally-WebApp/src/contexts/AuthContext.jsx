@@ -10,6 +10,7 @@ import {
     signInWithPopup      // Add this import
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 import { auth, db } from '../firebase/config';
 
 // Create the authentication context
@@ -177,35 +178,54 @@ export function AuthProvider({ children }) {
             try {
                 const provider = new GoogleAuthProvider();
                 const userCredential = await signInWithPopup(auth, provider);
+                const user = userCredential.user;
 
-                // Check if user exists in Firestore, create if not
-                const userRef = doc(db, 'users', userCredential.user.uid);
-                const userDoc = await getDoc(userRef);
+                // First, check if this email exists in our users collection
+                const usersRef = collection(db, 'users');
+                const emailQuery = query(usersRef, where('email', '==', user.email));
+                const emailQuerySnapshot = await getDocs(emailQuery);
 
-                if (!userDoc.exists()) {
-                    // Create a new user document
-                    await setDoc(userRef, {
-                        email: userCredential.user.email,
-                        displayName: userCredential.user.displayName || '',
-                        role: 'external', // Default role for Google sign-ins
-                        createdAt: serverTimestamp(),
-                        lastLogin: serverTimestamp(),
-                        authProvider: 'google'
-                    });
-                } else {
-                    // Update last login
-                    await setDoc(userRef, {
-                        lastLogin: serverTimestamp(),
-                        // Update display name if it was empty before
-                        ...(userCredential.user.displayName && !userDoc.data().displayName
-                            ? { displayName: userCredential.user.displayName }
-                            : {})
-                    }, { merge: true });
+                if (emailQuerySnapshot.empty) {
+                    // Email not found in authorized users
+                    // Sign out the user immediately
+                    await signOut(auth);
+                    throw new Error('UNAUTHORIZED_EMAIL');
                 }
+
+                // Email exists, get the user document
+                const existingUserDoc = emailQuerySnapshot.docs[0];
+                const existingUserData = existingUserDoc.data();
+                const existingUserId = existingUserDoc.id;
+
+                // Update the existing user document with Google auth info
+                const userRef = doc(db, 'users', existingUserId);
+                await setDoc(userRef, {
+                    lastLogin: serverTimestamp(),
+                    authProvider: 'google',
+                    // Update display name if it was empty before
+                    ...(user.displayName && !existingUserData.displayName
+                        ? { displayName: user.displayName }
+                        : {}),
+                    // Update photo URL if available
+                    ...(user.photoURL ? { photoURL: user.photoURL } : {})
+                }, { merge: true });
+
+                // Create a custom user object that maintains the existing UID from Firestore
+                // but uses the Google Auth user for authentication
+                const customUser = {
+                    ...user,
+                    firestoreUid: existingUserId,
+                    ...existingUserData
+                };
 
                 return userCredential;
             } catch (error) {
                 console.error("Google sign-in error:", error);
+
+                if (error.message === 'UNAUTHORIZED_EMAIL') {
+                    throw new Error('This email is not authorized to access this application. Please contact an administrator.');
+                }
+
                 throw error;
             }
         },

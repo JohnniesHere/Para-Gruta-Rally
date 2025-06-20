@@ -14,9 +14,10 @@ const Login = () => {
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [googleLoading, setGoogleLoading] = useState(false);
     const [error, setError] = useState('');
     const [isContactModalOpen, setIsContactModalOpen] = useState(false);
-    const { signIn } = useAuth();
+    const { signIn, signInWithGoogle } = useAuth();
     const { isDarkMode } = useTheme();
     const { t } = useLanguage();
     const navigate = useNavigate();
@@ -34,6 +35,29 @@ const Login = () => {
             console.error(err);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleGoogleSignIn = async () => {
+        setError('');
+        setGoogleLoading(true);
+
+        try {
+            await signInWithGoogle();
+            // Navigation will be handled by the AuthContext redirect logic
+        } catch (err) {
+            console.error('Google sign-in error:', err);
+
+            // Handle specific error cases
+            if (err.code === 'auth/popup-closed-by-user') {
+                setError(t('login.googleCancelled', 'Google sign-in was cancelled.'));
+            } else if (err.code === 'auth/popup-blocked') {
+                setError(t('login.popupBlocked', 'Popup was blocked. Please allow popups and try again.'));
+            } else {
+                setError(t('login.googleError', 'Failed to sign in with Google. Please try again.'));
+            }
+        } finally {
+            setGoogleLoading(false);
         }
     };
 
@@ -94,7 +118,7 @@ const Login = () => {
                         <button
                             type="submit"
                             className="login-button"
-                            disabled={loading}
+                            disabled={loading || googleLoading}
                         >
                             {loading ? t('login.signingIn', 'Signing In...') : t('login.signIn', 'Sign In')}
                         </button>
@@ -106,11 +130,13 @@ const Login = () => {
                     </form>
 
                     <div className="login-options">
-                        <button type="button" className="mobile-login-btn">
-                            {t('login.mobileSignIn', 'Sign In With Mobile Number')}
-                        </button>
-                        <button type="button" className="google-login-btn">
-                            {t('login.googleSignIn', 'Sign In With Google')}
+                        <button
+                            type="button"
+                            className="google-login-btn"
+                            onClick={handleGoogleSignIn}
+                            disabled={loading || googleLoading}
+                        >
+                            {googleLoading ? t('login.googleSigningIn', 'Signing in with Google...') : t('login.googleSignIn', 'Sign In With Google')}
                         </button>
                     </div>
                 </div>
