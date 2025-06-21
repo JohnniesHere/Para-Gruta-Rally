@@ -1185,7 +1185,7 @@ const translations = {
         'formsManagement.feedback': 'Feedback',
         'formsManagement.medical': 'Medical',
 
-        // In the `en` section:
+        // Analytics:
         'analytics.pageTitle': 'Racing Analytics Dashboard',
         'analytics.raceControlTitle': '🏁 Race Control Analytics',
         'analytics.subtitle': 'Comprehensive data insights for your racing program',
@@ -1198,8 +1198,6 @@ const translations = {
         'analytics.loadingParticipationAnalytics': 'Loading participation analytics...',
         'analytics.loadingMaintenanceData': 'Loading maintenance data...',
         'analytics.failedToLoad': 'Failed to load analytics data. Please try again.',
-
-// Tab labels
         'analytics.tabs.overview': 'Overview',
         'analytics.tabs.vehicles': 'Vehicles',
         'analytics.tabs.teams': 'Teams',
@@ -1210,8 +1208,6 @@ const translations = {
         'analytics.tabs.teamsDesc': 'Performance & capacity',
         'analytics.tabs.participationDesc': 'Participation & engagement',
         'analytics.tabs.maintenanceDesc': 'Alerts & recommendations',
-
-// Overview tab
         'analytics.overview.totalVehicles': 'Total Vehicles',
         'analytics.overview.totalRacers': 'Total Racers',
         'analytics.overview.racingTeams': 'Racing Teams',
@@ -1227,8 +1223,6 @@ const translations = {
         'analytics.overview.teamCapacityDesc': 'Current members vs maximum capacity',
         'analytics.overview.systemHealthDesc': 'Overall system operational status',
         'analytics.overview.participationDesc': 'Active racers with completed forms',
-
-// Vehicle analytics
         'analytics.vehicles.fleetOverview': '🚗 Vehicle Fleet Overview',
         'analytics.vehicles.fleetStatus': 'Fleet Status',
         'analytics.vehicles.totalVehicles': 'Total Vehicles',
@@ -1245,8 +1239,6 @@ const translations = {
         'analytics.vehicles.needsReplacement': '🚨 Needs Replacement',
         'analytics.vehicles.monitorClosely': '⚠️ Monitor Closely',
         'analytics.vehicles.daysOld': 'days old',
-
-// Teams analytics
         'analytics.teams.performanceOverview': '👥 Team Performance Overview',
         'analytics.teams.teamStatistics': 'Team Statistics',
         'analytics.teams.totalTeams': 'Total Teams',
@@ -1257,8 +1249,6 @@ const translations = {
         'analytics.teams.instructors': 'Instructors',
         'analytics.teams.vehicleDistribution': '🚗 Vehicle Distribution',
         'analytics.teams.ratio': 'Ratio',
-
-// Participation analytics
         'analytics.participation.eventsOverview': '🏁 Events Overview',
         'analytics.participation.totalEvents': 'Total Events',
         'analytics.participation.upcomingEvents': 'Upcoming',
@@ -1272,8 +1262,6 @@ const translations = {
         'analytics.participation.recentEvents': '📅 Recent Events',
         'analytics.participation.participants': 'participants',
         'analytics.participation.teams': 'teams',
-
-// Maintenance analytics
         'analytics.maintenance.urgentAlerts': '🚨 Urgent Maintenance Alerts',
         'analytics.maintenance.batteryReplacement': 'Battery Replacement Required',
         'analytics.maintenance.batteryAge': 'Battery is {daysOld} days old',
@@ -1285,61 +1273,45 @@ const translations = {
         'analytics.maintenance.healthIndicators': '📊 System Health Indicators',
         'analytics.maintenance.vehicleHealth': 'Vehicle Health',
         'analytics.maintenance.teamHealth': 'Team Health',
-
-// Tooltips
         'analytics.tooltip.systemPerformance.title': 'System Performance',
         'analytics.tooltip.systemPerformance.description': 'Critical metrics showing how well your racing program is running. These percentages help identify improvement areas.',
         'analytics.tooltip.systemPerformance.action': 'Aim for 80%+ on all metrics. Lower scores indicate specific areas needing attention.',
-
         'analytics.tooltip.vehicleUsage.title': 'Vehicle Usage Rate',
         'analytics.tooltip.vehicleUsage.description': 'Percentage of your vehicle fleet currently assigned and being used regularly by teams.',
         'analytics.tooltip.vehicleUsage.action': 'Low utilization? Redistribute vehicles or recruit participants. High? You may need more vehicles.',
-
         'analytics.tooltip.teamFillRate.title': 'Team Fill Rate',
         'analytics.tooltip.teamFillRate.description': 'How full your teams are compared to maximum capacity. Shows room for more participants.',
         'analytics.tooltip.teamFillRate.action': 'Low capacity? Focus on recruitment. High? Consider creating new teams or expanding existing ones.',
-
-        // Additional tooltip translations
         'analytics.tooltip.usageAnalytics.title': 'Usage Analytics',
         'analytics.tooltip.usageAnalytics.description': 'Track which vehicles are used most and least. Helps identify popular vehicles and those needing attention.',
         'analytics.tooltip.usageAnalytics.action': 'Rotate high-usage vehicles to prevent wear and investigate why some are used less.',
-
         'analytics.tooltip.highUsage.title': 'High-Usage Fleet',
         'analytics.tooltip.highUsage.description': 'These vehicles are in high demand. Monitor them for maintenance needs due to heavy usage.',
         'analytics.tooltip.highUsage.action': 'Schedule regular maintenance and consider rotating to prevent overuse.',
-
         'analytics.tooltip.batteryHealth.title': 'Battery Health Monitoring',
         'analytics.tooltip.batteryHealth.description': 'Track battery age and condition to prevent unexpected failures during events.',
         'analytics.tooltip.batteryHealth.action': 'Replace batteries showing warning signs immediately and schedule regular checks.',
-
         'analytics.tooltip.criticalBattery.title': 'Critical Battery Alert',
         'analytics.tooltip.criticalBattery.description': 'These batteries are old and need immediate replacement to avoid vehicle downtime.',
         'analytics.tooltip.criticalBattery.action': 'Order replacement batteries now and schedule immediate maintenance.',
-
         'analytics.tooltip.preventiveMaintenance.title': 'Preventive Maintenance',
         'analytics.tooltip.preventiveMaintenance.description': 'These batteries are approaching replacement time but can still be used with careful monitoring.',
         'analytics.tooltip.preventiveMaintenance.action': 'Order spare batteries and check these vehicles weekly for performance issues.',
-
         'analytics.tooltip.teamCapacityAnalysis.title': 'Team Capacity Analysis',
         'analytics.tooltip.teamCapacityAnalysis.description': 'See how full each team is and identify opportunities for growth or redistribution.',
         'analytics.tooltip.teamCapacityAnalysis.action': 'Teams under 70% capacity can take more members. Teams over 90% may need to split or expand.',
-
         'analytics.tooltip.resourceAllocation.title': 'Resource Allocation',
         'analytics.tooltip.resourceAllocation.description': 'Shows how vehicles are distributed across teams and the ratio of vehicles to members.',
         'analytics.tooltip.resourceAllocation.action': 'Ensure fair distribution. Aim for similar vehicle-to-member ratios across teams.',
-
         'analytics.tooltip.participationRate.title': 'Participation Rate',
         'analytics.tooltip.participationRate.description': 'Average number of participants per event. This helps gauge event popularity and engagement.',
         'analytics.tooltip.participationRate.action': 'Low participation? Try different event types or timing. High participation? Consider larger venues or more events.',
-
         'analytics.tooltip.participationHistory.title': 'Participation History',
         'analytics.tooltip.participationHistory.description': 'Racers with the highest total event participation. These are your most dedicated participants.',
         'analytics.tooltip.participationHistory.action': 'Consider special recognition or leadership roles for top participants.',
-
         'analytics.tooltip.currentEngagement.title': 'Current Engagement',
         'analytics.tooltip.currentEngagement.description': 'Racers who have been most active in recent events. This shows current engagement levels.',
         'analytics.tooltip.currentEngagement.action': 'Engage with recently active participants and encourage others to join upcoming events.',
-        // Dashboard additional translations (add to en section)
         'dashboard.fetchError': 'Failed to load dashboard data. Please try again.',
         'dashboard.scheduled': 'Scheduled',
         'dashboard.registered': 'Registered',
@@ -1347,18 +1319,74 @@ const translations = {
         'dashboard.activitiesWillAppear': 'Activities will appear here as users interact with the system.',
         'dashboard.noUpcomingEvents': 'No upcoming events scheduled.',
         'dashboard.createFirstEvent': 'Create your first event to get started!',
-
-        // System recommendations content
         'analytics.maintenance.teamsWithoutVehicles': 'Teams Without Vehicles',
         'analytics.maintenance.teamsCount': '{count} teams have no assigned vehicles',
         'analytics.maintenance.actionLabel': 'Action',
         'analytics.maintenance.assignVehiclesAction': 'Assign vehicles to teams or consider vehicle redistribution',
-
-// Tooltip text for priority recommendations
         'analytics.tooltip.priorityRecommendationGeneric.title': 'Priority Recommendation',
+
+        // Instructor Dashboard
+        'instructor.dashboard': 'Instructor Dashboard',
+        'instructor.dashboardSubtitle': 'Manage your teams, kids, and vehicles',
+        'instructor.accessDenied': 'Access denied: Instructor credentials required',
+        'instructor.failedToLoad': 'Failed to load dashboard data: {error}',
+        'instructor.noDataFound': 'No Data Found',
+        'instructor.noDataMessage': 'It looks like you don\'t have any teams or kids assigned yet.',
+        'instructor.couldMean': 'This could mean:',
+        'instructor.newInstructor': 'You\'re a new instructor and haven\'t been assigned teams yet',
+        'instructor.differentFormat': 'The data in Firestore uses a different instructor ID format',
+        'instructor.collectionsNotExist': 'The collections (teams, kids) don\'t exist in your Firestore database',
+        'instructor.nextSteps': 'Next Steps:',
+        'instructor.refreshPage': 'Refresh Page',
+        'instructor.viewMyAccount': 'View My Account',
+        'instructor.viewGallery': 'View Gallery',
+        'instructor.developmentMode': 'Development Mode',
+        'instructor.debugHelp': 'The debug component (red box) can help you create sample data for testing.',
+        'instructor.instructorId': 'Your instructor ID:',
+        'stats.myTeams': 'My Teams',
+        'stats.myKids': 'My Kids',
+        'stats.myVehicles': 'My Vehicles',
+        'stats.upcomingEvents': 'Upcoming Events',
+        'stats.managed': 'Managed',
+        'stats.totalMembers': 'Total Members',
+        'stats.assigned': 'Assigned',
+        'stats.involvingYourTeams': 'Involving Your Teams',
+        'common.loading': 'Loading...',
+        'common.welcome': 'Welcome',
+        'common.unknownTeam': 'Unknown Team',
+
+
     },
     he: {
-
+        // Instructor Dashboard
+        'instructor.dashboard': 'לוח בקרה מדריך',
+        'instructor.dashboardSubtitle': 'נהל את הקבוצות, הילדים והרכבים שלך',
+        'instructor.accessDenied': 'גישה נדחתה: נדרשות הרשאות מדריך',
+        'instructor.failedToLoad': 'כשל בטעינת נתוני לוח הבקרה: {error}',
+        'instructor.noDataFound': 'לא נמצאו נתונים',
+        'instructor.noDataMessage': 'נראה שעדיין לא הוקצו לך קבוצות או ילדים.',
+        'instructor.couldMean': 'זה יכול להיות:',
+        'instructor.newInstructor': 'אתה מדריך חדש ועדיין לא הוקצו לך קבוצות',
+        'instructor.differentFormat': 'הנתונים ב-Firestore משתמשים בפורמט מזהה מדריך שונה',
+        'instructor.collectionsNotExist': 'האוספים (קבוצות, ילדים) לא קיימים במסד הנתונים שלך',
+        'instructor.nextSteps': 'צעדים הבאים:',
+        'instructor.refreshPage': 'רענן דף',
+        'instructor.viewMyAccount': 'צפה בחשבון שלי',
+        'instructor.viewGallery': 'צפה בגלריה',
+        'instructor.developmentMode': 'מצב פיתוח',
+        'instructor.debugHelp': 'רכיב הניפוי (קופסה אדומה) יכול לעזור לך ליצור נתונים לדוגמה לבדיקה.',
+        'instructor.instructorId': 'מזהה המדריך שלך:',
+        'stats.myTeams': 'הקבוצות שלי',
+        'stats.myKids': 'הילדים שלי',
+        'stats.myVehicles': 'הרכבים שלי',
+        'stats.upcomingEvents': 'אירועים קרובים',
+        'stats.managed': 'מנוהלים',
+        'stats.totalMembers': 'סך החברים',
+        'stats.assigned': 'מוקצים',
+        'stats.involvingYourTeams': 'הכוללים את הקבוצות שלך',
+        'common.loading': 'טוען...',
+        'common.welcome': 'ברוך הבא',
+        'common.unknownTeam': 'קבוצה לא ידועה',
 
 
         // Navigation

@@ -1,4 +1,4 @@
-// src/pages/instructor/InstructorDashboardPage.jsx - With Debug and Better Error Handling
+// src/pages/instructor/InstructorDashboardPage.jsx - With Debug, Better Error Handling, and Full Translation Support
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -49,7 +49,7 @@ const InstructorDashboardPage = () => {
     useEffect(() => {
         const loadDashboardData = async () => {
             if (!currentUser || !isInstructor) {
-                setError('Access denied: Instructor credentials required');
+                setError(t('instructor.accessDenied', 'Access denied: Instructor credentials required'));
                 setLoading(false);
                 return;
             }
@@ -117,14 +117,14 @@ const InstructorDashboardPage = () => {
 
             } catch (err) {
                 console.error('Error loading dashboard data:', err);
-                setError(`Failed to load dashboard data: ${err.message}`);
+                setError(t('instructor.failedToLoad', 'Failed to load dashboard data: {error}', { error: err.message }));
             } finally {
                 setLoading(false);
             }
         };
 
         loadDashboardData();
-    }, [currentUser, isInstructor]);
+    }, [currentUser, isInstructor, t]);
 
     // Helper functions
     const getFieldValue = (item, fieldPath, defaultValue = '-') => {
@@ -140,7 +140,7 @@ const InstructorDashboardPage = () => {
 
     const getTeamName = (teamId) => {
         const team = dashboardData.teams.find(t => t.id === teamId);
-        return team ? team.name : 'Unknown Team';
+        return team ? team.name : t('common.unknownTeam', 'Unknown Team');
     };
 
     const getUpcomingEvents = () => {
@@ -205,7 +205,7 @@ const InstructorDashboardPage = () => {
                     </h1>
 
                     <div className="admin-container">
-                        {/* Welcome Header */}
+                        {/* Welcome Header - TRANSLATED */}
                         <div className="racing-header">
                             <div className="header-content">
                                 <div className="title-section">
@@ -220,15 +220,15 @@ const InstructorDashboardPage = () => {
                             </div>
                         </div>
 
-                        {/* No Data Message */}
+                        {/* No Data Message - TRANSLATED */}
                         <div className="card" style={{ textAlign: 'center', padding: '40px', marginTop: '30px' }}>
                             <Database size={64} style={{ color: '#6c757d', marginBottom: '20px' }} />
                             <h3 style={{ color: '#6c757d', marginBottom: '15px' }}>
-                                No Data Found
+                                {t('instructor.noDataFound', 'No Data Found')}
                             </h3>
                             <p style={{ color: '#6c757d', marginBottom: '20px', lineHeight: '1.6' }}>
-                                It looks like you don't have any teams or kids assigned yet.<br />
-                                This could mean:
+                                {t('instructor.noDataMessage', 'It looks like you don\'t have any teams or kids assigned yet.')}<br />
+                                {t('instructor.couldMean', 'This could mean:')}
                             </p>
                             <ul style={{
                                 color: '#6c757d',
@@ -236,32 +236,32 @@ const InstructorDashboardPage = () => {
                                 display: 'inline-block',
                                 marginBottom: '30px'
                             }}>
-                                <li>You're a new instructor and haven't been assigned teams yet</li>
-                                <li>The data in Firestore uses a different instructor ID format</li>
-                                <li>The collections (teams, kids) don't exist in your Firestore database</li>
+                                <li>{t('instructor.newInstructor', 'You\'re a new instructor and haven\'t been assigned teams yet')}</li>
+                                <li>{t('instructor.differentFormat', 'The data in Firestore uses a different instructor ID format')}</li>
+                                <li>{t('instructor.collectionsNotExist', 'The collections (teams, kids) don\'t exist in your Firestore database')}</li>
                             </ul>
                             <div>
                                 <p style={{ color: '#6c757d', marginBottom: '15px' }}>
-                                    <strong>Next Steps:</strong>
+                                    <strong>{t('instructor.nextSteps', 'Next Steps:')}</strong>
                                 </p>
                                 <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
                                     <button
                                         onClick={() => window.location.reload()}
                                         className="btn btn-primary"
                                     >
-                                        Refresh Page
+                                        {t('instructor.refreshPage', 'Refresh Page')}
                                     </button>
                                     <Link to="/my-account" className="btn btn-secondary">
-                                        View My Account
+                                        {t('instructor.viewMyAccount', 'View My Account')}
                                     </Link>
                                     <Link to="/gallery" className="btn btn-secondary">
-                                        View Gallery
+                                        {t('instructor.viewGallery', 'View Gallery')}
                                     </Link>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Development Tools */}
+                        {/* Development Tools - TRANSLATED */}
                         {process.env.NODE_ENV === 'development' && (
                             <div className="alert" style={{
                                 marginTop: '30px',
@@ -271,13 +271,13 @@ const InstructorDashboardPage = () => {
                                 padding: '15px'
                             }}>
                                 <h4 style={{ color: '#856404', marginBottom: '10px' }}>
-                                    Development Mode
+                                    {t('instructor.developmentMode', 'Development Mode')}
                                 </h4>
                                 <p style={{ color: '#856404', marginBottom: '10px' }}>
-                                    The debug component (red box) can help you create sample data for testing.
+                                    {t('instructor.debugHelp', 'The debug component (red box) can help you create sample data for testing.')}
                                 </p>
                                 <p style={{ color: '#856404', fontSize: '14px' }}>
-                                    Your instructor ID: <code>{currentUser?.uid}</code>
+                                    {t('instructor.instructorId', 'Your instructor ID:')} <code>{currentUser?.uid}</code>
                                 </p>
                             </div>
                         )}
@@ -300,7 +300,7 @@ const InstructorDashboardPage = () => {
                 </h1>
 
                 <div className="admin-container">
-                    {/* Welcome Header */}
+                    {/* Welcome Header - TRANSLATED */}
                     <div className="racing-header">
                         <div className="header-content">
                             <div className="title-section">
@@ -315,7 +315,7 @@ const InstructorDashboardPage = () => {
                         </div>
                     </div>
 
-                    {/* Main Stats */}
+                    {/* Main Stats - TRANSLATED */}
                     <div className="stats-grid">
                         <Link to="/instructor/teams" className="stat-card teams clickable">
                             <div className="stat-icon">
