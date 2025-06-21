@@ -1,10 +1,11 @@
-// src/pages/admin/EventManagementPage.jsx - Updated with Complete Translation Support
+// src/pages/admin/EventManagementPage.jsx - Updated with Separate Delete Modal
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { collection, getDocs, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
 import { ref, listAll, deleteObject } from 'firebase/storage';
 import { db, storage } from '../../firebase/config';
 import Dashboard from '../../components/layout/Dashboard';
+import DeleteEventModal from '../../components/modals/DeleteEventModal'; // Import the new modal
 import { useTheme } from '../../contexts/ThemeContext.jsx';
 import { useLanguage } from '../../contexts/LanguageContext.jsx';
 import { usePermissions } from '../../hooks/usePermissions.jsx';
@@ -48,6 +49,8 @@ const EventManagementPage = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [error, setError] = useState(null);
+
+    // Delete modal state - simplified
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [eventToDelete, setEventToDelete] = useState(null);
     const [deleteGalleryToo, setDeleteGalleryToo] = useState(false);
@@ -197,18 +200,6 @@ const EventManagementPage = () => {
         }
     };
 
-    // Check if gallery folder exists and has photos
-    const checkGalleryExists = async (eventName) => {
-        try {
-            const folderRef = ref(storage, `gallery/events/${eventName}`);
-            const result = await listAll(folderRef);
-            return result.items.length > 0; // Returns true if folder has any files
-        } catch (error) {
-            console.log(`Gallery folder for ${eventName} does not exist or is empty`);
-            return false;
-        }
-    };
-
     /**
      * Delete event image from Firebase Storage
      * @param {string} imageUrl - The full URL of the image to delete
@@ -354,7 +345,7 @@ const EventManagementPage = () => {
         }
     };
 
-    // Confirm delete event
+    // Confirm delete event - Updated to work with new modal
     const confirmDeleteEvent = async () => {
         if (!eventToDelete) return;
 
@@ -380,6 +371,7 @@ const EventManagementPage = () => {
             console.error('Error deleting event:', error);
             alert(t('events.deleteError', 'Failed to delete event. Please try again.'));
         } finally {
+            // Close modal and reset state
             setIsDeleting(false);
             setDeleteModalOpen(false);
             setEventToDelete(null);
@@ -387,7 +379,7 @@ const EventManagementPage = () => {
         }
     };
 
-    // Cancel delete
+    // Cancel delete - Updated for new modal
     const cancelDelete = () => {
         setDeleteModalOpen(false);
         setEventToDelete(null);
@@ -802,109 +794,16 @@ const EventManagementPage = () => {
                     </div>
                 )}
 
-                {/* Delete Confirmation Modal */}
-                {deleteModalOpen && eventToDelete && (
-                    <div className="modal-overlay" onClick={cancelDelete}>
-                        <div className="modal-content delete-modal" onClick={(e) => e.stopPropagation()}>
-                            <div className="modal-header">
-                                <h2>{t('events.deleteEvent', 'Delete Event')}</h2>
-                                <button className="modal-close" onClick={cancelDelete}>
-                                    <X size={20} />
-                                </button>
-                            </div>
-                            <div className="modal-body">
-                                <div className="delete-warning">
-                                    <AlertTriangle className="warning-icon" size={48} />
-                                    <h3>{t('events.deleteConfirmTitle', 'Are you sure you want to delete this event?')}</h3>
-                                    <p>
-                                        {t('events.deleteConfirmMessage', 'You are about to delete "{eventName}". This action cannot be undone.', { eventName: eventToDelete.name })}
-                                    </p>
-
-                                    {/* Show what will be deleted */}
-                                    <div className="deletion-summary">
-                                        <h4>{t('events.deletionSummaryTitle', 'The following will be permanently deleted:')}</h4>
-                                        <ul>
-                                            <li>✅ {t('events.eventInformation', 'Event information and details')}</li>
-                                            {eventToDelete.image && !eventToDelete.image.includes('unsplash.com') && (
-                                                <li>🖼️ {t('events.eventCoverImage', 'Event cover image')}</li>
-                                            )}
-                                            {deleteGalleryToo && eventToDelete.hasGalleryFolder && (
-                                                <li>📷 {t('events.allGalleryPhotos', 'All photos in the event gallery')}</li>
-                                            )}
-                                        </ul>
-                                    </div>
-                                </div>
-
-                                {eventToDelete.hasGalleryFolder && (
-                                    <div className="gallery-delete-section">
-                                        <div className="gallery-warning">
-                                            <Folder className="folder-icon" size={24} />
-                                            <div className="gallery-warning-content">
-                                                <h4>{t('events.galleryFolderDetected', 'Gallery Folder Detected')}</h4>
-                                                <p>{t('events.galleryFolderQuestion', 'This event has an associated photo gallery. What would you like to do with the photos?')}</p>
-                                            </div>
-                                        </div>
-
-                                        <div className="delete-options">
-                                            <label className="delete-option">
-                                                <input
-                                                    type="radio"
-                                                    name="galleryAction"
-                                                    checked={!deleteGalleryToo}
-                                                    onChange={() => setDeleteGalleryToo(false)}
-                                                />
-                                                <div className="option-content">
-                                                    <strong>{t('events.keepGalleryPhotos', 'Keep Gallery Photos')}</strong>
-                                                    <p>{t('events.keepGalleryDescription', 'Delete only the event, preserve all photos in the gallery')}</p>
-                                                </div>
-                                            </label>
-
-                                            <label className="delete-option danger">
-                                                <input
-                                                    type="radio"
-                                                    name="galleryAction"
-                                                    checked={deleteGalleryToo}
-                                                    onChange={() => setDeleteGalleryToo(true)}
-                                                />
-                                                <div className="option-content">
-                                                    <strong>{t('events.deleteGalleryToo', 'Delete Gallery Too')}</strong>
-                                                    <p>{t('events.deleteGalleryDescription', 'Delete the event AND permanently remove all photos from the gallery')}</p>
-                                                </div>
-                                            </label>
-                                        </div>
-                                    </div>
-                                )}
-
-                                <div className="modal-actions">
-                                    <button
-                                        className="btn-secondary"
-                                        onClick={cancelDelete}
-                                        disabled={isDeleting}
-                                    >
-                                        {t('general.cancel', 'Cancel')}
-                                    </button>
-                                    <button
-                                        className="btn-danger"
-                                        onClick={confirmDeleteEvent}
-                                        disabled={isDeleting}
-                                    >
-                                        {isDeleting ? (
-                                            <>
-                                                <Clock className="loading-spinner" size={16} />
-                                                {t('events.deleting', 'Deleting...')}
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Trash2 size={16} />
-                                                {deleteGalleryToo ? t('events.deleteEventAndGallery', 'Delete Event & Gallery') : t('events.deleteEventOnly', 'Delete Event Only')}
-                                            </>
-                                        )}
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
+                {/* New Delete Event Modal Component */}
+                <DeleteEventModal
+                    isOpen={deleteModalOpen}
+                    eventToDelete={eventToDelete}
+                    deleteGalleryToo={deleteGalleryToo}
+                    setDeleteGalleryToo={setDeleteGalleryToo}
+                    isDeleting={isDeleting}
+                    onConfirm={confirmDeleteEvent}
+                    onCancel={cancelDelete}
+                />
             </div>
         </Dashboard>
     );
