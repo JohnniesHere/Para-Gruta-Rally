@@ -11,7 +11,7 @@ export const LANGUAGES = {
 const translations = {
     en: {
 
-<<<<<<< HEAD
+
         dashboard: {
             title: 'Admin Dashboard',
             totalUsers: 'Total Users',
@@ -52,7 +52,7 @@ const translations = {
             statusChanged: 'status changed to',
             welcomeMessage: 'Welcome to your racing dashboard! Activities will appear here as you use the system.'
         },
-=======
+
         // Gallery Page - NEW TRANSLATIONS
         'gallery.title': 'Photo Gallery',
         'gallery.backToMainGallery': 'Back to Main Gallery',
@@ -94,7 +94,7 @@ const translations = {
         'gallery.teams': 'Teams',
         'gallery.awards': 'Award Ceremonies',
         'gallery.noPhotos': 'No photos found in this album.',
->>>>>>> parent of 1a6472e (Restructure translations to nested format and fix interpolation bug)
+
 
         // Navigation
         'nav.dashboard': 'Dashboard',
@@ -345,175 +345,6 @@ const translations = {
         'users.updating': 'Updating...',
         'users.updateUserButton': 'Update User',
 
-<<<<<<< HEAD
-        editKid: {
-            title: 'Update {firstName}\'s Info!',
-            titleGeneric: 'Update Racer\'s Info!',
-            backToProfile: 'Back to Profile',
-            loadingRacerData: 'Loading racer data...',
-            error: 'Error',
-            backToKids: 'Back to Kids',
-            editingInfo: 'You\'re editing {firstName}\'s information. Make changes below to update! 🏎️',
-            editingInfoGeneric: 'You\'re editing this racer\'s information. Make changes below to update! 🏎️',
-            kidNotFound: 'Kid not found!',
-            noPermission: 'You do not have permission to edit this kid.',
-            loadError: 'Failed to load kid data. Please try again.',
-            updateSuccess: '🎉 {firstName} has been updated successfully! 🏎️',
-            updateSuccessGeneric: '🎉 Racer has been updated successfully! 🏎️',
-            updateError: 'Failed to update kid: {error}',
-            photoUploadError: 'Photo upload failed: {error}. The kid will be updated without the new photo.',
-            vehicleAssignmentError: 'Failed to update vehicle assignment. Please try again.',
-            photoError: 'Failed to remove photo. Please try again.',
-            commentError: 'Failed to add comment. Please try again.',
-            focusIndicator: '← Update Here!',
-            racerProfile: '🏎️ Racer Profile',
-            superPowersSkills: '💪 Super Powers & Skills',
-            racingFamilyInfo: '👨‍👩‍👧‍👦 Racing Family Info',
-            teamVehicleAssignment: '🏎️ Team & Vehicle Assignment',
-            racingStatusForms: '📋 Racing Status & Forms',
-            racingNotesCommunication: '💬 Racing Notes & Team Communication',
-            racingPhoto: '📸 Racing Photo',
-            changePhoto: 'Change',
-            uploadPhoto: 'Upload',
-            removePhoto: 'Remove',
-            photoRequirements: '📸 Update racing photo! (Max 5MB, JPEG/PNG)',
-            raceNumber: '🏁 Race Number',
-            raceNumberPlaceholder: '001',
-            firstName: '👤 First Name',
-            firstNamePlaceholder: 'Future champion\'s first name',
-            lastName: '👨‍👩‍👧‍👦 Last Name',
-            lastNamePlaceholder: 'Racing family name',
-            birthday: '🎂 Birthday',
-            homeBaseLocation: '🏠 Home Base Location',
-            homeBaseLocationPlaceholder: 'Where our racer calls home',
-            amazingAbilities: '🌟 Amazing Abilities',
-            amazingAbilitiesPlaceholder: 'Tell us about this racer\'s awesome skills and abilities!',
-            announcerNotes: '📢 Announcer\'s Special Notes',
-            announcerNotesPlaceholder: 'Fun facts to share during the race!',
-            parentGuardianName: '👤 Parent/Guardian Name',
-            emailAddress: '📧 Email Address',
-            phoneNumber: '📱 Phone Number',
-            grandparentsNames: '👵👴 Grandparents Names',
-            grandparentsNamesPlaceholder: 'Racing legends in the family',
-            grandparentsPhone: '☎️ Grandparents Phone',
-            grandparentsPhonePlaceholder: 'Backup racing support',
-            racingTeam: 'Racing Team',
-            noTeamAssigned: '🚫 No Team Assigned (Yet!)',
-            teamOption: '🏁 {teamName} ({memberCount} racers)',
-            racingInstructor: 'Racing Instructor',
-            noInstructorAssigned: '👨‍🏫 No Instructor Assigned',
-            instructorOption: '🏎️ {instructorName}',
-            racingVehicleAssignment: 'Racing Vehicle Assignment',
-            assignedVehicle: 'Assigned Vehicle',
-            noVehicleAssigned: '🚫 No Vehicle Assigned',
-            vehicleOption: '🏎️ {make} {model} ({licensePlate})',
-            currentAssignment: 'Current Assignment:',
-            viewVehicleDetails: 'View Vehicle Details',
-            formStatus: 'Form Status',
-            formStatusOptions: {
-                pending: '⏳ Pending - Getting Ready',
-                completed: '✅ Completed - Ready to Race!',
-                needs_review: '🔍 Needs Review',
-                cancelled: '❌ Cancelled'
-            },
-            healthDeclarationSigned: '🛡️ Health Declaration Signed',
-            noTeamNotesYet: 'No team notes yet. Be the first to add one!',
-            addTeamNote: 'Add Team Note',
-            commentPlaceholder: 'Add a note about this racer\'s progress, behavior, or any important information...',
-            cancel: 'Cancel',
-            addNote: 'Add Note',
-            adding: 'Adding...',
-            additionalRacingNotes: '🗒️ Additional Racing Notes',
-            additionalRacingNotesPlaceholder: 'Any special notes about our racing star!',
-            cancelButton: 'Cancel',
-            saveUpdates: 'Save Updates! 🏁',
-            uploadingPhoto: 'Uploading Photo...',
-            updatingRacer: 'Updating Racer...',
-            required: '*',
-            requiredField: '* Required field',
-            validation: {
-                fixErrors: 'Please fix the following errors:'
-            },
-            lockedField: 'This field cannot be edited',
-            // photoUploadError: {
-            //     invalidType: 'Please upload a JPEG, PNG, or WebP image file.',
-            //     tooLarge: 'Photo file size must be less than 5MB.',
-            //     processingFailed: 'Failed to process photo. Please try again.'
-            // }
-        },
-
-
-        addKid: {
-            // Copy the same formStatusOptions from editKid
-            formStatusOptions: {
-                pending: '⏳ Pending - Getting Ready',
-                completed: '✅ Completed - Ready to Race!',
-                needs_review: '🔍 Needs Review',
-                cancelled: '❌ Cancelled'
-            },
-            // Add other translations as needed
-            title: 'Add A New Kid',
-            backToKids: 'Back to Kids',
-            subtitle: 'Let\'s get this future champion on the track! 🏁',
-        },
-
-        viewKid: {
-            racingStarProfile: 'Racing Star Profile!',
-            meetOurRacer: 'Meet our amazing racer! 🏁',
-            loadingRacingStarData: 'Loading racing star data...',
-            kidNotFound: 'Kid not found!',
-            noPermissionView: 'You do not have permission to view this kid.',
-            loadDataError: 'Failed to load kid data. Please try again.',
-            deleteConfirm: 'Are you sure you want to delete {kidName}? This action cannot be undone.',
-            deleteSuccess: '{kidName} has been removed from the racing program.',
-            deleteFailed: 'Failed to delete kid. Please try again.',
-            deletePermissionDenied: 'You do not have permission to delete this kid.',
-            nameRestricted: 'Name Restricted',
-            kidNumber: 'Kid #{number}',
-            ageLabel: 'Age: {age}',
-            teamLabel: 'Team: {teamName}',
-            vehicleLabel: 'Vehicle: {make} {model}',
-            personalProfile: '🏎️ {firstName}\'s Profile',
-            racingPhoto: '📸 Racing Photo',
-            photoUploaded: '✅ Uploaded',
-            noPhotoUploaded: '📷 No photo uploaded',
-            homeBase: '🏠 Home Base',
-            superPowersAbilities: '🌟 Super Powers & Abilities',
-            announcerNotes: '📢 Announcer Notes',
-            familyInfo: '👨‍👩‍👧‍👦 {firstName}\'s Family',
-            parentGuardian: '👤 Parent/Guardian',
-            email: '📧 Email',
-            phone: '📱 Phone',
-            grandparents: '👵👴 Grandparents',
-            grandparentsPhone: '☎️ Grandparents Phone',
-            teamVehicleInfo: '🏎️ {firstName}\'s Team & Vehicle',
-            team: '🏁 Team',
-            noTeamAssigned: 'No Team Assigned',
-            formStatus: '📋 Form Status',
-            safetyDeclaration: '🛡️ Safety Declaration',
-            signed: '✅ Signed',
-            pending: '⏳ Pending',
-            racingVehicleAssignment: 'Racing Vehicle Assignment',
-            noVehicleAssigned: 'No Vehicle Assigned',
-            readyForAssignment: 'Ready for assignment!',
-            licensePlate: 'License Plate:',
-            type: 'Type:',
-            battery: 'Battery:',
-            status: 'Status:',
-            vehicleActive: '✅ Active',
-            vehicleInactive: '❌ Inactive',
-            viewVehicle: 'View Vehicle',
-            notesComments: '💬 {firstName}\'s Notes & Comments',
-            parentComments: '👨‍👩‍👧‍👦 Parent Comments',
-            organizationComments: '🏢 Organization Comments',
-            teamLeaderComments: '👨‍🏫 Team Leader Comments',
-            additionalNotes: '🗒️ Additional Notes',
-            teamNotesHistory: '👨‍🏫 Team Notes History',
-            noComments: 'No comments',
-            noAdditionalNotes: 'No additional notes'
-        },
-=======
-
         // My Account
         'account.title': 'My Account',
         'account.profile': 'Profile Information',
@@ -527,7 +358,7 @@ const translations = {
         'account.bio': 'Bio',
         'account.saveChanges': 'Save Changes',
         'account.cancel': 'Cancel',
->>>>>>> parent of 1a6472e (Restructure translations to nested format and fix interpolation bug)
+
 
         // Forms
         'forms.title': 'Forms Management',
@@ -1444,48 +1275,8 @@ const translations = {
     },
     he: {
 
-<<<<<<< HEAD
-        dashboard: {
-            title: 'לוח בקרה ראשי',
-            totalUsers: 'סך המשתמשים',
-            upcomingEvents: 'אירועים קרובים',
-            totalKids: 'סך הילדים',
-            activeTeams: 'קבוצות פעילות',
-            recentActivities: 'פעילויות אחרונות',
-            newUser: 'משתמש חדש',
-            wasAdded: 'נוסף',
-            event: 'אירוע',
-            wasCreated: 'נוצר',
-            newPhotos: 'תמונות חדשות',
-            wereAdded: 'נוספו לגלריה',
-            racingReady: 'מוכנים למירוץ',
-            racingVehicles: 'רכבי מירוץ',
-            available: 'זמינים',
-            systemUsers: 'משתמשי מערכת',
-            autoRefresh: 'הלוח מתעדכן אוטומטית כל 5 דקות',
-            teamCreated: 'קבוצה <strong>{teamName}</strong> נוצרה.',
-            justNow: 'עכשיו',
-            minutesAgo: 'לפני {count} דקות',
-            hoursAgo: 'לפני {count} שעות',
-            daysAgo: 'לפני {count} ימים',
-            fetchError: 'כשל בטעינת נתוני הלוח. אנא נסה שוב.',
-            scheduled: 'מתוזמנים',
-            registered: 'רשומים',
-            noRecentActivities: 'לא נמצאו פעילויות אחרונות.',
-            activitiesWillAppear: 'פעילויות יופיעו כאן כאשר משתמשים יבצעו פעולות במערכת.',
-            noUpcomingEvents: 'אין אירועים קרובים מתוזמנים.',
-            createFirstEvent: 'צור את האירוע הראשון שלך כדי להתחיל!',
-            wasUpdated: 'עודכנ/ה',
-            user: 'משתמש',
-            kid: 'ילד',
-            team: 'קבוצה',
-            vehicle: 'רכב',
-            newKid: 'ילד חדש',
-            newVehicle: 'רכב חדש',
-            statusChanged: 'סטטוס שונה ל',
-            welcomeMessage: 'ברוכים הבאים לדשבור הראשי של פאראגרוטראלי! כאן תוכלו לראות את כל הפעילות האחרונה במערכת.',
-        },
-=======
+
+
         // Navigation
         'nav.dashboard': 'לוח בקרה',
         'nav.eventManagement': 'ניהול אירועים',
@@ -1503,7 +1294,7 @@ const translations = {
         'nav.teams': 'קבוצות',
         'nav.vehicles': 'רכבים',
         'nav.analytics': 'אנליטיקה',
->>>>>>> parent of 1a6472e (Restructure translations to nested format and fix interpolation bug)
+
 
         // Dashboard
         'dashboard.title': 'לוח בקרה ראשי',
@@ -1739,114 +1530,7 @@ const translations = {
         'users.updating': 'מעדכן...',
         'users.updateUserButton': 'עדכן משתמש',
 
-<<<<<<< HEAD
-        editKid: {
-            title: 'עדכן את המידע של {firstName}!',
-            titleGeneric: 'עדכן מידע של הרוכב!',
-            backToProfile: 'חזור לפרופיל',
-            loadingRacerData: 'טוען נתוני רוכב...',
-            error: 'שגיאה',
-            backToKids: 'חזור לילדים',
-            editingInfo: 'אתה עורך את המידע של {firstName}. בצע שינויים למטה כדי לעדכן! 🏎️',
-            editingInfoGeneric: 'אתה עורך את המידע של הרוכב הזה. בצע שינויים למטה כדי לעדכן! 🏎️',
-            kidNotFound: 'ילד לא נמצא!',
-            noPermission: 'אין לך הרשאה לערוך את הילד הזה.',
-            loadError: 'כשל בטעינת נתוני הילד. אנא נסה שוב.',
-            updateSuccess: '🎉 {firstName} עודכן בהצלחה! 🏎️',
-            updateSuccessGeneric: '🎉 הרוכב עודכן בהצלחה! 🏎️',
-            updateError: 'כשל בעדכון הילד: {error}',
-            photoUploadError: 'העלאת תמונה נכשלה: {error}. הילד יתעדכן ללא התמונה החדשה.',
-            vehicleAssignmentError: 'כשל בעדכון הקצאת הרכב. אנא נסה שוב.',
-            photoError: 'כשל בהסרת התמונה. אנא נסה שוב.',
-            commentError: 'כשל בהוספת הערה. אנא נסה שוב.',
-            focusIndicator: '← עדכן כאן!',
-            racerProfile: '🏎️ פרופיל רוכב',
-            superPowersSkills: '💪 כוחות על וכישורים',
-            racingFamilyInfo: '👨‍👩‍👧‍👦 מידע משפחת מירוצים',
-            teamVehicleAssignment: '🏎️ הקצאת קבוצה ורכב',
-            racingStatusForms: '📋 סטטוס מירוצים וטפסים',
-            racingNotesCommunication: '💬 הערות מירוצים ותקשורת צוות',
-            racingPhoto: '📸 תמונת מירוצים',
-            changePhoto: 'שנה',
-            uploadPhoto: 'העלה',
-            removePhoto: 'הסר',
-            photoRequirements: '📸 עדכן תמונת מירוצים! (מקסימום 5MB, JPEG/PNG)',
-            raceNumber: '🏁 מספר מירוץ',
-            raceNumberPlaceholder: '001',
-            firstName: '👤 שם פרטי',
-            firstNamePlaceholder: 'שם פרטי של אלוף העתיד',
-            lastName: '👨‍👩‍👧‍👦 שם משפחה',
-            lastNamePlaceholder: 'שם משפחת מירוצים',
-            birthday: '🎂 יום הולדת',
-            homeBaseLocation: '🏠 מיקום בית',
-            homeBaseLocationPlaceholder: 'איפה הרוכב שלנו קורא לבית',
-            amazingAbilities: '🌟 יכולות מדהימות',
-            amazingAbilitiesPlaceholder: 'ספר לנו על הכישורים והיכולות המדהימות של הרוכב הזה!',
-            announcerNotes: '📢 הערות מיוחדות לקריין',
-            announcerNotesPlaceholder: 'עובדות כיפיות לחלוק במהלך המירוץ!',
-            parentGuardianName: '👤 שם הורה/אפוטרופוס',
-            emailAddress: '📧 כתובת אימייל',
-            phoneNumber: '📱 מספר טלפון',
-            grandparentsNames: '👵👴 שמות סבא וסבתא',
-            grandparentsNamesPlaceholder: 'אגדות מירוצים במשפחה',
-            grandparentsPhone: '☎️ טלפון סבא וסבתא',
-            grandparentsPhonePlaceholder: 'גיבוי תמיכת מירוצים',
-            racingTeam: 'קבוצת מירוצים',
-            noTeamAssigned: '🚫 אין קבוצה מוקצית (עדיין)',
-            teamOption: '🏁 {teamName} ({memberCount} רוכבים)',
-            racingInstructor: 'מדריך מירוצים',
-            noInstructorAssigned: '👨‍🏫 אין מדריך מוקצה',
-            instructorOption: '🏎️ {instructorName}',
-            racingVehicleAssignment: 'הקצאת רכב מירוצים',
-            assignedVehicle: 'רכב מוקצה',
-            noVehicleAssigned: '🚫 אין רכב מוקצה',
-            vehicleOption: '🏎️ {make} {model} ({licensePlate})',
-            currentAssignment: 'הקצאה נוכחית:',
-            viewVehicleDetails: 'צפה בפרטי הרכב',
-            formStatus: 'סטטוס טופס',
-            formStatusOptions: {
-                pending: '⏳ ממתין - מתכונן',
-                completed: '✅ הושלם - מוכן למירוץ!',
-                needs_review: '🔍 זקוק לבדיקה',
-                cancelled: '❌ בוטל'
-            },
-            healthDeclarationSigned: '🛡️ הצהרת בריאות חתומה',
-            noTeamNotesYet: 'עדיין אין הערות צוות. היה הראשון להוסיף!',
-            addTeamNote: 'הוסף הערת צוות',
-            commentPlaceholder: 'הוסף הערה על התקדמות הרוכב, התנהגות או כל מידע חשוב...',
-            cancel: 'בטל',
-            addNote: 'הוסף הערה',
-            adding: 'מוסיף...',
-            additionalRacingNotes: '🗒️ הערות מירוצים נוספות',
-            additionalRacingNotesPlaceholder: 'כל הערות מיוחדות על כוכב המירוצים שלנו!',
-            cancelButton: 'בטל',
-            saveUpdates: 'שמור עדכונים! 🏁',
-            uploadingPhoto: 'מעלה תמונה...',
-            updatingRacer: 'מעדכן רוכב...',
-            required: '*',
-            requiredField: '* שדה חובה',
-            validation: {
-                fixErrors: 'אנא תקן את השגיאות הבאות:'
-            },
-            // lockedField: 'לא ניתן לערוך שדה זה',
-            // photoUploadError: {
-            //     invalidType: 'אנא העלה קובץ תמונה JPEG, PNG או WebP.',
-            //     tooLarge: 'גודל קובץ התמונה חייב להיות פחות מ-5MB.',
-            //     processingFailed: 'כשל בעיבוד התמונה. אנא נסה שוב.'
-            // }
-        },
-        addKid: {
-            formStatusOptions: {
-                pending: '⏳ ממתין - מתכונן',
-                completed: '✅ הושלם - מוכן למירוץ!',
-                needs_review: '🔍 זקוק לבדיקה',
-                cancelled: '❌ בוטל'
-            },
-            title: 'הוסף ילד חדש',
-            backToKids: 'חזור לילדים',
-            subtitle: 'בואו נכניס את האלוף העתידי הזה למסלול! 🏁',
-        },
-=======
+
         // My Account
         'account.title': 'החשבון שלי',
         'account.profile': 'מידע אישי',
@@ -1860,7 +1544,7 @@ const translations = {
         'account.bio': 'ביוגרפיה',
         'account.saveChanges': 'שמור שינויים',
         'account.cancel': 'בטל',
->>>>>>> parent of 1a6472e (Restructure translations to nested format and fix interpolation bug)
+
 
         // Forms
         'forms.title': 'ניהול טפסים',
