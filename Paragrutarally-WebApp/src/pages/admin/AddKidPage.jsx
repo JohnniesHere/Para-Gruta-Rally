@@ -8,8 +8,9 @@ import { usePermissions } from '../../hooks/usePermissions.jsx';
 import { addKid, getNextParticipantNumber } from '../../services/kidService';
 import { getAllInstructors } from '../../services/teamService'; // Added import for instructor service
 import { uploadKidPhoto, validatePhotoFile, resizeImage, getKidPhotoInfo } from '../../services/kidPhotoService';
-import { createEmptyKid, validateKid, formStatusOptions } from '../../schemas/kidSchema';
+import { createEmptyKid, validateKid, getFormStatusOptions } from '../../schemas/kidSchema';
 import { getDocs, collection, query, where } from 'firebase/firestore';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { db } from '../../firebase/config';
 import {
     IconUserCircle as Baby,
@@ -40,7 +41,8 @@ const AddKidPage = () => {
     const navigate = useNavigate();
     const { isDarkMode, appliedTheme } = useTheme();
     const { permissions, userRole } = usePermissions();
-
+    const { t } = useLanguage();
+    const formstatusOptions = getFormStatusOptions(t);
     const [isLoading, setIsLoading] = useState(false);
     const [teams, setTeams] = useState([]);
     const [instructors, setInstructors] = useState([]);

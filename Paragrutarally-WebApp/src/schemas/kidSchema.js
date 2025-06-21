@@ -1,6 +1,7 @@
 // src/schemas/kidSchema.js
 import { Timestamp } from 'firebase/firestore';
 
+
 /**
  * Kid Schema Definition
  * Based on the Firestore structure and AddKidPage form
@@ -100,16 +101,15 @@ export const kidValidationRules = {
         'parentInfo.grandparentsInfo.phone': 20,
         'additionalComments': 1000
     }
+
 };
 
-// Form status options
-export const formStatusOptions = [
-    { value: 'pending', label: '⏳ Pending - Getting Ready', color: '#F59E0B' },
-    { value: 'completed', label: '✅ Completed - Ready to Race!', color: '#10B981' },
-    { value: 'needs_review', label: '🔍 Needs Review', color: '#EF4444' },
-    { value: 'cancelled', label: '❌ Cancelled', color: '#6B7280' }
+export const getFormStatusOptions = (t) => [
+    { value: 'pending', label: t('editKid.formStatusOptions.pending'), color: '#F59E0B' },
+    { value: 'completed', label: t('editKid.formStatusOptions.completed'), color: '#10B981' },
+    { value: 'needs_review', label: t('editKid.formStatusOptions.needs_review'), color: '#EF4444' },
+    { value: 'cancelled', label: t('editKid.formStatusOptions.cancelled'), color: '#6B7280' }
 ];
-
 /**
  * Validate a kid object against the schema
  * @param {Object} kidData - The kid data to validate
@@ -302,8 +302,9 @@ export const getKidAge = (kid) => {
  * @param {string} status - Status value
  * @returns {Object} - Status info with label and color
  */
-export const getFormStatusInfo = (status) => {
-    return formStatusOptions.find(option => option.value === status) || formStatusOptions[0];
+export const getFormStatusInfo = (status, t) => {
+    const options = getFormStatusOptions(t);
+    return options.find(option => option.value === status) || options[0];
 };
 
 // Export the schema for use in forms and validation
@@ -315,6 +316,6 @@ export default {
     getKidFullName,
     getKidAge,
     getFormStatusInfo,
-    formStatusOptions,
+    getFormStatusOptions,
     kidValidationRules
 };

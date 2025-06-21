@@ -11,7 +11,7 @@ import { uploadKidPhoto, deleteKidPhoto, getKidPhotoInfo } from '../../services/
 import { getAllTeams, getAllInstructors } from '../../services/teamService'; // Updated import
 import { getAllVehicles, updateVehicle, getVehicleById } from '../../services/vehicleService';
 import { getVehiclePhotoInfo } from '../../services/vehiclePhotoService';
-import { validateKid, formStatusOptions } from '../../schemas/kidSchema';
+import {validateKid, getFormStatusInfo, getFormStatusOptions} from '../../schemas/kidSchema';
 import { getDocs, collection, query, where } from 'firebase/firestore';
 import { db } from '../../firebase/config';
 import {
@@ -49,6 +49,7 @@ const EditKidPage = () => {
     const location = useLocation();
     const { isDarkMode, appliedTheme } = useTheme();
     const { t } = useLanguage();
+    const formStatusOptions = getFormStatusOptions(t);
     const { permissions, userRole, userData } = usePermissions();
 
     const [isLoading, setIsLoading] = useState(true);

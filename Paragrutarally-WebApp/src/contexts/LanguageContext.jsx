@@ -531,6 +531,12 @@ const translations = {
             currentAssignment: 'Current Assignment:',
             viewVehicleDetails: 'View Vehicle Details',
             formStatus: 'Form Status',
+            formStatusOptions: {
+                pending: '⏳ Pending - Getting Ready',
+                completed: '✅ Completed - Ready to Race!',
+                needs_review: '🔍 Needs Review',
+                cancelled: '❌ Cancelled'
+            },
             healthDeclarationSigned: '🛡️ Health Declaration Signed',
             noTeamNotesYet: 'No team notes yet. Be the first to add one!',
             addTeamNote: 'Add Team Note',
@@ -555,6 +561,21 @@ const translations = {
             //     tooLarge: 'Photo file size must be less than 5MB.',
             //     processingFailed: 'Failed to process photo. Please try again.'
             // }
+        },
+
+
+        addKid: {
+            // Copy the same formStatusOptions from editKid
+            formStatusOptions: {
+                pending: '⏳ Pending - Getting Ready',
+                completed: '✅ Completed - Ready to Race!',
+                needs_review: '🔍 Needs Review',
+                cancelled: '❌ Cancelled'
+            },
+            // Add other translations as needed
+            title: 'Add A New Kid',
+            backToKids: 'Back to Kids',
+            subtitle: 'Let\'s get this future champion on the track! 🏁',
         },
 
         viewKid: {
@@ -1697,6 +1718,12 @@ const translations = {
             currentAssignment: 'הקצאה נוכחית:',
             viewVehicleDetails: 'צפה בפרטי הרכב',
             formStatus: 'סטטוס טופס',
+            formStatusOptions: {
+                pending: '⏳ ממתין - מתכונן',
+                completed: '✅ הושלם - מוכן למירוץ!',
+                needs_review: '🔍 זקוק לבדיקה',
+                cancelled: '❌ בוטל'
+            },
             healthDeclarationSigned: '🛡️ הצהרת בריאות חתומה',
             noTeamNotesYet: 'עדיין אין הערות צוות. היה הראשון להוסיף!',
             addTeamNote: 'הוסף הערת צוות',
@@ -1721,6 +1748,17 @@ const translations = {
             //     tooLarge: 'גודל קובץ התמונה חייב להיות פחות מ-5MB.',
             //     processingFailed: 'כשל בעיבוד התמונה. אנא נסה שוב.'
             // }
+        },
+        addKid: {
+            formStatusOptions: {
+                pending: '⏳ ממתין - מתכונן',
+                completed: '✅ הושלם - מוכן למירוץ!',
+                needs_review: '🔍 זקוק לבדיקה',
+                cancelled: '❌ בוטל'
+            },
+            title: 'הוסף ילד חדש',
+            backToKids: 'חזור לילדים',
+            subtitle: 'בואו נכניס את האלוף העתידי הזה למסלול! 🏁',
         },
 
         viewKid: {
