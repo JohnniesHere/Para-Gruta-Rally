@@ -1354,6 +1354,40 @@ const translations = {
         'common.loading': 'Loading...',
         'common.welcome': 'Welcome',
         'common.unknownTeam': 'Unknown Team',
+        // Instructor Kids Management
+        'instructor.myKids': 'My Kids',
+        'instructor.kidsManagement': 'Kids Management',
+        'instructor.manageAssignedKids': 'Manage kids assigned to your teams',
+        'instructor.searchKidsPlaceholder': 'Search by name or participant number...',
+        'instructor.noKidsFound': 'No Kids Found',
+        'instructor.noKidsMatchFilter': 'No kids match your current filter',
+        'instructor.noAssignedKids': 'You have no kids assigned to your teams yet',
+        'instructor.accessDeniedKids': 'Access denied: Instructor credentials required',
+        'instructor.failedToLoadKids': 'Failed to load data. Please try again.',
+        'stats.totalKids': 'Total Kids',
+        'stats.assignedToYou': 'Assigned to You',
+        'stats.activeTeams': 'Active Teams',
+        'stats.avgPerTeam': 'Avg per Team',
+        'stats.kidsPerTeam': 'Kids per Team',
+        'common.search': 'Search',
+        'common.filterByTeam': 'Filter by Team',
+        'common.allTeams': 'All Teams',
+        'common.showing': 'Showing',
+        'common.results': 'results',
+        'common.participantNumber': 'Participant #',
+        'common.name': 'Name',
+        'common.team': 'Team',
+        'common.parentContact': 'Parent Contact',
+        'common.capabilities': 'Capabilities',
+        'common.status': 'Status',
+        'common.actions': 'Actions',
+        'common.view': 'View',
+        'common.edit': 'Edit',
+        'common.none': 'None',
+        'common.unassigned': 'Unassigned',
+        'common.pending': 'Pending',
+        'common.ready': 'Ready',
+        'common.completed': 'Completed',
 
 
     },
@@ -2548,7 +2582,7 @@ const translations = {
         'analytics.loadingMaintenanceData': 'טוען נתוני תחזוקה...',
         'analytics.failedToLoad': 'כשל בטעינת נתוני אנליטיקה. אנא נסה שוב.',
 
-// Tab labels
+        // Tab labels
         'analytics.tabs.overview': 'סקירה כללית',
         'analytics.tabs.vehicles': 'רכבים',
         'analytics.tabs.teams': 'קבוצות',
@@ -2560,7 +2594,7 @@ const translations = {
         'analytics.tabs.participationDesc': 'השתתפות ומעורבות',
         'analytics.tabs.maintenanceDesc': 'התראות והמלצות',
 
-// Overview tab
+        // Overview tab
         'analytics.overview.totalVehicles': 'סך הרכבים',
         'analytics.overview.totalRacers': 'סך הרוכבים',
         'analytics.overview.racingTeams': 'קבוצות מירוץ',
@@ -2577,7 +2611,7 @@ const translations = {
         'analytics.overview.systemHealthDesc': 'סטטוס תפעולי כולל של המערכת',
         'analytics.overview.participationDesc': 'רוכבים פעילים עם טפסים מושלמים',
 
-// Vehicle analytics
+        // Vehicle analytics
         'analytics.vehicles.fleetOverview': '🚗 סקירת קבוצת הרכבים',
         'analytics.vehicles.fleetStatus': 'סטטוס קבוצת הרכבים',
         'analytics.vehicles.totalVehicles': 'סך הרכבים',
@@ -2595,7 +2629,7 @@ const translations = {
         'analytics.vehicles.monitorClosely': '⚠️ מעקב צמוד',
         'analytics.vehicles.daysOld': 'ימים',
 
-// Teams analytics
+        // Teams analytics
         'analytics.teams.performanceOverview': '👥 סקירת ביצועי קבוצות',
         'analytics.teams.teamStatistics': 'סטטיסטיקות קבוצות',
         'analytics.teams.totalTeams': 'סך הקבוצות',
@@ -2607,7 +2641,7 @@ const translations = {
         'analytics.teams.vehicleDistribution': '🚗 חלוקת רכבים',
         'analytics.teams.ratio': 'יחס',
 
-// Participation analytics
+        // Participation analytics
         'analytics.participation.eventsOverview': '🏁 סקירת אירועים',
         'analytics.participation.totalEvents': 'סך האירועים',
         'analytics.participation.upcomingEvents': 'קרובים',
@@ -2622,7 +2656,7 @@ const translations = {
         'analytics.participation.participants': 'משתתפים',
         'analytics.participation.teams': 'קבוצות',
 
-// Maintenance analytics
+        // Maintenance analytics
         'analytics.maintenance.urgentAlerts': '🚨 התראות תחזוקה דחופות',
         'analytics.maintenance.batteryReplacement': 'נדרשת החלפת סוללה',
         'analytics.maintenance.batteryAge': 'הסוללה בת {daysOld} ימים',
@@ -2635,7 +2669,7 @@ const translations = {
         'analytics.maintenance.vehicleHealth': 'בריאות רכבים',
         'analytics.maintenance.teamHealth': 'בריאות קבוצות',
 
-// Tooltips
+        // Tooltips
         'analytics.tooltip.systemPerformance.title': 'ביצועי המערכת',
         'analytics.tooltip.systemPerformance.description': 'מדדים קריטיים המראים כמה טוב תוכנית המירוצים שלך פועלת. האחוזים הללו עוזרים לזהות תחומים לשיפור.',
         'analytics.tooltip.systemPerformance.action': 'כוון ל-80%+ בכל המדדים. ציונים נמוכים מצביעים על תחומים ספציפיים הזקוקים לתשומת לב.',
@@ -2706,7 +2740,7 @@ const translations = {
         'analytics.tooltip.activeParticipationRate.description': 'אחוז מהרוכבים הרשומים שמשתתפים באופן פעיל עם טפסים נדרשים מושלמים.',
         'analytics.tooltip.activeParticipationRate.action': 'השתתפות נמוכה? עקוב אחר רישומים לא שלמים ועסוק עם משתתפים פחות פעילים.',
 
-// Additional missing tooltips that might appear elsewhere
+        // Additional missing tooltips that might appear elsewhere
         'analytics.tooltip.teamAnalysis.title': 'ניתוח קבוצה {teamName}',
         'analytics.tooltip.teamAnalysis.description': 'הקבוצה הזו מלאה ב-{utilizationRate}% עם {currentMembers} מתוך {maxCapacity} חברים אפשריים.',
         'analytics.tooltip.teamAnalysis.actionLow': 'שקול לגייס עוד חברים לקבוצה הזו.',
@@ -2747,8 +2781,42 @@ const translations = {
         'analytics.maintenance.teamsCount': '{count} קבוצות שאין להן רכבים מוקצים',
         'analytics.maintenance.actionLabel': 'פעולה',
         'analytics.maintenance.assignVehiclesAction': 'הקצה רכבים לקבוצות או שקול חלוקה מחדש של רכבים',
-    }
-};
+        // Instructor Kids Management
+        'instructor.myKids': 'הילדים שלי',
+        'instructor.kidsManagement': 'ניהול ילדים',
+        'instructor.manageAssignedKids': 'נהל ילדים המוקצים לקבוצות שלך',
+        'instructor.searchKidsPlaceholder': 'חפש לפי שם או מספר משתתף...',
+        'instructor.noKidsFound': 'לא נמצאו ילדים',
+        'instructor.noKidsMatchFilter': 'אין ילדים התואמים למסנן הנוכחי',
+        'instructor.noAssignedKids': 'עדיין אין לך ילדים מוקצים לקבוצות שלך',
+        'instructor.accessDeniedKids': 'גישה נדחתה: נדרשות הרשאות מדריך',
+        'instructor.failedToLoadKids': 'כשל בטעינת נתונים. אנא נסה שוב.',
+        'stats.totalKids': 'סך הילדים',
+        'stats.assignedToYou': 'מוקצים אליך',
+        'stats.activeTeams': 'קבוצות פעילות',
+        'stats.avgPerTeam': 'ממוצע לקבוצה',
+        'stats.kidsPerTeam': 'ילדים לקבוצה',
+        'common.search': 'חפש',
+        'common.filterByTeam': 'סנן לפי קבוצה',
+        'common.allTeams': 'כל הקבוצות',
+        'common.showing': 'מציג',
+        'common.results': 'תוצאות',
+        'common.participantNumber': 'מספר משתתף',
+        'common.name': 'שם',
+        'common.team': 'קבוצה',
+        'common.parentContact': 'איש קשר הורה',
+        'common.capabilities': 'יכולות',
+        'common.status': 'סטטוס',
+        'common.actions': 'פעולות',
+        'common.view': 'צפה',
+        'common.edit': 'ערוך',
+        'common.none': 'אין',
+        'common.unassigned': 'לא מוקצה',
+        'common.pending': 'ממתין',
+        'common.ready': 'מוכן',
+        'common.completed': 'הושלם',
+            }
+        };
 
 // Create the context
 const LanguageContext = createContext();

@@ -1,4 +1,4 @@
-// src/pages/instructor/InstructorKidsManagementPage.jsx
+// src/pages/instructor/InstructorKidsManagementPage.jsx - Full Translation Support
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -40,7 +40,7 @@ const InstructorKidsManagementPage = () => {
     useEffect(() => {
         const loadInstructorData = async () => {
             if (!userData?.instructorId || userRole !== 'instructor') {
-                setError('Access denied: Instructor credentials required');
+                setError(t('instructor.accessDeniedKids', 'Access denied: Instructor credentials required'));
                 setLoading(false);
                 return;
             }
@@ -78,14 +78,14 @@ const InstructorKidsManagementPage = () => {
                 setTeams(teamsData);
             } catch (err) {
                 console.error('Error loading instructor data:', err);
-                setError('Failed to load data. Please try again.');
+                setError(t('instructor.failedToLoadKids', 'Failed to load data. Please try again.'));
             } finally {
                 setLoading(false);
             }
         };
 
         loadInstructorData();
-    }, [userData, userRole]);
+    }, [userData, userRole, t]);
 
     // Filter kids based on search and team filter
     const filteredKids = useMemo(() => {
@@ -106,10 +106,10 @@ const InstructorKidsManagementPage = () => {
         });
     }, [kids, searchTerm, teamFilter, permissions, userData, user]);
 
-    // Get team name by ID
+    // Get team name by ID - TRANSLATED
     const getTeamName = (teamId) => {
         const team = teams.find(t => t.id === teamId);
-        return team ? team.name : 'Unassigned';
+        return team ? team.name : t('common.unassigned', 'Unassigned');
     };
 
     // Check if instructor can edit this kid
@@ -128,6 +128,20 @@ const InstructorKidsManagementPage = () => {
         // Navigate nested object path
         const value = fieldPath.split('.').reduce((obj, key) => obj?.[key], kid);
         return value || defaultValue;
+    };
+
+    // Get translated status - TRANSLATED
+    const getStatusLabel = (status) => {
+        switch (status) {
+            case 'completed':
+                return t('common.completed', 'Completed');
+            case 'pending':
+                return t('common.pending', 'Pending');
+            case 'ready':
+                return t('common.ready', 'Ready');
+            default:
+                return t('common.pending', 'Pending');
+        }
     };
 
     if (loading) {
@@ -165,7 +179,7 @@ const InstructorKidsManagementPage = () => {
                 </h1>
 
                 <div className="admin-container">
-                    {/* Racing Header */}
+                    {/* Racing Header - TRANSLATED */}
                     <div className="racing-header">
                         <div className="header-content">
                             <div className="title-section">
@@ -180,7 +194,7 @@ const InstructorKidsManagementPage = () => {
                         </div>
                     </div>
 
-                    {/* Stats Section */}
+                    {/* Stats Section - TRANSLATED */}
                     <div className="stats-grid">
                         <div className="stat-card total">
                             <div className="stat-icon">
@@ -218,7 +232,7 @@ const InstructorKidsManagementPage = () => {
                         </div>
                     </div>
 
-                    {/* Search and Filter Section */}
+                    {/* Search and Filter Section - TRANSLATED */}
                     <div className="search-filter-section">
                         <div className="search-container">
                             <label className="search-label">
@@ -265,7 +279,7 @@ const InstructorKidsManagementPage = () => {
                         </div>
                     </div>
 
-                    {/* Results Summary */}
+                    {/* Results Summary - TRANSLATED */}
                     {(searchTerm || teamFilter) && (
                         <div className="results-summary">
                             <span>{t('common.showing', 'Showing')} {filteredKids.length} {t('common.results', 'results')}</span>
@@ -274,7 +288,7 @@ const InstructorKidsManagementPage = () => {
                         </div>
                     )}
 
-                    {/* Kids Table */}
+                    {/* Kids Table - TRANSLATED */}
                     <div className="table-container">
                         {filteredKids.length === 0 ? (
                             <div className="empty-state">
@@ -331,7 +345,7 @@ const InstructorKidsManagementPage = () => {
                                         </td>
                                         <td>
                                                 <span className={`status-badge ${kid.signedFormStatus === 'completed' ? 'ready' : 'pending'}`}>
-                                                    {getFieldValue(kid, 'signedFormStatus', 'pending')}
+                                                    {getStatusLabel(getFieldValue(kid, 'signedFormStatus', 'pending'))}
                                                 </span>
                                         </td>
                                         <td>
