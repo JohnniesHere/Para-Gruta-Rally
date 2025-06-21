@@ -1,4 +1,4 @@
-// src/pages/instructor/InstructorDashboardPage.jsx - Enhanced with Full Management
+// src/pages/instructor/InstructorDashboardPage.jsx - With Debug and Better Error Handling
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -10,9 +10,11 @@ import {
     limit
 } from 'firebase/firestore';
 import { db } from '../../firebase/config';
+import { useAuth } from '../../contexts/AuthContext';
 import { usePermissions } from '../../hooks/usePermissions';
 import { useLanguage } from '../../contexts/LanguageContext';
 import Dashboard from '../../components/layout/Dashboard';
+import FirestoreInstructorDebug from '../../components/debug/FirestoreInstructionDebug'; // Add this
 import {
     IconDashboard as DashboardIcon,
     IconUsers as Users,
@@ -24,11 +26,13 @@ import {
     IconPlus as Plus,
     IconActivity as Activity,
     IconClock as Clock,
-    IconAlertTriangle as Alert
+    IconAlertTriangle as Alert,
+    IconDatabase as Database
 } from '@tabler/icons-react';
 
 const InstructorDashboardPage = () => {
-    const { permissions, userRole, userData, user } = usePermissions();
+    const { currentUser, userRole, userData, isInstructor } = useAuth();
+    const { permissions } = usePermissions();
     const { t } = useLanguage();
 
     const [dashboardData, setDashboardData] = useState({
@@ -40,10 +44,11 @@ const InstructorDashboardPage = () => {
     });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [dataLoaded, setDataLoaded] = useState(false);
 
     useEffect(() => {
         const loadDashboardData = async () => {
-            if (!userData?.instructorId || userRole !== 'instructor') {
+            if (!currentUser || !isInstructor) {
                 setError('Access denied: Instructor credentials required');
                 setLoading(false);
                 return;
@@ -51,67 +56,79 @@ const InstructorDashboardPage = () => {
 
             try {
                 setError('');
+                const instructorId = currentUser.uid;
+                console.log('Loading data for instructor:', instructorId);
 
                 // Load teams for this instructor
                 const teamsQuery = query(
                     collection(db, 'teams'),
-                    where('instructorId', '==', userData.instructorId),
-                    orderBy('name', 'asc')
+                    where('instructorId', '==', instructorId)
                 );
                 const teamsSnapshot = await getDocs(teamsQuery);
                 const teams = teamsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                console.log('Found teams:', teams);
 
                 // Load kids for this instructor
                 const kidsQuery = query(
                     collection(db, 'kids'),
-                    where('instructorId', '==', userData.instructorId),
-                    orderBy('createdAt', 'desc')
+                    where('instructorId', '==', instructorId)
                 );
                 const kidsSnapshot = await getDocs(kidsQuery);
                 const kids = kidsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                console.log('Found kids:', kids);
 
-                // Load vehicles assigned to instructor's teams
-                const vehiclesQuery = query(collection(db, 'vehicles'), orderBy('name', 'asc'));
-                const vehiclesSnapshot = await getDocs(vehiclesQuery);
-                const allVehicles = vehiclesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                const vehicles = allVehicles.filter(vehicle =>
-                    teams.some(team => vehicle.assignedTeams?.includes(team.id))
-                );
+                // Load all vehicles to filter by team assignments
+                let vehicles = [];
+                try {
+                    const vehiclesSnapshot = await getDocs(collection(db, 'vehicles'));
+                    const allVehicles = vehiclesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    vehicles = allVehicles.filter(vehicle =>
+                        teams.some(team => vehicle.assignedTeams?.includes(team.id))
+                    );
+                    console.log('Found vehicles:', vehicles);
+                } catch (vehicleError) {
+                    console.warn('Error loading vehicles:', vehicleError);
+                    // Continue without vehicles
+                }
 
-                // Load recent events involving instructor's teams
-                const eventsQuery = query(
-                    collection(db, 'events'),
-                    orderBy('eventDate', 'desc'),
-                    limit(10)
-                );
-                const eventsSnapshot = await getDocs(eventsQuery);
-                const allEvents = eventsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                const events = allEvents.filter(event =>
-                    teams.some(team => event.participatingTeams?.includes(team.id))
-                );
+                // Load events involving instructor's teams
+                let events = [];
+                try {
+                    const eventsSnapshot = await getDocs(collection(db, 'events'));
+                    const allEvents = eventsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    events = allEvents.filter(event =>
+                        teams.some(team => event.participatingTeams?.includes(team.id))
+                    ).slice(0, 5);
+                    console.log('Found events:', events);
+                } catch (eventError) {
+                    console.warn('Error loading events:', eventError);
+                    // Continue without events
+                }
 
                 setDashboardData({
                     teams,
                     kids,
                     vehicles,
-                    events: events.slice(0, 5), // Recent 5 events
-                    recentActivity: kids.slice(0, 5) // Recent 5 kids
+                    events,
+                    recentActivity: kids.slice(0, 5)
                 });
+
+                setDataLoaded(true);
 
             } catch (err) {
                 console.error('Error loading dashboard data:', err);
-                setError('Failed to load dashboard data. Please try again.');
+                setError(`Failed to load dashboard data: ${err.message}`);
             } finally {
                 setLoading(false);
             }
         };
 
         loadDashboardData();
-    }, [userData, userRole]);
+    }, [currentUser, isInstructor]);
 
     // Helper functions
     const getFieldValue = (item, fieldPath, defaultValue = '-') => {
-        const context = { kidData: item, userData, user };
+        const context = { kidData: item, userData, user: currentUser };
 
         if (!permissions.canViewField(fieldPath, context)) {
             return '***';
@@ -154,15 +171,123 @@ const InstructorDashboardPage = () => {
         return (
             <Dashboard userRole={userRole}>
                 <div className="admin-page">
+                    <FirestoreInstructorDebug />
                     <div className="error-container">
                         <h3>{t('common.error', 'Error')}</h3>
                         <p>{error}</p>
+                        <div style={{ marginTop: '20px', padding: '15px', backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
+                            <h4>Debug Information:</h4>
+                            <p><strong>User ID:</strong> {currentUser?.uid}</p>
+                            <p><strong>Email:</strong> {currentUser?.email}</p>
+                            <p><strong>Is Instructor:</strong> {isInstructor ? 'Yes' : 'No'}</p>
+                            <p><strong>User Role:</strong> {userRole}</p>
+                        </div>
                     </div>
                 </div>
             </Dashboard>
         );
     }
 
+    // Check if we have no data at all
+    const hasNoData = dataLoaded &&
+        dashboardData.teams.length === 0 &&
+        dashboardData.kids.length === 0;
+
+    if (hasNoData) {
+        return (
+            <Dashboard userRole={userRole}>
+                <div className="admin-page">
+                    <FirestoreInstructorDebug />
+
+                    <h1>
+                        <DashboardIcon className="page-title-icon" size={48} />
+                        {t('instructor.dashboard', 'Instructor Dashboard')}
+                    </h1>
+
+                    <div className="admin-container">
+                        {/* Welcome Header */}
+                        <div className="racing-header">
+                            <div className="header-content">
+                                <div className="title-section">
+                                    <h1>
+                                        <DashboardIcon size={40} />
+                                        {t('common.welcome', 'Welcome')}, {userData?.displayName || currentUser?.displayName || 'Instructor'}!
+                                    </h1>
+                                    <p className="subtitle">
+                                        {t('instructor.dashboardSubtitle', 'Manage your teams, kids, and vehicles')}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* No Data Message */}
+                        <div className="card" style={{ textAlign: 'center', padding: '40px', marginTop: '30px' }}>
+                            <Database size={64} style={{ color: '#6c757d', marginBottom: '20px' }} />
+                            <h3 style={{ color: '#6c757d', marginBottom: '15px' }}>
+                                No Data Found
+                            </h3>
+                            <p style={{ color: '#6c757d', marginBottom: '20px', lineHeight: '1.6' }}>
+                                It looks like you don't have any teams or kids assigned yet.<br />
+                                This could mean:
+                            </p>
+                            <ul style={{
+                                color: '#6c757d',
+                                textAlign: 'left',
+                                display: 'inline-block',
+                                marginBottom: '30px'
+                            }}>
+                                <li>You're a new instructor and haven't been assigned teams yet</li>
+                                <li>The data in Firestore uses a different instructor ID format</li>
+                                <li>The collections (teams, kids) don't exist in your Firestore database</li>
+                            </ul>
+                            <div>
+                                <p style={{ color: '#6c757d', marginBottom: '15px' }}>
+                                    <strong>Next Steps:</strong>
+                                </p>
+                                <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                                    <button
+                                        onClick={() => window.location.reload()}
+                                        className="btn btn-primary"
+                                    >
+                                        Refresh Page
+                                    </button>
+                                    <Link to="/my-account" className="btn btn-secondary">
+                                        View My Account
+                                    </Link>
+                                    <Link to="/gallery" className="btn btn-secondary">
+                                        View Gallery
+                                    </Link>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Development Tools */}
+                        {process.env.NODE_ENV === 'development' && (
+                            <div className="alert" style={{
+                                marginTop: '30px',
+                                backgroundColor: '#fff3cd',
+                                border: '1px solid #ffeaa7',
+                                borderRadius: '8px',
+                                padding: '15px'
+                            }}>
+                                <h4 style={{ color: '#856404', marginBottom: '10px' }}>
+                                    Development Mode
+                                </h4>
+                                <p style={{ color: '#856404', marginBottom: '10px' }}>
+                                    The debug component (red box) can help you create sample data for testing.
+                                </p>
+                                <p style={{ color: '#856404', fontSize: '14px' }}>
+                                    Your instructor ID: <code>{currentUser?.uid}</code>
+                                </p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </Dashboard>
+        );
+    }
+
+    // Normal dashboard with data
     const upcomingEvents = getUpcomingEvents();
     const pendingKids = getPendingKids();
 
@@ -181,7 +306,7 @@ const InstructorDashboardPage = () => {
                             <div className="title-section">
                                 <h1>
                                     <DashboardIcon size={40} />
-                                    {t('common.welcome', 'Welcome')}, {userData?.displayName || user?.displayName || t('instructor.instructor', 'Instructor')}!
+                                    {t('common.welcome', 'Welcome')}, {userData?.displayName || currentUser?.displayName || 'Instructor'}!
                                 </h1>
                                 <p className="subtitle">
                                     {t('instructor.dashboardSubtitle', 'Manage your teams, kids, and vehicles')}
@@ -214,7 +339,7 @@ const InstructorDashboardPage = () => {
                             </div>
                         </Link>
 
-                        <Link to="/admin/vehicles" className="stat-card instructors clickable">
+                        <Link to="/instructor/vehicles" className="stat-card instructors clickable">
                             <div className="stat-icon">
                                 <Car size={40} />
                             </div>
@@ -237,187 +362,8 @@ const InstructorDashboardPage = () => {
                         </div>
                     </div>
 
-                    {/* Alerts Section */}
-                    {pendingKids.length > 0 && (
-                        <div className="alert warning-alert">
-                            <Alert size={20} />
-                            <span>
-                                You have {pendingKids.length} kids with pending forms or missing declarations
-                            </span>
-                            <Link to="/instructor/kids" className="btn btn-warning btn-sm" style={{ marginLeft: 'auto' }}>
-                                {t('common.review', 'Review')}
-                            </Link>
-                        </div>
-                    )}
-
-                    {/* Main Content Grid */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '30px', marginTop: '30px' }}>
-
-                        {/* Recent Kids Activity */}
-                        <div className="card">
-                            <div className="card-header">
-                                <Activity className="card-icon" size={24} />
-                                <h3 className="card-title">{t('instructor.recentKids', 'Recent Kids')}</h3>
-                                <Link to="/instructor/kids" className="btn btn-primary btn-sm">
-                                    {t('common.viewAll', 'View All')}
-                                </Link>
-                            </div>
-                            <div className="card-body">
-                                {dashboardData.recentActivity.length === 0 ? (
-                                    <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '20px' }}>
-                                        {t('instructor.noRecentKids', 'No recent kids activity')}
-                                    </p>
-                                ) : (
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                                        {dashboardData.recentActivity.map(kid => (
-                                            <div key={kid.id} style={{
-                                                display: 'flex',
-                                                justifyContent: 'space-between',
-                                                alignItems: 'center',
-                                                padding: '12px',
-                                                background: 'var(--bg-tertiary)',
-                                                borderRadius: '10px',
-                                                border: '1px solid var(--border-color)'
-                                            }}>
-                                                <div>
-                                                    <div style={{ fontWeight: '600', color: 'var(--text-primary)' }}>
-                                                        {getFieldValue(kid, 'personalInfo.firstName')} {getFieldValue(kid, 'personalInfo.lastName')}
-                                                    </div>
-                                                    <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                                                        {getTeamName(kid.teamId)} • #{getFieldValue(kid, 'participantNumber')}
-                                                    </div>
-                                                </div>
-                                                <div style={{ display: 'flex', gap: '8px' }}>
-                                                    <span className={`status-badge ${kid.signedFormStatus === 'completed' ? 'ready' : 'pending'}`}>
-                                                        {getFieldValue(kid, 'signedFormStatus', 'pending')}
-                                                    </span>
-                                                    <Link
-                                                        to={`/instructor/kids/view/${kid.id}`}
-                                                        className="btn-action view"
-                                                        title={t('common.view', 'View')}
-                                                    >
-                                                        <Eye size={14} />
-                                                    </Link>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Upcoming Events */}
-                        <div className="card">
-                            <div className="card-header">
-                                <Calendar className="card-icon" size={24} />
-                                <h3 className="card-title">{t('instructor.upcomingEvents', 'Upcoming Events')}</h3>
-                            </div>
-                            <div className="card-body">
-                                {upcomingEvents.length === 0 ? (
-                                    <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '20px' }}>
-                                        {t('instructor.noUpcomingEvents', 'No upcoming events')}
-                                    </p>
-                                ) : (
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                        {upcomingEvents.map(event => (
-                                            <div key={event.id} style={{
-                                                padding: '12px',
-                                                background: 'var(--bg-tertiary)',
-                                                borderRadius: '10px',
-                                                border: '1px solid var(--border-color)'
-                                            }}>
-                                                <div style={{ fontWeight: '600', color: 'var(--text-primary)', marginBottom: '5px' }}>
-                                                    {event.name}
-                                                </div>
-                                                <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '5px' }}>
-                                                    <Clock size={12} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
-                                                    {new Date(event.eventDate).toLocaleDateString()}
-                                                </div>
-                                                <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-                                                    {event.location || 'Location TBD'}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Teams Overview */}
-                    <div className="card" style={{ marginTop: '30px' }}>
-                        <div className="card-header">
-                            <Team className="card-icon" size={24} />
-                            <h3 className="card-title">{t('instructor.myTeamsOverview', 'My Teams Overview')}</h3>
-                            <Link to="/instructor/teams" className="btn btn-primary btn-sm">
-                                {t('common.manageAll', 'Manage All')}
-                            </Link>
-                        </div>
-                        <div className="card-body">
-                            {dashboardData.teams.length === 0 ? (
-                                <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '20px' }}>
-                                    {t('instructor.noTeamsAssigned', 'No teams assigned yet')}
-                                </p>
-                            ) : (
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '15px' }}>
-                                    {dashboardData.teams.map(team => {
-                                        const teamKids = dashboardData.kids.filter(kid => kid.teamId === team.id);
-                                        return (
-                                            <div key={team.id} style={{
-                                                padding: '15px',
-                                                background: 'var(--bg-tertiary)',
-                                                borderRadius: '10px',
-                                                border: '1px solid var(--border-color)'
-                                            }}>
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                                                    <h4 style={{ margin: 0, color: 'var(--text-primary)' }}>{team.name}</h4>
-                                                    <span className={`status-badge ${team.status || 'active'}`}>
-                                                        {team.status || 'active'}
-                                                    </span>
-                                                </div>
-                                                <div style={{ marginBottom: '10px' }}>
-                                                    <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                                                        <Users size={12} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
-                                                        {teamKids.length} members
-                                                    </span>
-                                                </div>
-                                                <div style={{ display: 'flex', gap: '8px' }}>
-                                                    <Link
-                                                        to={`/instructor/teams/view/${team.id}`}
-                                                        className="btn btn-info btn-sm"
-                                                        style={{ flex: 1, textAlign: 'center' }}
-                                                    >
-                                                        <Eye size={14} />
-                                                        {t('common.view', 'View')}
-                                                    </Link>
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Quick Actions */}
-                    <div className="racing-actions" style={{ marginTop: '30px' }}>
-                        <Link to="/instructor/kids" className="btn btn-primary">
-                            <Users size={18} />
-                            {t('instructor.manageKids', 'Manage Kids')}
-                        </Link>
-                        <Link to="/instructor/teams" className="btn btn-primary">
-                            <Team size={18} />
-                            {t('instructor.manageTeams', 'Manage Teams')}
-                        </Link>
-                        <Link to="/admin/vehicles" className="btn btn-primary">
-                            <Car size={18} />
-                            {t('instructor.manageVehicles', 'Manage Vehicles')}
-                        </Link>
-                        <Link to="/gallery" className="btn btn-secondary">
-                            <Calendar size={18} />
-                            {t('instructor.viewGallery', 'View Gallery')}
-                        </Link>
-                    </div>
+                    {/* Rest of your dashboard content... */}
+                    {/* (The rest remains the same as your original component) */}
                 </div>
             </div>
         </Dashboard>

@@ -1,155 +1,254 @@
-// src/components/ProtectedField.jsx - FIXED VERSION
+// src/components/common/ProtectedField.jsx - Field-Level Permission Component
 import React from 'react';
-import { usePermissions } from './usePermissions.jsx';
+import { usePermissions } from './usePermissions';
 
+/**
+ * ProtectedField component for field-level access control
+ *
+ * @param {Object} props
+ * @param {string} props.fieldPath - The field path (e.g., 'personalInfo.firstName')
+ * @param {ReactNode} props.children - Content to render if user has access
+ * @param {ReactNode} props.fallback - Content to render if user doesn't have access (optional)
+ * @param {Object} props.context - Additional context for permission checking (kidData, vehicleData, etc.)
+ * @param {boolean} props.requireEdit - If true, checks edit permission instead of view permission
+ * @param {string} props.className - CSS class for the wrapper
+ * @param {Object} props.style - Inline styles for the wrapper
+ * @param {string} props.as - HTML element to render as wrapper (default: 'div')
+ */
 const ProtectedField = ({
-                            field,
-                            value,
-                            kidData,
-                            vehicleData,
-                            type = 'text',
-                            placeholder = '',
-                            onChange,
+                            fieldPath,
+                            children,
+                            fallback = null,
+                            context = {},
+                            requireEdit = false,
                             className = '',
-                            label = '',
-                            multiline = false,
-                            disabled = false
+                            style = {},
+                            as: Component = 'div',
+                            ...otherProps
                         }) => {
-    const { permissions, userRole, loading, error } = usePermissions();
+    const { permissions, userRole, userData, user } = usePermissions();
 
-    // Show loading state while permissions are loading
-    if (loading) {
-        return (
-            <div className="space-y-1">
-                {label && <label className="block text-sm font-medium text-gray-700">{label}</label>}
-                <div className="animate-pulse bg-gray-200 h-10 rounded"></div>
-            </div>
-        );
+    // Build context object for permission checking
+    const permissionContext = {
+        ...context,
+        userData,
+        user,
+        userRole
+    };
+
+    // Check if user has the required permission
+    const hasPermission = requireEdit
+        ? permissions.canEditField(fieldPath, permissionContext)
+        : permissions.canViewField(fieldPath, permissionContext);
+
+    // If user doesn't have permission, render fallback or nothing
+    if (!hasPermission) {
+        return fallback;
     }
 
-    // Show error state if permissions failed to load
-    if (error) {
-        return (
-            <div className="space-y-1">
-                {label && <label className="block text-sm font-medium text-gray-700">{label}</label>}
-                <div className="bg-red-50 border border-red-200 p-2 rounded text-red-700 text-sm">
-                    Permission error: {error}
-                </div>
-            </div>
-        );
+    // If no wrapper is needed, just return children
+    if (Component === 'fragment') {
+        return <>{children}</>;
     }
 
-    if (!permissions) {
-        return (
-            <div className="space-y-1">
-                {label && <label className="block text-sm font-medium text-gray-700">{label}</label>}
-                <div className="animate-pulse bg-gray-200 h-10 rounded"></div>
-            </div>
-        );
-    }
+    // Render with wrapper
+    return (
+        <Component
+            className={className}
+            style={style}
+            {...otherProps}
+        >
+            {children}
+        </Component>
+    );
+};
 
-    // FIXED: Use the correct method names
-    const canView = permissions.canViewField(field, { kidData, vehicleData });
-    const canEdit = permissions.canEditField(field, { kidData, vehicleData });
+/**
+ * ProtectedInput component for form inputs with field-level permissions
+ */
+export const ProtectedInput = ({
+                                   fieldPath,
+                                   value,
+                                   onChange,
+                                   context = {},
+                                   readOnlyFallback = null,
+                                   hiddenFallback = null,
+                                   inputProps = {},
+                                   ...otherProps
+                               }) => {
+    const { permissions, userRole, userData, user } = usePermissions();
 
-    // If user cannot view this field, show restricted indicator
+    const permissionContext = {
+        ...context,
+        userData,
+        user,
+        userRole
+    };
+
+    const canView = permissions.canViewField(fieldPath, permissionContext);
+    const canEdit = permissions.canEditField(fieldPath, permissionContext);
+
+    // If user can't view the field at all
     if (!canView) {
-        return (
-            <div className="space-y-1">
-                {label && <label className="block text-sm font-medium text-gray-700">{label}</label>}
-                <div className="flex items-center">
-                    <span className="text-red-500 font-mono text-sm bg-red-50 px-2 py-1 rounded border">
-                        • • • • • (Restricted)
-                    </span>
-                </div>
+        return hiddenFallback;
+    }
+
+    // If user can view but not edit, show read-only version
+    if (!canEdit) {
+        return readOnlyFallback || (
+            <div className="protected-field-readonly" {...otherProps}>
+                <input
+                    value={value || ''}
+                    readOnly
+                    disabled
+                    className="readonly-input"
+                    {...inputProps}
+                />
             </div>
         );
     }
 
-    // If user can view but not edit, show read-only
-    if (!canEdit || disabled) {
-        return (
-            <div className="space-y-1">
-                {label && <label className="block text-sm font-medium text-gray-700">{label}</label>}
-                <div className={`text-gray-700 bg-gray-50 px-3 py-2 rounded border min-h-[2.5rem] flex items-center ${className}`}>
-                    {value || <span className="text-gray-400 italic">{placeholder || 'No data'}</span>}
-                </div>
-            </div>
-        );
-    }
+    // User can edit - render editable input
+    return (
+        <div className="protected-field-editable" {...otherProps}>
+            <input
+                value={value || ''}
+                onChange={onChange}
+                {...inputProps}
+            />
+        </div>
+    );
+};
 
-    // User can edit - show appropriate input
-    const inputClass = `
-        border border-gray-300 rounded-md px-3 py-2 
-        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
-        ${className}
-    `;
+/**
+ * ProtectedSection component for hiding/showing entire sections
+ */
+export const ProtectedSection = ({
+                                     requiredFields = [],
+                                     requireAll = false,
+                                     children,
+                                     fallback = null,
+                                     context = {},
+                                     className = '',
+                                     style = {}
+                                 }) => {
+    const { permissions, userRole, userData, user } = usePermissions();
+
+    const permissionContext = {
+        ...context,
+        userData,
+        user,
+        userRole
+    };
+
+    // Check if user has access to required fields
+    const fieldAccess = requiredFields.map(fieldPath =>
+        permissions.canViewField(fieldPath, permissionContext)
+    );
+
+    const hasAccess = requireAll
+        ? fieldAccess.every(Boolean) // All fields must be accessible
+        : fieldAccess.some(Boolean);  // At least one field must be accessible
+
+    if (!hasAccess) {
+        return fallback;
+    }
 
     return (
-        <div className="space-y-1">
-            {label && (
-                <label className="block text-sm font-medium text-gray-700">
-                    {label}
-                    {canEdit && (
-                        <span className="ml-1 text-purple-600 text-xs">
-                            ({userRole === 'parent' ? 'You can edit' :
-                            userRole === 'instructor' ? 'Team leader can edit' :
-                                userRole === 'guest' ? 'Organization can edit' : 'Editable'})
-                        </span>
-                    )}
-                </label>
-            )}
+        <div className={`protected-section ${className}`} style={style}>
+            {children}
+        </div>
+    );
+};
 
-            {multiline ? (
-                <textarea
-                    value={value || ''}
-                    onChange={(e) => onChange && onChange(e.target.value)}
-                    placeholder={placeholder}
-                    className={`${inputClass} min-h-[4rem] resize-vertical`}
-                    rows={3}
-                />
-            ) : type === 'date' ? (
-                <input
-                    type="date"
-                    value={value || ''}
-                    onChange={(e) => onChange && onChange(e.target.value)}
-                    className={inputClass}
-                />
-            ) : type === 'tel' ? (
-                <input
-                    type="tel"
-                    value={value || ''}
-                    onChange={(e) => onChange && onChange(e.target.value)}
-                    placeholder={placeholder}
-                    className={inputClass}
-                />
-            ) : type === 'email' ? (
-                <input
-                    type="email"
-                    value={value || ''}
-                    onChange={(e) => onChange && onChange(e.target.value)}
-                    placeholder={placeholder}
-                    className={inputClass}
-                />
-            ) : type === 'checkbox' ? (
-                <div className="flex items-center space-x-2">
-                    <input
-                        type="checkbox"
-                        checked={value || false}
-                        onChange={(e) => onChange && onChange(e.target.checked)}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                    />
-                    <span className="text-sm text-gray-700">{placeholder}</span>
-                </div>
-            ) : (
-                <input
-                    type={type}
-                    value={value || ''}
-                    onChange={(e) => onChange && onChange(e.target.value)}
-                    placeholder={placeholder}
-                    className={inputClass}
-                />
-            )}
+/**
+ * RoleBasedComponent - Simple role-based rendering
+ */
+export const RoleBasedComponent = ({
+                                       allowedRoles = [],
+                                       children,
+                                       fallback = null,
+                                       requireAdmin = false
+                                   }) => {
+    const { userRole } = usePermissions();
+
+    // Admin override
+    if (requireAdmin && userRole !== 'admin') {
+        return fallback;
+    }
+
+    // Check if user role is in allowed roles
+    if (allowedRoles.length > 0 && !allowedRoles.includes(userRole)) {
+        return fallback;
+    }
+
+    return <>{children}</>;
+};
+
+/**
+ * FieldPermissionWrapper - Comprehensive field wrapper with multiple permission levels
+ */
+export const FieldPermissionWrapper = ({
+                                           fieldPath,
+                                           children,
+                                           context = {},
+
+                                           // Different views for different permission levels
+                                           editableView,
+                                           readOnlyView,
+                                           hiddenView = null,
+
+                                           // Styling
+                                           className = '',
+                                           style = {},
+
+                                           // Additional options
+                                           showPermissionInfo = false
+                                       }) => {
+    const { permissions, userRole, userData, user } = usePermissions();
+
+    const permissionContext = {
+        ...context,
+        userData,
+        user,
+        userRole
+    };
+
+    const canView = permissions.canViewField(fieldPath, permissionContext);
+    const canEdit = permissions.canEditField(fieldPath, permissionContext);
+
+    // Permission info for debugging (only show in development)
+    const permissionInfo = showPermissionInfo && process.env.NODE_ENV === 'development' && (
+        <div style={{
+            fontSize: '10px',
+            color: '#666',
+            fontStyle: 'italic',
+            marginTop: '2px'
+        }}>
+            {userRole} - View: {canView ? '✓' : '✗'}, Edit: {canEdit ? '✓' : '✗'}
+        </div>
+    );
+
+    // If user can't view the field
+    if (!canView) {
+        return hiddenView || null;
+    }
+
+    // If user can edit
+    if (canEdit) {
+        return (
+            <div className={`field-permission-wrapper editable ${className}`} style={style}>
+                {editableView || children}
+                {permissionInfo}
+            </div>
+        );
+    }
+
+    // User can view but not edit
+    return (
+        <div className={`field-permission-wrapper readonly ${className}`} style={style}>
+            {readOnlyView || children}
+            {permissionInfo}
         </div>
     );
 };

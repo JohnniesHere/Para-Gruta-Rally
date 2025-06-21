@@ -1,4 +1,4 @@
-// src/App.jsx
+// src/App.jsx - Updated with Enhanced Route Protection
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
@@ -6,6 +6,16 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { PermissionProvider } from './hooks/usePermissions.jsx';
 import ErrorBoundary from './components/layout/ErrorBoundary';
+
+// Import the enhanced protected route components
+import ProtectedRoute, {
+    RequireAuth,
+    RequireAdmin,
+    RequireInstructor,
+    RequireParent,
+    RequireHost,
+    RequireAnyRole
+} from './components/routing/ProtectedRoute.jsx';
 
 // Import pages
 import Login from './components/auth/Login';
@@ -65,14 +75,6 @@ import KidDetailView from './components/kids/KidDetail.jsx';
 import './styles/theme.css';
 import './App.css';
 
-// Protected Route component
-const ProtectedRoute = ({ children, requiredRole }) => {
-    // This would typically check authentication and authorization
-    // For now, we'll assume the Dashboard component handles this
-    // You can enhance this later to use permissions
-    return children;
-};
-
 function App() {
     return (
         <ErrorBoundary>
@@ -95,9 +97,9 @@ function App() {
                                         <Route
                                             path="/admin/dashboard"
                                             element={
-                                                <ProtectedRoute requiredRole="admin">
+                                                <RequireAdmin>
                                                     <AdminDashboardPage />
-                                                </ProtectedRoute>
+                                                </RequireAdmin>
                                             }
                                         />
 
@@ -105,41 +107,41 @@ function App() {
                                         <Route
                                             path="/admin/events"
                                             element={
-                                                <ProtectedRoute requiredRole="admin">
+                                                <RequireAdmin>
                                                     <EventManagementPage />
-                                                </ProtectedRoute>
+                                                </RequireAdmin>
                                             }
                                         />
                                         <Route
                                             path="/admin/events/create"
                                             element={
-                                                <ProtectedRoute requiredRole="admin">
+                                                <RequireAdmin>
                                                     <CreateEventPage />
-                                                </ProtectedRoute>
+                                                </RequireAdmin>
                                             }
                                         />
                                         <Route
                                             path="/admin/events/view"
                                             element={
-                                                <ProtectedRoute requiredRole="admin">
+                                                <RequireAdmin>
                                                     <ViewEventsPage />
-                                                </ProtectedRoute>
+                                                </RequireAdmin>
                                             }
                                         />
                                         <Route
                                             path="/admin/events/view/:eventId"
                                             element={
-                                                <ProtectedRoute requiredRole="admin">
+                                                <RequireAdmin>
                                                     <ViewEventsPage />
-                                                </ProtectedRoute>
+                                                </RequireAdmin>
                                             }
                                         />
                                         <Route
                                             path="/admin/events/edit/:eventId"
                                             element={
-                                                <ProtectedRoute requiredRole="admin">
+                                                <RequireAdmin>
                                                     <EditEventPage />
-                                                </ProtectedRoute>
+                                                </RequireAdmin>
                                             }
                                         />
 
@@ -147,9 +149,9 @@ function App() {
                                         <Route
                                             path="/admin/users"
                                             element={
-                                                <ProtectedRoute requiredRole="admin">
+                                                <RequireAdmin>
                                                     <UserManagementPage />
-                                                </ProtectedRoute>
+                                                </RequireAdmin>
                                             }
                                         />
 
@@ -157,33 +159,33 @@ function App() {
                                         <Route
                                             path="/admin/kids"
                                             element={
-                                                <ProtectedRoute requiredRole="admin">
+                                                <RequireAdmin>
                                                     <KidsManagementPage />
-                                                </ProtectedRoute>
+                                                </RequireAdmin>
                                             }
                                         />
                                         <Route
                                             path="/admin/kids/add"
                                             element={
-                                                <ProtectedRoute requiredRole="admin">
+                                                <RequireAdmin>
                                                     <AddKidPage />
-                                                </ProtectedRoute>
+                                                </RequireAdmin>
                                             }
                                         />
                                         <Route
                                             path="/admin/kids/view/:id"
                                             element={
-                                                <ProtectedRoute requiredRole="admin">
+                                                <RequireAdmin>
                                                     <ViewKidPage />
-                                                </ProtectedRoute>
+                                                </RequireAdmin>
                                             }
                                         />
                                         <Route
                                             path="/admin/kids/edit/:id"
                                             element={
-                                                <ProtectedRoute requiredRole="admin">
+                                                <RequireAdmin>
                                                     <EditKidPage />
-                                                </ProtectedRoute>
+                                                </RequireAdmin>
                                             }
                                         />
 
@@ -191,33 +193,33 @@ function App() {
                                         <Route
                                             path="/admin/teams"
                                             element={
-                                                <ProtectedRoute requiredRole="admin">
+                                                <RequireAdmin>
                                                     <TeamsManagementPage />
-                                                </ProtectedRoute>
+                                                </RequireAdmin>
                                             }
                                         />
                                         <Route
                                             path="/admin/teams/add"
                                             element={
-                                                <ProtectedRoute requiredRole="admin">
+                                                <RequireAdmin>
                                                     <AddTeamPage />
-                                                </ProtectedRoute>
+                                                </RequireAdmin>
                                             }
                                         />
                                         <Route
                                             path="/admin/teams/view/:id"
                                             element={
-                                                <ProtectedRoute requiredRole="admin">
+                                                <RequireAdmin>
                                                     <ViewTeamPage />
-                                                </ProtectedRoute>
+                                                </RequireAdmin>
                                             }
                                         />
                                         <Route
                                             path="/admin/teams/edit/:id"
                                             element={
-                                                <ProtectedRoute requiredRole="admin">
+                                                <RequireAdmin>
                                                     <EditTeamPage />
-                                                </ProtectedRoute>
+                                                </RequireAdmin>
                                             }
                                         />
 
@@ -225,33 +227,33 @@ function App() {
                                         <Route
                                             path="/admin/vehicles"
                                             element={
-                                                <ProtectedRoute requiredRole="admin">
+                                                <RequireAdmin>
                                                     <VehiclesPage />
-                                                </ProtectedRoute>
+                                                </RequireAdmin>
                                             }
                                         />
                                         <Route
                                             path="/admin/vehicles/add"
                                             element={
-                                                <ProtectedRoute requiredRole="admin">
+                                                <RequireAdmin>
                                                     <AddVehiclePage />
-                                                </ProtectedRoute>
+                                                </RequireAdmin>
                                             }
                                         />
                                         <Route
                                             path="/admin/vehicles/view/:id"
                                             element={
-                                                <ProtectedRoute requiredRole="admin">
+                                                <RequireAdmin>
                                                     <ViewVehiclePage />
-                                                </ProtectedRoute>
+                                                </RequireAdmin>
                                             }
                                         />
                                         <Route
                                             path="/admin/vehicles/edit/:id"
                                             element={
-                                                <ProtectedRoute requiredRole="admin">
+                                                <RequireAdmin>
                                                     <EditVehiclePage />
-                                                </ProtectedRoute>
+                                                </RequireAdmin>
                                             }
                                         />
 
@@ -259,33 +261,33 @@ function App() {
                                         <Route
                                             path="/admin/forms"
                                             element={
-                                                <ProtectedRoute requiredRole="admin">
+                                                <RequireAdmin>
                                                     <FormsManagementPage />
-                                                </ProtectedRoute>
+                                                </RequireAdmin>
                                             }
                                         />
                                         <Route
                                             path="/admin/backup"
                                             element={
-                                                <ProtectedRoute requiredRole="admin">
+                                                <RequireAdmin>
                                                     <BackupSyncPage />
-                                                </ProtectedRoute>
+                                                </RequireAdmin>
                                             }
                                         />
                                         <Route
                                             path="/admin/import-export"
                                             element={
-                                                <ProtectedRoute requiredRole="admin">
+                                                <RequireAdmin>
                                                     <ImportExportPage />
-                                                </ProtectedRoute>
+                                                </RequireAdmin>
                                             }
                                         />
                                         <Route
                                             path="/admin/analytics"
                                             element={
-                                                <ProtectedRoute requiredRole="admin">
+                                                <RequireAdmin>
                                                     <AnalyticsDashboardPage />
-                                                </ProtectedRoute>
+                                                </RequireAdmin>
                                             }
                                         />
 
@@ -295,9 +297,9 @@ function App() {
                                         <Route
                                             path="/instructor/dashboard"
                                             element={
-                                                <ProtectedRoute requiredRole="instructor">
+                                                <RequireInstructor>
                                                     <InstructorDashboardPage />
-                                                </ProtectedRoute>
+                                                </RequireInstructor>
                                             }
                                         />
 
@@ -305,9 +307,9 @@ function App() {
                                         <Route
                                             path="/instructor/events"
                                             element={
-                                                <ProtectedRoute requiredRole="instructor">
+                                                <RequireInstructor>
                                                     <InstructorEventsPage />
-                                                </ProtectedRoute>
+                                                </RequireInstructor>
                                             }
                                         />
 
@@ -315,25 +317,25 @@ function App() {
                                         <Route
                                             path="/instructor/kids"
                                             element={
-                                                <ProtectedRoute requiredRole="instructor">
+                                                <RequireInstructor>
                                                     <InstructorKidsManagementPage />
-                                                </ProtectedRoute>
+                                                </RequireInstructor>
                                             }
                                         />
                                         <Route
                                             path="/instructor/kids/view/:id"
                                             element={
-                                                <ProtectedRoute requiredRole="instructor">
+                                                <RequireInstructor>
                                                     <ViewKidPage />
-                                                </ProtectedRoute>
+                                                </RequireInstructor>
                                             }
                                         />
                                         <Route
                                             path="/instructor/kids/edit/:id"
                                             element={
-                                                <ProtectedRoute requiredRole="instructor">
+                                                <RequireInstructor>
                                                     <EditKidPage />
-                                                </ProtectedRoute>
+                                                </RequireInstructor>
                                             }
                                         />
 
@@ -341,25 +343,25 @@ function App() {
                                         <Route
                                             path="/instructor/teams"
                                             element={
-                                                <ProtectedRoute requiredRole="instructor">
+                                                <RequireInstructor>
                                                     <InstructorTeamsManagementPage />
-                                                </ProtectedRoute>
+                                                </RequireInstructor>
                                             }
                                         />
                                         <Route
                                             path="/instructor/teams/view/:id"
                                             element={
-                                                <ProtectedRoute requiredRole="instructor">
+                                                <RequireInstructor>
                                                     <ViewTeamPage />
-                                                </ProtectedRoute>
+                                                </RequireInstructor>
                                             }
                                         />
                                         <Route
                                             path="/instructor/teams/edit/:id"
                                             element={
-                                                <ProtectedRoute requiredRole="instructor">
+                                                <RequireInstructor>
                                                     <EditTeamPage />
-                                                </ProtectedRoute>
+                                                </RequireInstructor>
                                             }
                                         />
 
@@ -367,25 +369,25 @@ function App() {
                                         <Route
                                             path="/instructor/vehicles"
                                             element={
-                                                <ProtectedRoute requiredRole="instructor">
+                                                <RequireInstructor>
                                                     <InstructorVehiclesPage />
-                                                </ProtectedRoute>
+                                                </RequireInstructor>
                                             }
                                         />
                                         <Route
                                             path="/instructor/vehicles/view/:id"
                                             element={
-                                                <ProtectedRoute requiredRole="instructor">
+                                                <RequireInstructor>
                                                     <ViewVehiclePage />
-                                                </ProtectedRoute>
+                                                </RequireInstructor>
                                             }
                                         />
                                         <Route
                                             path="/instructor/vehicles/edit/:id"
                                             element={
-                                                <ProtectedRoute requiredRole="instructor">
+                                                <RequireInstructor>
                                                     <EditVehiclePage />
-                                                </ProtectedRoute>
+                                                </RequireInstructor>
                                             }
                                         />
 
@@ -395,17 +397,17 @@ function App() {
                                         <Route
                                             path="/parent/dashboard"
                                             element={
-                                                <ProtectedRoute requiredRole="parent">
+                                                <RequireParent>
                                                     <ParentDashboardPage />
-                                                </ProtectedRoute>
+                                                </RequireParent>
                                             }
                                         />
                                         <Route
                                             path="/parent/kid/:id"
                                             element={
-                                                <ProtectedRoute requiredRole="parent">
+                                                <RequireParent>
                                                     <ParentKidDetailPage />
-                                                </ProtectedRoute>
+                                                </RequireParent>
                                             }
                                         />
 
@@ -415,31 +417,31 @@ function App() {
                                         <Route
                                             path="/host/dashboard"
                                             element={
-                                                <ProtectedRoute requiredRole="host">
+                                                <RequireHost>
                                                     <HostDashboardPage />
-                                                </ProtectedRoute>
+                                                </RequireHost>
                                             }
                                         />
                                         <Route
                                             path="/host/events"
                                             element={
-                                                <ProtectedRoute requiredRole="host">
+                                                <RequireHost>
                                                     <HostDashboardPage />
-                                                </ProtectedRoute>
+                                                </RequireHost>
                                             }
                                         />
 
                                         {/* ========================================
-                                           SHARED ROUTES
+                                           SHARED ROUTES (Accessible to all authenticated users)
                                            ======================================== */}
 
                                         {/* My Account - accessible to all authenticated users */}
                                         <Route
                                             path="/my-account"
                                             element={
-                                                <ProtectedRoute>
+                                                <RequireAuth>
                                                     <MyAccountPage />
-                                                </ProtectedRoute>
+                                                </RequireAuth>
                                             }
                                         />
 
@@ -447,35 +449,83 @@ function App() {
                                         <Route
                                             path="/gallery"
                                             element={
-                                                <ProtectedRoute>
+                                                <RequireAuth>
                                                     <GalleryPage />
-                                                </ProtectedRoute>
+                                                </RequireAuth>
                                             }
                                         />
                                         <Route
                                             path="/gallery/:eventId"
                                             element={
-                                                <ProtectedRoute>
+                                                <RequireAuth>
                                                     <GalleryPage />
-                                                </ProtectedRoute>
+                                                </RequireAuth>
                                             }
                                         />
 
-                                        {/* Permission-aware kid detail route for testing */}
+                                        {/* Permission-aware kid detail route - uses smart permissions */}
                                         <Route
                                             path="/kid/:kidId"
                                             element={
-                                                <ProtectedRoute>
+                                                <RequireAuth>
                                                     <KidDetailView />
-                                                </ProtectedRoute>
+                                                </RequireAuth>
+                                            }
+                                        />
+
+                                        {/* ========================================
+                                           FLEXIBLE MULTI-ROLE ROUTES
+                                           For routes that need multiple role access
+                                           ======================================== */}
+
+                                        {/* Kids can be viewed by admin, instructor (for their kids), or parent (for their kids) */}
+                                        <Route
+                                            path="/kids/view/:id"
+                                            element={
+                                                <RequireAnyRole roles={['admin', 'instructor', 'parent']}>
+                                                    <ViewKidPage />
+                                                </RequireAnyRole>
+                                            }
+                                        />
+
+                                        {/* Teams can be viewed by admin, instructor, or parent */}
+                                        <Route
+                                            path="/teams/view/:id"
+                                            element={
+                                                <RequireAnyRole roles={['admin', 'instructor', 'parent']}>
+                                                    <ViewTeamPage />
+                                                </RequireAnyRole>
+                                            }
+                                        />
+
+                                        {/* Vehicles can be viewed by admin, instructor */}
+                                        <Route
+                                            path="/vehicles/view/:id"
+                                            element={
+                                                <RequireAnyRole roles={['admin', 'instructor']}>
+                                                    <ViewVehiclePage />
+                                                </RequireAnyRole>
                                             }
                                         />
 
                                         {/* ========================================
                                            DEFAULT REDIRECTS & 404
                                            ======================================== */}
-                                        <Route path="/dashboard" element={<Navigate to="/admin/dashboard" replace />} />
+
+                                        {/* Legacy dashboard redirect - now handled by AuthContext */}
+                                        <Route
+                                            path="/dashboard"
+                                            element={
+                                                <RequireAuth>
+                                                    <Navigate to="/admin/dashboard" replace />
+                                                </RequireAuth>
+                                            }
+                                        />
+
+                                        {/* Root redirect */}
                                         <Route path="/" element={<Navigate to="/login" replace />} />
+
+                                        {/* 404 - redirect to login for now, could be enhanced with a proper 404 page */}
                                         <Route path="*" element={<Navigate to="/login" replace />} />
                                     </Routes>
                                 </div>

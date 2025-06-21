@@ -1,6 +1,6 @@
-// src/components/auth/Login.jsx
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+// src/components/auth/Login.jsx - Enhanced with Role-Based Redirects
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext.jsx';
 import { useLanguage } from '../../contexts/LanguageContext.jsx';
@@ -17,45 +17,109 @@ const Login = () => {
     const [googleLoading, setGoogleLoading] = useState(false);
     const [error, setError] = useState('');
     const [isContactModalOpen, setIsContactModalOpen] = useState(false);
-    const { signIn, signInWithGoogle } = useAuth();
+
+    const {
+        signIn,
+        signInWithGoogle,
+        currentUser,
+        userRole,
+        getDashboardForRole,
+        authInitialized
+    } = useAuth();
+
     const { isDarkMode } = useTheme();
     const { t } = useLanguage();
     const navigate = useNavigate();
+    const location = useLocation();
 
+    // Get the intended destination (from protected route redirect)
+    const from = location.state?.from?.pathname || null;
+
+    // Handle redirect for already authenticated users
+    useEffect(() => {
+        if (authInitialized && currentUser && userRole) {
+            const targetPath = from || getDashboardForRole(userRole);
+            console.log(`User already authenticated, redirecting to: ${targetPath}`);
+            navigate(targetPath, { replace: true });
+        }
+    }, [currentUser, userRole, authInitialized, navigate, from, getDashboardForRole]);
+
+    // Handle form submission
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
         setLoading(true);
 
         try {
-            await signIn(email, password);
-            navigate('/dashboard');
+            const userCredential = await signIn(email, password);
+            console.log('Sign in successful:', userCredential.user.email);
+
+            // Note: Navigation will be handled by the AuthContext redirect logic
+            // or the useEffect above once the user role is determined
+
         } catch (err) {
-            setError(t('login.error', 'Failed to sign in. Please check your credentials.'));
-            console.error(err);
+            console.error('Login error:', err);
+
+            // Handle specific Firebase auth errors
+            let errorMessage = t('login.error', 'Failed to sign in. Please check your credentials.');
+
+            switch (err.code) {
+                case 'auth/user-not-found':
+                    errorMessage = t('login.userNotFound', 'No account found with this email address.');
+                    break;
+                case 'auth/wrong-password':
+                    errorMessage = t('login.wrongPassword', 'Incorrect password. Please try again.');
+                    break;
+                case 'auth/invalid-email':
+                    errorMessage = t('login.invalidEmail', 'Please enter a valid email address.');
+                    break;
+                case 'auth/user-disabled':
+                    errorMessage = t('login.userDisabled', 'This account has been disabled. Please contact support.');
+                    break;
+                case 'auth/too-many-requests':
+                    errorMessage = t('login.tooManyAttempts', 'Too many failed attempts. Please try again later.');
+                    break;
+                default:
+                    errorMessage = err.message || errorMessage;
+            }
+
+            setError(errorMessage);
         } finally {
             setLoading(false);
         }
     };
 
+    // Handle Google sign-in
     const handleGoogleSignIn = async () => {
         setError('');
         setGoogleLoading(true);
 
         try {
-            await signInWithGoogle();
-            // Navigation will be handled by the AuthContext redirect logic
+            const userCredential = await signInWithGoogle();
+            console.log('Google sign in successful:', userCredential.user.email);
+
+            // Note: Navigation will be handled by the AuthContext redirect logic
+            // or the useEffect above once the user role is determined
+
         } catch (err) {
             console.error('Google sign-in error:', err);
 
             // Handle specific error cases
+            let errorMessage = t('login.googleError', 'Failed to sign in with Google. Please try again.');
+
             if (err.code === 'auth/popup-closed-by-user') {
-                setError(t('login.googleCancelled', 'Google sign-in was cancelled.'));
+                errorMessage = t('login.googleCancelled', 'Google sign-in was cancelled.');
             } else if (err.code === 'auth/popup-blocked') {
-                setError(t('login.popupBlocked', 'Popup was blocked. Please allow popups and try again.'));
+                errorMessage = t('login.popupBlocked', 'Popup was blocked. Please allow popups and try again.');
+            } else if (err.code === 'auth/account-exists-with-different-credential') {
+                errorMessage = t('login.accountExists', 'An account already exists with this email. Please sign in with your original method.');
+            } else if (err.message.includes('not authorized')) {
+                errorMessage = t('login.notAuthorized', 'This email is not authorized to access this application. Please contact an administrator.');
             } else {
-                setError(t('login.googleError', 'Failed to sign in with Google. Please try again.'));
+                errorMessage = err.message || errorMessage;
             }
+
+            setError(errorMessage);
         } finally {
             setGoogleLoading(false);
         }
@@ -64,6 +128,33 @@ const Login = () => {
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);
     };
+
+    // Show loading while auth is initializing
+    if (!authInitialized) {
+        return (
+            <div className={`login-page ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    height: '100vh',
+                    flexDirection: 'column'
+                }}>
+                    <div style={{
+                        width: '40px',
+                        height: '40px',
+                        border: '4px solid #f3f3f3',
+                        borderTop: '4px solid #3498db',
+                        borderRadius: '50%',
+                        animation: 'spin 1s linear infinite'
+                    }}></div>
+                    <p style={{ marginTop: '16px', color: '#666' }}>
+                        {t('login.initializing', 'Initializing...')}
+                    </p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className={`login-page ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
@@ -79,11 +170,26 @@ const Login = () => {
                 <div className="login-form-box">
                     <h2 className="login-heading">{t('login.title', 'Login')}</h2>
 
+                    {/* Show redirect information if coming from a protected route */}
+                    {from && (
+                        <div className="redirect-info" style={{
+                            backgroundColor: '#e3f2fd',
+                            border: '1px solid #2196f3',
+                            borderRadius: '4px',
+                            padding: '12px',
+                            marginBottom: '16px',
+                            fontSize: '14px',
+                            color: '#1976d2'
+                        }}>
+                            {t('login.redirectMessage', 'Please sign in to access the requested page.')}
+                        </div>
+                    )}
+
                     {error && <div className="error-message">{error}</div>}
 
                     <form onSubmit={handleSubmit}>
                         <div className="form-group">
-                            <label htmlFor="email">{t('login.email', 'Email:')}:</label>
+                            <label htmlFor="email">{t('login.email', 'Email')}:</label>
                             <input
                                 type="email"
                                 id="email"
@@ -91,11 +197,12 @@ const Login = () => {
                                 onChange={(e) => setEmail(e.target.value)}
                                 required
                                 placeholder={t('login.emailPlaceholder', 'Enter your email')}
+                                disabled={loading || googleLoading}
                             />
                         </div>
 
                         <div className="form-group">
-                            <label htmlFor="password">{t('login.password', 'Password:')}:</label>
+                            <label htmlFor="password">{t('login.password', 'Password')}:</label>
                             <div className="password-input-container">
                                 <input
                                     type={showPassword ? "text" : "password"}
@@ -104,11 +211,13 @@ const Login = () => {
                                     onChange={(e) => setPassword(e.target.value)}
                                     required
                                     placeholder={t('login.passwordPlaceholder', 'Enter your password')}
+                                    disabled={loading || googleLoading}
                                 />
                                 <button
                                     type="button"
                                     className="toggle-password-btn"
                                     onClick={togglePasswordVisibility}
+                                    disabled={loading || googleLoading}
                                 >
                                     {showPassword ? t('login.hide', 'Hide') : t('login.show', 'Show')}
                                 </button>
@@ -123,28 +232,60 @@ const Login = () => {
                             {loading ? t('login.signingIn', 'Signing In...') : t('login.signIn', 'Sign In')}
                         </button>
 
-                        {/* Text link for forgot password */}
+                        {/* Forgot password link */}
                         <Link to="/forgot-password" className="forgot-password-link">
                             {t('login.forgotPassword', 'Forgot Password?')}
                         </Link>
                     </form>
 
                     <div className="login-options">
+                        <div className="divider" style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            margin: '20px 0',
+                            fontSize: '14px',
+                            color: '#666'
+                        }}>
+                            <div style={{ flex: 1, height: '1px', backgroundColor: '#ddd' }}></div>
+                            <span style={{ padding: '0 16px' }}>{t('login.or', 'or')}</span>
+                            <div style={{ flex: 1, height: '1px', backgroundColor: '#ddd' }}></div>
+                        </div>
+
                         <button
                             type="button"
                             className="google-login-btn"
                             onClick={handleGoogleSignIn}
                             disabled={loading || googleLoading}
                         >
-                            {googleLoading ? t('login.googleSigningIn', 'Signing in with Google...') : t('login.googleSignIn', 'Sign In With Google')}
+                            {googleLoading
+                                ? t('login.googleSigningIn', 'Signing in with Google...')
+                                : t('login.googleSignIn', 'Sign In With Google')
+                            }
                         </button>
                     </div>
+
+                    {/* Development/Debug info (remove in production) */}
+                    {process.env.NODE_ENV === 'development' && (
+                        <div className="debug-info" style={{
+                            marginTop: '20px',
+                            padding: '12px',
+                            backgroundColor: '#f5f5f5',
+                            borderRadius: '4px',
+                            fontSize: '12px',
+                            color: '#666'
+                        }}>
+                            <strong>Development Info:</strong><br />
+                            Available roles: admin, instructor, parent, host, guest<br />
+                            {from && `Redirect target: ${from}`}
+                        </div>
+                    )}
                 </div>
 
                 <div className="contact-container">
                     <button
                         className="contact-us-btn"
                         onClick={() => setIsContactModalOpen(true)}
+                        disabled={loading || googleLoading}
                     >
                         {t('login.contactUs', 'Contact Us')}
                     </button>
