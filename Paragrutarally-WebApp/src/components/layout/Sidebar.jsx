@@ -180,6 +180,41 @@ const Sidebar = ({userRole}) => {
                         </NavLink>
                     </>
                 )}
+
+                {/* Parent Links */}
+                {userRole === 'parent' && (
+                    <>
+                        <NavLink
+                            to="/parent/dashboard"
+                            className={({isActive}) => isActive ? 'active' : ''}
+                            end
+                        >
+                            <Dashboard className="sidebar-icon" size={20}/>
+                            {t('nav.dashboard', 'Dashboard')}
+                        </NavLink>
+                        <NavLink
+                            to="/parent/events"
+                            className={({isActive}) => isActive ? 'active' : ''}
+                        >
+                            <Calendar className="sidebar-icon" size={20}/>
+                            {t('nav.events', 'Events')}
+                        </NavLink>
+                        <NavLink
+                            to="/parent/kids"
+                            className={({isActive}) => isActive ? 'active' : ''}
+                        >
+                            <Baby className="sidebar-icon" size={20}/>
+                            {t('nav.kids', 'Kids')}
+                        </NavLink>
+                        <NavLink
+                            to="/gallery"
+                            className={({isActive}) => isActive ? 'active' : ''}
+                        >
+                            <Photo className="sidebar-icon" size={20}/>
+                            {t('nav.gallery', 'Gallery')}
+                        </NavLink>
+                    </>
+                )}
             </div>
         </div>
     );
