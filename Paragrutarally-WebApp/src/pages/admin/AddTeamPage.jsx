@@ -4,6 +4,7 @@ import {useNavigate} from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
 import {useTheme} from '../../contexts/ThemeContext';
 import {usePermissions} from '../../hooks/usePermissions.jsx';
+import {useLanguage} from '../../contexts/LanguageContext';
 import {addTeam, getAllInstructors} from '../../services/teamService';
 import {getAllKids} from '../../services/kidService';
 import {createEmptyTeam, validateTeam} from '../../schemas/teamSchema'; // Fixed import path
@@ -28,6 +29,7 @@ const AddTeamPage = () => {
     const navigate = useNavigate();
     const {isDarkMode, appliedTheme} = useTheme();
     const {permissions, userRole} = usePermissions();
+    const {t} = useLanguage();
 
     const [isLoading, setIsLoading] = useState(false);
     const [instructors, setInstructors] = useState([]);
@@ -60,7 +62,7 @@ const AddTeamPage = () => {
 
         } catch (error) {
             console.error('❌ Error loading initial data:', error);
-            setErrors({general: 'Failed to load form data. Please refresh and try again.'});
+            setErrors({general: t('addTeam.failedToLoadForm', 'Failed to load form data. Please refresh and try again.')});
         } finally {
             setIsLoading(false);
         }
@@ -147,13 +149,13 @@ const AddTeamPage = () => {
             // Navigate to the new team's view page with success message
             navigate(`/admin/teams/view/${teamId}`, {
                 state: {
-                    message: `🏁 Team "${formData.name}" is ready for action! Let the racing begin! 🏎️`,
+                    message: t('addTeam.teamCreatedSuccess', 'Team "{teamName}" is ready for action! Let the racing begin! 🏎️', { teamName: formData.name }),
                     type: 'success'
                 }
             });
         } catch (error) {
             console.error('❌ Error adding team:', error);
-            setErrors({general: 'Failed to add team. Please try again.'});
+            setErrors({general: t('addTeam.failedToAddTeam', 'Failed to add team. Please try again.')});
         } finally {
             setIsSubmitting(false);
         }
@@ -165,7 +167,7 @@ const AddTeamPage = () => {
 
     // Helper function to get instructor display name
     const getInstructorDisplayName = (instructor) => {
-        return instructor.displayName || instructor.name || instructor.email || 'Unknown Instructor';
+        return instructor.displayName || instructor.name || instructor.email || t('addTeam.unknownInstructor', 'Unknown Instructor');
     };
 
     // Helper function to get error message for a field
@@ -184,7 +186,7 @@ const AddTeamPage = () => {
                 <div className={`admin-page add-team-page ${appliedTheme}-mode`}>
                     <div className="loading-container">
                         <div className="loading-spinner"></div>
-                        <p>Loading team setup...</p>
+                        <p>{t('addTeam.loadingTeamSetup', 'Loading team setup...')}</p>
                     </div>
                 </div>
             </Dashboard>
@@ -199,13 +201,13 @@ const AddTeamPage = () => {
                     onClick={handleCancel}
                     className={`back-button ${appliedTheme}-back-button`}>
                     <ArrowLeft className="btn-icon" size={20}/>
-                    Back to Teams
+                    {t('addTeam.backToTeams', 'Back to Teams')}
                 </button>
                 <div className="page-header">
                     <div className="title-section">
                         <h1>
                             <UsersGroup size={32} className="page-title-icon"/>
-                            Create A Team!
+                            {t('addTeam.title', 'Create A Team!')}
                             <Trophy size={24} className="trophy-icon"/>
                         </h1>
                     </div>
@@ -219,7 +221,7 @@ const AddTeamPage = () => {
                         <div className="header-content">
 
                             <div className="title-section">
-                                <p className="subtitle">Let's build the ultimate racing squad! 🏁</p>
+                                <p className="subtitle">{t('addTeam.subtitle', 'Let\'s build the ultimate racing squad! 🏁')}</p>
                             </div>
                         </div>
                     </div>
@@ -236,20 +238,20 @@ const AddTeamPage = () => {
                         <div className="form-section team-info-section">
                             <div className="section-header">
                                 <Trophy className="section-icon" size={24}/>
-                                <h2>🏎️ Team Identity</h2>
+                                <h2>🏎️ {t('teams.teamIdentity', 'Team Identity')}</h2>
                             </div>
                             <div className="form-grid">
                                 <div className="form-group">
                                     <div className="field-wrapper">
                                         <label className="form-label">
                                             <Target className="label-icon" size={16}/>
-                                            Team Name *
+                                            {t('teams.teamName', 'Team Name')} *
                                         </label>
                                         <input
                                             type="text"
                                             value={formData.name}
                                             onChange={(e) => handleInputChange('name', e.target.value)}
-                                            placeholder="Thunder Racers, Speed Demons, Lightning Bolts..."
+                                            placeholder={t('teams.teamNamePlaceholder', 'Thunder Racers, Speed Demons, Lightning Bolts...')}
                                             className={`form-input ${hasFieldError('name') ? 'error' : ''}`}
                                         />
                                         {getErrorMessage('name') && <span className="error-text">{getErrorMessage('name')}</span>}
@@ -260,7 +262,7 @@ const AddTeamPage = () => {
                                     <div className="field-wrapper">
                                         <label className="form-label">
                                             <Users className="label-icon" size={16}/>
-                                            Max Racers
+                                            {t('teams.maxRacers', 'Max Racers')}
                                         </label>
                                         <input
                                             type="number"
@@ -278,12 +280,12 @@ const AddTeamPage = () => {
                                     <div className="field-wrapper">
                                         <label className="form-label">
                                             <FileText className="label-icon" size={16}/>
-                                            Team Description
+                                            {t('teams.teamDescription', 'Team Description')}
                                         </label>
                                         <textarea
                                             value={formData.description}
                                             onChange={(e) => handleInputChange('description', e.target.value)}
-                                            placeholder="What makes this team special? Their racing spirit, teamwork, or special skills..."
+                                            placeholder={t('teams.teamDescriptionPlaceholder', 'What makes this team special? Their racing spirit, teamwork, or special skills...')}
                                             className="form-textarea"
                                             rows={3}
                                         />
@@ -294,15 +296,15 @@ const AddTeamPage = () => {
                                     <div className="field-wrapper">
                                         <label className="form-label">
                                             <Check className="label-icon" size={16}/>
-                                            Team Status
+                                            {t('teams.teamStatus', 'Team Status')}
                                         </label>
                                         <select
                                             value={formData.active ? 'active' : 'inactive'}
                                             onChange={(e) => handleInputChange('active', e.target.value === 'active')}
                                             className="form-select"
                                         >
-                                            <option value="active">✅ Active & Ready to Race</option>
-                                            <option value="inactive">⏸️ Inactive (Prep Mode)</option>
+                                            <option value="active">✅ {t('teams.activeReady', 'Active & Ready to Race')}</option>
+                                            <option value="inactive">⏸️ {t('teams.inactivePrep', 'Inactive (Prep Mode)')}</option>
                                         </select>
                                     </div>
                                 </div>
@@ -313,13 +315,13 @@ const AddTeamPage = () => {
                         <div className="form-section instructors-section">
                             <div className="section-header">
                                 <User className="section-icon" size={24}/>
-                                <h2>👨‍🏫 Racing Instructors</h2>
+                                <h2>👨‍🏫 {t('teams.racingInstructors', 'Racing Instructors')}</h2>
                             </div>
                             <div className="instructors-grid">
                                 {instructors.length === 0 ? (
                                     <div className="empty-state">
                                         <User className="empty-icon" size={40}/>
-                                        <p>No instructors available. Add some instructors first!</p>
+                                        <p>{t('teams.noInstructorsAvailable', 'No instructors available. Add some instructors first!')}</p>
                                     </div>
                                 ) : (
                                     instructors.map(instructor => (
@@ -355,14 +357,14 @@ const AddTeamPage = () => {
                                     <div className="field-wrapper">
                                         <label className="form-label">
                                             <Trophy className="label-icon" size={16}/>
-                                            Team Leader
+                                            {t('teams.teamLeader', 'Team Leader')}
                                         </label>
                                         <select
                                             value={formData.teamLeaderId}
                                             onChange={(e) => handleInputChange('teamLeaderId', e.target.value)}
                                             className="form-select"
                                         >
-                                            <option value="">🎯 Choose Team Leader</option>
+                                            <option value="">🎯 {t('teams.chooseTeamLeader', 'Choose Team Leader')}</option>
                                             {formData.instructorIds.map(instructorId => {
                                                 const instructor = instructors.find(i => i.id === instructorId);
                                                 return instructor ? (
@@ -373,7 +375,7 @@ const AddTeamPage = () => {
                                             })}
                                         </select>
                                         <small className="field-hint">
-                                            The team leader will be the main instructor responsible for this team.
+                                            {t('addTeam.teamLeaderHint', 'The team leader will be the main instructor responsible for this team.')}
                                         </small>
                                     </div>
                                 </div>
@@ -384,7 +386,7 @@ const AddTeamPage = () => {
                         <div className="form-section kids-section">
                             <div className="section-header">
                                 <Baby className="section-icon" size={24}/>
-                                <h2>🏎️ Team Racers ({formData.kidIds.length}/{formData.maxCapacity})</h2>
+                                <h2>🏎️ {t('teams.teamRacersWithCount', 'Team Racers ({current}/{max})', { current: formData.kidIds.length, max: formData.maxCapacity })}</h2>
                             </div>
 
                             {getErrorMessage('kidIds') && (
@@ -398,8 +400,8 @@ const AddTeamPage = () => {
                                 {availableKids.length === 0 ? (
                                     <div className="empty-state">
                                         <Baby className="empty-icon" size={40}/>
-                                        <p>All kids are already assigned to teams! 🎉</p>
-                                        <small>Add more kids or check existing team assignments.</small>
+                                        <p>{t('teams.allKidsAssigned', 'All kids are already assigned to teams! 🎉')}</p>
+                                        <small>{t('addTeam.addMoreKidsHint', 'Add more kids or check existing team assignments.')}</small>
                                     </div>
                                 ) : (
                                     availableKids.map(kid => (
@@ -411,7 +413,7 @@ const AddTeamPage = () => {
                                             <div className="card-header">
                                                 <Baby className="card-icon" size={20}/>
                                                 <span className="kid-name card-title">
-                                                    {kid.personalInfo?.firstName || 'Unknown'} {kid.personalInfo?.lastName || ''}
+                                                    {kid.personalInfo?.firstName || t('addTeam.unknown', 'Unknown')} {kid.personalInfo?.lastName || ''}
                                                 </span>
                                                 {formData.kidIds.includes(kid.id) && (
                                                     <Check className="selected-icon" size={16}/>
@@ -433,19 +435,19 @@ const AddTeamPage = () => {
                         <div className="form-section notes-section">
                             <div className="section-header">
                                 <FileText className="section-icon" size={24}/>
-                                <h2>📝 Team Notes</h2>
+                                <h2>📝 {t('teams.teamNotes', 'Team Notes')}</h2>
                             </div>
                             <div className="form-grid">
                                 <div className="form-group full-width">
                                     <div className="field-wrapper">
                                         <label className="form-label">
                                             <Sparkles className="label-icon" size={16}/>
-                                            Special Notes & Strategy
+                                            {t('teams.specialNotesStrategy', 'Special Notes & Strategy')}
                                         </label>
                                         <textarea
                                             value={formData.notes}
                                             onChange={(e) => handleInputChange('notes', e.target.value)}
-                                            placeholder="Team strategy, special requirements, or any other important notes..."
+                                            placeholder={t('teams.notesPlaceholder', 'Team strategy, special requirements, or any other important notes...')}
                                             className="form-textarea"
                                             rows={4}
                                         />
@@ -458,7 +460,7 @@ const AddTeamPage = () => {
                         <div className="racing-actions">
                             <button type="button" onClick={handleCancel} className="btn btn-cancel">
                                 <ArrowLeft className="btn-icon" size={18}/>
-                                Cancel
+                                {t('general.cancel', 'Cancel')}
                             </button>
                             <button
                                 type="submit"
@@ -468,12 +470,12 @@ const AddTeamPage = () => {
                                 {isSubmitting ? (
                                     <>
                                         <div className="loading-spinner-mini"></div>
-                                        Creating Team...
+                                        {t('addTeam.creatingTeam', 'Creating Team...')}
                                     </>
                                 ) : (
                                     <>
                                         <Plus className="btn-icon" size={18}/>
-                                        Create Racing Team! 🏁
+                                        {t('addTeam.createRacingTeam', 'Create Racing Team! 🏁')}
                                     </>
                                 )}
                             </button>

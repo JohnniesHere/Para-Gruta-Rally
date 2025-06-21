@@ -1576,8 +1576,98 @@ const translations = {
         'addVehicle.photoError.invalidType': 'Please upload a JPEG, PNG, or WebP image file.',
         'addVehicle.photoError.tooLarge': 'Photo file size must be less than 5MB.',
         'addVehicle.photoError.processingFailed': 'Failed to process photo. Please try again.',
+            // Add Team Page
+        'addTeam.title': 'Create A Team!',
+        'addTeam.subtitle': 'Let\'s build the ultimate racing squad! 🏁',
+        'addTeam.backToTeams': 'Back to Teams',
+        'addTeam.loadingTeamSetup': 'Loading team setup...',
+        'addTeam.failedToLoadForm': 'Failed to load form data. Please refresh and try again.',
+        'addTeam.failedToAddTeam': 'Failed to add team. Please try again.',
+
+        // Team Identity Section
+        'addTeam.teamIdentity': 'Team Identity',
+        'addTeam.teamNameRequired': 'Team name is required',
+        'addTeam.teamNamePlaceholder': 'Thunder Racers, Speed Demons, Lightning Bolts...',
+        'addTeam.maxRacers': 'Max Racers',
+        'addTeam.teamDescription': 'Team Description',
+        'addTeam.teamDescriptionPlaceholder': 'What makes this team special? Their racing spirit, teamwork, or special skills...',
+        'addTeam.teamStatus': 'Team Status',
+        'addTeam.activeReady': 'Active & Ready to Race',
+        'addTeam.inactivePrep': 'Inactive (Prep Mode)',
+
+        // Instructors Section
+        'addTeam.racingInstructors': 'Racing Instructors',
+        'addTeam.noInstructorsAvailable': 'No instructors available. Add some instructors first!',
+        'addTeam.teamLeader': 'Team Leader',
+        'addTeam.chooseTeamLeader': 'Choose Team Leader',
+        'addTeam.teamLeaderHint': 'The team leader will be the main instructor responsible for this team.',
+
+        // Kids/Racers Section
+        'addTeam.teamRacers': 'Team Racers',
+        'addTeam.allKidsAssigned': 'All kids are already assigned to teams! 🎉',
+        'addTeam.addMoreKidsHint': 'Add more kids or check existing team assignments.',
+        'addTeam.capacityExceeded': 'Cannot assign more kids than maximum capacity',
+
+        // Team Notes Section
+        'addTeam.teamNotes': 'Team Notes',
+        'addTeam.specialNotesStrategy': 'Special Notes & Strategy',
+        'addTeam.notesPlaceholder': 'Team strategy, special requirements, or any other important notes...',
+
+        // Actions
+        'addTeam.createRacingTeam': 'Create Racing Team! 🏁',
+        'addTeam.creatingTeam': 'Creating Team...',
+        'addTeam.teamCreatedSuccess': 'Team "{teamName}" is ready for action! Let the racing begin! 🏎️',
+
+        // Common elements
+        'addTeam.unknownInstructor': 'Unknown Instructor',
+        'addTeam.unknown': 'Unknown',
     },
     he: {
+         // Add Team Page
+        'addTeam.title': 'צור קבוצה!',
+        'addTeam.subtitle': 'בואו נבנה את צוות המירוצים האולטימטיבי! 🏁',
+        'addTeam.backToTeams': 'חזור לקבוצות',
+        'addTeam.loadingTeamSetup': 'טוען הגדרת קבוצה...',
+        'addTeam.failedToLoadForm': 'כשל בטעינת נתוני הטופס. אנא רענן ונסה שוב.',
+        'addTeam.failedToAddTeam': 'כשל בהוספת קבוצה. אנא נסה שוב.',
+
+        // Team Identity Section
+        'addTeam.teamIdentity': 'זהות הקבוצה',
+        'addTeam.teamNameRequired': 'שם הקבוצה הוא שדה חובה',
+        'addTeam.teamNamePlaceholder': 'רוכבי הרעם, שדי המהירות, ברקי הזעם...',
+        'addTeam.maxRacers': 'מספר רוכבים מקסימלי',
+        'addTeam.teamDescription': 'תיאור הקבוצה',
+        'addTeam.teamDescriptionPlaceholder': 'מה עושה את הקבוצה הזו מיוחדת? רוח המירוצים, עבודת הצוות או כישורים מיוחדים...',
+        'addTeam.teamStatus': 'סטטוס הקבוצה',
+        'addTeam.activeReady': 'פעילה ומוכנה למירוץ',
+        'addTeam.inactivePrep': 'לא פעילה (מצב הכנה)',
+
+        // Instructors Section
+        'addTeam.racingInstructors': 'מדריכי מירוצים',
+        'addTeam.noInstructorsAvailable': 'אין מדריכים זמינים. הוסף כמה מדריכים תחילה!',
+        'addTeam.teamLeader': 'מנהיג הקבוצה',
+        'addTeam.chooseTeamLeader': 'בחר מנהיג קבוצה',
+        'addTeam.teamLeaderHint': 'מנהיג הקבוצה יהיה המדריך הראשי האחראי על הקבוצה הזו.',
+
+        // Kids/Racers Section
+        'addTeam.teamRacers': 'רוכבי הקבוצה',
+        'addTeam.allKidsAssigned': 'כל הילדים כבר מוקצים לקבוצות! 🎉',
+        'addTeam.addMoreKidsHint': 'הוסף עוד ילדים או בדוק הקצאות קבוצות קיימות.',
+        'addTeam.capacityExceeded': 'לא ניתן להקצות יותר ילדים מהקיבולת המקסימלית',
+
+        // Team Notes Section
+        'addTeam.teamNotes': 'הערות קבוצה',
+        'addTeam.specialNotesStrategy': 'הערות מיוחדות ואסטרטגיה',
+        'addTeam.notesPlaceholder': 'אסטרטגיית הקבוצה, דרישות מיוחדות או כל הערות חשובות אחרות...',
+
+        // Actions
+        'addTeam.createRacingTeam': 'צור קבוצת מירוצים! 🏁',
+        'addTeam.creatingTeam': 'יוצר קבוצה...',
+        'addTeam.teamCreatedSuccess': 'קבוצה "{teamName}" מוכנה לפעולה! שיתחיל המירוץ! 🏎️',
+
+        // Common elements
+        'addTeam.unknownInstructor': 'מדריך לא ידוע',
+        'addTeam.unknown': 'לא ידוע',
         // Add Vehicle Page
         'addVehicle.title': 'הוסף רכב מירוץ חדש!',
         'addVehicle.welcomeTitle': 'ברוכים הבאים לרישום רכב!',
