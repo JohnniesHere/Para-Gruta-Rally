@@ -1,88 +1,147 @@
-/* src/components/modals/TeamAssignmentModal.css */
+/* src/components/TeamAssignmentModal.css - Rewritten with High Z-index */
+@import url('../../styles/global.css');
 
-.modal-overlay {
+/* ========================================
+   TEAM ASSIGNMENT MODAL OVERLAY
+   ======================================== */
+
+.team-assignment-overlay {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.6);
+    background-color: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9998; /* High z-index, just below delete modal */
+    animation: fadeInModal 0.3s ease-out;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+@keyframes fadeInModal {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* ========================================
+   TEAM ASSIGNMENT MODAL CONTAINER
+   ======================================== */
+
+.team-assignment-container {
+    background: var(--bg-secondary);
+    border: 3px solid var(--accent-color);
+    border-radius: 20px;
+    max-width: 900px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 25px 75px rgba(0, 0, 0, 0.4);
+    animation: slideInModal 0.3s ease-out;
+    position: relative;
+}
+
+@keyframes slideInModal {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* ========================================
+   TEAM ASSIGNMENT MODAL HEADER
+   ======================================== */
+
+.team-assignment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 28px;
+    border-bottom: 2px solid var(--border-color);
+    background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
+    border-radius: 17px 17px 0 0;
+}
+
+.team-assignment-header h2 {
+    margin: 0;
+    color: white;
+    font-size: 1.75rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.team-assignment-close {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 1000;
+    width: 40px;
+    height: 40px;
+}
+
+.team-assignment-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: scale(1.1);
+}
+
+/* ========================================
+   TEAM ASSIGNMENT MODAL BODY
+   ======================================== */
+
+.team-assignment-body {
+    padding: 28px;
+}
+
+/* ========================================
+   ERROR STATE
+   ======================================== */
+
+.team-assignment-error {
+    background: linear-gradient(135deg, var(--error-light) 0%, #FEE2E2 100%);
+    border: 2px solid var(--error-color);
+    border-radius: 12px;
     padding: 20px;
-}
-
-.team-assignment-modal {
-    background: var(--bg-primary);
-    border-radius: 16px;
-    max-width: 800px;
-    width: 90vw;
-    max-height: 85vh;
-    overflow: hidden;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
-    display: flex;
-    flex-direction: column;
-}
-
-.modal-header {
-    padding: 24px;
-    border-bottom: 1px solid var(--border-color);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
-}
-
-.modal-header h2 {
-    margin: 0;
-    color: var(--text-primary);
-    font-size: 20px;
-    font-weight: 700;
+    margin-bottom: 24px;
     display: flex;
     align-items: center;
     gap: 12px;
 }
 
-.modal-close {
-    background: none;
-    border: none;
-    color: var(--text-muted);
-    cursor: pointer;
-    padding: 8px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
+.dark-mode .team-assignment-error {
+    background: linear-gradient(135deg, rgba(248, 113, 113, 0.2) 0%, rgba(248, 113, 113, 0.1) 100%);
 }
 
-.modal-close:hover {
-    background: var(--bg-quaternary);
-    color: var(--text-primary);
-    transform: scale(1.1);
-}
-
-.modal-body {
-    padding: 24px;
-    flex: 1;
-    overflow-y: auto;
-}
-
-.error-message {
-    background: var(--error-light);
-    border: 1px solid var(--error-color);
-    border-radius: 8px;
-    padding: 16px;
-    margin-bottom: 20px;
-    text-align: center;
-}
-
-.error-message p {
+.error-icon {
     color: var(--error-color);
-    margin: 0 0 12px 0;
+    flex-shrink: 0;
+}
+
+.team-assignment-error p {
+    color: var(--error-color);
+    margin: 0;
     font-weight: 500;
+    flex: 1;
 }
 
 .retry-button {
@@ -92,8 +151,9 @@
     padding: 8px 16px;
     border-radius: 6px;
     cursor: pointer;
-    font-weight: 500;
-    transition: all 0.2s ease;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    font-size: 14px;
 }
 
 .retry-button:hover {
@@ -101,17 +161,21 @@
     transform: translateY(-1px);
 }
 
-.loading-container {
+/* ========================================
+   LOADING STATE
+   ======================================== */
+
+.team-assignment-loading {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 40px 20px;
+    padding: 60px 20px;
     color: var(--text-muted);
 }
 
-.loading-spinner {
+.team-assignment-loading .loading-spinner {
+    margin-bottom: 20px;
     animation: spin 1s linear infinite;
-    margin-bottom: 16px;
 }
 
 @keyframes spin {
@@ -119,289 +183,517 @@
     to { transform: rotate(360deg); }
 }
 
-.empty-state {
+.team-assignment-loading p {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+/* ========================================
+   EMPTY STATE
+   ======================================== */
+
+.team-assignment-empty {
     text-align: center;
-    padding: 40px 20px;
+    padding: 60px 20px;
     color: var(--text-muted);
 }
 
 .empty-icon {
-    margin-bottom: 16px;
+    margin-bottom: 20px;
     opacity: 0.6;
+    animation: bounce 2s infinite;
 }
 
-.empty-state h3 {
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-10px); }
+    60% { transform: translateY(-5px); }
+}
+
+.team-assignment-empty h3 {
     color: var(--text-primary);
-    margin-bottom: 8px;
-    font-size: 18px;
+    margin-bottom: 12px;
+    font-size: 1.5rem;
+    font-weight: 700;
 }
 
-.empty-state p {
+.team-assignment-empty p {
     margin: 0;
+    font-size: 16px;
     line-height: 1.5;
 }
 
-.modal-instructions {
-    margin-bottom: 24px;
-    padding: 16px;
+/* ========================================
+   INSTRUCTIONS SECTION
+   ======================================== */
+
+.team-assignment-instructions {
     background: var(--bg-tertiary);
-    border-radius: 8px;
-    border-left: 4px solid var(--accent-color);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
 }
 
-.modal-instructions p {
+.instructions-icon {
+    color: var(--accent-color);
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.instructions-content {
+    flex: 1;
+}
+
+.instructions-content p {
     margin: 0 0 12px 0;
     color: var(--text-secondary);
     line-height: 1.5;
-}
-
-.selection-count {
-    color: var(--accent-color);
-    font-weight: 600;
     font-size: 14px;
 }
 
-.teams-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 16px;
-    max-height: 400px;
-    overflow-y: auto;
-    padding: 4px;
+.selection-count {
+    background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    display: inline-block;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
 }
 
-.team-card {
+.selection-count strong {
+    font-weight: 700;
+}
+
+/* ========================================
+   TEAMS GRID
+   ======================================== */
+
+.teams-assignment-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    max-height: 500px;
+    overflow-y: auto;
+    padding: 8px;
+    border-radius: 12px;
+    background: var(--bg-quaternary);
+    border: 1px solid var(--border-color);
+}
+
+/* Custom scrollbar for teams grid */
+.teams-assignment-grid::-webkit-scrollbar {
+    width: 8px;
+}
+
+.teams-assignment-grid::-webkit-scrollbar-track {
+    background: var(--bg-tertiary);
+    border-radius: 4px;
+}
+
+.teams-assignment-grid::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+}
+
+.teams-assignment-grid::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+}
+
+/* ========================================
+   TEAM ASSIGNMENT CARDS
+   ======================================== */
+
+.team-assignment-card {
     background: var(--bg-secondary);
     border: 2px solid var(--border-color);
-    border-radius: 12px;
-    padding: 16px;
+    border-radius: 15px;
+    padding: 20px;
     cursor: pointer;
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
 }
 
-.team-card:hover {
-    transform: translateY(-2px);
+.team-assignment-card:hover {
+    transform: translateY(-3px);
     box-shadow: 0 8px 25px var(--shadow-color);
     border-color: var(--accent-color);
 }
 
-.team-card.selected {
+.team-assignment-card.selected {
     border-color: var(--success-color);
     background: linear-gradient(135deg, var(--success-light) 0%, rgba(16, 185, 129, 0.1) 100%);
-    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
 }
 
-.team-card.selected:hover {
+.team-assignment-card.selected:hover {
     border-color: var(--success-hover);
-    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+    box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4);
 }
 
-.selection-indicator {
+.dark-mode .team-assignment-card.selected {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.1) 100%);
+}
+
+/* ========================================
+   TEAM SELECTION INDICATOR
+   ======================================== */
+
+.team-selection-indicator {
     position: absolute;
     top: 12px;
     right: 12px;
     background: var(--success-color);
     color: white;
     border-radius: 50%;
-    width: 24px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+    box-shadow: 0 3px 10px rgba(16, 185, 129, 0.4);
+    animation: checkmarkPop 0.3s ease-out;
 }
 
-.team-card-header {
+@keyframes checkmarkPop {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* ========================================
+   TEAM CARD CONTENT
+   ======================================== */
+
+.team-assignment-card-header {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 12px;
+    gap: 12px;
+    margin-bottom: 16px;
 }
 
-.team-icon {
+.team-card-icon {
     color: var(--accent-color);
     flex-shrink: 0;
 }
 
-.team-card-header h3 {
+.team-assignment-card-header h3 {
     margin: 0;
     color: var(--text-primary);
     font-size: 16px;
-    font-weight: 600;
+    font-weight: 700;
     line-height: 1.3;
 }
 
-.team-details {
+.team-assignment-details {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
 }
 
-.team-leader,
-.team-member-count {
+.team-leader-info,
+.team-members-info {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     color: var(--text-secondary);
     font-size: 14px;
+    font-weight: 500;
 }
 
-.team-leader svg,
-.team-member-count svg {
+.team-leader-info svg,
+.team-members-info svg {
     color: var(--text-muted);
     flex-shrink: 0;
 }
 
-.team-description {
+.team-assignment-description {
     color: var(--text-muted);
     font-size: 13px;
     line-height: 1.4;
-    margin-top: 4px;
+    margin-top: 8px;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    font-style: italic;
 }
 
-.modal-actions {
-    padding: 20px 24px;
-    border-top: 1px solid var(--border-color);
+/* ========================================
+   TEAM ASSIGNMENT ACTIONS
+   ======================================== */
+
+.team-assignment-actions {
+    padding: 24px 28px;
+    border-top: 2px solid var(--border-color);
     display: flex;
-    gap: 12px;
+    gap: 16px;
     justify-content: flex-end;
-    background: var(--bg-secondary);
+    background: var(--bg-tertiary);
+    border-radius: 0 0 17px 17px;
 }
 
-.btn-cancel {
-    padding: 10px 20px;
-    background: var(--bg-tertiary);
-    color: var(--text-secondary);
-    border: 2px solid var(--border-color);
-    border-radius: 8px;
+.btn-cancel-assignment {
+    background: linear-gradient(135deg, #6B7280 0%, #9CA3AF 100%);
+    color: white;
+    border: none;
+    padding: 14px 24px;
+    border-radius: 50px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
-    font-size: 14px;
-}
-
-.btn-cancel:hover {
-    background: var(--bg-quaternary);
-    border-color: var(--text-muted);
-    color: var(--text-primary);
-}
-
-.btn-accept {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 10px 20px;
+    font-size: 14px;
+    min-width: 120px;
+    justify-content: center;
+}
+
+.btn-cancel-assignment:hover:not(:disabled) {
+    background: linear-gradient(135deg, #4B5563 0%, #6B7280 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(107, 114, 128, 0.4);
+}
+
+.btn-save-assignment {
     background: linear-gradient(135deg, var(--success-color) 0%, var(--success-hover) 100%);
     color: white;
     border: none;
-    border-radius: 8px;
-    font-weight: 600;
+    padding: 14px 24px;
+    border-radius: 50px;
+    font-weight: 700;
     cursor: pointer;
     transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
     font-size: 14px;
-    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+    min-width: 180px;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
 }
 
-.btn-accept:hover:not(:disabled) {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+.btn-save-assignment::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.6s ease;
 }
 
-.btn-accept:disabled {
+.btn-save-assignment:hover:not(:disabled)::before {
+    left: 100%;
+}
+
+.btn-save-assignment:hover:not(:disabled) {
+    background: linear-gradient(135deg, var(--success-hover) 0%, #059669 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
+}
+
+.btn-cancel-assignment:disabled,
+.btn-save-assignment:disabled {
     opacity: 0.6;
     cursor: not-allowed;
     transform: none;
-    box-shadow: none;
 }
 
-/* Dark mode adjustments */
-[data-theme="dark"] .team-assignment-modal,
-.dark-mode .team-assignment-modal {
-    background: var(--bg-secondary);
+/* ========================================
+   LOADING SPINNER IN BUTTON
+   ======================================== */
+
+.btn-save-assignment .loading-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid transparent;
+    border-top: 2px solid currentColor;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
 }
 
-[data-theme="dark"] .modal-header,
-.dark-mode .modal-header {
-    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-quaternary) 100%);
-}
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
 
-[data-theme="dark"] .team-card.selected,
-.dark-mode .team-card.selected {
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.1) 100%);
-}
-
-/* Responsive design */
 @media (max-width: 768px) {
-    .team-assignment-modal {
-        width: 95vw;
-        max-height: 90vh;
+    .team-assignment-overlay {
+        padding: 10px;
     }
 
-    .modal-header {
-        padding: 20px;
+    .team-assignment-container {
+        max-width: 95vw;
+        max-height: 95vh;
     }
 
-    .modal-header h2 {
-        font-size: 18px;
+    .team-assignment-header {
+        padding: 20px 24px;
     }
 
-    .modal-body {
-        padding: 20px;
+    .team-assignment-header h2 {
+        font-size: 1.5rem;
     }
 
-    .teams-grid {
+    .team-assignment-body {
+        padding: 24px;
+    }
+
+    .teams-assignment-grid {
         grid-template-columns: 1fr;
+        gap: 16px;
+        max-height: 400px;
+    }
+
+    .team-assignment-instructions {
+        flex-direction: column;
         gap: 12px;
     }
 
-    .modal-actions {
-        padding: 16px 20px;
+    .team-assignment-actions {
+        padding: 20px 24px;
         flex-direction: column;
+        gap: 12px;
     }
 
-    .btn-cancel,
-    .btn-accept {
+    .btn-cancel-assignment,
+    .btn-save-assignment {
         width: 100%;
-        justify-content: center;
+        min-width: auto;
     }
 }
 
 @media (max-width: 480px) {
-    .team-assignment-modal {
+    .team-assignment-container {
         width: 100vw;
         height: 100vh;
         max-height: 100vh;
         border-radius: 0;
     }
 
-    .modal-header {
+    .team-assignment-header {
+        padding: 16px 20px;
+        border-radius: 0;
+    }
+
+    .team-assignment-header h2 {
+        font-size: 1.3rem;
+    }
+
+    .team-assignment-body {
+        padding: 20px;
+    }
+
+    .team-assignment-card {
         padding: 16px;
     }
 
-    .modal-body {
-        padding: 16px;
-    }
-
-    .team-card {
-        padding: 12px;
-    }
-
-    .team-card-header h3 {
+    .team-assignment-card-header h3 {
         font-size: 15px;
     }
 
-    .team-leader,
-    .team-member-count {
+    .team-leader-info,
+    .team-members-info {
         font-size: 13px;
     }
 
-    .team-description {
+    .team-assignment-description {
         font-size: 12px;
     }
+
+    .team-assignment-actions {
+        padding: 16px 20px;
+    }
+
+    .btn-cancel-assignment,
+    .btn-save-assignment {
+        padding: 12px 20px;
+        font-size: 13px;
+    }
+
+    .teams-assignment-grid {
+        max-height: 350px;
+    }
+}
+
+/* ========================================
+   ACCESSIBILITY IMPROVEMENTS
+   ======================================== */
+
+.team-assignment-card:focus {
+    outline: 3px solid var(--accent-color);
+    outline-offset: 2px;
+}
+
+.team-assignment-card.selected:focus {
+    outline-color: var(--success-color);
+}
+
+.btn-cancel-assignment:focus,
+.btn-save-assignment:focus {
+    outline: 3px solid var(--accent-color);
+    outline-offset: 2px;
+}
+
+.btn-save-assignment:focus {
+    outline-color: var(--success-color);
+}
+
+.team-assignment-close:focus {
+    outline: 3px solid rgba(255, 255, 255, 0.5);
+    outline-offset: 2px;
+}
+
+/* ========================================
+   DARK MODE SPECIFICS
+   ======================================== */
+
+.dark-mode .team-assignment-container {
+    background: var(--bg-secondary);
+    border-color: var(--accent-color);
+}
+
+.dark-mode .team-assignment-header {
+    background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
+}
+
+.dark-mode .team-assignment-instructions {
+    background: var(--bg-tertiary);
+    border-color: var(--border-color);
+}
+
+.dark-mode .team-assignment-card {
+    background: var(--bg-secondary);
+    border-color: var(--border-color);
+}
+
+.dark-mode .team-assignment-card:hover {
+    background: var(--bg-primary);
+}
+
+.dark-mode .teams-assignment-grid {
+    background: var(--bg-tertiary);
+    border-color: var(--border-color);
+}
+
+.dark-mode .team-assignment-actions {
+    background: var(--bg-tertiary);
 }

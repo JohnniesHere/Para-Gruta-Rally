@@ -1,21 +1,36 @@
-// src/components/modals/TeamAssignmentModal.jsx
+// src/components/TeamAssignmentModal.jsx - Rewritten with High Z-index
 import React, { useState, useEffect } from 'react';
 import { getAllTeams } from '../../services/teamService';
+import { useLanguage } from '../../contexts/LanguageContext.jsx';
+import { useTheme } from '../../contexts/ThemeContext.jsx';
 import {
     IconX as X,
     IconUsers as Users,
     IconUser as User,
     IconCheck as Check,
-    IconLoader as Loader
+    IconClock as Clock,
+    IconUserPlus as UserPlus,
+    IconAlertTriangle as AlertTriangle
 } from '@tabler/icons-react';
 import './TeamAssignmentModal.css';
 
-const TeamAssignmentModal = ({ isOpen, onClose, onAssignTeams, currentTeamIds = [], eventName }) => {
+const TeamAssignmentModal = ({
+                                 isOpen,
+                                 onClose,
+                                 onAssignTeams,
+                                 currentTeamIds = [],
+                                 eventName
+                             }) => {
+    const { t } = useLanguage();
+    const { appliedTheme } = useTheme();
+
     const [teams, setTeams] = useState([]);
     const [selectedTeamIds, setSelectedTeamIds] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
+    // Load teams when modal opens
     useEffect(() => {
         if (isOpen) {
             loadAvailableTeams();
@@ -28,12 +43,19 @@ const TeamAssignmentModal = ({ isOpen, onClose, onAssignTeams, currentTeamIds = 
         setError(null);
 
         try {
+            console.log('🔄 Loading teams for assignment modal...');
             const allTeams = await getAllTeams({ active: true });
-            // Filter out teams that are already assigned to this event
-            const availableTeams = allTeams.filter(team => !currentTeamIds.includes(team.id));
-            setTeams(availableTeams);
+            console.log('📋 All teams loaded:', allTeams.length);
+
+            // Don't filter out already assigned teams - show all teams but mark assigned ones as selected
+            setTeams(allTeams);
+
+            // Pre-select teams that are already assigned to this event
+            setSelectedTeamIds([...currentTeamIds]);
+
+            console.log('✅ Teams loaded for modal, current assignments:', currentTeamIds);
         } catch (err) {
-            console.error('Error loading teams:', err);
+            console.error('❌ Error loading teams:', err);
             setError('Failed to load teams. Please try again.');
         } finally {
             setIsLoading(false);
@@ -43,103 +65,128 @@ const TeamAssignmentModal = ({ isOpen, onClose, onAssignTeams, currentTeamIds = 
     const handleTeamToggle = (teamId) => {
         setSelectedTeamIds(prev => {
             if (prev.includes(teamId)) {
+                // Remove team from selection
                 return prev.filter(id => id !== teamId);
             } else {
+                // Add team to selection
                 return [...prev, teamId];
             }
         });
     };
 
-    const handleAccept = () => {
-        if (selectedTeamIds.length > 0) {
-            onAssignTeams(selectedTeamIds);
+    const handleSave = async () => {
+        setIsSubmitting(true);
+        try {
+            console.log('💾 Saving team assignments:', selectedTeamIds);
+
+            // Call the callback with selected team IDs
+            await onAssignTeams(selectedTeamIds);
+
+            console.log('✅ Team assignments saved successfully');
+            onClose();
+        } catch (error) {
+            console.error('❌ Error saving team assignments:', error);
+            setError('Failed to save team assignments. Please try again.');
+        } finally {
+            setIsSubmitting(false);
         }
-        onClose();
     };
 
     const handleCancel = () => {
-        setSelectedTeamIds([]);
+        setSelectedTeamIds([...currentTeamIds]); // Reset to original assignments
         onClose();
     };
 
-    if (!isOpen) return null;
+    const handleOverlayClick = (e) => {
+        if (e.target === e.currentTarget) {
+            handleCancel();
+        }
+    };
+
+    if (!isOpen) {
+        return null;
+    }
 
     return (
-        <div className="modal-overlay" onClick={handleCancel}>
-            <div className="team-assignment-modal" onClick={(e) => e.stopPropagation()}>
-                <div className="modal-header">
+        <div className={`team-assignment-overlay ${appliedTheme}-mode`} onClick={handleOverlayClick}>
+            <div className="team-assignment-container" onClick={(e) => e.stopPropagation()}>
+                <div className="team-assignment-header">
                     <h2>
                         <Users size={24} />
-                        Assign Teams to {eventName}
+                        {t('events.assignTeams', 'Assign Teams to')} {eventName}
                     </h2>
-                    <button className="modal-close" onClick={handleCancel}>
+                    <button className="team-assignment-close" onClick={handleCancel}>
                         <X size={20} />
                     </button>
                 </div>
 
-                <div className="modal-body">
+                <div className="team-assignment-body">
                     {error && (
-                        <div className="error-message">
+                        <div className="team-assignment-error">
+                            <AlertTriangle className="error-icon" size={20} />
                             <p>{error}</p>
                             <button onClick={loadAvailableTeams} className="retry-button">
-                                Try Again
+                                {t('common.tryAgain', 'Try Again')}
                             </button>
                         </div>
                     )}
 
                     {isLoading ? (
-                        <div className="loading-container">
-                            <Loader className="loading-spinner" size={32} />
-                            <p>Loading available teams...</p>
+                        <div className="team-assignment-loading">
+                            <Clock className="loading-spinner" size={32} />
+                            <p>{t('teams.loading', 'Loading teams...')}</p>
                         </div>
                     ) : teams.length === 0 ? (
-                        <div className="empty-state">
+                        <div className="team-assignment-empty">
                             <Users size={48} className="empty-icon" />
-                            <h3>No Available Teams</h3>
-                            <p>All active teams are already assigned to this event, or no teams exist.</p>
+                            <h3>{t('teams.noTeams', 'No Teams Available')}</h3>
+                            <p>{t('teams.noTeamsDescription', 'No active teams found. Create some teams first to assign them to events.')}</p>
                         </div>
                     ) : (
                         <>
-                            <div className="modal-instructions">
-                                <p>Select teams to assign to this event. Click on team cards to select them.</p>
-                                <div className="selection-count">
-                                    {selectedTeamIds.length} team{selectedTeamIds.length !== 1 ? 's' : ''} selected
+                            <div className="team-assignment-instructions">
+                                <UserPlus className="instructions-icon" size={20} />
+                                <div className="instructions-content">
+                                    <p>{t('events.teamAssignmentInstructions', 'Select teams to assign to this event. Click on team cards to select or deselect them.')}</p>
+                                    <div className="selection-count">
+                                        <strong>{selectedTeamIds.length}</strong> {t('teams.teamsSelected', 'team(s) selected')}
+                                    </div>
                                 </div>
                             </div>
 
-                            <div className="teams-grid">
+                            <div className="teams-assignment-grid">
                                 {teams.map(team => (
                                     <div
                                         key={team.id}
-                                        className={`team-card ${selectedTeamIds.includes(team.id) ? 'selected' : ''}`}
+                                        className={`team-assignment-card ${selectedTeamIds.includes(team.id) ? 'selected' : ''}`}
                                         onClick={() => handleTeamToggle(team.id)}
                                     >
                                         {selectedTeamIds.includes(team.id) && (
-                                            <div className="selection-indicator">
+                                            <div className="team-selection-indicator">
                                                 <Check size={16} />
                                             </div>
                                         )}
 
-                                        <div className="team-card-header">
-                                            <Users className="team-icon" size={20} />
+                                        <div className="team-assignment-card-header">
+                                            <Users className="team-card-icon" size={20} />
                                             <h3>{team.name}</h3>
                                         </div>
 
-                                        <div className="team-details">
+                                        <div className="team-assignment-details">
                                             {team.teamLeader && (
-                                                <div className="team-leader">
+                                                <div className="team-leader-info">
                                                     <User size={14} />
-                                                    <span>Leader: {team.teamLeader.firstName} {team.teamLeader.lastName}</span>
+                                                    <span>{t('teams.leader', 'Leader')}: {team.teamLeader.firstName} {team.teamLeader.lastName}</span>
                                                 </div>
                                             )}
 
-                                            <div className="team-member-count">
+                                            <div className="team-members-info">
                                                 <Users size={14} />
-                                                <span>Kids in team: {team.kidIds?.length || 0}</span>
+                                                <span>{team.kidIds?.length || 0} {t('teams.kidsInTeam', 'kids in team')}</span>
                                             </div>
 
                                             {team.description && (
-                                                <div className="team-description">
+                                                <div className="team-assignment-description">
                                                     {team.description}
                                                 </div>
                                             )}
@@ -151,20 +198,30 @@ const TeamAssignmentModal = ({ isOpen, onClose, onAssignTeams, currentTeamIds = 
                     )}
                 </div>
 
-                <div className="modal-actions">
+                <div className="team-assignment-actions">
                     <button
-                        className="btn-cancel"
+                        className="btn-cancel-assignment"
                         onClick={handleCancel}
+                        disabled={isSubmitting}
                     >
-                        Cancel
+                        {t('common.cancel', 'Cancel')}
                     </button>
                     <button
-                        className="btn-accept"
-                        onClick={handleAccept}
-                        disabled={selectedTeamIds.length === 0 || isLoading}
+                        className="btn-save-assignment"
+                        onClick={handleSave}
+                        disabled={isSubmitting || isLoading}
                     >
-                        <Check size={16} />
-                        Assign {selectedTeamIds.length} Team{selectedTeamIds.length !== 1 ? 's' : ''}
+                        {isSubmitting ? (
+                            <>
+                                <Clock className="loading-spinner" size={16} />
+                                {t('common.saving', 'Saving...')}
+                            </>
+                        ) : (
+                            <>
+                                <Check size={16} />
+                                {t('events.assignTeams', 'Assign')} {selectedTeamIds.length} {t('teams.teams', 'Team(s)')}
+                            </>
+                        )}
                     </button>
                 </div>
             </div>

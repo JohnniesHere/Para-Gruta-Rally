@@ -110,6 +110,7 @@ export const getFormStatusOptions = (t) => [
     { value: 'needs_review', label: t('editKid.formStatusOptions.needs_review'), color: '#EF4444' },
     { value: 'cancelled', label: t('editKid.formStatusOptions.cancelled'), color: '#6B7280' }
 ];
+
 /**
  * Validate a kid object against the schema
  * @param {Object} kidData - The kid data to validate

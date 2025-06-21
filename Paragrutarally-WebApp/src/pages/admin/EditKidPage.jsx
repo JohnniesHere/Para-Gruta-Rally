@@ -495,6 +495,7 @@ const EditKidPage = () => {
         };
     };
 
+
     // Get vehicle display component for assignment section
     const getVehicleAssignmentDisplay = () => {
         const assignedVehicle = getAssignedVehicle();
@@ -990,7 +991,7 @@ const EditKidPage = () => {
                                         >
                                             {formStatusOptions.map(option => (
                                                 <option key={option.value} value={option.value}>
-                                                    {option.label}
+                                                    {option.icon} {option.label}
                                                 </option>
                                             ))}
                                         </select>
