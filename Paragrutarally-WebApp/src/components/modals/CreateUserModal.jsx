@@ -137,9 +137,7 @@ const CreateUserModal = ({ isOpen, onClose, onUserCreated }) => {
                     `✅ ${t('users.createSuccess', 'SUCCESS!')}\n\n` +
                     `${t('users.userCreated', 'User has been created successfully!')}\n\n` +
                     `📧 ${t('users.email', 'Email')}: ${formData.email}\n` +
-                    `🔑 ${t('users.password', 'Password')}: TempPass123!\n` +
-                    `👤 ${t('users.role', 'Role')}: ${formData.role}\n\n` +
-                    `${t('users.remainLoggedIn', 'You remain logged in as admin!')}`
+                    `👤 ${t('users.role', 'Role')}: ${formData.role}\n\n`
                 );
 
                 // Notify parent and close

@@ -39,7 +39,7 @@
 }
 
 .edit-kid-modal .section-icon {
-    color: var(--racing-gold);
+    color: var(--racing-lilach);
     background: rgba(255, 215, 0, 0.1);
     padding: 6px;
     border-radius: 8px;
@@ -154,7 +154,7 @@
     width: 16px;
     height: 16px;
     cursor: pointer;
-    accent-color: var(--racing-gold);
+    accent-color: var(--racing-lilach);
 }
 
 /* ========================================
@@ -245,7 +245,7 @@
 }
 
 .edit-kid-modal .btn-primary {
-    background: linear-gradient(135deg, var(--racing-gold) 0%, var(--racing-orange) 100%);
+    background: linear-gradient(135deg, var(--racing-lilach) 0%, var(--racing-purple) 100%);
     color: var(--text-primary);
     box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
 }
@@ -279,7 +279,7 @@
     width: 30px;
     height: 30px;
     border: 3px solid var(--border-color);
-    border-top: 3px solid var(--racing-gold);
+    border-top: 3px solid var(--racing-lilach);
     border-radius: 50%;
     animation: spin 1s linear infinite;
     margin-bottom: 15px;

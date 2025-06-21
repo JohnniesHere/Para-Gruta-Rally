@@ -53,19 +53,19 @@
 
 .kid-photo {
     object-fit: cover;
-    border: 3px solid var(--racing-gold);
+    border: 3px solid var(--racing-lilach);
     box-shadow: 0 4px 16px rgba(255, 215, 0, 0.3);
 }
 
 .kid-photo-placeholder {
-    background: linear-gradient(135deg, var(--racing-gold) 0%, var(--racing-orange) 100%);
+    background: linear-gradient(135deg, var(--racing-lilach) 0%, var(--racing-purple) 100%);
     display: flex;
     align-items: center;
     justify-content: center;
     color: var(--text-primary);
     font-size: 48px;
     font-weight: bold;
-    border: 3px solid var(--racing-gold);
+    border: 3px solid var(--racing-lilach);
     box-shadow: 0 4px 16px rgba(255, 215, 0, 0.3);
 }
 
@@ -206,18 +206,18 @@
 
 .vehicle-select:focus {
     outline: none;
-    border-color: var(--racing-gold);
+    border-color: var(--racing-lilach);
     box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.2);
 }
 
 .vehicle-select:hover {
-    border-color: var(--racing-orange);
+    border-color: var(--racing-purple);
 }
 
 /* Vehicle Preview Card */
 .assigned-vehicle-preview {
     background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-quaternary) 100%);
-    border: 2px solid var(--racing-gold);
+    border: 2px solid var(--racing-lilach);
     border-radius: 15px;
     padding: 20px;
     margin-top: 20px;
@@ -246,7 +246,7 @@
 
 .vehicle-preview-card:hover {
     box-shadow: 0 4px 15px rgba(255, 215, 0, 0.2);
-    border-color: var(--racing-gold);
+    border-color: var(--racing-lilach);
 }
 
 .vehicle-preview-photo {
@@ -258,21 +258,21 @@
     height: 60px;
     border-radius: 8px;
     object-fit: cover;
-    border: 2px solid var(--racing-gold);
+    border: 2px solid var(--racing-lilach);
 }
 
 .vehicle-preview-placeholder {
     width: 60px;
     height: 60px;
     border-radius: 8px;
-    background: linear-gradient(135deg, var(--racing-gold) 0%, var(--racing-orange) 100%);
+    background: linear-gradient(135deg, var(--racing-lilach) 0%, var(--racing-purple) 100%);
     display: flex;
     align-items: center;
     justify-content: center;
     color: var(--text-primary);
     font-size: 24px;
     font-weight: bold;
-    border: 2px solid var(--racing-gold);
+    border: 2px solid var(--racing-lilach);
 }
 
 .vehicle-preview-details {
@@ -484,7 +484,7 @@
 }
 
 .comment-avatar {
-    background: var(--racing-gold);
+    background: var(--racing-lilach);
     border-radius: 50%;
     width: 32px;
     height: 32px;
@@ -553,7 +553,7 @@
     align-items: center;
     gap: 8px;
     padding: 12px 20px;
-    background: linear-gradient(135deg, var(--racing-gold) 0%, var(--racing-orange) 100%);
+    background: linear-gradient(135deg, var(--racing-lilach) 0%, var(--racing-purple) 100%);
     color: var(--text-primary);
     border: none;
     border-radius: 20px;
@@ -591,7 +591,7 @@
 
 .comment-textarea:focus {
     outline: none;
-    border-color: var(--racing-gold);
+    border-color: var(--racing-lilach);
     box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.2);
 }
 

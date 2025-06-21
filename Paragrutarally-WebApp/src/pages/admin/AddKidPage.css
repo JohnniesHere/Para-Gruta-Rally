@@ -204,12 +204,12 @@
     padding: 20px;
     background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-quaternary) 100%);
     border-radius: 20px;
-    border: 2px dashed var(--racing-gold);
+    border: 2px dashed var(--racing-lilach);
     transition: all 0.3s ease;
 }
 
 .photo-upload-section:hover {
-    border-color: var(--racing-orange);
+    border-color: var(--racing-purple);
     background: linear-gradient(135deg, var(--bg-quaternary) 0%, var(--bg-tertiary) 100%);
 }
 
@@ -225,7 +225,7 @@
     height: 120px;
     border-radius: 50%;
     object-fit: cover;
-    border: 4px solid var(--racing-gold);
+    border: 4px solid var(--racing-lilach);
     box-shadow: 0 4px 20px rgba(255, 215, 0, 0.4);
     transition: all 0.3s ease;
 }
@@ -239,14 +239,14 @@
     width: 120px;
     height: 120px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--racing-gold) 0%, var(--racing-orange) 100%);
+    background: linear-gradient(135deg, var(--racing-lilach) 0%, var(--racing-purple) 100%);
     display: flex;
     align-items: center;
     justify-content: center;
     color: var(--text-primary);
     font-size: 36px;
     font-weight: bold;
-    border: 4px solid var(--racing-gold);
+    border: 4px solid var(--racing-lilach);
     box-shadow: 0 4px 20px rgba(255, 215, 0, 0.4);
     transition: all 0.3s ease;
 }
@@ -263,7 +263,7 @@
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background: var(--racing-gold);
+    background: var(--racing-lilach);
     border: 3px solid white;
     color: var(--text-primary);
     cursor: pointer;
@@ -276,7 +276,7 @@
 }
 
 .upload-photo-button:hover {
-    background: var(--racing-orange);
+    background: var(--racing-purple);
     transform: scale(1.1);
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
 }
@@ -352,7 +352,7 @@
 }
 
 .checkbox-label:hover {
-    border-color: var(--racing-gold);
+    border-color: var(--racing-lilach);
     background: linear-gradient(135deg, var(--bg-quaternary) 0%, var(--bg-tertiary) 100%);
 }
 
@@ -360,7 +360,7 @@
     width: 20px;
     height: 20px;
     cursor: pointer;
-    accent-color: var(--racing-gold);
+    accent-color: var(--racing-lilach);
     border-radius: 4px;
 }
 
@@ -375,18 +375,18 @@
 }
 
 .label-icon {
-    color: var(--racing-gold);
+    color: var(--racing-lilach);
     margin-right: 4px;
 }
 
 /* Enhanced form sections with racing theme */
 .racing-section {
-    border: 3px solid var(--racing-gold);
+    border: 3px solid var(--racing-lilach);
     background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
 }
 
 .skills-section {
-    border: 3px solid var(--racing-purple);
+    border: 3px solid var(--racing-light-purple);
     background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
 }
 
@@ -406,21 +406,21 @@
 }
 
 .comments-section {
-    border: 3px solid var(--racing-orange);
+    border: 3px solid var(--racing-purple);
     background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
 }
 
 /* Section icons with matching colors */
 .racing-section .section-icon {
-    color: var(--racing-gold);
+    color: var(--racing-lilach);
     background: rgba(255, 215, 0, 0.1);
-    border-color: var(--racing-gold);
+    border-color: var(--racing-lilach);
 }
 
 .skills-section .section-icon {
-    color: var(--racing-purple);
+    color: var(--racing-light-purple);
     background: rgba(139, 92, 246, 0.1);
-    border-color: var(--racing-purple);
+    border-color: var(--racing-light-purple);
 }
 
 .parent-section .section-icon {
@@ -442,9 +442,9 @@
 }
 
 .comments-section .section-icon {
-    color: var(--racing-orange);
+    color: var(--racing-purple);
     background: rgba(255, 165, 0, 0.1);
-    border-color: var(--racing-orange);
+    border-color: var(--racing-purple);
 }
 
 /* ========================================

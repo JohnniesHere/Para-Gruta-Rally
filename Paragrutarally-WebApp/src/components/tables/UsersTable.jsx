@@ -1,10 +1,7 @@
-// src/components/tables/UsersTable.jsx - Fixed with Delete Functionality
+// src/components/tables/UsersTable.jsx - Updated with Proper User Deletion
 import React, { useState, useMemo } from 'react';
-import { doc, deleteDoc } from 'firebase/firestore';
-import { initializeApp, deleteApp } from 'firebase/app';
-import { getAuth, signInWithEmailAndPassword, deleteUser } from 'firebase/auth';
-import { db } from '../../firebase/config';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { deleteUserCompletely } from '../../services/userService';
 import {
     IconEdit as Edit,
     IconTrash as Trash,
@@ -59,8 +56,6 @@ const UsersTable = ({ users, isLoading, onUpdateUser, onUserDeleted }) => {
                 return role || t('common.notAvailable', 'N/A');
         }
     };
-
-    // Removed getRoleIcon function - no symbols needed
 
     // Sort users based on current sort configuration
     const sortedUsers = useMemo(() => {
@@ -121,7 +116,7 @@ const UsersTable = ({ users, isLoading, onUpdateUser, onUserDeleted }) => {
         return sortConfig.direction === 'asc' ? ' ↑' : ' ↓';
     };
 
-    // Delete functionality
+    // Delete functionality with Cloud Function integration
     const handleDeleteClick = (user) => {
         console.log('Delete clicked for user:', user.id);
         setUserToDelete(user);
@@ -134,21 +129,21 @@ const UsersTable = ({ users, isLoading, onUpdateUser, onUserDeleted }) => {
         setDeletingUser(userToDelete.id);
 
         try {
-            console.log('Deleting user:', userToDelete.id, userToDelete.email);
+            console.log('🗑️ Starting complete deletion for user:', userToDelete.id, userToDelete.email);
 
-            // Delete user document from Firestore
-            const userDocRef = doc(db, 'users', userToDelete.id);
-            await deleteDoc(userDocRef);
+            // Use the new userService function for complete deletion
+            const result = await deleteUserCompletely(userToDelete.id);
 
-            console.log('✅ User document deleted from Firestore');
+            console.log('✅ User deleted completely:', result);
 
             // Show success message
             alert(
                 `✅ ${t('users.deleteSuccess', 'User Deleted Successfully!')}\n\n` +
-                `${t('users.userDeleted', 'User has been removed from the system.')}\n\n` +
+                `${t('users.userDeletedCompletely', 'User has been completely removed from both authentication and database.')}\n\n` +
                 `📧 ${t('users.email', 'Email')}: ${userToDelete.email}\n` +
                 `👤 ${t('users.name', 'Name')}: ${userToDelete.displayName}\n\n` +
-                `⚠️ ${t('users.authNote', 'Note: For complete removal, the authentication account may need to be deleted separately.')}`
+                `🔐 ${t('users.authDeleted', 'Authentication account deleted')}\n` +
+                `🗄️ ${t('users.databaseDeleted', 'Database record deleted')}`
             );
 
             // Notify parent component
@@ -160,17 +155,24 @@ const UsersTable = ({ users, isLoading, onUpdateUser, onUserDeleted }) => {
             setUserToDelete(null);
 
         } catch (error) {
-            console.error('Error deleting user:', error);
+            console.error('❌ Error deleting user:', error);
 
             let errorMessage = t('users.deleteError', 'Failed to delete user. Please try again.');
 
-            if (error.code === 'permission-denied') {
+            // Handle specific error types
+            if (error.message.includes('permission') || error.message.includes('Forbidden')) {
                 errorMessage = t('users.deletePermissionError', 'Permission denied. You may not have rights to delete this user.');
-            } else if (error.code === 'not-found') {
+            } else if (error.message.includes('not found')) {
                 errorMessage = t('users.deleteNotFoundError', 'User not found. They may have already been deleted.');
+            } else if (error.message.includes('Network')) {
+                errorMessage = t('users.deleteNetworkError', 'Network error. Please check your connection and try again.');
+            } else if (error.message.includes('Admin access required')) {
+                errorMessage = t('users.deleteAdminError', 'Admin access required to delete users.');
+            } else if (error.message.includes('service is not available')) {
+                errorMessage = t('users.deleteServiceError', 'User deletion service is temporarily unavailable. Please contact support.');
             }
 
-            alert(`❌ ${t('users.error', 'Error')}\n\n${errorMessage}`);
+            alert(`❌ ${t('users.error', 'Error')}\n\n${errorMessage}\n\n${t('users.errorDetails', 'Details')}: ${error.message}`);
         } finally {
             setDeletingUser(null);
         }
@@ -369,11 +371,35 @@ const UsersTable = ({ users, isLoading, onUpdateUser, onUserDeleted }) => {
                             <div className="delete-consequences">
                                 <h4>{t('users.deleteConsequences', 'This will permanently delete:')}</h4>
                                 <ul>
-                                    <li>{t('users.deleteConsequence1', 'User profile and all associated data')}</li>
-                                    <li>{t('users.deleteConsequence2', 'All user-generated content and records')}</li>
-                                    <li>{t('users.deleteConsequence3', 'User access to the system')}</li>
-                                    <li>{t('users.deleteConsequence4', 'All user preferences and settings')}</li>
+                                    <li>🔐 {t('users.deleteConsequence1', 'User authentication account (login access)')}</li>
+                                    <li>🗄️ {t('users.deleteConsequence2', 'User profile and all associated data')}</li>
+                                    <li>📊 {t('users.deleteConsequence3', 'All user-generated content and records')}</li>
+                                    <li>⚙️ {t('users.deleteConsequence4', 'All user preferences and settings')}</li>
                                 </ul>
+                            </div>
+
+                            <div className="enhanced-warning" style={{
+                                marginTop: '20px',
+                                padding: '15px',
+                                backgroundColor: 'var(--danger-background)',
+                                border: '1px solid var(--danger-border)',
+                                borderRadius: '8px'
+                            }}>
+                                <p style={{
+                                    margin: 0,
+                                    fontSize: '14px',
+                                    color: 'var(--danger-text)',
+                                    fontWeight: 'bold'
+                                }}>
+                                    🛡️ {t('users.completeDeleteionNote', 'Complete Deletion:')}
+                                </p>
+                                <p style={{
+                                    margin: '8px 0 0 0',
+                                    fontSize: '13px',
+                                    color: 'var(--danger-text)'
+                                }}>
+                                    {t('users.completeDeleteionExplanation', 'This will remove the user from both the authentication system and the database. The user will no longer be able to log in and all their data will be permanently deleted.')}
+                                </p>
                             </div>
 
                             <p style={{
@@ -410,7 +436,7 @@ const UsersTable = ({ users, isLoading, onUpdateUser, onUserDeleted }) => {
                                 ) : (
                                     <>
                                         <Trash size={16} />
-                                        {t('users.deleteConfirm', 'Yes, Delete User')}
+                                        {t('users.deleteConfirm', 'Yes, Delete User Completely')}
                                     </>
                                 )}
                             </button>

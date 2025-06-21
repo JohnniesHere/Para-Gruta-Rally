@@ -219,7 +219,7 @@ const ViewTeamPage = () => {
                                 <div className="hero-stats">
                                     <div className="stat-item">
                                         <Baby className="stat-icon" size={16} />
-                                        <span>{t('teams.racersCount', '{count} Racers', { count: performance.total })}</span>
+                                        <span>{t('teams.racersCount', '{count} Kids', { count: performance.total })}</span>
                                     </div>
                                     <div className="stat-item">
                                         <Check className="stat-icon" size={16} />

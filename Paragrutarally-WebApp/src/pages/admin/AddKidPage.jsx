@@ -1,4 +1,4 @@
-// src/pages/admin/AddKidPage.jsx - Enhanced with Photo Upload - MATCHING EditKidPage UI
+// src/pages/admin/AddKidPage.jsx - Fixed with Proper Instructor Loading
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
@@ -6,6 +6,7 @@ import CreateUserModal from '../../components/modals/CreateUserModal';
 import { useTheme } from '../../contexts/ThemeContext';
 import { usePermissions } from '../../hooks/usePermissions.jsx';
 import { addKid, getNextParticipantNumber } from '../../services/kidService';
+import { getAllInstructors } from '../../services/teamService'; // Added import for instructor service
 import { uploadKidPhoto, validatePhotoFile, resizeImage, getKidPhotoInfo } from '../../services/kidPhotoService';
 import { createEmptyKid, validateKid, formStatusOptions } from '../../schemas/kidSchema';
 import { getDocs, collection, query, where } from 'firebase/firestore';
@@ -87,7 +88,7 @@ const AddKidPage = () => {
 
             // Load teams with better error handling
             try {
-                console.log('Loading teams...');
+                console.log('📋 Loading teams...');
                 const teamsQuery = collection(db, 'teams');
                 const teamsSnapshot = await getDocs(teamsQuery);
 
@@ -98,32 +99,27 @@ const AddKidPage = () => {
                     }))
                     .filter(team => team.active !== false);
 
-                console.log('Teams loaded successfully:', teamsData);
+                console.log('✅ Teams loaded successfully:', teamsData.length);
                 setTeams(teamsData);
             } catch (teamsError) {
-                console.error('Error loading teams:', teamsError);
+                console.error('❌ Error loading teams:', teamsError);
                 setTeams([]);
             }
 
-            // Load instructors
+            // Load instructors using the new service function
             try {
-                console.log('Loading instructors...');
-                const instructorsQuery = collection(db, 'instructors');
-                const instructorsSnapshot = await getDocs(instructorsQuery);
-                const instructorsData = instructorsSnapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                }));
-                console.log('Instructors loaded successfully:', instructorsData);
+                console.log('👨‍🏫 Loading instructors from users collection...');
+                const instructorsData = await getAllInstructors();
+                console.log('✅ Instructors loaded successfully:', instructorsData.length);
                 setInstructors(instructorsData);
             } catch (instructorsError) {
-                console.error('Error loading instructors:', instructorsError);
+                console.error('❌ Error loading instructors:', instructorsError);
                 setInstructors([]);
             }
 
             // Load parents (users with parent role)
             try {
-                console.log('Loading parents...');
+                console.log('👨‍👩‍👧‍👦 Loading parents...');
                 const parentsQuery = query(
                     collection(db, 'users'),
                     where('role', '==', 'parent')
@@ -133,15 +129,15 @@ const AddKidPage = () => {
                     id: doc.id,
                     ...doc.data()
                 }));
-                console.log('Parents loaded successfully:', parentsData);
+                console.log('✅ Parents loaded successfully:', parentsData.length);
                 setParents(parentsData);
             } catch (parentsError) {
-                console.error('Error loading parents:', parentsError);
+                console.error('❌ Error loading parents:', parentsError);
                 setParents([]);
             }
 
         } catch (error) {
-            console.error('Error loading initial data:', error);
+            console.error('❌ Error loading initial data:', error);
             setLoadingError('Some form data failed to load, but you can still create a kid. Please check your internet connection.');
         } finally {
             setIsLoading(false);
@@ -277,6 +273,11 @@ const AddKidPage = () => {
         loadInitialData();
     };
 
+    // Helper function to get instructor display name
+    const getInstructorDisplayName = (instructor) => {
+        return instructor.displayName || instructor.name || instructor.email || 'Unknown Instructor';
+    };
+
     const validateForm = () => {
         const validation = validateKid(formData);
 
@@ -303,6 +304,8 @@ const AddKidPage = () => {
 
         setIsSubmitting(true);
         try {
+            console.log('🏁 Creating kid with data:', formData);
+
             // First, create the kid
             const kidId = await addKid(formData);
             console.log('✅ Kid created with ID:', kidId);
@@ -335,7 +338,7 @@ const AddKidPage = () => {
             });
 
         } catch (error) {
-            console.error('Error adding kid:', error);
+            console.error('❌ Error adding kid:', error);
             setErrors({ general: error.message || 'Failed to add kid. Please try again.' });
         } finally {
             setIsSubmitting(false);
@@ -817,7 +820,7 @@ const AddKidPage = () => {
                                             <option value="">👨‍🏫 No Instructor Assigned</option>
                                             {instructors.map(instructor => (
                                                 <option key={instructor.id} value={instructor.id}>
-                                                    🏎️ {instructor.name}
+                                                    🏎️ {getInstructorDisplayName(instructor)}
                                                 </option>
                                             ))}
                                         </select>

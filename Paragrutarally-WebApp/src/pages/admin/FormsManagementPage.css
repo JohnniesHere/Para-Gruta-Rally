@@ -98,13 +98,13 @@
     left: 0;
     right: 0;
     height: 4px;
-    background: linear-gradient(90deg, var(--racing-gold), var(--racing-orange), var(--racing-gold));
+    background: linear-gradient(90deg, var(--racing-lilach), var(--racing-purple), var(--racing-lilach));
 }
 
 .form-card:hover {
     transform: translateY(-3px);
     box-shadow: 0 10px 30px var(--shadow-hover);
-    border-color: var(--racing-gold);
+    border-color: var(--racing-lilach);
 }
 
 .form-card-header {
@@ -115,7 +115,7 @@
 }
 
 .form-card-icon {
-    color: var(--racing-gold);
+    color: var(--racing-lilach);
     background: rgba(255, 215, 0, 0.1);
     padding: 8px;
     border-radius: 10px;
@@ -150,7 +150,7 @@
 .form-stat-number {
     font-size: 20px;
     font-weight: 700;
-    color: var(--racing-gold);
+    color: var(--racing-lilach);
 }
 
 .form-stat-label {
@@ -184,7 +184,7 @@
 .template-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px var(--shadow-color);
-    border-color: var(--racing-purple);
+    border-color: var(--racing-light-purple);
 }
 
 .template-preview {
@@ -209,7 +209,7 @@
 
 .template-preview-icon {
     font-size: 40px;
-    color: var(--racing-purple);
+    color: var(--racing-light-purple);
 }
 
 .template-name {
@@ -225,7 +225,7 @@
 }
 
 .use-template-btn {
-    background: linear-gradient(135deg, var(--racing-purple) 0%, #7C3AED 100%);
+    background: linear-gradient(135deg, var(--racing-light-purple) 0%, #7C3AED 100%);
     color: white;
     border: none;
     padding: 8px 16px;
@@ -384,7 +384,7 @@
 
 .quick-actions {
     background: linear-gradient(135deg, #FFF9E6 0%, #FFFBEF 100%);
-    border: 2px solid var(--racing-gold);
+    border: 2px solid var(--racing-lilach);
     border-radius: 15px;
     padding: 20px;
     margin-bottom: 20px;
@@ -413,7 +413,7 @@
 }
 
 .quick-action-btn {
-    background: linear-gradient(135deg, var(--racing-gold) 0%, var(--racing-orange) 100%);
+    background: linear-gradient(135deg, var(--racing-lilach) 0%, var(--racing-purple) 100%);
     color: var(--text-primary);
     border: none;
     padding: 15px 20px;
@@ -433,7 +433,7 @@
 .quick-action-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
-    background: linear-gradient(135deg, var(--racing-orange) 0%, var(--racing-gold) 100%);
+    background: linear-gradient(135deg, var(--racing-purple) 0%, var(--racing-lilach) 100%);
 }
 
 /* ========================================

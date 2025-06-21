@@ -373,9 +373,9 @@
 .capacity-button {
     width: 40px;
     height: 40px;
-    border: 2px solid var(--racing-gold);
+    border: 2px solid var(--racing-lilach);
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--racing-gold) 0%, var(--racing-orange) 100%);
+    background: linear-gradient(135deg, var(--racing-lilach) 0%, var(--racing-purple) 100%);
     color: var(--text-primary);
     font-weight: 700;
     font-size: 18px;
@@ -400,7 +400,7 @@
 .capacity-display {
     font-size: 24px;
     font-weight: 700;
-    color: var(--racing-gold);
+    color: var(--racing-lilach);
     min-width: 60px;
     text-align: center;
 }
@@ -430,11 +430,11 @@
 .event-type-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px var(--shadow-color);
-    border-color: var(--racing-gold);
+    border-color: var(--racing-lilach);
 }
 
 .event-type-card.selected {
-    border-color: var(--racing-gold);
+    border-color: var(--racing-lilach);
     background: linear-gradient(135deg, #FFF9E6 0%, #FFFBEF 100%);
     box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
 }
@@ -467,7 +467,7 @@
     position: absolute;
     top: 10px;
     right: 10px;
-    color: var(--racing-gold);
+    color: var(--racing-lilach);
     background: white;
     border-radius: 50%;
     padding: 2px;
@@ -478,7 +478,7 @@
    ======================================== */
 
 .image-upload-area {
-    border: 2px dashed var(--racing-gold);
+    border: 2px dashed var(--racing-lilach);
     border-radius: 15px;
     padding: 30px;
     text-align: center;
@@ -495,14 +495,14 @@
 }
 
 .image-upload-area:hover {
-    border-color: var(--racing-orange);
+    border-color: var(--racing-purple);
     background: linear-gradient(135deg, #FFEAA7 0%, #FDCB6E 100%);
     transform: translateY(-2px);
 }
 
 .upload-icon {
     font-size: 48px;
-    color: var(--racing-gold);
+    color: var(--racing-lilach);
     margin-bottom: 15px;
 }
 
@@ -575,11 +575,11 @@
 .participant-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px var(--shadow-color);
-    border-color: var(--racing-gold);
+    border-color: var(--racing-lilach);
 }
 
 .participant-card.selected {
-    border-color: var(--racing-gold);
+    border-color: var(--racing-lilach);
     background: linear-gradient(135deg, #FFF9E6 0%, #FFFBEF 100%);
     box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
 }
@@ -603,7 +603,7 @@
 }
 
 .selected-count {
-    background: var(--racing-gold);
+    background: var(--racing-lilach);
     color: var(--text-primary);
     padding: 8px 16px;
     border-radius: 20px;

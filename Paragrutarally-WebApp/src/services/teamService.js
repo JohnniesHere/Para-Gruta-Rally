@@ -1,4 +1,4 @@
-// src/services/teamService.js
+// src/services/teamService.js - Fixed for Users Collection
 import {
     collection,
     doc,
@@ -78,6 +78,33 @@ export const getTeamById = async (teamId) => {
 };
 
 /**
+ * Get user by ID from users collection (instructor/team leader)
+ * @param {string} userId - The user's document ID
+ * @returns {Promise<Object|null>} User data formatted for team display
+ */
+const getUserById = async (userId) => {
+    try {
+        const userDoc = await getDoc(doc(db, 'users', userId));
+        if (userDoc.exists()) {
+            const userData = userDoc.data();
+            return {
+                id: userDoc.id,
+                name: userData.displayName || userData.name || userData.email || 'Unknown User',
+                displayName: userData.displayName,
+                fullName: userData.name,
+                email: userData.email,
+                phone: userData.phone,
+                role: userData.role
+            };
+        }
+        return null;
+    } catch (error) {
+        console.error('Error fetching user:', error);
+        return null;
+    }
+};
+
+/**
  * Get a team with detailed information (kids, instructors, team leader)
  * @param {string} teamId - The team's document ID
  * @returns {Promise<Object|null>} Team data with details or null if not found
@@ -125,30 +152,22 @@ export const getTeamWithDetails = async (teamId) => {
             }
         }
 
-        // Fetch team leader information
+        // Fetch team leader information from users collection
         if (team.teamLeaderId) {
-            console.log('👨‍🏫 Fetching team leader...');
+            console.log('👨‍🏫 Fetching team leader from users collection...');
             try {
-                const leaderDoc = await getDoc(doc(db, 'instructors', team.teamLeaderId));
-                if (leaderDoc.exists()) {
-                    teamWithDetails.teamLeader = {
-                        id: leaderDoc.id,
-                        ...leaderDoc.data()
-                    };
-                    console.log('✅ Team leader loaded:', teamWithDetails.teamLeader.name);
+                const teamLeader = await getUserById(team.teamLeaderId);
+                if (teamLeader) {
+                    teamWithDetails.teamLeader = teamLeader;
+                    console.log('✅ Team leader loaded:', teamLeader.name);
                 } else {
-                    // Try to find in users collection as fallback
-                    const userDoc = await getDoc(doc(db, 'users', team.teamLeaderId));
-                    if (userDoc.exists()) {
-                        const userData = userDoc.data();
-                        teamWithDetails.teamLeader = {
-                            id: userDoc.id,
-                            name: userData.name || userData.email || 'Unknown',
-                            email: userData.email,
-                            phone: userData.phone
-                        };
-                        console.log('✅ Team leader found in users:', teamWithDetails.teamLeader.name);
-                    }
+                    console.warn('⚠️ Team leader not found in users collection');
+                    teamWithDetails.teamLeader = {
+                        id: team.teamLeaderId,
+                        name: 'Unknown Team Leader',
+                        email: null,
+                        phone: null
+                    };
                 }
             } catch (leaderError) {
                 console.warn('⚠️ Could not load team leader:', leaderError);
@@ -156,21 +175,11 @@ export const getTeamWithDetails = async (teamId) => {
             }
         }
 
-        // Fetch additional instructors (if any)
+        // Fetch additional instructors from users collection
         if (team.instructorIds && team.instructorIds.length > 0) {
-            console.log('👥 Fetching additional instructors...');
+            console.log('👥 Fetching additional instructors from users collection...');
             try {
-                const instructorsPromises = team.instructorIds.map(async (instructorId) => {
-                    const instructorDoc = await getDoc(doc(db, 'instructors', instructorId));
-                    if (instructorDoc.exists()) {
-                        return {
-                            id: instructorDoc.id,
-                            ...instructorDoc.data()
-                        };
-                    }
-                    return null;
-                });
-
+                const instructorsPromises = team.instructorIds.map(instructorId => getUserById(instructorId));
                 const instructorsResults = await Promise.all(instructorsPromises);
                 teamWithDetails.instructors = instructorsResults.filter(instructor => instructor !== null);
 
@@ -222,6 +231,44 @@ export const getTeamsByInstructor = async (instructorId) => {
     } catch (error) {
         console.error('Error getting teams by instructor:', error);
         throw new Error(`Failed to fetch instructor's teams: ${error.message}`);
+    }
+};
+
+/**
+ * Get all instructors from users collection
+ * @returns {Promise<Array>} Array of users with instructor role
+ */
+export const getAllInstructors = async () => {
+    try {
+        console.log('📋 Fetching all instructors from users collection...');
+
+        const instructorsQuery = query(
+            collection(db, 'users'),
+            where('role', '==', 'instructor')
+        );
+
+        const querySnapshot = await getDocs(instructorsQuery);
+        const instructors = [];
+
+        querySnapshot.forEach((doc) => {
+            const userData = doc.data();
+            instructors.push({
+                id: doc.id,
+                name: userData.displayName || userData.name || userData.email || 'Unknown Instructor',
+                displayName: userData.displayName,
+                fullName: userData.name,
+                email: userData.email,
+                phone: userData.phone,
+                role: userData.role,
+                ...userData // Include all other user data
+            });
+        });
+
+        console.log('✅ Instructors loaded:', instructors.length);
+        return instructors;
+    } catch (error) {
+        console.error('Error getting instructors:', error);
+        throw new Error(`Failed to fetch instructors: ${error.message}`);
     }
 };
 

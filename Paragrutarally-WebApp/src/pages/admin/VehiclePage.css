@@ -84,7 +84,7 @@
     height: 50px;
     border-radius: 8px;
     object-fit: cover;
-    border: 2px solid var(--racing-gold);
+    border: 2px solid var(--racing-lilach);
     box-shadow: 0 2px 8px rgba(255, 215, 0, 0.2);
     flex-shrink: 0;
 }
@@ -93,12 +93,12 @@
     width: 50px;
     height: 50px;
     border-radius: 8px;
-    background: linear-gradient(135deg, var(--racing-gold) 0%, var(--racing-orange) 100%);
+    background: linear-gradient(135deg, var(--racing-lilach) 0%, var(--racing-purple) 100%);
     display: flex;
     align-items: center;
     justify-content: center;
     color: var(--text-primary);
-    border: 2px solid var(--racing-gold);
+    border: 2px solid var(--racing-lilach);
     box-shadow: 0 2px 8px rgba(255, 215, 0, 0.2);
     flex-shrink: 0;
 }
@@ -180,7 +180,7 @@
 }
 
 .current-user {
-    color: var(--racing-orange);
+    color: var(--racing-purple);
     font-weight: 600;
     font-size: 12px;
 }
@@ -443,7 +443,7 @@
 .vehicle-mobile-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 25px var(--shadow-hover);
-    border-color: var(--racing-gold);
+    border-color: var(--racing-lilach);
 }
 
 .vehicle-mobile-header {
@@ -458,7 +458,7 @@
     height: 60px;
     border-radius: 12px;
     object-fit: cover;
-    border: 2px solid var(--racing-gold);
+    border: 2px solid var(--racing-lilach);
     box-shadow: 0 2px 8px rgba(255, 215, 0, 0.2);
     flex-shrink: 0;
 }
@@ -467,12 +467,12 @@
     width: 60px;
     height: 60px;
     border-radius: 12px;
-    background: linear-gradient(135deg, var(--racing-gold) 0%, var(--racing-orange) 100%);
+    background: linear-gradient(135deg, var(--racing-lilach) 0%, var(--racing-purple) 100%);
     display: flex;
     align-items: center;
     justify-content: center;
     color: var(--text-primary);
-    border: 2px solid var(--racing-gold);
+    border: 2px solid var(--racing-lilach);
     box-shadow: 0 2px 8px rgba(255, 215, 0, 0.2);
     flex-shrink: 0;
 }
@@ -626,7 +626,7 @@
     height: 200px;
     object-fit: cover;
     border-radius: 15px;
-    border: 3px solid var(--racing-gold);
+    border: 3px solid var(--racing-lilach);
     box-shadow: 0 8px 25px rgba(255, 215, 0, 0.3);
 }
 
@@ -635,7 +635,7 @@
     max-width: 300px;
     height: 200px;
     background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-quaternary) 100%);
-    border: 3px dashed var(--racing-gold);
+    border: 3px dashed var(--racing-lilach);
     border-radius: 15px;
     display: flex;
     flex-direction: column;
@@ -896,17 +896,17 @@
 }
 
 .basic-info-section {
-    border: 3px solid var(--racing-gold);
+    border: 3px solid var(--racing-lilach);
     background: linear-gradient(135deg, rgba(255, 215, 0, 0.05) 0%, rgba(255, 215, 0, 0.1) 100%);
 }
 
 .technical-section {
-    border: 3px solid var(--racing-purple);
+    border: 3px solid var(--racing-light-purple);
     background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(139, 92, 246, 0.1) 100%);
 }
 
 .assignment-section {
-    border: 3px solid var(--racing-orange);
+    border: 3px solid var(--racing-purple);
     background: linear-gradient(135deg, rgba(255, 165, 0, 0.05) 0%, rgba(255, 165, 0, 0.1) 100%);
 }
 
@@ -916,7 +916,7 @@
 }
 
 .history-section {
-    border: 3px solid var(--racing-red);
+    border: 3px solid var(--racing-blurple);
     background: linear-gradient(135deg, rgba(220, 38, 38, 0.05) 0%, rgba(220, 38, 38, 0.1) 100%);
 }
 
@@ -939,21 +939,21 @@
 }
 
 .basic-info-section .section-icon {
-    color: var(--racing-gold);
+    color: var(--racing-lilach);
     background: rgba(255, 215, 0, 0.1);
-    border-color: var(--racing-gold);
+    border-color: var(--racing-lilach);
 }
 
 .technical-section .section-icon {
-    color: var(--racing-purple);
+    color: var(--racing-light-purple);
     background: rgba(139, 92, 246, 0.1);
-    border-color: var(--racing-purple);
+    border-color: var(--racing-light-purple);
 }
 
 .assignment-section .section-icon {
-    color: var(--racing-orange);
+    color: var(--racing-purple);
     background: rgba(255, 165, 0, 0.1);
-    border-color: var(--racing-orange);
+    border-color: var(--racing-purple);
 }
 
 .notes-section .section-icon {
@@ -963,9 +963,9 @@
 }
 
 .history-section .section-icon {
-    color: var(--racing-red);
+    color: var(--racing-blurple);
     background: rgba(220, 38, 38, 0.1);
-    border-color: var(--racing-red);
+    border-color: var(--racing-blurple);
 }
 
 .timestamps-section .section-icon {

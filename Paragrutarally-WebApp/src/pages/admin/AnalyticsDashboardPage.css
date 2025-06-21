@@ -15,7 +15,7 @@
 
 .sparkle-icon {
     animation: twinkle 2s infinite;
-    color: var(--racing-gold);
+    color: var(--racing-lilach);
     filter: drop-shadow(0 2px 4px rgba(255, 215, 0, 0.3));
 }
 
@@ -24,7 +24,7 @@
    ======================================== */
 
 .analytics-header {
-    background: linear-gradient(135deg, var(--racing-gold) 0%, var(--racing-orange) 100%);
+    background: linear-gradient(135deg, var(--racing-lilach) 0%, var(--racing-purple) 100%);
     border-radius: 20px;
     padding: 30px;
     margin-bottom: 30px;
@@ -44,7 +44,7 @@
     left: 0;
     right: 0;
     height: 6px;
-    background: linear-gradient(90deg, var(--racing-red), var(--racing-gold), var(--racing-red));
+    background: linear-gradient(90deg, var(--racing-blurple), var(--racing-lilach), var(--racing-blurple));
     z-index: 1;
 }
 
@@ -102,8 +102,8 @@
 }
 
 .info-tooltip:hover {
-    background: var(--racing-gold);
-    border-color: var(--racing-orange);
+    background: var(--racing-lilach);
+    border-color: var(--racing-purple);
     transform: scale(1.1);
     z-index: 10001;
 }
@@ -138,8 +138,8 @@
 }
 
 .info-tooltip:hover {
-    background: var(--racing-gold);
-    border-color: var(--racing-orange);
+    background: var(--racing-lilach);
+    border-color: var(--racing-purple);
     transform: scale(1.1);
 }
 
@@ -157,7 +157,7 @@
 .tabs-container {
     background: var(--bg-secondary);
     border-radius: 20px;
-    border: 3px solid var(--racing-gold);
+    border: 3px solid var(--racing-lilach);
     overflow: hidden;
     box-shadow: 0 10px 30px rgba(255, 215, 0, 0.2);
     position: relative;
@@ -170,14 +170,14 @@
     left: 0;
     right: 0;
     height: 6px;
-    background: linear-gradient(90deg, var(--racing-gold), var(--racing-orange), var(--racing-gold));
+    background: linear-gradient(90deg, var(--racing-lilach), var(--racing-purple), var(--racing-lilach));
     z-index: 1;
 }
 
 .tabs-nav {
     display: flex;
     background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-quaternary) 100%);
-    border-bottom: 3px solid var(--racing-gold);
+    border-bottom: 3px solid var(--racing-lilach);
     overflow-x: auto;
     position: relative;
     z-index: 2;
@@ -209,9 +209,9 @@
 }
 
 .tab-button.active {
-    background: linear-gradient(135deg, var(--racing-gold) 0%, var(--racing-orange) 100%);
+    background: linear-gradient(135deg, var(--racing-lilach) 0%, var(--racing-purple) 100%);
     color: var(--text-primary);
-    border-bottom-color: var(--racing-red);
+    border-bottom-color: var(--racing-blurple);
     font-weight: 700;
     transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4);
@@ -224,7 +224,7 @@
     left: 0;
     right: 0;
     height: 4px;
-    background: linear-gradient(90deg, var(--racing-red), var(--racing-gold), var(--racing-red));
+    background: linear-gradient(90deg, var(--racing-blurple), var(--racing-lilach), var(--racing-blurple));
 }
 
 .tab-label {
@@ -270,7 +270,7 @@
     width: 50px;
     height: 50px;
     border: 4px solid var(--border-color);
-    border-top: 4px solid var(--racing-gold);
+    border-top: 4px solid var(--racing-lilach);
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
@@ -284,7 +284,7 @@
     padding: 30px;
     background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
     border-radius: 20px;
-    border: 2px solid var(--racing-gold);
+    border: 2px solid var(--racing-lilach);
     box-shadow: 0 8px 25px rgba(255, 215, 0, 0.1);
     position: relative;
     overflow: hidden;
@@ -297,7 +297,7 @@
     left: 0;
     right: 0;
     height: 4px;
-    background: linear-gradient(90deg, var(--racing-gold), var(--racing-orange), var(--racing-gold));
+    background: linear-gradient(90deg, var(--racing-lilach), var(--racing-purple), var(--racing-lilach));
     z-index: 1;
 }
 
@@ -339,7 +339,7 @@
     left: 0;
     right: 0;
     height: 6px;
-    background: linear-gradient(90deg, var(--card-color) 0%, var(--racing-gold) 50%, var(--card-color) 100%);
+    background: linear-gradient(90deg, var(--card-color) 0%, var(--racing-lilach) 50%, var(--card-color) 100%);
     z-index: 1;
 }
 
@@ -351,7 +351,7 @@
 
 /* Enhanced stat card variants */
 .stat-card.events {
-    --card-color: var(--racing-purple);
+    --card-color: var(--racing-light-purple);
     --card-color-light: #F3E8FF;
 }
 
@@ -367,11 +367,11 @@
    ======================================== */
 
 .kpi-section {
-    background: linear-gradient(135deg, var(--racing-gold) 0%, var(--racing-orange) 100%);
+    background: linear-gradient(135deg, var(--racing-lilach) 0%, var(--racing-purple) 100%);
     border-radius: 20px;
     padding: 35px;
     margin-bottom: 30px;
-    border: 3px solid var(--racing-red);
+    border: 3px solid var(--racing-blurple);
     box-shadow: 0 10px 30px rgba(255, 215, 0, 0.3);
     position: relative;
     overflow: hidden;
@@ -384,7 +384,7 @@
     left: 0;
     right: 0;
     height: 6px;
-    background: linear-gradient(90deg, var(--racing-red), var(--racing-gold), var(--racing-red));
+    background: linear-gradient(90deg, var(--racing-blurple), var(--racing-lilach), var(--racing-blurple));
     z-index: 1;
 }
 
@@ -409,7 +409,7 @@
     background: var(--bg-secondary);
     border-radius: 20px;
     padding: 30px;
-    border: 3px solid var(--racing-gold);
+    border: 3px solid var(--racing-lilach);
     transition: all 0.3s ease;
     text-align: center;
     position: relative;
@@ -424,14 +424,14 @@
     left: 0;
     right: 0;
     height: 4px;
-    background: linear-gradient(90deg, var(--racing-gold), var(--racing-orange), var(--racing-gold));
+    background: linear-gradient(90deg, var(--racing-lilach), var(--racing-purple), var(--racing-lilach));
     z-index: 1;
 }
 
 .kpi-card:hover {
     transform: translateY(-8px);
     box-shadow: 0 15px 40px rgba(255, 215, 0, 0.4);
-    border-color: var(--racing-orange);
+    border-color: var(--racing-purple);
 }
 
 .kpi-header {
@@ -456,7 +456,7 @@
 .kpi-value {
     font-size: 42px;
     font-weight: 700;
-    color: var(--racing-gold);
+    color: var(--text-primary);
     margin-bottom: 12px;
     text-shadow: 0 2px 4px rgba(255, 215, 0, 0.3);
     position: relative;
@@ -487,7 +487,7 @@
     background: var(--bg-secondary);
     border-radius: 20px;
     padding: 30px;
-    border: 3px solid var(--racing-gold);
+    border: 3px solid var(--racing-lilach);
     box-shadow: 0 8px 25px rgba(255, 215, 0, 0.1);
     position: relative;
     overflow: hidden;
@@ -501,7 +501,7 @@
     left: 0;
     right: 0;
     height: 4px;
-    background: linear-gradient(90deg, var(--racing-gold), var(--racing-orange), var(--racing-gold));
+    background: linear-gradient(90deg, var(--racing-lilach), var(--racing-purple), var(--racing-lilach));
     z-index: 1;
 }
 
@@ -556,7 +556,7 @@
 }
 
 .stat-value {
-    color: var(--racing-gold);
+    color: var(--racing-lilach);
     font-size: 18px;
     font-weight: 700;
     text-shadow: 0 1px 2px rgba(255, 215, 0, 0.2);
@@ -590,7 +590,7 @@
     left: 0;
     right: 0;
     height: 4px;
-    background: linear-gradient(90deg, var(--racing-blue), var(--racing-purple), var(--racing-blue));
+    background: linear-gradient(90deg, var(--racing-blue), var(--racing-light-purple), var(--racing-blue));
     z-index: 1;
 }
 
@@ -637,14 +637,14 @@
     top: 0;
     bottom: 0;
     width: 4px;
-    background: var(--racing-gold);
+    background: var(--racing-lilach);
     transition: width 0.3s ease;
 }
 
 .vehicle-item:hover {
     transform: translateX(5px);
     box-shadow: 0 5px 15px var(--shadow-color);
-    border-color: var(--racing-gold);
+    border-color: var(--racing-lilach);
 }
 
 .vehicle-item:hover::before {
@@ -654,13 +654,13 @@
 .vehicle-rank {
     font-size: 20px;
     font-weight: 700;
-    color: var(--racing-gold);
+    color: var(--racing-lilach);
     min-width: 40px;
     text-align: center;
     background: rgba(255, 215, 0, 0.1);
     padding: 8px;
     border-radius: 50%;
-    border: 2px solid var(--racing-gold);
+    border: 2px solid var(--racing-lilach);
 }
 
 .vehicle-info {
@@ -847,10 +847,10 @@
 /* Racing checkered pattern for special elements */
 .racing-pattern {
     background-image:
-            linear-gradient(45deg, var(--racing-gold) 25%, transparent 25%),
-            linear-gradient(-45deg, var(--racing-gold) 25%, transparent 25%),
-            linear-gradient(45deg, transparent 75%, var(--racing-gold) 75%),
-            linear-gradient(-45deg, transparent 75%, var(--racing-gold) 75%);
+            linear-gradient(45deg, var(--racing-lilach) 25%, transparent 25%),
+            linear-gradient(-45deg, var(--racing-lilach) 25%, transparent 25%),
+            linear-gradient(45deg, transparent 75%, var(--racing-lilach) 75%),
+            linear-gradient(-45deg, transparent 75%, var(--racing-lilach) 75%);
     background-size: 10px 10px;
     background-position: 0 0, 0 5px, 5px -5px, -5px 0px;
     opacity: 0.1;
@@ -865,11 +865,11 @@
 .race-animation {
     background: linear-gradient(
             90deg,
-            var(--racing-gold) 0%,
-            var(--racing-orange) 25%,
-            var(--racing-gold) 50%,
-            var(--racing-orange) 75%,
-            var(--racing-gold) 100%
+            var(--racing-lilach) 0%,
+            var(--racing-purple) 25%,
+            var(--racing-lilach) 50%,
+            var(--racing-purple) 75%,
+            var(--racing-lilach) 100%
     );
     background-size: 30px 100%;
     animation: raceStripe 2s linear infinite;

@@ -14,11 +14,11 @@ import {
     IconPhoto as Photo,
     IconChartBar as Analytics
 } from '@tabler/icons-react';
-import { useLanguage } from '../../contexts/LanguageContext';
+import {useLanguage} from '../../contexts/LanguageContext';
 import './Sidebar.css';
 
 const Sidebar = ({userRole}) => {
-    const { t } = useLanguage();
+    const {t} = useLanguage();
 
     return (
         <div className="sidebar">
@@ -98,17 +98,15 @@ const Sidebar = ({userRole}) => {
                             {t('nav.gallery', 'Gallery')}
                         </NavLink>
                         {userRole === 'admin' && (
-                            <li>
-                                <NavLink
-                                    to="/admin/analytics"
-                                    className={({ isActive }) =>
-                                        `sidebar-link ${isActive ? 'active' : ''}`
-                                    }
-                                >
-                                    <Analytics size={20} />
-                                    <span>{t('nav.analytics','Analytics')}</span>
-                                </NavLink>
-                            </li>
+                            <NavLink
+                                to="/admin/analytics"
+                                className={({isActive}) =>
+                                    `sidebar-link ${isActive ? 'active' : ''}`
+                                }
+                            >
+                                <Analytics size={20}/>
+                                <span>{t('nav.analytics', 'Analytics')}</span>
+                            </NavLink>
                         )}
                     </>
                 )}

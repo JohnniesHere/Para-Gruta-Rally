@@ -1,13 +1,11 @@
-// src/pages/admin/AddTeamPage.jsx - Updated for Global Theme System
+// src/pages/admin/AddTeamPage.jsx - Updated with Fixed Instructor Loading
 import React, {useState, useEffect} from 'react';
 import {useNavigate} from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
 import {useTheme} from '../../contexts/ThemeContext';
 import {usePermissions} from '../../hooks/usePermissions.jsx';
-import {addTeam} from '../../services/teamService';
+import {addTeam, getAllInstructors} from '../../services/teamService'; // Added getAllInstructors import
 import {getAllKids} from '../../services/kidService';
-import {getDocs, collection, query, where} from 'firebase/firestore';
-import {db} from '../../firebase/config';
 import {
     IconUsers as UsersGroup,
     IconPlus as Plus,
@@ -54,22 +52,21 @@ const AddTeamPage = () => {
         try {
             setIsLoading(true);
 
-            // Load instructors
-            const instructorsQuery = query(collection(db, 'instructors'));
-            const instructorsSnapshot = await getDocs(instructorsQuery);
-            const instructorsData = instructorsSnapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            }));
+            // Load instructors using the new service function
+            console.log('📋 Loading instructors...');
+            const instructorsData = await getAllInstructors();
             setInstructors(instructorsData);
+            console.log('✅ Instructors loaded:', instructorsData.length);
 
             // Load kids without teams
+            console.log('👶 Loading available kids...');
             const allKids = await getAllKids();
             const kidsWithoutTeams = allKids.filter(kid => !kid.teamId);
             setAvailableKids(kidsWithoutTeams);
+            console.log('✅ Available kids loaded:', kidsWithoutTeams.length);
 
         } catch (error) {
-            console.error('Error loading initial data:', error);
+            console.error('❌ Error loading initial data:', error);
             setErrors({general: 'Failed to load form data. Please refresh and try again.'});
         } finally {
             setIsLoading(false);
@@ -138,7 +135,9 @@ const AddTeamPage = () => {
 
         setIsSubmitting(true);
         try {
+            console.log('🏁 Creating team with data:', formData);
             const teamId = await addTeam(formData);
+            console.log('✅ Team created with ID:', teamId);
 
             // Navigate to the new team's view page with success message
             navigate(`/admin/teams/view/${teamId}`, {
@@ -148,7 +147,7 @@ const AddTeamPage = () => {
                 }
             });
         } catch (error) {
-            console.error('Error adding team:', error);
+            console.error('❌ Error adding team:', error);
             setErrors({general: 'Failed to add team. Please try again.'});
         } finally {
             setIsSubmitting(false);
@@ -157,6 +156,11 @@ const AddTeamPage = () => {
 
     const handleCancel = () => {
         navigate('/admin/teams');
+    };
+
+    // Helper function to get instructor display name
+    const getInstructorDisplayName = (instructor) => {
+        return instructor.displayName || instructor.name || instructor.email || 'Unknown Instructor';
     };
 
     if (isLoading) {
@@ -182,15 +186,15 @@ const AddTeamPage = () => {
                     <ArrowLeft className="btn-icon" size={20}/>
                     Back to Teams
                 </button>
-                    <div className="page-header">
-                        <div className="title-section">
-                            <h1>
-                                <UsersGroup size={32} className="page-title-icon"/>
-                                Create A Team!
-                                <Trophy size={24} className="trophy-icon"/>
-                            </h1>
-                        </div>
+                <div className="page-header">
+                    <div className="title-section">
+                        <h1>
+                            <UsersGroup size={32} className="page-title-icon"/>
+                            Create A Team!
+                            <Trophy size={24} className="trophy-icon"/>
+                        </h1>
                     </div>
+                </div>
 
 
                 {/* Main Container */}
@@ -311,16 +315,21 @@ const AddTeamPage = () => {
                                         >
                                             <div className="card-header">
                                                 <User className="card-icon" size={20}/>
-                                                <span className="instructor-name card-title">{instructor.name}</span>
+                                                <span className="instructor-name card-title">
+                                                    {getInstructorDisplayName(instructor)}
+                                                </span>
                                                 {formData.instructorIds.includes(instructor.id) && (
                                                     <Check className="selected-icon" size={16}/>
                                                 )}
                                             </div>
-                                            {instructor.phone && (
-                                                <div className="instructor-details card-body">
-                                                    📱 {instructor.phone}
-                                                </div>
-                                            )}
+                                            <div className="instructor-details card-body">
+                                                {instructor.email && (
+                                                    <div>📧 {instructor.email}</div>
+                                                )}
+                                                {instructor.phone && (
+                                                    <div>📱 {instructor.phone}</div>
+                                                )}
+                                            </div>
                                         </div>
                                     ))
                                 )}
@@ -341,13 +350,16 @@ const AddTeamPage = () => {
                                             <option value="">🎯 Choose Team Leader</option>
                                             {formData.instructorIds.map(instructorId => {
                                                 const instructor = instructors.find(i => i.id === instructorId);
-                                                return (
+                                                return instructor ? (
                                                     <option key={instructorId} value={instructorId}>
-                                                        👑 {instructor?.name}
+                                                        👑 {getInstructorDisplayName(instructor)}
                                                     </option>
-                                                );
+                                                ) : null;
                                             })}
                                         </select>
+                                        <small className="field-hint">
+                                            The team leader will be the main instructor responsible for this team.
+                                        </small>
                                     </div>
                                 </div>
                             )}

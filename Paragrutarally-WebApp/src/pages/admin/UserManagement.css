@@ -119,7 +119,7 @@
 
 /* Update button - specific styling for user management */
 .btn-update {
-    background: linear-gradient(135deg, var(--racing-gold) 0%, var(--racing-orange) 100%);
+    background: linear-gradient(135deg, var(--racing-lilach) 0%, var(--racing-purple) 100%);
     color: var(--text-primary);
     padding: 6px 12px;
     border: none;
@@ -135,7 +135,7 @@
 }
 
 .btn-update:hover {
-    background: linear-gradient(135deg, var(--racing-orange) 0%, #e67e22 100%);
+    background: linear-gradient(135deg, var(--racing-purple) 0%, #e67e22 100%);
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(255, 215, 0, 0.5);
 }
@@ -343,7 +343,7 @@
 
 /* Role update button - specific styling for user management */
 .btn-update {
-    background: linear-gradient(135deg, var(--racing-gold) 0%, var(--racing-orange) 100%);
+    background: linear-gradient(135deg, var(--racing-lilach) 0%, var(--racing-purple) 100%);
     color: var(--text-primary);
     padding: 8px 16px;
     border: none;
@@ -399,7 +399,7 @@
 }
 
 .role-option:hover {
-    border-color: var(--racing-gold);
+    border-color: var(--racing-lilach);
     background: var(--bg-quaternary);
 }
 

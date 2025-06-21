@@ -127,7 +127,7 @@
     height: 120px;
     border-radius: 50%;
     object-fit: cover;
-    border: 4px solid var(--racing-gold);
+    border: 4px solid var(--racing-lilach);
     box-shadow: 0 4px 16px rgba(255, 215, 0, 0.4);
     transition: all 0.3s ease;
 }
@@ -141,14 +141,14 @@
     width: 120px;
     height: 120px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--racing-gold) 0%, var(--racing-orange) 100%);
+    background: linear-gradient(135deg, var(--racing-lilach) 0%, var(--racing-purple) 100%);
     display: flex;
     align-items: center;
     justify-content: center;
     color: var(--text-primary);
     font-size: 48px;
     font-weight: bold;
-    border: 4px solid var(--racing-gold);
+    border: 4px solid var(--racing-lilach);
     box-shadow: 0 4px 16px rgba(255, 215, 0, 0.4);
 }
 
@@ -156,7 +156,7 @@
     position: absolute;
     bottom: -10px;
     right: -10px;
-    background: var(--racing-gold);
+    background: var(--racing-lilach);
     color: var(--text-primary);
     padding: 4px 8px;
     border-radius: 12px;
@@ -178,7 +178,7 @@
     height: 40px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid var(--racing-gold);
+    border: 2px solid var(--racing-lilach);
 }
 
 .photo-status {
@@ -221,7 +221,7 @@
 }
 
 .stat-icon {
-    color: var(--racing-gold);
+    color: var(--racing-lilach);
 }
 
 /* ========================================
@@ -318,7 +318,7 @@
     gap: 20px;
     padding: 25px;
     background: var(--bg-secondary);
-    border: 2px solid var(--racing-gold);
+    border: 2px solid var(--racing-lilach);
     border-radius: 15px;
     box-shadow: 0 4px 16px rgba(255, 215, 0, 0.2);
     transition: all 0.3s ease;
@@ -453,7 +453,7 @@
     width: 60px;
     height: 60px;
     border-radius: 8px;
-    background: linear-gradient(135deg, var(--racing-gold) 0%, var(--racing-orange) 100%);
+    background: linear-gradient(135deg, var(--racing-lilach) 0%, var(--racing-purple) 100%);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -518,7 +518,7 @@
 }
 
 .info-value:hover {
-    border-color: var(--racing-gold);
+    border-color: var(--racing-lilach);
     box-shadow: 0 2px 8px rgba(255, 215, 0, 0.2);
 }
 
@@ -618,7 +618,7 @@
 }
 
 .comment-value:hover {
-    border-color: var(--racing-gold);
+    border-color: var(--racing-lilach);
     box-shadow: 0 2px 8px rgba(255, 215, 0, 0.2);
 }
 
@@ -690,7 +690,7 @@
 
 .section-header.clickable:hover {
     background: linear-gradient(135deg, var(--bg-quaternary) 0%, var(--bg-tertiary) 100%);
-    border-bottom-color: var(--racing-gold);
+    border-bottom-color: var(--racing-lilach);
 }
 
 .section-header-content {
@@ -711,7 +711,7 @@
 }
 
 .section-header.clickable:hover .collapse-icon {
-    color: var(--racing-gold);
+    color: var(--racing-lilach);
 }
 
 /* ========================================

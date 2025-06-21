@@ -1,7 +1,11 @@
-// src/services/userService.js - FIXED VERSION
-import { doc, updateDoc, getDoc } from 'firebase/firestore';
+// src/services/userService.js - Updated for Callable Functions
+import { doc, updateDoc, getDoc, deleteDoc } from 'firebase/firestore';
 import { updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
+import { getFunctions, httpsCallable } from 'firebase/functions';
 import { db, auth } from '../firebase/config';
+
+// Initialize Firebase Functions
+const functions = getFunctions();
 
 /**
  * Update user profile information in Firestore
@@ -47,6 +51,104 @@ export const getUserData = async (userId) => {
     } catch (error) {
         console.error('❌ Error fetching user data:', error);
         throw new Error('Failed to fetch user data. Please try again.');
+    }
+};
+
+/**
+ * Delete user completely (Authentication + Firestore) - Admin only
+ * Uses Firebase Callable Functions to avoid CORS issues
+ * @param {string} userIdToDelete - The user ID to delete
+ * @returns {Promise<Object>} Deletion result
+ */
+export const deleteUserCompletely = async (userIdToDelete) => {
+    try {
+        console.log('🗑️ Starting complete user deletion process...');
+
+        // Get current user
+        const currentUser = auth.currentUser;
+        if (!currentUser) {
+            throw new Error('You must be logged in to perform this action.');
+        }
+
+        console.log('👤 Current user:', currentUser.uid);
+        console.log('🎯 User to delete:', userIdToDelete);
+
+        // Create callable function reference
+        const deleteUserFunction = httpsCallable(functions, 'deleteUser');
+
+        console.log('📞 Calling Firebase Callable Function...');
+
+        // Call the function (Firebase handles authentication automatically)
+        const result = await deleteUserFunction({
+            userIdToDelete: userIdToDelete
+        });
+
+        console.log('📦 Function result:', result.data);
+
+        if (!result.data.success) {
+            console.error('❌ Callable function error:', result.data.message);
+            throw new Error(result.data.message || 'Failed to delete authentication account.');
+        }
+
+        console.log('✅ Authentication account deleted successfully');
+
+        // Delete user document from Firestore
+        console.log('🗄️ Deleting user document from Firestore...');
+        const userDocRef = doc(db, 'users', userIdToDelete);
+        await deleteDoc(userDocRef);
+
+        console.log('✅ User document deleted from Firestore');
+
+        return {
+            success: true,
+            message: 'User deleted completely from both authentication and database.',
+            deletedUserId: userIdToDelete,
+            deletedUserEmail: result.data.deletedUserEmail
+        };
+
+    } catch (error) {
+        console.error('❌ Error in complete user deletion:', error);
+
+        // Handle Firebase Functions specific errors
+        if (error.code === 'functions/unauthenticated') {
+            throw new Error('You must be logged in to delete users.');
+        } else if (error.code === 'functions/permission-denied') {
+            throw new Error('You do not have permission to delete users. Admin access required.');
+        } else if (error.code === 'functions/invalid-argument') {
+            throw new Error('Invalid request. Please check the user ID and try again.');
+        } else if (error.code === 'functions/internal') {
+            throw new Error('Server error occurred. Please try again or contact support.');
+        } else if (error.code === 'functions/unavailable') {
+            throw new Error('User deletion service is temporarily unavailable. Please try again later.');
+        }
+
+        // Handle other errors
+        if (error.message.includes('Network')) {
+            throw new Error('Network error. Please check your internet connection and try again.');
+        }
+
+        throw new Error(error.message || 'Failed to delete user. Please try again.');
+    }
+};
+
+/**
+ * Get user information using callable function (Admin only)
+ * @param {string} userId - The user ID to get info for
+ * @returns {Promise<Object>} User information
+ */
+export const getUserInfo = async (userId) => {
+    try {
+        const getUserInfoFunction = httpsCallable(functions, 'getUserInfo');
+        const result = await getUserInfoFunction({ userId });
+
+        if (result.data.success) {
+            return result.data;
+        } else {
+            throw new Error('Failed to get user information.');
+        }
+    } catch (error) {
+        console.error('❌ Error getting user info:', error);
+        throw new Error(error.message || 'Failed to get user information.');
     }
 };
 
@@ -217,4 +319,20 @@ export const getCurrentUserStatus = () => {
         emailVerified: user.emailVerified,
         providerData: user.providerData
     };
+};
+
+/**
+ * Test Cloud Function connectivity using callable functions
+ * @returns {Promise<boolean>} True if Cloud Functions are accessible
+ */
+export const testCloudFunctions = async () => {
+    try {
+        const healthCheckFunction = httpsCallable(functions, 'healthCheck');
+        const result = await healthCheckFunction();
+        console.log('🧪 Health check result:', result.data);
+        return result.data.success === true;
+    } catch (error) {
+        console.error('Cloud Functions connectivity test failed:', error);
+        return false;
+    }
 };

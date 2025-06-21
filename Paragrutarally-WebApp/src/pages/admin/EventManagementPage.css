@@ -397,7 +397,7 @@
     width: 30px;
     height: 30px;
     border: 3px solid var(--border-color);
-    border-top: 3px solid var(--racing-gold);
+    border-top: 3px solid var(--racing-lilach);
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
@@ -413,7 +413,7 @@
     color: var(--text-muted);
     background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-quaternary) 100%);
     border-radius: 20px;
-    border: 2px dashed var(--racing-gold);
+    border: 2px dashed var(--racing-lilach);
 }
 
 .empty-icon {
@@ -462,7 +462,7 @@
 
 .filter-applied,
 .search-applied {
-    color: var(--racing-purple);
+    color: var(--racing-light-purple);
     font-weight: 700;
 }
 
@@ -535,8 +535,8 @@
 }
 
 .pagination-button:hover:not(:disabled) {
-    background: var(--racing-gold);
-    border-color: var(--racing-gold);
+    background: var(--racing-lilach);
+    border-color: var(--racing-lilach);
     transform: translateY(-2px);
     box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
 }
@@ -570,14 +570,14 @@
 
 .pagination-number:hover:not(.active) {
     background: var(--bg-secondary);
-    border-color: var(--racing-gold);
+    border-color: var(--racing-lilach);
     transform: translateY(-2px);
 }
 
 .pagination-number.active {
-    background: var(--racing-gold);
+    background: var(--racing-lilach);
     color: var(--text-primary);
-    border-color: var(--racing-gold);
+    border-color: var(--racing-lilach);
     box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
 }
 
@@ -586,7 +586,7 @@
    ======================================== */
 
 .btn-export {
-    background: linear-gradient(135deg, var(--racing-purple) 0%, #8B5CF6 100%);
+    background: linear-gradient(135deg, var(--racing-light-purple) 0%, #8B5CF6 100%);
     color: white;
     border: none;
     padding: 12px 20px;
@@ -604,7 +604,7 @@
 .btn-export:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
-    background: linear-gradient(135deg, #7C3AED 0%, var(--racing-purple) 100%);
+    background: linear-gradient(135deg, #7C3AED 0%, var(--racing-light-purple) 100%);
 }
 
 /* ========================================
@@ -784,12 +784,12 @@
 }
 
 .btn-action.gallery {
-    background: linear-gradient(135deg, var(--racing-purple) 0%, #8B5CF6 100%);
+    background: linear-gradient(135deg, var(--racing-light-purple) 0%, #8B5CF6 100%);
     color: white;
 }
 
 .btn-action.gallery:hover {
-    background: linear-gradient(135deg, #7C3AED 0%, var(--racing-purple) 100%);
+    background: linear-gradient(135deg, #7C3AED 0%, var(--racing-light-purple) 100%);
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
 }
@@ -885,7 +885,7 @@
 }
 
 .folder-icon {
-    color: var(--racing-purple);
+    color: var(--racing-light-purple);
     flex-shrink: 0;
     margin-top: 2px;
 }

@@ -40,10 +40,10 @@
     --shadow-hover: rgba(0, 0, 0, 0.15);
 
     /* Racing Theme Colors */
-    --racing-gold: #9146FF;
-    --racing-orange: #6441A4;
-    --racing-red: #DC2626;
-    --racing-purple: #8B5CF6;
+    --racing-lilach: rgba(211, 189, 245, 0.79);
+    --racing-purple: #d18dee;
+    --racing-blurple: #ad83f2;
+    --racing-light-purple: #dda3ff;
     --racing-blue: #3B82F6;
     --racing-green: #10B981;
     --racing-pink: #EC4899;
@@ -95,6 +95,12 @@
     --input-bg: #374151;
     --input-border: #6B7280;
     --input-focus: #BF94FF;
+
+    /* Racing Theme Colors */
+    --racing-lilach: #9146FF;
+    --racing-purple: #6441A4;
+    --racing-blurple: #711cf2;
+    --racing-light-purple: #8B5CF6;
 }
 
 /* ========================================
@@ -131,7 +137,7 @@
 }
 
 .page-title-icon {
-    color: var(--racing-gold);
+    color: var(--racing-lilach);
     filter: drop-shadow(0 2px 4px rgba(255, 215, 0, 0.3));
 }
 
@@ -140,7 +146,7 @@
     background: var(--bg-secondary);
     padding: 30px;
     border-radius: 20px;
-    border: 3px solid var(--racing-gold);
+    border: 3px solid var(--racing-lilach);
     box-shadow: 0 10px 30px rgba(255, 215, 0, 0.2);
     position: relative;
     overflow: hidden;
@@ -154,7 +160,7 @@
     left: 0;
     right: 0;
     height: 6px;
-    background: linear-gradient(90deg, var(--racing-gold), var(--racing-orange), var(--racing-gold));
+    background: linear-gradient(90deg, var(--racing-lilach), var(--racing-purple), var(--racing-lilach));
     z-index: 1;
 }
 
@@ -164,7 +170,7 @@
 
 /* Racing-style headers */
 .racing-header {
-    background: linear-gradient(135deg, var(--racing-gold) 0%, var(--racing-orange) 100%);
+    background: linear-gradient(135deg, var(--racing-lilach) 0%, var(--racing-purple) 100%);
     border-radius: 20px;
     padding: 30px;
     margin-bottom: 30px;
@@ -181,7 +187,7 @@
     left: 0;
     right: 0;
     height: 6px;
-    background: linear-gradient(90deg, var(--racing-red), var(--racing-gold), var(--racing-red));
+    background: linear-gradient(90deg, var(--racing-blurple), var(--racing-lilach), var(--racing-blurple));
     z-index: 1;
 }
 
@@ -252,7 +258,7 @@
 
 /* Primary buttons (Racing Gold theme) */
 .btn-primary {
-    background: linear-gradient(135deg, var(--racing-gold) 0%, var(--racing-orange) 100%);
+    background: linear-gradient(135deg, var(--racing-lilach) 0%, var(--racing-purple) 100%);
     color: var(--text-primary);
     box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
     position: relative;
@@ -280,7 +286,7 @@
 .btn-primary:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(255, 215, 0, 0.6);
-    background: linear-gradient(135deg, var(--racing-orange) 0%, var(--racing-gold) 100%);
+    background: linear-gradient(135deg, var(--racing-purple) 0%, var(--racing-lilach) 100%);
 }
 
 /* Secondary buttons */
@@ -462,7 +468,7 @@
 
 /* Stat card color variants - FIXED FOR DARK MODE */
 .stat-card.total {
-    --card-color: var(--racing-gold);
+    --card-color: var(--racing-lilach);
     --card-color-light: #FFF9E6;
 }
 
@@ -500,7 +506,7 @@ body.dark .stat-card.total::before {
 }
 
 .stat-card.teams {
-    --card-color: var(--racing-purple);
+    --card-color: var(--racing-light-purple);
     --card-color-light: #F3E8FF;
 }
 
@@ -529,7 +535,7 @@ body.dark .stat-card.total::before {
 }
 
 .stat-card.avg-kids {
-    --card-color: var(--racing-purple);
+    --card-color: var(--racing-light-purple);
     --card-color-light: #F3E8FF;
 }
 
@@ -714,7 +720,7 @@ body.dark .stat-card.total::before {
 
 .filter-applied,
 .search-applied {
-    color: var(--racing-purple);
+    color: var(--racing-light-purple);
     font-weight: 700;
 }
 
@@ -799,7 +805,7 @@ body.dark .stat-card.total::before {
 }
 
 .section-icon {
-    color: var(--racing-gold);
+    color: var(--racing-lilach);
     background: rgba(255, 215, 0, 0.1);
     padding: 8px;
     border-radius: 12px;
@@ -1077,7 +1083,7 @@ body.dark .stat-card.total::before {
 .card:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px var(--shadow-color);
-    border-color: var(--racing-gold);
+    border-color: var(--racing-lilach);
 }
 
 .card.selectable {
@@ -1142,7 +1148,7 @@ body.dark .stat-card.total::before {
     width: 40px;
     height: 40px;
     border: 4px solid var(--border-color);
-    border-top: 4px solid var(--racing-gold);
+    border-top: 4px solid var(--racing-lilach);
     border-radius: 50%;
     animation: spin 1s linear infinite;
     margin-bottom: 20px;
@@ -1180,7 +1186,7 @@ body.dark .stat-card.total::before {
     color: var(--text-muted);
     background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-quaternary) 100%);
     border-radius: 20px;
-    border: 2px dashed var(--racing-gold);
+    border: 2px dashed var(--racing-lilach);
     grid-column: 1 / -1;
 }
 
@@ -1358,7 +1364,7 @@ body.dark .stat-card.total::before {
 
 .modal-content {
     background: var(--bg-secondary);
-    border: 3px solid var(--racing-gold);
+    border: 3px solid var(--racing-lilach);
     border-radius: 20px;
     max-width: 600px;
     max-height: 80vh;
@@ -1395,7 +1401,7 @@ body.dark .stat-card.total::before {
 }
 
 .modal-close:hover {
-    background: var(--racing-gold);
+    background: var(--racing-lilach);
     color: var(--text-primary);
     transform: scale(1.1);
 }
@@ -1415,7 +1421,7 @@ body.dark .stat-card.total::before {
     padding: 30px 0;
     background: linear-gradient(135deg, #FFF9E6 0%, #FFFBEF 100%);
     border-radius: 20px;
-    border: 2px solid var(--racing-gold);
+    border: 2px solid var(--racing-lilach);
     margin-top: 30px;
 }
 
@@ -1427,7 +1433,7 @@ body.dark .stat-card.total::before {
 }
 
 .btn-submit.racing-submit {
-    background: linear-gradient(135deg, var(--racing-gold) 0%, var(--racing-orange) 100%);
+    background: linear-gradient(135deg, var(--racing-lilach) 0%, var(--racing-purple) 100%);
     color: var(--text-primary);
     border: none;
     padding: 15px 30px;
@@ -1464,7 +1470,7 @@ body.dark .stat-card.total::before {
 .btn-submit.racing-submit:hover {
     transform: translateY(-3px);
     box-shadow: 0 8px 25px rgba(255, 215, 0, 0.6);
-    background: linear-gradient(135deg, var(--racing-orange) 0%, var(--racing-gold) 100%);
+    background: linear-gradient(135deg, var(--racing-purple) 0%, var(--racing-lilach) 100%);
 }
 
 .btn-cancel {

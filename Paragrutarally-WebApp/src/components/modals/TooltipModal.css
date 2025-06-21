@@ -20,7 +20,7 @@
 
 .tooltip-modal-content {
     background: var(--bg-secondary);
-    border: 3px solid var(--racing-gold);
+    border: 3px solid var(--racing-lilach);
     border-radius: 12px;
     padding: 16px 20px;
     min-width: 280px;
@@ -37,12 +37,12 @@
     left: 0;
     right: 0;
     height: 4px;
-    background: linear-gradient(90deg, var(--racing-gold), var(--racing-orange), var(--racing-gold));
+    background: linear-gradient(90deg, var(--racing-lilach), var(--racing-purple), var(--racing-lilach));
     z-index: 1;
 }
 
 .tooltip-modal-title {
-    color: var(--racing-gold);
+    color: var(--racing-lilach);
     font-weight: 700;
     font-size: 14px;
     margin-bottom: 8px;
@@ -68,7 +68,7 @@
     background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 165, 0, 0.1) 100%);
     padding: 8px 12px;
     border-radius: 8px;
-    border-left: 3px solid var(--racing-gold);
+    border-left: 3px solid var(--racing-lilach);
     position: relative;
     z-index: 2;
 }

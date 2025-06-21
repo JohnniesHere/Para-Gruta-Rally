@@ -139,7 +139,7 @@
     height: 120px;
     border-radius: 15px;
     object-fit: cover;
-    border: 4px solid var(--racing-gold);
+    border: 4px solid var(--racing-lilach);
     box-shadow: 0 4px 16px rgba(255, 215, 0, 0.4);
     transition: all 0.3s ease;
 }
@@ -153,7 +153,7 @@
     position: absolute;
     bottom: -10px;
     right: -10px;
-    background: var(--racing-gold);
+    background: var(--racing-lilach);
     color: var(--text-primary);
     padding: 4px 8px;
     border-radius: 12px;
@@ -198,7 +198,7 @@
 }
 
 .stat-icon {
-    color: var(--racing-gold);
+    color: var(--racing-lilach);
     flex-shrink: 0;
 }
 
@@ -229,7 +229,7 @@
 .info-section:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 25px var(--shadow-color);
-    border-color: var(--racing-gold) !important;
+    border-color: var(--racing-lilach) !important;
 }
 
 .section-header {
@@ -249,7 +249,7 @@
 }
 
 .section-icon {
-    color: var(--racing-gold);
+    color: var(--racing-lilach);
 }
 
 /* ========================================
@@ -306,7 +306,7 @@
 }
 
 .info-value:hover {
-    border-color: var(--racing-gold);
+    border-color: var(--racing-lilach);
     box-shadow: 0 2px 8px rgba(255, 215, 0, 0.2);
 }
 
@@ -385,7 +385,7 @@
    ======================================== */
 
 .gallery-section {
-    border-color: var(--racing-purple) !important;
+    border-color: var(--racing-light-purple) !important;
 }
 
 .gallery-preview {
@@ -404,7 +404,7 @@
 }
 
 .gallery-folder-icon {
-    color: var(--racing-purple);
+    color: var(--racing-light-purple);
     opacity: 0.8;
 }
 
@@ -422,7 +422,7 @@
 }
 
 .gallery-button {
-    background: linear-gradient(135deg, var(--racing-purple) 0%, #8B5CF6 100%);
+    background: linear-gradient(135deg, var(--racing-light-purple) 0%, #8B5CF6 100%);
     color: white;
     border: none;
     padding: 12px 20px;
@@ -468,7 +468,7 @@
     width: 30px;
     height: 30px;
     border: 3px solid var(--border-color);
-    border-top: 3px solid var(--racing-gold);
+    border-top: 3px solid var(--racing-lilach);
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
