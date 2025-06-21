@@ -8,6 +8,8 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { usePermissions, canUserAccessKid } from '../../hooks/usePermissions.jsx';
 import { db } from '../../firebase/config';
+import ExportKidsModal from '../../components/modals/ExportKidsModal';
+
 import {
     getAllKids,
     getKidsByInstructor,
@@ -55,6 +57,7 @@ const KidsManagementPage = () => {
     const [teamFilter, setTeamFilter] = useState('all');
     const [statusFilter, setStatusFilter] = useState('all');
     const [showingKidsWithoutTeams, setShowingKidsWithoutTeams] = useState(false);
+    const [exportModalOpen, setExportModalOpen] = useState(false);
 
     // TEAM CHANGE MODAL STATE
     const [teamModalOpen, setTeamModalOpen] = useState(false);
@@ -414,6 +417,16 @@ const KidsManagementPage = () => {
         alert(t('kids.updated', '{kidName} has been updated successfully!', { kidName }));
     };
 
+        // ADDED THIS - Handle export kids
+    const handleExportKids = () => {
+        setExportModalOpen(true);
+    };
+
+    // ADDED THIS - Handle close export modal
+    const handleCloseExportModal = () => {
+        setExportModalOpen(false);
+    };
+
     const handleAddKid = () => {
         navigate('/admin/kids/add');
     };
@@ -495,7 +508,7 @@ const KidsManagementPage = () => {
                                 {t('kids.refresh', 'Refresh')}
                             </button>
                             {(userRole === 'admin' || userRole === 'instructor') && (
-                                <button className="btn-export">
+                                <button className="btn-export" onClick={handleExportKids}>
                                     <Download className="btn-icon" size={18} />
                                     {t('kids.exportKids', 'Export Kids')}
                                 </button>
@@ -822,6 +835,12 @@ const KidsManagementPage = () => {
                         setSelectedKidForEdit(null);
                     }}
                     onKidUpdated={handleKidUpdated}
+                />
+
+                {/* Export Kids Modal Component */}
+                <ExportKidsModal
+                    isOpen={exportModalOpen}
+                    onClose={handleCloseExportModal}
                 />
             </div>
         </Dashboard>

@@ -42,7 +42,7 @@ const AddKidPage = () => {
     const { isDarkMode, appliedTheme } = useTheme();
     const { permissions, userRole } = usePermissions();
     const { t } = useLanguage();
-    const formstatusOptions = getFormStatusOptions(t);
+    const formStatusOptions = getFormStatusOptions(t);
     const [isLoading, setIsLoading] = useState(false);
     const [teams, setTeams] = useState([]);
     const [instructors, setInstructors] = useState([]);
