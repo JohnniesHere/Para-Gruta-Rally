@@ -1456,8 +1456,48 @@ const translations = {
         'common.parentName': 'Parent Name',
         'common.signedFormStatus': 'Form Status',
         'common.declaration': 'Declaration',
+            // Parent Kid Detail Page
+        'parent.backToMyKids': 'Back to My Kids',
+        'parent.kidNotFound': 'Kid not found or access denied',
+        'parent.incompleteFormsWarning': 'Some forms or declarations are still pending completion',
+        'parent.personalInformation': 'Personal Information',
+        'parent.contactInformation': 'Contact Information',
+        'parent.grandparentsNames': 'Grandparents Names',
+        'parent.grandparentsPhone': 'Grandparents Phone',
+        'parent.formsAndStatus': 'Forms & Status',
+        'parent.editComments': 'Edit Your Comments',
+        'parent.yourComments': 'Your Comments',
+        'parent.announcersNotes': 'Announcer\'s Notes',
+        'parent.additionalComments': 'Additional Comments',
+        'parent.photo': 'Photo',
+
+        // Common fields
+        'common.fullName': 'Full Name',
+        'common.signed': 'Signed',
+        'common.notFound': 'Not Found',
+        'common.incomplete': 'Incomplete',
     },
     he: {
+        // Parent Kid Detail Page
+        'parent.backToMyKids': 'חזור לילדים שלי',
+        'parent.kidNotFound': 'ילד לא נמצא או גישה נדחתה',
+        'parent.incompleteFormsWarning': 'חלק מהטפסים או ההצהרות עדיין ממתינים להשלמה',
+        'parent.personalInformation': 'מידע אישי',
+        'parent.contactInformation': 'פרטי יצירת קשר',
+        'parent.grandparentsNames': 'שמות סבא וסבתא',
+        'parent.grandparentsPhone': 'טלפון סבא וסבתא',
+        'parent.formsAndStatus': 'טפסים וסטטוס',
+        'parent.editComments': 'ערוך את ההערות שלך',
+        'parent.yourComments': 'ההערות שלך',
+        'parent.announcersNotes': 'הערות קריין',
+        'parent.additionalComments': 'הערות נוספות',
+        'parent.photo': 'תמונה',
+
+        // Common fields
+        'common.fullName': 'שם מלא',
+        'common.signed': 'חתום',
+        'common.notFound': 'לא נמצא',
+        'common.incomplete': 'לא הושלם',
         // Parent Dashboard
         'parent.myKids': 'הילדים שלי',
         'parent.parent': 'הורה',

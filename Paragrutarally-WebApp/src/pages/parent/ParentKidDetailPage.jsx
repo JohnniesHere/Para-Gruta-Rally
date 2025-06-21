@@ -41,7 +41,7 @@ const ParentKidDetailPage = () => {
     useEffect(() => {
         const loadKidDetails = async () => {
             if (!user?.uid || userRole !== 'parent') {
-                setError('Access denied: Parent credentials required');
+                setError(t('instructor.accessDenied', 'Access denied: Parent credentials required'));
                 setLoading(false);
                 return;
             }
@@ -52,7 +52,7 @@ const ParentKidDetailPage = () => {
                 const kidDoc = await getDoc(doc(db, 'kids', kidId));
 
                 if (!kidDoc.exists()) {
-                    setError('Kid not found');
+                    setError(t('viewKid.kidNotFound', 'Kid not found'));
                     setLoading(false);
                     return;
                 }
@@ -61,7 +61,7 @@ const ParentKidDetailPage = () => {
 
                 // Check if this kid belongs to the current parent
                 if (kidData.parentInfo?.parentId !== user.uid) {
-                    setError('Access denied: You can only view your own kids');
+                    setError(t('parent.kidNotFound', 'Access denied: You can only view your own kids'));
                     setLoading(false);
                     return;
                 }
@@ -71,7 +71,7 @@ const ParentKidDetailPage = () => {
 
             } catch (err) {
                 console.error('Error loading kid details:', err);
-                setError('Failed to load kid details. Please try again.');
+                setError(t('viewKid.loadDataError', 'Failed to load kid details. Please try again.'));
             } finally {
                 setLoading(false);
             }
@@ -80,7 +80,7 @@ const ParentKidDetailPage = () => {
         if (kidId) {
             loadKidDetails();
         }
-    }, [kidId, user, userRole]);
+    }, [kidId, user, userRole, t]);
 
     // Helper function to safely display field data based on permissions
     const getFieldValue = (fieldPath, defaultValue = '-') => {
@@ -123,7 +123,7 @@ const ParentKidDetailPage = () => {
             setIsEditingComment(false);
         } catch (err) {
             console.error('Error saving comments:', err);
-            setError('Failed to save comments. Please try again.');
+            setError(t('editKid.commentError', 'Failed to save comments. Please try again.'));
         } finally {
             setSaving(false);
         }
@@ -135,14 +135,14 @@ const ParentKidDetailPage = () => {
     };
 
     const getFormStatus = () => {
-        if (!kid) return { status: 'unknown', label: 'Unknown', color: 'secondary' };
+        if (!kid) return { status: 'unknown', label: t('common.unknown', 'Unknown'), color: 'secondary' };
 
         if (kid.signedFormStatus === 'completed' && kid.signedDeclaration) {
-            return { status: 'complete', label: 'Complete', color: 'success' };
+            return { status: 'complete', label: t('status.completed', 'Complete'), color: 'success' };
         } else if (kid.signedFormStatus === 'pending' || !kid.signedDeclaration) {
-            return { status: 'pending', label: 'Pending', color: 'warning' };
+            return { status: 'pending', label: t('status.pending', 'Pending'), color: 'warning' };
         }
-        return { status: 'incomplete', label: 'Incomplete', color: 'danger' };
+        return { status: 'incomplete', label: t('common.incomplete', 'Incomplete'), color: 'danger' };
     };
 
     if (loading) {
@@ -216,7 +216,7 @@ const ParentKidDetailPage = () => {
                                     {getFieldValue('personalInfo.firstName')} {getFieldValue('personalInfo.lastName')}
                                 </h1>
                                 <p className="subtitle">
-                                    {t('common.participantNumber', 'Participant #')}: {getFieldValue('participantNumber')} •
+                                    {t('kids.participantNumber', 'Participant #')}: {getFieldValue('participantNumber')} •
                                     <span className={`status-badge ${formStatus.color === 'success' ? 'ready' : formStatus.color === 'warning' ? 'pending' : 'inactive'}`} style={{ marginLeft: '10px' }}>
                                         {formStatus.label}
                                     </span>
@@ -256,7 +256,7 @@ const ParentKidDetailPage = () => {
                             <div className="form-group">
                                 <label className="form-label">
                                     <Calendar size={16} />
-                                    {t('common.dateOfBirth', 'Date of Birth')}
+                                    {t('editKid.birthday', 'Date of Birth')}
                                 </label>
                                 <div className="form-display-value">
                                     {getFieldValue('personalInfo.dateOfBirth')
@@ -269,7 +269,7 @@ const ParentKidDetailPage = () => {
                             <div className="form-group full-width">
                                 <label className="form-label">
                                     <MapPin size={16} />
-                                    {t('common.address', 'Address')}
+                                    {t('editKid.homeBaseLocation', 'Address')}
                                 </label>
                                 <div className="form-display-value">
                                     {getFieldValue('personalInfo.address')}
@@ -279,7 +279,7 @@ const ParentKidDetailPage = () => {
                             <div className="form-group full-width">
                                 <label className="form-label">
                                     <FileText size={16} />
-                                    {t('common.capabilities', 'Capabilities & Special Needs')}
+                                    {t('editKid.amazingAbilities', 'Capabilities & Special Needs')}
                                 </label>
                                 <div className="form-display-value">
                                     {getFieldValue('personalInfo.capabilities') || t('common.none', 'None specified')}
@@ -311,7 +311,7 @@ const ParentKidDetailPage = () => {
                             <div className="form-group">
                                 <label className="form-label">
                                     <User size={16} />
-                                    {t('common.parentName', 'Parent Name')}
+                                    {t('editKid.parentGuardianName', 'Parent Name')}
                                 </label>
                                 <div className="form-display-value">
                                     {getFieldValue('parentInfo.name')}
@@ -321,7 +321,7 @@ const ParentKidDetailPage = () => {
                             <div className="form-group">
                                 <label className="form-label">
                                     <Mail size={16} />
-                                    {t('common.email', 'Email')}
+                                    {t('editKid.emailAddress', 'Email')}
                                 </label>
                                 <div className="form-display-value" style={{ fontFamily: 'monospace' }}>
                                     {getFieldValue('parentInfo.email')}
@@ -331,7 +331,7 @@ const ParentKidDetailPage = () => {
                             <div className="form-group">
                                 <label className="form-label">
                                     <Phone size={16} />
-                                    {t('common.phone', 'Phone')}
+                                    {t('editKid.phoneNumber', 'Phone')}
                                 </label>
                                 <div className="form-display-value" style={{ fontFamily: 'monospace', direction: 'ltr' }}>
                                     {getFieldValue('parentInfo.phone')}
@@ -378,7 +378,7 @@ const ParentKidDetailPage = () => {
                             <div className="form-group">
                                 <label className="form-label">
                                     <FileText size={16} />
-                                    {t('common.signedFormStatus', 'Form Status')}
+                                    {t('editKid.formStatus', 'Form Status')}
                                 </label>
                                 <div>
                                     <span className={`status-badge ${getFieldValue('signedFormStatus') === 'completed' ? 'ready' : 'pending'}`}>
@@ -390,7 +390,7 @@ const ParentKidDetailPage = () => {
                             <div className="form-group">
                                 <label className="form-label">
                                     <Check size={16} />
-                                    {t('common.declaration', 'Declaration')}
+                                    {t('editKid.healthDeclarationSigned', 'Declaration')}
                                 </label>
                                 <div>
                                     <span className={`status-badge ${getFieldValue('signedDeclaration') ? 'ready' : 'pending'}`}>
@@ -403,7 +403,7 @@ const ParentKidDetailPage = () => {
                                 <div className="form-group">
                                     <label className="form-label">
                                         <User size={16} />
-                                        {t('common.team', 'Team')}
+                                        {t('kids.team', 'Team')}
                                     </label>
                                     <div className="form-display-value">
                                         <span className="badge secondary">
@@ -461,7 +461,7 @@ const ParentKidDetailPage = () => {
                                             ) : (
                                                 <Save size={18} />
                                             )}
-                                            {t('common.save', 'Save Comments')}
+                                            {t('general.save', 'Save Comments')}
                                         </button>
                                         <button
                                             className="btn btn-secondary"
@@ -469,7 +469,7 @@ const ParentKidDetailPage = () => {
                                             disabled={saving}
                                         >
                                             <X size={18} />
-                                            {t('common.cancel', 'Cancel')}
+                                            {t('general.cancel', 'Cancel')}
                                         </button>
                                     </div>
                                 </div>
@@ -496,7 +496,7 @@ const ParentKidDetailPage = () => {
                                         onClick={() => setIsEditingComment(true)}
                                     >
                                         <Edit size={18} />
-                                        {commentText ? t('common.edit', 'Edit Comments') : t('parent.addComments', 'Add Comments')}
+                                        {commentText ? t('general.edit', 'Edit Comments') : t('parent.addComments', 'Add Comments')}
                                     </button>
                                 </div>
                             )}
