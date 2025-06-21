@@ -39,7 +39,7 @@ const InstructorVehiclesPage = () => {
     useEffect(() => {
         const loadVehicleData = async () => {
             if (!userData?.instructorId || userRole !== 'instructor') {
-                setError('Access denied: Instructor credentials required');
+                setError(t('instructor.accessDenied', 'Access denied: Instructor credentials required'));
                 setLoading(false);
                 return;
             }
@@ -76,14 +76,14 @@ const InstructorVehiclesPage = () => {
                 setTeams(teamsData);
             } catch (err) {
                 console.error('Error loading vehicle data:', err);
-                setError('Failed to load vehicles. Please try again.');
+                setError(t('instructor.failedToLoad', 'Failed to load vehicles. Please try again.'));
             } finally {
                 setLoading(false);
             }
         };
 
         loadVehicleData();
-    }, [userData, userRole]);
+    }, [userData, userRole, t]);
 
     // Filter vehicles based on search and filters
     const filteredVehicles = useMemo(() => {
@@ -299,8 +299,8 @@ const InstructorVehiclesPage = () => {
                         <div className="results-summary">
                             <span>{t('common.showing', 'Showing')} {filteredVehicles.length} {t('common.results', 'results')}</span>
                             {searchTerm && <span className="search-applied">for "{searchTerm}"</span>}
-                            {statusFilter && <span className="filter-applied">status: {statusFilter}</span>}
-                            {typeFilter && <span className="filter-applied">type: {typeFilter}</span>}
+                            {statusFilter && <span className="filter-applied">{t('common.status', 'status')}: {statusFilter}</span>}
+                            {typeFilter && <span className="filter-applied">{t('common.type', 'type')}: {typeFilter}</span>}
                         </div>
                     )}
 
@@ -325,7 +325,7 @@ const InstructorVehiclesPage = () => {
                                 <tr>
                                     <th>{t('vehicles.name', 'Name')}</th>
                                     <th>{t('vehicles.type', 'Type')}</th>
-                                    <th>{t('vehicles.licensePlate', 'License Plate')}</th>
+                                    <th>{t('vehicles.table.licensePlate', 'License Plate')}</th>
                                     <th>{t('vehicles.model', 'Model')}</th>
                                     <th>{t('vehicles.capacity', 'Capacity')}</th>
                                     <th>{t('vehicles.status', 'Status')}</th>
@@ -362,7 +362,7 @@ const InstructorVehiclesPage = () => {
                                             <td>
                                                 <div style={{ textAlign: 'center' }}>
                                                     <Users size={16} style={{ marginRight: '5px', verticalAlign: 'middle' }} />
-                                                    {vehicle.capacity || 'N/A'}
+                                                    {vehicle.capacity || t('common.notAvailable', 'N/A')}
                                                 </div>
                                             </td>
                                             <td>
@@ -370,7 +370,7 @@ const InstructorVehiclesPage = () => {
                                                         vehicle.status === 'active' ? 'ready' :
                                                             vehicle.status === 'maintenance' ? 'pending' : 'inactive'
                                                     }`}>
-                                                        {vehicle.status || 'unknown'}
+                                                        {vehicle.status || t('common.unknown', 'unknown')}
                                                     </span>
                                             </td>
                                             <td>
