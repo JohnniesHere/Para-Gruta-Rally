@@ -1476,8 +1476,64 @@ const translations = {
         'common.signed': 'Signed',
         'common.notFound': 'Not Found',
         'common.incomplete': 'Incomplete',
+            // Host Dashboard
+        'host.dashboard': 'Host Dashboard',
+        'host.host': 'Host',
+        'host.dashboardSubtitle': 'View event participants and manage organization notes',
+        'host.searchParticipantsPlaceholder': 'Search participants by name or number...',
+        'host.noParticipantsFound': 'No Participants Found',
+        'host.noParticipantsMatchFilter': 'No participants match your current filter',
+        'host.noParticipantsRegistered': 'No participants are registered for events yet',
+        'host.participantInfo': 'Participant Information',
+        'host.announcersNotes': 'Announcer\'s Notes',
+        'host.additionalComments': 'Additional Comments',
+        'host.organizationComments': 'Organization Comments',
+        'host.addOrgCommentsPlaceholder': 'Add organization notes for this participant...',
+        'host.noOrgCommentsYet': 'No organization comments added yet',
+        'host.addOrgComments': 'Add Comments',
+        'host.viewGallery': 'View Gallery',
+        'host.upcomingEvents': 'Next Event',
+
+        // Stats
+        'stats.inSystem': 'In System',
+        'stats.futureEvents': 'Future Events',
+        'stats.participants': 'Participants',
+        'stats.pastEvents': 'Past Events',
+        'stats.upcoming': 'Upcoming',
+
+        // Common filters
+        'common.filterByEvent': 'Filter by Event',
+        'common.allEvents': 'All Events',
     },
     he: {
+          // Host Dashboard
+        'host.dashboard': 'לוח בקרה מארח',
+        'host.host': 'מארח',
+        'host.dashboardSubtitle': 'צפה במשתתפי אירועים ונהל הערות ארגון',
+        'host.searchParticipantsPlaceholder': 'חפש משתתפים לפי שם או מספר...',
+        'host.noParticipantsFound': 'לא נמצאו משתתפים',
+        'host.noParticipantsMatchFilter': 'אין משתתפים התואמים למסנן הנוכחי',
+        'host.noParticipantsRegistered': 'עדיין אין משתתפים רשומים לאירועים',
+        'host.participantInfo': 'מידע משתתף',
+        'host.announcersNotes': 'הערות קריין',
+        'host.additionalComments': 'הערות נוספות',
+        'host.organizationComments': 'הערות ארגון',
+        'host.addOrgCommentsPlaceholder': 'הוסף הערות ארגון עבור משתתף זה...',
+        'host.noOrgCommentsYet': 'עדיין לא נוספו הערות ארגון',
+        'host.addOrgComments': 'הוסף הערות',
+        'host.viewGallery': 'צפה בגלריה',
+        'host.upcomingEvents': 'האירוע הבא',
+
+        // Stats
+        'stats.inSystem': 'במערכת',
+        'stats.futureEvents': 'אירועים עתידיים',
+        'stats.participants': 'משתתפים',
+        'stats.pastEvents': 'אירועים שעברו',
+        'stats.upcoming': 'קרובים',
+
+        // Common filters
+        'common.filterByEvent': 'סנן לפי אירוע',
+        'common.allEvents': 'כל האירועים',
         // Parent Kid Detail Page
         'parent.backToMyKids': 'חזור לילדים שלי',
         'parent.kidNotFound': 'ילד לא נמצא או גישה נדחתה',

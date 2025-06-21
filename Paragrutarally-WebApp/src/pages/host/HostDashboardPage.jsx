@@ -51,7 +51,7 @@ const HostDashboardPage = () => {
     useEffect(() => {
         const loadHostData = async () => {
             if (userRole !== 'host' && userRole !== 'guest') {
-                setError('Access denied: Host/Guest credentials required');
+                setError(t('instructor.accessDenied', 'Access denied: Host/Guest credentials required'));
                 setLoading(false);
                 return;
             }
@@ -90,14 +90,14 @@ const HostDashboardPage = () => {
 
             } catch (err) {
                 console.error('Error loading host data:', err);
-                setError('Failed to load data. Please try again.');
+                setError(t('instructor.failedToLoad', 'Failed to load data. Please try again.'));
             } finally {
                 setLoading(false);
             }
         };
 
         loadHostData();
-    }, [userRole]);
+    }, [userRole, t]);
 
     // Helper function to safely display field data based on permissions
     const getFieldValue = (kid, fieldPath, defaultValue = '-') => {
@@ -172,7 +172,7 @@ const HostDashboardPage = () => {
             setEditingComments({ ...editingComments, [kidId]: false });
         } catch (err) {
             console.error('Error saving comments:', err);
-            setError('Failed to save comments. Please try again.');
+            setError(t('editKid.commentError', 'Failed to save comments. Please try again.'));
         } finally {
             setSaving({ ...saving, [kidId]: false });
         }
@@ -243,7 +243,7 @@ const HostDashboardPage = () => {
                                 <Calendar size={40} />
                             </div>
                             <div className="stat-content">
-                                <h3>{t('stats.totalEvents', 'Total Events')}</h3>
+                                <h3>{t('events.totalEvents', 'Total Events')}</h3>
                                 <div className="stat-value">{events.length}</div>
                                 <div className="stat-subtitle">{t('stats.inSystem', 'In System')}</div>
                             </div>
@@ -278,7 +278,7 @@ const HostDashboardPage = () => {
                             <div className="stat-content">
                                 <h3>{t('stats.pastEvents', 'Past Events')}</h3>
                                 <div className="stat-value">{pastEvents.length}</div>
-                                <div className="stat-subtitle">{t('stats.completed', 'Completed')}</div>
+                                <div className="stat-subtitle">{t('status.completed', 'Completed')}</div>
                             </div>
                         </div>
                     </div>
@@ -384,7 +384,7 @@ const HostDashboardPage = () => {
                                                         {firstName} {lastName}
                                                     </h3>
                                                     <p style={{ margin: 0, fontSize: '14px', color: 'var(--text-muted)' }}>
-                                                        {t('common.participantNumber', 'Participant #')}: {participantNumber}
+                                                        {t('kids.participantNumber', 'Participant #')}: {participantNumber}
                                                     </p>
                                                 </div>
                                             </div>
@@ -426,7 +426,7 @@ const HostDashboardPage = () => {
 
                                                         <div>
                                                             <label style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>
-                                                                {t('common.capabilities', 'Capabilities')}
+                                                                {t('kids.capabilities', 'Capabilities')}
                                                             </label>
                                                             <div style={{ color: 'var(--text-primary)' }}>
                                                                 {getFieldValue(kid, 'personalInfo.capabilities') || t('common.none', 'None')}
@@ -435,7 +435,7 @@ const HostDashboardPage = () => {
 
                                                         <div>
                                                             <label style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>
-                                                                {t('common.team', 'Team')}
+                                                                {t('kids.team', 'Team')}
                                                             </label>
                                                             <div style={{ color: 'var(--text-primary)' }}>
                                                                 <span className="badge secondary">
@@ -446,7 +446,7 @@ const HostDashboardPage = () => {
 
                                                         <div>
                                                             <label style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>
-                                                                {t('common.status', 'Status')}
+                                                                {t('kids.status', 'Status')}
                                                             </label>
                                                             <div>
                                                                 <span className={`status-badge ${getFieldValue(kid, 'signedFormStatus') === 'completed' ? 'ready' : 'pending'}`}>
@@ -517,7 +517,7 @@ const HostDashboardPage = () => {
                                                                         ) : (
                                                                             <Save size={14} />
                                                                         )}
-                                                                        {t('common.save', 'Save')}
+                                                                        {t('general.save', 'Save')}
                                                                     </button>
                                                                     <button
                                                                         className="btn btn-secondary btn-sm"
@@ -525,7 +525,7 @@ const HostDashboardPage = () => {
                                                                         disabled={isSavingComment}
                                                                     >
                                                                         <X size={14} />
-                                                                        {t('common.cancel', 'Cancel')}
+                                                                        {t('general.cancel', 'Cancel')}
                                                                     </button>
                                                                 </div>
                                                             </div>
@@ -547,7 +547,7 @@ const HostDashboardPage = () => {
                                                                     onClick={() => startEditingComments(kid.id)}
                                                                 >
                                                                     <Edit size={14} />
-                                                                    {commentTexts[kid.id] ? t('common.edit', 'Edit') : t('host.addOrgComments', 'Add Comments')}
+                                                                    {commentTexts[kid.id] ? t('general.edit', 'Edit') : t('host.addOrgComments', 'Add Comments')}
                                                                 </button>
                                                             </div>
                                                         )}
