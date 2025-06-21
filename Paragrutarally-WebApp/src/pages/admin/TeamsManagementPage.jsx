@@ -7,6 +7,7 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import { usePermissions } from '../../hooks/usePermissions.jsx';
 import { getAllTeams, deleteTeam, getAllInstructors } from '../../services/teamService';
 import { getAllKids } from '../../services/kidService';
+import ExportTeamsModal from '../../components/modals/ExportTeamsModal';
 import {
     IconUsers as Team,
     IconPlus as Plus,
@@ -45,7 +46,7 @@ const TeamsManagementPage = () => {
     const [statusFilter, setStatusFilter] = useState('all');
     const [capacityFilter, setCapacityFilter] = useState('all');
     const [showingTeamsWithoutKids, setShowingTeamsWithoutKids] = useState(false);
-
+    const [exportModalOpen, setExportModalOpen] = useState(false);
     // Reference data for lookups
     const [instructorsMap, setInstructorsMap] = useState(new Map());
     const [kidsMap, setKidsMap] = useState(new Map());
@@ -220,6 +221,14 @@ const TeamsManagementPage = () => {
         }
     };
 
+    const handleExportTeams = () => {
+        setExportModalOpen(true);
+    };
+
+
+    const handleCloseExportModal = () => {
+        setExportModalOpen(false);
+    };
     const handleViewTeam = (team) => {
         navigate(`/admin/teams/view/${team.id}`);
     };
@@ -309,7 +318,7 @@ const TeamsManagementPage = () => {
                                 {t('teams.refresh', 'Refresh')}
                             </button>
                             {(userRole === 'admin' || userRole === 'instructor') && (
-                                <button className="btn-export">
+                                <button className="btn-export" onClick={handleExportTeams}>
                                     <Download className="btn-icon" size={18} />
                                     {t('teams.exportTeams', 'Export Teams')}
                                 </button>
@@ -573,6 +582,11 @@ const TeamsManagementPage = () => {
                         </table>
                     </div>
                 </div>
+                {/* Export Teams Modal Component */}
+                <ExportTeamsModal
+                    isOpen={exportModalOpen}
+                    onClose={handleCloseExportModal}
+                />
             </div>
         </Dashboard>
     );
