@@ -106,7 +106,7 @@ const Sidebar = ({userRole}) => {
                                     }
                                 >
                                     <Analytics size={20} />
-                                    <span>Analytics</span>
+                                    <span>{t('nav.analytics','Analytics')}</span>
                                 </NavLink>
                             </li>
                         )}

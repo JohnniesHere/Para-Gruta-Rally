@@ -162,7 +162,7 @@ const translations = {
         'events.keepGalleryPhotos': 'Keep Gallery Photos',
         'events.keepGalleryDescription': 'Delete only the event, preserve all photos in the gallery',
         'events.deleteGalleryToo': 'Delete Gallery Too',
-        'events.deleteGalleryDescription': 'Delete the event AND permanently remove all photos from the gallery',
+        'events.deleteGalleryDescription': `Delete the event AND permanently remove all photos from the gallery`,
         'events.deleting': 'Deleting...',
         'events.deleteEventAndGallery': 'Delete Event & Gallery',
         'events.deleteEventOnly': 'Delete Event Only',
@@ -1058,7 +1058,177 @@ const translations = {
         'formsManagement.feedback': 'Feedback',
         'formsManagement.medical': 'Medical',
 
+        // In the `en` section:
+        'analytics.pageTitle': 'Racing Analytics Dashboard',
+        'analytics.raceControlTitle': '🏁 Race Control Analytics',
+        'analytics.subtitle': 'Comprehensive data insights for your racing program',
+        'analytics.lastUpdated': 'Last updated',
+        'analytics.refreshData': 'Refresh Data',
+        'analytics.loadingAnalytics': 'Loading analytics data...',
+        'analytics.loadingOverview': 'Loading overview...',
+        'analytics.loadingVehicleAnalytics': 'Loading vehicle analytics...',
+        'analytics.loadingTeamAnalytics': 'Loading team analytics...',
+        'analytics.loadingParticipationAnalytics': 'Loading participation analytics...',
+        'analytics.loadingMaintenanceData': 'Loading maintenance data...',
+        'analytics.failedToLoad': 'Failed to load analytics data. Please try again.',
 
+// Tab labels
+        'analytics.tabs.overview': 'Overview',
+        'analytics.tabs.vehicles': 'Vehicles',
+        'analytics.tabs.teams': 'Teams',
+        'analytics.tabs.participation': 'Events',
+        'analytics.tabs.maintenance': 'Maintenance',
+        'analytics.tabs.overviewDesc': 'System health & KPIs',
+        'analytics.tabs.vehiclesDesc': 'Usage & maintenance',
+        'analytics.tabs.teamsDesc': 'Performance & capacity',
+        'analytics.tabs.participationDesc': 'Participation & engagement',
+        'analytics.tabs.maintenanceDesc': 'Alerts & recommendations',
+
+// Overview tab
+        'analytics.overview.totalVehicles': 'Total Vehicles',
+        'analytics.overview.totalRacers': 'Total Racers',
+        'analytics.overview.racingTeams': 'Racing Teams',
+        'analytics.overview.events': 'Events',
+        'analytics.overview.active': 'Active',
+        'analytics.overview.upcoming': 'Upcoming',
+        'analytics.overview.kpiTitle': 'Key Performance Indicators',
+        'analytics.overview.vehicleUtilization': 'Vehicle Utilization',
+        'analytics.overview.teamCapacity': 'Team Capacity',
+        'analytics.overview.systemHealth': 'System Health',
+        'analytics.overview.participation': 'Participation',
+        'analytics.overview.vehicleUtilizationDesc': 'Percentage of vehicles currently in use',
+        'analytics.overview.teamCapacityDesc': 'Current members vs maximum capacity',
+        'analytics.overview.systemHealthDesc': 'Overall system operational status',
+        'analytics.overview.participationDesc': 'Active racers with completed forms',
+
+// Vehicle analytics
+        'analytics.vehicles.fleetOverview': '🚗 Vehicle Fleet Overview',
+        'analytics.vehicles.fleetStatus': 'Fleet Status',
+        'analytics.vehicles.totalVehicles': 'Total Vehicles',
+        'analytics.vehicles.currentlyInUse': 'Currently In Use',
+        'analytics.vehicles.available': 'Available',
+        'analytics.vehicles.utilizationTitle': '📊 Vehicle Utilization',
+        'analytics.vehicles.mostUsed': '🏆 Most Used Vehicles',
+        'analytics.vehicles.usageByTeam': '📈 Usage by Team',
+        'analytics.vehicles.assignments': 'assignments',
+        'analytics.vehicles.inUse': '🔴 In Use',
+        'analytics.vehicles.vehiclesCount': 'vehicles',
+        'analytics.vehicles.utilized': 'utilized',
+        'analytics.vehicles.batteryStatus': '🔋 Battery Maintenance Status',
+        'analytics.vehicles.needsReplacement': '🚨 Needs Replacement',
+        'analytics.vehicles.monitorClosely': '⚠️ Monitor Closely',
+        'analytics.vehicles.daysOld': 'days old',
+
+// Teams analytics
+        'analytics.teams.performanceOverview': '👥 Team Performance Overview',
+        'analytics.teams.teamStatistics': 'Team Statistics',
+        'analytics.teams.totalTeams': 'Total Teams',
+        'analytics.teams.averageTeamSize': 'Average Team Size',
+        'analytics.teams.totalCapacity': 'Total Capacity',
+        'analytics.teams.capacityUtilization': '📊 Capacity Utilization',
+        'analytics.teams.members': 'Members',
+        'analytics.teams.instructors': 'Instructors',
+        'analytics.teams.vehicleDistribution': '🚗 Vehicle Distribution',
+        'analytics.teams.ratio': 'Ratio',
+
+// Participation analytics
+        'analytics.participation.eventsOverview': '🏁 Events Overview',
+        'analytics.participation.totalEvents': 'Total Events',
+        'analytics.participation.upcomingEvents': 'Upcoming',
+        'analytics.participation.completedEvents': 'Completed',
+        'analytics.participation.avgParticipation': 'Avg Participation',
+        'analytics.participation.mostActiveRacers': '🏆 Most Active Racers',
+        'analytics.participation.allTimeLeaders': 'All Time Leaders',
+        'analytics.participation.recentActivity': 'Recent Activity (30 days)',
+        'analytics.participation.eventsCount': 'events',
+        'analytics.participation.recent': 'recent',
+        'analytics.participation.recentEvents': '📅 Recent Events',
+        'analytics.participation.participants': 'participants',
+        'analytics.participation.teams': 'teams',
+
+// Maintenance analytics
+        'analytics.maintenance.urgentAlerts': '🚨 Urgent Maintenance Alerts',
+        'analytics.maintenance.batteryReplacement': 'Battery Replacement Required',
+        'analytics.maintenance.batteryAge': 'Battery is {daysOld} days old',
+        'analytics.maintenance.batteryType': 'Type',
+        'analytics.maintenance.priorityHigh': 'HIGH',
+        'analytics.maintenance.batteriesToMonitor': '⚠️ Batteries to Monitor',
+        'analytics.maintenance.priorityMedium': 'MEDIUM',
+        'analytics.maintenance.systemRecommendations': '💡 System Recommendations',
+        'analytics.maintenance.healthIndicators': '📊 System Health Indicators',
+        'analytics.maintenance.vehicleHealth': 'Vehicle Health',
+        'analytics.maintenance.teamHealth': 'Team Health',
+
+// Tooltips
+        'analytics.tooltip.systemPerformance.title': 'System Performance',
+        'analytics.tooltip.systemPerformance.description': 'Critical metrics showing how well your racing program is running. These percentages help identify improvement areas.',
+        'analytics.tooltip.systemPerformance.action': 'Aim for 80%+ on all metrics. Lower scores indicate specific areas needing attention.',
+
+        'analytics.tooltip.vehicleUsage.title': 'Vehicle Usage Rate',
+        'analytics.tooltip.vehicleUsage.description': 'Percentage of your vehicle fleet currently assigned and being used regularly by teams.',
+        'analytics.tooltip.vehicleUsage.action': 'Low utilization? Redistribute vehicles or recruit participants. High? You may need more vehicles.',
+
+        'analytics.tooltip.teamFillRate.title': 'Team Fill Rate',
+        'analytics.tooltip.teamFillRate.description': 'How full your teams are compared to maximum capacity. Shows room for more participants.',
+        'analytics.tooltip.teamFillRate.action': 'Low capacity? Focus on recruitment. High? Consider creating new teams or expanding existing ones.',
+
+        // Additional tooltip translations
+        'analytics.tooltip.usageAnalytics.title': 'Usage Analytics',
+        'analytics.tooltip.usageAnalytics.description': 'Track which vehicles are used most and least. Helps identify popular vehicles and those needing attention.',
+        'analytics.tooltip.usageAnalytics.action': 'Rotate high-usage vehicles to prevent wear and investigate why some are used less.',
+
+        'analytics.tooltip.highUsage.title': 'High-Usage Fleet',
+        'analytics.tooltip.highUsage.description': 'These vehicles are in high demand. Monitor them for maintenance needs due to heavy usage.',
+        'analytics.tooltip.highUsage.action': 'Schedule regular maintenance and consider rotating to prevent overuse.',
+
+        'analytics.tooltip.batteryHealth.title': 'Battery Health Monitoring',
+        'analytics.tooltip.batteryHealth.description': 'Track battery age and condition to prevent unexpected failures during events.',
+        'analytics.tooltip.batteryHealth.action': 'Replace batteries showing warning signs immediately and schedule regular checks.',
+
+        'analytics.tooltip.criticalBattery.title': 'Critical Battery Alert',
+        'analytics.tooltip.criticalBattery.description': 'These batteries are old and need immediate replacement to avoid vehicle downtime.',
+        'analytics.tooltip.criticalBattery.action': 'Order replacement batteries now and schedule immediate maintenance.',
+
+        'analytics.tooltip.preventiveMaintenance.title': 'Preventive Maintenance',
+        'analytics.tooltip.preventiveMaintenance.description': 'These batteries are approaching replacement time but can still be used with careful monitoring.',
+        'analytics.tooltip.preventiveMaintenance.action': 'Order spare batteries and check these vehicles weekly for performance issues.',
+
+        'analytics.tooltip.teamCapacityAnalysis.title': 'Team Capacity Analysis',
+        'analytics.tooltip.teamCapacityAnalysis.description': 'See how full each team is and identify opportunities for growth or redistribution.',
+        'analytics.tooltip.teamCapacityAnalysis.action': 'Teams under 70% capacity can take more members. Teams over 90% may need to split or expand.',
+
+        'analytics.tooltip.resourceAllocation.title': 'Resource Allocation',
+        'analytics.tooltip.resourceAllocation.description': 'Shows how vehicles are distributed across teams and the ratio of vehicles to members.',
+        'analytics.tooltip.resourceAllocation.action': 'Ensure fair distribution. Aim for similar vehicle-to-member ratios across teams.',
+
+        'analytics.tooltip.participationRate.title': 'Participation Rate',
+        'analytics.tooltip.participationRate.description': 'Average number of participants per event. This helps gauge event popularity and engagement.',
+        'analytics.tooltip.participationRate.action': 'Low participation? Try different event types or timing. High participation? Consider larger venues or more events.',
+
+        'analytics.tooltip.participationHistory.title': 'Participation History',
+        'analytics.tooltip.participationHistory.description': 'Racers with the highest total event participation. These are your most dedicated participants.',
+        'analytics.tooltip.participationHistory.action': 'Consider special recognition or leadership roles for top participants.',
+
+        'analytics.tooltip.currentEngagement.title': 'Current Engagement',
+        'analytics.tooltip.currentEngagement.description': 'Racers who have been most active in recent events. This shows current engagement levels.',
+        'analytics.tooltip.currentEngagement.action': 'Engage with recently active participants and encourage others to join upcoming events.',
+        // Dashboard additional translations (add to en section)
+        'dashboard.fetchError': 'Failed to load dashboard data. Please try again.',
+        'dashboard.scheduled': 'Scheduled',
+        'dashboard.registered': 'Registered',
+        'dashboard.noRecentActivities': 'No recent activities found.',
+        'dashboard.activitiesWillAppear': 'Activities will appear here as users interact with the system.',
+        'dashboard.noUpcomingEvents': 'No upcoming events scheduled.',
+        'dashboard.createFirstEvent': 'Create your first event to get started!',
+
+        // System recommendations content
+        'analytics.maintenance.teamsWithoutVehicles': 'Teams Without Vehicles',
+        'analytics.maintenance.teamsCount': '{count} teams have no assigned vehicles',
+        'analytics.maintenance.actionLabel': 'Action',
+        'analytics.maintenance.assignVehiclesAction': 'Assign vehicles to teams or consider vehicle redistribution',
+
+// Tooltip text for priority recommendations
+        'analytics.tooltip.priorityRecommendationGeneric.title': 'Priority Recommendation',
     },
     he: {
 
@@ -1078,6 +1248,7 @@ const translations = {
         'nav.kids': 'ילדים',
         'nav.teams': 'קבוצות',
         'nav.vehicles': 'רכבים',
+        'nav.analytics': 'אנליטיקה',
 
         // Dashboard
         'dashboard.title': 'לוח בקרה ראשי',
@@ -2105,6 +2276,220 @@ const translations = {
         'formsManagement.contact': 'יצירת קשר',
         'formsManagement.feedback': 'משוב',
         'formsManagement.medical': 'רפואי',
+
+        // In the `he` section:
+        'analytics.pageTitle': 'לוח בקרת ניתוח מירוצים',
+        'analytics.raceControlTitle': '🏁 אנליטיקת בקרת מירוץ',
+        'analytics.subtitle': 'תובנות נתונים מקיפות עבור תוכנית המירוצים שלך',
+        'analytics.lastUpdated': 'עודכן לאחרונה',
+        'analytics.refreshData': 'רענן נתונים',
+        'analytics.loadingAnalytics': 'טוען נתוני אנליטיקה...',
+        'analytics.loadingOverview': 'טוען סקירה כללית...',
+        'analytics.loadingVehicleAnalytics': 'טוען אנליטיקת רכבים...',
+        'analytics.loadingTeamAnalytics': 'טוען אנליטיקת קבוצות...',
+        'analytics.loadingParticipationAnalytics': 'טוען אנליטיקת השתתפות...',
+        'analytics.loadingMaintenanceData': 'טוען נתוני תחזוקה...',
+        'analytics.failedToLoad': 'כשל בטעינת נתוני אנליטיקה. אנא נסה שוב.',
+
+// Tab labels
+        'analytics.tabs.overview': 'סקירה כללית',
+        'analytics.tabs.vehicles': 'רכבים',
+        'analytics.tabs.teams': 'קבוצות',
+        'analytics.tabs.participation': 'אירועים',
+        'analytics.tabs.maintenance': 'תחזוקה',
+        'analytics.tabs.overviewDesc': 'בריאות המערכת ומדדי ביצוע מרכזיים',
+        'analytics.tabs.vehiclesDesc': 'שימוש ותחזוקה',
+        'analytics.tabs.teamsDesc': 'ביצועים וקיבולת',
+        'analytics.tabs.participationDesc': 'השתתפות ומעורבות',
+        'analytics.tabs.maintenanceDesc': 'התראות והמלצות',
+
+// Overview tab
+        'analytics.overview.totalVehicles': 'סך הרכבים',
+        'analytics.overview.totalRacers': 'סך הרוכבים',
+        'analytics.overview.racingTeams': 'קבוצות מירוץ',
+        'analytics.overview.events': 'אירועים',
+        'analytics.overview.active': 'פעילים',
+        'analytics.overview.upcoming': 'קרובים',
+        'analytics.overview.kpiTitle': 'מדדי ביצוע מרכזיים',
+        'analytics.overview.vehicleUtilization': 'ניצול רכבים',
+        'analytics.overview.teamCapacity': 'קיבולת קבוצות',
+        'analytics.overview.systemHealth': 'בריאות המערכת',
+        'analytics.overview.participation': 'השתתפות',
+        'analytics.overview.vehicleUtilizationDesc': 'אחוז הרכבים הנמצאים כעת בשימוש',
+        'analytics.overview.teamCapacityDesc': 'חברים נוכחיים לעומת קיבולת מקסימלית',
+        'analytics.overview.systemHealthDesc': 'סטטוס תפעולי כולל של המערכת',
+        'analytics.overview.participationDesc': 'רוכבים פעילים עם טפסים מושלמים',
+
+// Vehicle analytics
+        'analytics.vehicles.fleetOverview': '🚗 סקירת קבוצת הרכבים',
+        'analytics.vehicles.fleetStatus': 'סטטוס קבוצת הרכבים',
+        'analytics.vehicles.totalVehicles': 'סך הרכבים',
+        'analytics.vehicles.currentlyInUse': 'כעת בשימוש',
+        'analytics.vehicles.available': 'זמינים',
+        'analytics.vehicles.utilizationTitle': '📊 ניצול רכבים',
+        'analytics.vehicles.mostUsed': '🏆 הרכבים הנפוצים ביותר',
+        'analytics.vehicles.usageByTeam': '📈 שימוש לפי קבוצה',
+        'analytics.vehicles.assignments': 'הקצאות',
+        'analytics.vehicles.inUse': '🔴 בשימוש',
+        'analytics.vehicles.vehiclesCount': 'רכבים',
+        'analytics.vehicles.utilized': 'מנוצלים',
+        'analytics.vehicles.batteryStatus': '🔋 סטטוס תחזוקת סוללות',
+        'analytics.vehicles.needsReplacement': '🚨 דורש החלפה',
+        'analytics.vehicles.monitorClosely': '⚠️ מעקב צמוד',
+        'analytics.vehicles.daysOld': 'ימים',
+
+// Teams analytics
+        'analytics.teams.performanceOverview': '👥 סקירת ביצועי קבוצות',
+        'analytics.teams.teamStatistics': 'סטטיסטיקות קבוצות',
+        'analytics.teams.totalTeams': 'סך הקבוצות',
+        'analytics.teams.averageTeamSize': 'גודל קבוצה ממוצע',
+        'analytics.teams.totalCapacity': 'קיבולת כוללת',
+        'analytics.teams.capacityUtilization': '📊 ניצול קיבולת',
+        'analytics.teams.members': 'חברים',
+        'analytics.teams.instructors': 'מדריכים',
+        'analytics.teams.vehicleDistribution': '🚗 חלוקת רכבים',
+        'analytics.teams.ratio': 'יחס',
+
+// Participation analytics
+        'analytics.participation.eventsOverview': '🏁 סקירת אירועים',
+        'analytics.participation.totalEvents': 'סך האירועים',
+        'analytics.participation.upcomingEvents': 'קרובים',
+        'analytics.participation.completedEvents': 'הושלמו',
+        'analytics.participation.avgParticipation': 'השתתפות ממוצעת',
+        'analytics.participation.mostActiveRacers': '🏆 הרוכבים הפעילים ביותר',
+        'analytics.participation.allTimeLeaders': 'מובילים בכל הזמנים',
+        'analytics.participation.recentActivity': 'פעילות אחרונה (30 ימים)',
+        'analytics.participation.eventsCount': 'אירועים',
+        'analytics.participation.recent': 'אחרונים',
+        'analytics.participation.recentEvents': '📅 אירועים אחרונים',
+        'analytics.participation.participants': 'משתתפים',
+        'analytics.participation.teams': 'קבוצות',
+
+// Maintenance analytics
+        'analytics.maintenance.urgentAlerts': '🚨 התראות תחזוקה דחופות',
+        'analytics.maintenance.batteryReplacement': 'נדרשת החלפת סוללה',
+        'analytics.maintenance.batteryAge': 'הסוללה בת {daysOld} ימים',
+        'analytics.maintenance.batteryType': 'סוג',
+        'analytics.maintenance.priorityHigh': 'גבוהה',
+        'analytics.maintenance.batteriesToMonitor': '⚠️ סוללות לעקוב אחריהן',
+        'analytics.maintenance.priorityMedium': 'בינונית',
+        'analytics.maintenance.systemRecommendations': '💡 המלצות מערכת',
+        'analytics.maintenance.healthIndicators': '📊 מחווני בריאות מערכת',
+        'analytics.maintenance.vehicleHealth': 'בריאות רכבים',
+        'analytics.maintenance.teamHealth': 'בריאות קבוצות',
+
+// Tooltips
+        'analytics.tooltip.systemPerformance.title': 'ביצועי המערכת',
+        'analytics.tooltip.systemPerformance.description': 'מדדים קריטיים המראים כמה טוב תוכנית המירוצים שלך פועלת. האחוזים הללו עוזרים לזהות תחומים לשיפור.',
+        'analytics.tooltip.systemPerformance.action': 'כוון ל-80%+ בכל המדדים. ציונים נמוכים מצביעים על תחומים ספציפיים הזקוקים לתשומת לב.',
+
+        'analytics.tooltip.vehicleUsage.title': 'שיעור שימוש ברכבים',
+        'analytics.tooltip.vehicleUsage.description': 'אחוז מקבוצת הרכבים שלך שמוקצית כעת ומשמשת באופן קבוע על ידי קבוצות.',
+        'analytics.tooltip.vehicleUsage.action': 'ניצול נמוך? חלק מחדש רכבים או גייס משתתפים. גבוה? אולי תזדקק לעוד רכבים.',
+
+        'analytics.tooltip.teamFillRate.title': 'שיעור מילוי קבוצות',
+        'analytics.tooltip.teamFillRate.description': 'כמה מלאות הקבוצות שלך בהשוואה לקיבולת המקסימלית. מראה מקום לעוד משתתפים.',
+        'analytics.tooltip.teamFillRate.action': 'קיבולת נמוכה? התמקד בגיוס. גבוהה? שקול ליצור קבוצות חדשות או להרחיב קיימות.',
+
+        // Hebrew tooltip translations
+        'analytics.tooltip.usageAnalytics.title': 'אנליטיקת שימוש',
+        'analytics.tooltip.usageAnalytics.description': 'עקוב אחר הרכבים שנמצאים בשימוש הרב ביותר והמועט ביותר. עוזר לזהות רכבים פופולריים ואלה הזקוקים לתשומת לב.',
+        'analytics.tooltip.usageAnalytics.action': 'סובב רכבים עם שימוש רב למניעת בלאי וחקור מדוע יש כאלה שמשתמשים בהם פחות.',
+
+        'analytics.tooltip.highUsage.title': 'צי עם שימוש רב',
+        'analytics.tooltip.highUsage.description': 'הרכבים האלה נמצאים בביקוש גבוה. עקוב אחריהם לצרכי תחזוקה בגלל השימוש הכבד.',
+        'analytics.tooltip.highUsage.action': 'קבע תחזוקה שוטפת ושקול סיבוב כדי למנוע שימוש יתר.',
+
+        'analytics.tooltip.batteryHealth.title': 'מעקב בריאות סוללות',
+        'analytics.tooltip.batteryHealth.description': 'עקוב אחר גיל הסוללות ומצבן כדי למנוע כשלים בלתי צפויים במהלך אירועים.',
+        'analytics.tooltip.batteryHealth.action': 'החלף סוללות שמראות סימני אזהרה מיד וקבע בדיקות שוטפות.',
+
+        'analytics.tooltip.criticalBattery.title': 'התראת סוללה קריטית',
+        'analytics.tooltip.criticalBattery.description': 'הסוללות האלה ישנות וזקוקות להחלפה מיידית כדי למנוע השבתת רכבים.',
+        'analytics.tooltip.criticalBattery.action': 'הזמן סוללות חלופיות עכשיו וקבע תחזוקה מיידית.',
+
+        'analytics.tooltip.preventiveMaintenance.title': 'תחזוקה מונעת',
+        'analytics.tooltip.preventiveMaintenance.description': 'הסוללות האלה מתקרבות לזמן החלפה אבל עדיין ניתן להשתמש בהן עם מעקב זהיר.',
+        'analytics.tooltip.preventiveMaintenance.action': 'הזמן סוללות רזרביות ובדוק את הרכבים האלה שבועית לבעיות ביצועים.',
+
+        'analytics.tooltip.teamCapacityAnalysis.title': 'ניתוח קיבולת קבוצות',
+        'analytics.tooltip.teamCapacityAnalysis.description': 'ראה כמה מלאה כל קבוצה וזהה הזדמנויות לצמיחה או חלוקה מחדש.',
+        'analytics.tooltip.teamCapacityAnalysis.action': 'קבוצות מתחת ל-70% קיבולת יכולות לקבל עוד חברים. קבוצות מעל 90% אולי צריכות להתפצל או להתרחב.',
+
+        'analytics.tooltip.resourceAllocation.title': 'הקצאת משאבים',
+        'analytics.tooltip.resourceAllocation.description': 'מראה איך רכבים מחולקים בין קבוצות ואת היחס של רכבים לחברים.',
+        'analytics.tooltip.resourceAllocation.action': 'הבטח חלוקה הוגנת. כוון ליחסי רכבים לחברים דומים בין קבוצות.',
+
+        'analytics.tooltip.participationRate.title': 'שיעור השתתפות',
+        'analytics.tooltip.participationRate.description': 'מספר משתתפים ממוצע לאירוע. זה עוזר לאמוד פופולריות ומעורבות באירועים.',
+        'analytics.tooltip.participationRate.action': 'השתתפות נמוכה? נסה סוגי אירועים או תזמונים שונים. השתתפות גבוהה? שקול מקומות גדולים יותר או יותר אירועים.',
+
+        'analytics.tooltip.participationHistory.title': 'היסטוריית השתתפות',
+        'analytics.tooltip.participationHistory.description': 'רוכבים עם ההשתתפות הכוללת הגבוהה ביותר באירועים. אלה המשתתפים הנאמנים ביותר שלך.',
+        'analytics.tooltip.participationHistory.action': 'שקול הכרה מיוחדת או תפקידי מנהיגות למשתתפים המובילים.',
+
+        'analytics.tooltip.currentEngagement.title': 'מעורבות נוכחית',
+        'analytics.tooltip.currentEngagement.description': 'רוכבים שהיו הכי פעילים באירועים האחרונים. זה מראה רמות מעורבות נוכחיות.',
+        'analytics.tooltip.currentEngagement.action': 'התחבר עם משתתפים פעילים לאחרונה ועודד אחרים להצטרף לאירועים הקרובים.',
+        // Dashboard additional translations (add to he section)
+        'dashboard.fetchError': 'כשל בטעינת נתוני הלוח. אנא נסה שוב.',
+        'dashboard.scheduled': 'מתוזמנים',
+        'dashboard.registered': 'רשומים',
+        'dashboard.noRecentActivities': 'לא נמצאו פעילויות אחרונות.',
+        'dashboard.activitiesWillAppear': 'פעילויות יופיעו כאן כאשר משתמשים יבצעו פעולות במערכת.',
+        'dashboard.noUpcomingEvents': 'אין אירועים קרובים מתוזמנים.',
+        'dashboard.createFirstEvent': 'צור את האירוע הראשון שלך כדי להתחיל!',
+
+        // Missing tooltip translations
+        'analytics.tooltip.systemOverallStatus.title': 'סטטוס כולל של המערכת',
+        'analytics.tooltip.systemOverallStatus.description': 'ציון משולב של מצב הרכבים, ארגון הקבוצות ותפעול התוכנית. ציון גבוה אומר הפעלה חלקה.',
+        'analytics.tooltip.systemOverallStatus.action': 'עקוב מקרוב. אם מתחת ל-75%, בדוק התראות תחזוקה ובעיות ניהול קבוצות.',
+
+        'analytics.tooltip.activeParticipationRate.title': 'שיעור השתתפות פעילה',
+        'analytics.tooltip.activeParticipationRate.description': 'אחוז מהרוכבים הרשומים שמשתתפים באופן פעיל עם טפסים נדרשים מושלמים.',
+        'analytics.tooltip.activeParticipationRate.action': 'השתתפות נמוכה? עקוב אחר רישומים לא שלמים ועסוק עם משתתפים פחות פעילים.',
+
+// Additional missing tooltips that might appear elsewhere
+        'analytics.tooltip.teamAnalysis.title': 'ניתוח קבוצה {teamName}',
+        'analytics.tooltip.teamAnalysis.description': 'הקבוצה הזו מלאה ב-{utilizationRate}% עם {currentMembers} מתוך {maxCapacity} חברים אפשריים.',
+        'analytics.tooltip.teamAnalysis.actionLow': 'שקול לגייס עוד חברים לקבוצה הזו.',
+        'analytics.tooltip.teamAnalysis.actionHigh': 'הקבוצה הזו קרובה לקיבולת המקסימלית. שקול הרחבה או יצירת קבוצה חדשה.',
+        'analytics.tooltip.teamAnalysis.actionOptimal': 'גודל הקבוצה אופטימלי.',
+
+        'analytics.tooltip.maintenanceWatch.title': 'מעקב תחזוקה',
+        'analytics.tooltip.maintenanceWatch.description': 'עקוב אחר הביצועים של הרכב הזה ותכנן החלפת סוללה בקרוב.',
+        'analytics.tooltip.maintenanceWatch.action': 'קבע החלפה תוך 2-4 שבועות ועקוב אחר ביצועים מופחתים.',
+
+        'analytics.tooltip.optimizationSuggestions.title': 'הצעות אופטימיזציה',
+        'analytics.tooltip.optimizationSuggestions.description': 'המלצות שנוצרו על ידי AI לשיפור היעילות והביצועים של תוכנית המירוצים שלך.',
+        'analytics.tooltip.optimizationSuggestions.action': 'סקור את ההצעות האלה ויישם פריטים בעדיפות גבוהה תחילה.',
+
+        'analytics.tooltip.priorityRecommendation.title': 'המלצה בעדיפות {priority}',
+        'analytics.tooltip.priorityRecommendation.action': 'יישום: {action}',
+        'analytics.tooltip.priorityRecommendation.actionLabel': 'פעולה',
+
+        'analytics.tooltip.healthMonitoring.title': 'מעקב בריאות',
+        'analytics.tooltip.healthMonitoring.description': 'ציוני בריאות כלליים עבור היבטים שונים של תוכנית המירוצים שלך. ציונים מעל 80% נחשבים בריאים.',
+        'analytics.tooltip.healthMonitoring.action': 'התמקד בתחומים עם ציונים נמוכים יותר. בדוק התראות תחזוקה וניהול קבוצות להזדמנויות שיפור.',
+
+        'analytics.tooltip.fleetCondition.title': 'מצב כלל הרכבים',
+        'analytics.tooltip.fleetCondition.description': 'מצב כללי של כלל הרכבים שלך בהתבסס על סטטוס תחזוקה, בריאות סוללות ודפוסי שימוש.',
+        'analytics.tooltip.fleetCondition.action': 'ציונים נמוכים מצביעים על בעיות תחזוקה. בדוק את התראות התחזוקה לעיל לפעולות ספציפיות.',
+
+        'analytics.tooltip.teamOrganization.title': 'ארגון קבוצות',
+        'analytics.tooltip.teamOrganization.description': 'כמה טוב הקבוצות שלך מאורגנות, מאוזנות ומצוידות במשאבים. כולל ניצול קיבולת וחלוקת משאבים.',
+        'analytics.tooltip.teamOrganization.action': 'ציונים נמוכים מרמזים על חוסר איזון בקבוצות. בדוק בלשונית הקבוצות תובנות על קיבולת וחלוקת משאבים.',
+
+        'analytics.tooltip.overallProgramHealth.title': 'בריאות כללית של התוכנית',
+        'analytics.tooltip.overallProgramHealth.description': 'ציון משולב המייצג את הבריאות הכללית של תוכנית המירוצים שלך, כולל כל הרכבים, הקבוצות והתפעול.',
+        'analytics.tooltip.overallProgramHealth.action': 'זהו מחוון הבריאות הראשי שלך. ציונים מתחת ל-75% מצביעים על בעיות מערכתיות הזקוקות לתשומת לב.',
+        'analytics.tooltip.priorityRecommendationGeneric.title': 'המלצה בעדיפות',
+
+        // System recommendations content
+        'analytics.maintenance.teamsWithoutVehicles': 'קבוצות ללא רכבים',
+        'analytics.maintenance.teamsCount': '{count} קבוצות שאין להן רכבים מוקצים',
+        'analytics.maintenance.actionLabel': 'פעולה',
+        'analytics.maintenance.assignVehiclesAction': 'הקצה רכבים לקבוצות או שקול חלוקה מחדש של רכבים',
     }
 };
 

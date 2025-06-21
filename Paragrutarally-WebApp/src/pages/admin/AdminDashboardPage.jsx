@@ -60,37 +60,37 @@ const AdminDashboardPage = () => {
 
     // Format time ago utility
     const formatTimeAgo = (timestamp) => {
-    if (!timestamp) return t('general.loading');
+        if (!timestamp) return t('general.loading', 'Loading...');
 
-    const now = new Date();
-    const eventTime = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    const diffInMilliseconds = now - eventTime;
-    const diffInMinutes = Math.floor(diffInMilliseconds / (1000 * 60));
-    const diffInHours = Math.floor(diffInMinutes / 60);
-    const diffInDays = Math.floor(diffInHours / 24);
+        const now = new Date();
+        const eventTime = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+        const diffInMilliseconds = now - eventTime;
+        const diffInMinutes = Math.floor(diffInMilliseconds / (1000 * 60));
+        const diffInHours = Math.floor(diffInMinutes / 60);
+        const diffInDays = Math.floor(diffInHours / 24);
 
-    if (diffInMinutes < 1) return t('dashboard.justNow', 'Just now');
-    if (diffInMinutes < 60) {
-        return t('dashboard.minutesAgo', '{count} minute{plural} ago', {
-            count: diffInMinutes,
-            plural: diffInMinutes > 1 ? 's' : ''
+        if (diffInMinutes < 1) return t('dashboard.justNow', 'Just now');
+        if (diffInMinutes < 60) {
+            return t('dashboard.minutesAgo', '{count} minute{plural} ago', {
+                count: diffInMinutes,
+                plural: diffInMinutes > 1 ? 's' : ''
+            });
+        }
+        if (diffInHours < 24) {
+            return t('dashboard.hoursAgo', '{count} hour{plural} ago', {
+                count: diffInHours,
+                plural: diffInHours > 1 ? 's' : ''
+            });
+        }
+        return t('dashboard.daysAgo', '{count} day{plural} ago', {
+            count: diffInDays,
+            plural: diffInDays > 1 ? 's' : ''
         });
-    }
-    if (diffInHours < 24) {
-        return t('dashboard.hoursAgo', '{count} hour{plural} ago', {
-            count: diffInHours,
-            plural: diffInHours > 1 ? 's' : ''
-        });
-    }
-    return t('dashboard.daysAgo', '{count} day{plural} ago', {
-        count: diffInDays,
-        plural: diffInDays > 1 ? 's' : ''
-    });
-};
+    };
 
     // Format event date utility
     const formatEventDate = (dateString) => {
-        if (!dateString || dateString === 'Date TBD') return dateString;
+        if (!dateString || dateString === 'Date TBD') return t('events.dateTBD', 'Date TBD');
 
         try {
             const date = new Date(dateString);
@@ -135,9 +135,9 @@ const AdminDashboardPage = () => {
                 allEvents.push({
                     id: doc.id,
                     name: eventData.name || t('events.unnamedEvent', 'Unnamed Event'),
-                    description: eventData.description || 'No description available',
-                    location: eventData.location || 'Location TBD',
-                    date: eventData.date || 'Date TBD',
+                    description: eventData.description || t('events.noDescription', 'No description available'),
+                    location: eventData.location || t('events.locationTBD', 'Location TBD'),
+                    date: eventData.date || t('events.dateTBD', 'Date TBD'),
                     participants: eventData.attendees || 0,
                     status: eventData.status || 'upcoming',
                     createdAt: eventData.createdAt,
@@ -148,7 +148,7 @@ const AdminDashboardPage = () => {
             // Filter upcoming events
             const now = new Date();
             const upcomingEvents = allEvents.filter(event => {
-                if (event.status === 'upcoming' && event.date !== 'Date TBD') {
+                if (event.status === 'upcoming' && event.date !== t('events.dateTBD', 'Date TBD')) {
                     const eventDate = new Date(event.date);
                     return eventDate >= now;
                 }
@@ -210,7 +210,7 @@ const AdminDashboardPage = () => {
                     data.recentActivities.push({
                         timestamp: event.createdAt,
                         icon: '📅',
-                        description: t('dashboard.event') + ` <strong>${event.name}</strong> ` + t('dashboard.wasCreated') + '.'
+                        description: t('dashboard.event', 'Event') + ` <strong>${event.name}</strong> ` + t('dashboard.wasCreated', 'was created') + '.'
                     });
                 }
             });
@@ -221,7 +221,7 @@ const AdminDashboardPage = () => {
                     {
                         timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
                         icon: '👤',
-                        description: t('dashboard.newUser') + ' <strong>instructorTest</strong> ' + t('dashboard.wasAdded') + '.'
+                        description: t('dashboard.newUser', 'New user') + ' <strong>instructorTest</strong> ' + t('dashboard.wasAdded', 'was added') + '.'
                     },
                     {
                         timestamp: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
@@ -231,7 +231,7 @@ const AdminDashboardPage = () => {
                     {
                         timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
                         icon: '👤',
-                        description: t('dashboard.newUser') + ' <strong>parentTest</strong> ' + t('dashboard.wasAdded') + '.'
+                        description: t('dashboard.newUser', 'New user') + ' <strong>parentTest</strong> ' + t('dashboard.wasAdded', 'was added') + '.'
                     }
                 ];
 
@@ -263,7 +263,7 @@ const AdminDashboardPage = () => {
                 setDashboardData(data);
             } catch (err) {
                 console.error('Error loading dashboard data:', err);
-                setError(t('common.error', 'Failed to load dashboard data. Please try again.'));
+                setError(t('dashboard.fetchError', 'Failed to load dashboard data. Please try again.'));
             } finally {
                 setIsLoading(false);
             }
@@ -292,7 +292,7 @@ const AdminDashboardPage = () => {
                 <div className={`admin-page admin-dashboard ${appliedTheme}-mode`} dir={isRTL ? 'rtl' : 'ltr'}>
                     <h1>
                         <Teams size={32} className="page-title-icon" />
-                        {t('dashboard.title')}
+                        {t('dashboard.title', 'Admin Dashboard')}
                     </h1>
                     <div className="admin-container">
                         <div className="error-container">
@@ -317,7 +317,7 @@ const AdminDashboardPage = () => {
                 {/* Page Title */}
                 <h1>
                     <Teams size={32} className="page-title-icon" />
-                    {t('dashboard.title')}
+                    {t('dashboard.title', 'Admin Dashboard')}
                 </h1>
 
                 {/* Main Container */}
@@ -333,7 +333,7 @@ const AdminDashboardPage = () => {
                         >
                             <Users className="stat-icon" size={40}/>
                             <div className="stat-content">
-                                <h3>{t('dashboard.totalUsers')}</h3>
+                                <h3>{t('dashboard.totalUsers', 'Total Users')}</h3>
                                 <div className="stat-value">
                                     {isLoading ? (
                                         <div className="loading-skeleton">--</div>
@@ -354,7 +354,7 @@ const AdminDashboardPage = () => {
                         >
                             <Calendar className="stat-icon" size={40}/>
                             <div className="stat-content">
-                                <h3>{t('dashboard.upcomingEvents')}</h3>
+                                <h3>{t('dashboard.upcomingEvents', 'Upcoming Events')}</h3>
                                 <div className="stat-value">
                                     {isLoading ? (
                                         <div className="loading-skeleton">--</div>
@@ -362,7 +362,7 @@ const AdminDashboardPage = () => {
                                         dashboardData.stats.upcomingEventsCount
                                     )}
                                 </div>
-                                <div className="stat-subtitle">{t('events.status', 'Scheduled')}</div>
+                                <div className="stat-subtitle">{t('dashboard.scheduled', 'Scheduled')}</div>
                             </div>
                         </div>
 
@@ -375,7 +375,7 @@ const AdminDashboardPage = () => {
                         >
                             <Kids className="stat-icon" size={40}/>
                             <div className="stat-content">
-                                <h3>{t('dashboard.totalKids')}</h3>
+                                <h3>{t('dashboard.totalKids', 'Total Kids')}</h3>
                                 <div className="stat-value">
                                     {isLoading ? (
                                         <div className="loading-skeleton">--</div>
@@ -383,7 +383,7 @@ const AdminDashboardPage = () => {
                                         dashboardData.stats.totalKids
                                     )}
                                 </div>
-                                <div className="stat-subtitle">{t('kids.participantNumber', 'Registered')}</div>
+                                <div className="stat-subtitle">{t('dashboard.registered', 'Registered')}</div>
                             </div>
                         </div>
 
@@ -396,7 +396,7 @@ const AdminDashboardPage = () => {
                         >
                             <Teams className="stat-icon" size={40}/>
                             <div className="stat-content">
-                                <h3>{t('dashboard.activeTeams')}</h3>
+                                <h3>{t('dashboard.activeTeams', 'Active Teams')}</h3>
                                 <div className="stat-value">
                                     {isLoading ? (
                                         <div className="loading-skeleton">--</div>
@@ -436,14 +436,14 @@ const AdminDashboardPage = () => {
                     {/* Dashboard Sections */}
                     <div className="dashboard-sections">
                         <div className="recent-activities">
-                            <h2>{t('dashboard.recentActivities')}</h2>
+                            <h2>{t('dashboard.recentActivities', 'Recent Activities')}</h2>
                             <div className="activity-list">
                                 {isLoading ? (
                                     [...Array(3)].map((_, index) => (
                                         <div key={index} className="activity-item loading">
-                                            <div className="activity-time loading-skeleton">{t('general.loading')}</div>
+                                            <div className="activity-time loading-skeleton">{t('general.loading', 'Loading...')}</div>
                                             <div className="activity-description loading-skeleton">
-                                                {t('general.loading')}...
+                                                {t('general.loading', 'Loading...')}...
                                             </div>
                                         </div>
                                     ))
@@ -461,31 +461,29 @@ const AdminDashboardPage = () => {
                                     ))
                                 ) : (
                                     <div className="empty-state">
-                                        <p>{t('common.noDataFound', 'No recent activities found.')}</p>
-                                        <small>Activities will appear here as users interact with the system.</small>
+                                        <p>{t('dashboard.noRecentActivities', 'No recent activities found.')}</p>
+                                        <small>{t('dashboard.activitiesWillAppear', 'Activities will appear here as users interact with the system.')}</small>
                                     </div>
                                 )}
                             </div>
                         </div>
 
                         <div className="upcoming-events">
-                            <h2>{t('dashboard.upcomingEvents')}</h2>
+                            <h2>{t('dashboard.upcomingEvents', 'Upcoming Events')}</h2>
                             <div className="events-list">
                                 {isLoading ? (
                                     <>
                                         <div className="event-headers">
-                                            <div className="event-header-date">📅 {t('events.date')}</div>
-                                            <div className="event-header-name">🎯 {t('events.eventName')}</div>
-                                            <div className="event-header-location">📍 {t('events.location')}</div>
+                                            <div className="event-header-date">📅 {t('events.date', 'Date')}</div>
+                                            <div className="event-header-name">🎯 {t('events.eventName', 'Event Name')}</div>
+                                            <div className="event-header-location">📍 {t('events.location', 'Location')}</div>
                                         </div>
                                         {[...Array(3)].map((_, index) => (
                                             <div key={index} className="event-item loading">
-                                                <div
-                                                    className="event-date loading-skeleton">{t('general.loading')}</div>
-                                                <div className="event-name loading-skeleton">{t('general.loading')}...
+                                                <div className="event-date loading-skeleton">{t('general.loading', 'Loading...')}</div>
+                                                <div className="event-name loading-skeleton">{t('general.loading', 'Loading...')}...
                                                 </div>
-                                                <div
-                                                    className="event-location loading-skeleton">{t('general.loading')}...
+                                                <div className="event-location loading-skeleton">{t('general.loading', 'Loading...')}...
                                                 </div>
                                             </div>
                                         ))}
@@ -493,9 +491,9 @@ const AdminDashboardPage = () => {
                                 ) : dashboardData.upcomingEvents.length > 0 ? (
                                     <>
                                         <div className="event-headers">
-                                            <div className="event-header-date">📅 {t('events.date')}</div>
-                                            <div className="event-header-name">🎯 {t('events.eventName')}</div>
-                                            <div className="event-header-location">📍 {t('events.location')}</div>
+                                            <div className="event-header-date">📅 {t('events.date', 'Date')}</div>
+                                            <div className="event-header-name">🎯 {t('events.eventName', 'Event Name')}</div>
+                                            <div className="event-header-location">📍 {t('events.location', 'Location')}</div>
                                         </div>
                                         {dashboardData.upcomingEvents.slice(0, 5).map((event) => (
                                             <div key={event.id} className="event-item">
@@ -513,8 +511,8 @@ const AdminDashboardPage = () => {
                                     </>
                                 ) : (
                                     <div className="empty-state">
-                                        <p>{t('events.noEvents', 'No upcoming events scheduled.')}</p>
-                                        <small>Create your first event to get started!</small>
+                                        <p>{t('dashboard.noUpcomingEvents', 'No upcoming events scheduled.')}</p>
+                                        <small>{t('dashboard.createFirstEvent', 'Create your first event to get started!')}</small>
                                     </div>
                                 )}
                             </div>
