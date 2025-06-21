@@ -122,6 +122,9 @@ const AdminDashboardPage = () => {
                 recentActivities: []
             };
 
+            // Array to collect all recent activities
+            const allActivities = [];
+
             // Fetch events
             const eventsQuery = query(
                 collection(db, 'events'),
@@ -132,7 +135,7 @@ const AdminDashboardPage = () => {
 
             eventsSnapshot.forEach((doc) => {
                 const eventData = doc.data();
-                allEvents.push({
+                const event = {
                     id: doc.id,
                     name: eventData.name || t('events.unnamedEvent', 'Unnamed Event'),
                     description: eventData.description || t('events.noDescription', 'No description available'),
@@ -142,7 +145,28 @@ const AdminDashboardPage = () => {
                     status: eventData.status || 'upcoming',
                     createdAt: eventData.createdAt,
                     updatedAt: eventData.updatedAt
-                });
+                };
+                allEvents.push(event);
+
+                // Add event creation activity
+                if (eventData.createdAt) {
+                    allActivities.push({
+                        timestamp: eventData.createdAt,
+                        icon: '📅',
+                        description: t('dashboard.event', 'Event') + ` <strong>${event.name}</strong> ` + t('dashboard.wasCreated', 'was created') + '.',
+                        type: 'event_created'
+                    });
+                }
+
+                // Add event update activity if it was updated recently
+                if (eventData.updatedAt && eventData.updatedAt !== eventData.createdAt) {
+                    allActivities.push({
+                        timestamp: eventData.updatedAt,
+                        icon: '📝',
+                        description: t('dashboard.event', 'Event') + ` <strong>${event.name}</strong> ` + t('dashboard.wasUpdated', 'was updated') + '.',
+                        type: 'event_updated'
+                    });
+                }
             });
 
             // Filter upcoming events
@@ -158,41 +182,174 @@ const AdminDashboardPage = () => {
             data.stats.upcomingEventsCount = upcomingEvents.length;
             data.upcomingEvents = upcomingEvents.slice(0, 5);
 
-            // Fetch users
+            // Fetch users with recent activity tracking
             try {
-                const usersSnapshot = await getDocs(collection(db, 'users'));
+                const usersQuery = query(
+                    collection(db, 'users'),
+                    orderBy('createdAt', 'desc')
+                );
+                const usersSnapshot = await getDocs(usersQuery);
                 data.stats.totalUsers = usersSnapshot.size;
+
+                // Add user activities
+                usersSnapshot.forEach((doc) => {
+                    const userData = doc.data();
+
+                    // User creation activity
+                    if (userData.createdAt) {
+                        allActivities.push({
+                            timestamp: userData.createdAt,
+                            icon: '👤',
+                            description: t('dashboard.newUser', 'New user') + ` <strong>${userData.displayName || userData.email || 'Unknown'}</strong> ` + t('dashboard.wasAdded', 'was added') + '.',
+                            type: 'user_created'
+                        });
+                    }
+
+                    // User update activity
+                    if (userData.updatedAt && userData.updatedAt !== userData.createdAt) {
+                        allActivities.push({
+                            timestamp: userData.updatedAt,
+                            icon: '👤',
+                            description: t('dashboard.user', 'User') + ` <strong>${userData.displayName || userData.email || 'Unknown'}</strong> ` + t('dashboard.wasUpdated', 'was updated') + '.',
+                            type: 'user_updated'
+                        });
+                    }
+                });
             } catch (userError) {
                 console.warn('Could not fetch users:', userError);
                 data.stats.totalUsers = 5;
             }
 
-            // Fetch kids
+            // Fetch kids with recent activity tracking
             try {
-                const kidsSnapshot = await getDocs(collection(db, 'kids'));
+                const kidsQuery = query(
+                    collection(db, 'kids'),
+                    orderBy('createdAt', 'desc')
+                );
+                const kidsSnapshot = await getDocs(kidsQuery);
                 data.stats.totalKids = kidsSnapshot.size;
+
+                // Add kid activities
+                kidsSnapshot.forEach((doc) => {
+                    const kidData = doc.data();
+
+                    // Kid creation activity
+                    if (kidData.createdAt) {
+                        allActivities.push({
+                            timestamp: kidData.createdAt,
+                            icon: '👶',
+                            description: t('dashboard.newKid', 'New kid') + ` <strong>${kidData.personalInfo.firstName || 'Unknown'} ${kidData.personalInfo.lastName || ''}</strong> ` + t('dashboard.wasAdded', 'was added') + '.',
+                            type: 'kid_created'
+                        });
+                    }
+
+                    // Kid update activity
+                    if (kidData.updatedAt && kidData.updatedAt !== kidData.createdAt) {
+                        allActivities.push({
+                            timestamp: kidData.updatedAt,
+                            icon: '👶',
+                            description: t('dashboard.kid', 'Kid') + ` <strong>${kidData.personalInfo.firstName || 'Unknown'} ${kidData.personalInfo.lastName || ''}</strong> ` + t('dashboard.wasUpdated', 'was updated') + '.',
+                            type: 'kid_updated'
+                        });
+                    }
+                });
             } catch (kidError) {
                 console.warn('Could not fetch kids:', kidError);
                 data.stats.totalKids = 1;
             }
 
-            // Fetch teams
+            // Fetch teams with recent activity tracking
             try {
-                const teamsSnapshot = await getDocs(collection(db, 'teams'));
+                const teamsQuery = query(
+                    collection(db, 'teams'),
+                    orderBy('createdAt', 'desc')
+                );
+                const teamsSnapshot = await getDocs(teamsQuery);
                 data.stats.activeTeams = teamsSnapshot.size;
+
+                // Add team activities
+                teamsSnapshot.forEach((doc) => {
+                    const teamData = doc.data();
+
+                    // Team creation activity
+                    if (teamData.createdAt) {
+                        allActivities.push({
+                            timestamp: teamData.createdAt,
+                            icon: '👥',
+                            description: t('dashboard.teamCreated', 'Team <strong>{teamName}</strong> was created.', {
+                                teamName: teamData.name || 'Unknown Team'
+                            }),
+                            type: 'team_created'
+                        });
+                    }
+
+                    // Team update activity
+                    if (teamData.updatedAt && teamData.updatedAt !== teamData.createdAt) {
+                        allActivities.push({
+                            timestamp: teamData.updatedAt,
+                            icon: '👥',
+                            description: t('dashboard.team', 'Team') + ` <strong>${teamData.name || 'Unknown Team'}</strong> ` + t('dashboard.wasUpdated', 'was updated') + '.',
+                            type: 'team_updated'
+                        });
+                    }
+                });
             } catch (teamError) {
                 console.warn('Could not fetch teams:', teamError);
                 data.stats.activeTeams = 2;
             }
 
-            // Fetch vehicles
+            // Fetch vehicles with recent activity tracking
             try {
+                const vehiclesQuery = query(
+                    collection(db, 'vehicles'),
+                    orderBy('createdAt', 'desc')
+                );
+                const vehiclesSnapshot = await getDocs(vehiclesQuery);
+
+                // Get vehicle stats
                 const vehicleStats = await getVehicleStats();
                 console.log('✅ Vehicle stats loaded:', vehicleStats);
                 data.stats.totalVehicles = vehicleStats.total;
                 data.stats.activeVehicles = vehicleStats.active;
                 data.stats.vehiclesInUse = vehicleStats.inUse;
                 data.stats.availableVehicles = vehicleStats.available;
+
+                // Add vehicle activities
+                vehiclesSnapshot.forEach((doc) => {
+                    const vehicleData = doc.data();
+
+                    // Vehicle creation activity
+                    if (vehicleData.createdAt) {
+                        allActivities.push({
+                            timestamp: vehicleData.createdAt,
+                            icon: '🏎️',
+                            description: t('dashboard.newVehicle', 'New vehicle') + ` <strong>${vehicleData.name || vehicleData.model || 'Unknown Vehicle'}</strong> ` + t('dashboard.wasAdded', 'was added') + '.',
+                            type: 'vehicle_created'
+                        });
+                    }
+
+                    // Vehicle update activity
+                    if (vehicleData.updatedAt && vehicleData.updatedAt !== vehicleData.createdAt) {
+                        allActivities.push({
+                            timestamp: vehicleData.updatedAt,
+                            icon: '🏎️',
+                            description: t('dashboard.vehicle', 'Vehicle') + ` <strong>${vehicleData.name || vehicleData.model || 'Unknown Vehicle'}</strong> ` + t('dashboard.wasUpdated', 'was updated') + '.',
+                            type: 'vehicle_updated'
+                        });
+                    }
+
+                    // Vehicle status change activities
+                    if (vehicleData.statusChangedAt) {
+                        const statusIcon = vehicleData.status === 'active' ? '✅' : vehicleData.status === 'maintenance' ? '🔧' : '❌';
+                        allActivities.push({
+                            timestamp: vehicleData.statusChangedAt,
+                            icon: statusIcon,
+                            description: t('dashboard.vehicle', 'Vehicle') + ` <strong>${vehicleData.name || vehicleData.model || 'Unknown Vehicle'}</strong> ` +
+                                t('dashboard.statusChanged', 'status changed to') + ` <strong>${vehicleData.status}</strong>.`,
+                            type: 'vehicle_status_changed'
+                        });
+                    }
+                });
             } catch (vehicleError) {
                 console.warn('Could not fetch vehicles:', vehicleError);
                 data.stats.totalVehicles = 0;
@@ -201,49 +358,33 @@ const AdminDashboardPage = () => {
                 data.stats.availableVehicles = 0;
             }
 
-            // Generate recent activities based on actual data
-            data.recentActivities = [];
-
-            // Add event creation activities
-            allEvents.slice(0, 3).forEach(event => {
-                if (event.createdAt) {
-                    data.recentActivities.push({
-                        timestamp: event.createdAt,
-                        icon: '📅',
-                        description: t('dashboard.event', 'Event') + ` <strong>${event.name}</strong> ` + t('dashboard.wasCreated', 'was created') + '.'
-                    });
-                }
-            });
-
-            // Add some mock activities if we don't have enough real ones
-            if (data.recentActivities.length < 3) {
-                const mockActivities = [
-                    {
-                        timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-                        icon: '👤',
-                        description: t('dashboard.newUser', 'New user') + ' <strong>instructorTest</strong> ' + t('dashboard.wasAdded', 'was added') + '.'
-                    },
-                    {
-                        timestamp: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
-                        icon: '👥',
-                        description: t('dashboard.teamCreated', 'Team <strong>{teamName}</strong> was created.', { teamName: 'testName' })
-                    },
-                    {
-                        timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
-                        icon: '👤',
-                        description: t('dashboard.newUser', 'New user') + ' <strong>parentTest</strong> ' + t('dashboard.wasAdded', 'was added') + '.'
-                    }
-                ];
-
-                data.recentActivities = [...data.recentActivities, ...mockActivities].slice(0, 5);
-            }
-
-            // Sort activities by timestamp
-            data.recentActivities.sort((a, b) => {
+            // Sort all activities by timestamp (most recent first)
+            allActivities.sort((a, b) => {
                 const timeA = a.timestamp.toDate ? a.timestamp.toDate() : new Date(a.timestamp);
                 const timeB = b.timestamp.toDate ? b.timestamp.toDate() : new Date(b.timestamp);
                 return timeB - timeA;
             });
+
+            // Filter activities from the last 30 days and take top 10
+            const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+            const recentActivities = allActivities.filter(activity => {
+                const activityTime = activity.timestamp.toDate ? activity.timestamp.toDate() : new Date(activity.timestamp);
+                return activityTime >= thirtyDaysAgo;
+            }).slice(0, 10);
+
+            data.recentActivities = recentActivities;
+
+            // If no recent activities, add some helpful mock data
+            if (data.recentActivities.length === 0) {
+                data.recentActivities = [
+                    {
+                        timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+                        icon: '🏁',
+                        description: t('dashboard.welcomeMessage', 'Welcome to your racing dashboard! Activities will appear here as you use the system.'),
+                        type: 'system_message'
+                    }
+                ];
+            }
 
             return data;
         } catch (error) {

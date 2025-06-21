@@ -58,7 +58,16 @@ const translations = {
             noRecentActivities: 'No recent activities found.',
             activitiesWillAppear: 'Activities will appear here as users interact with the system.',
             noUpcomingEvents: 'No upcoming events scheduled.',
-            createFirstEvent: 'Create your first event to get started!'
+            createFirstEvent: 'Create your first event to get started!',
+            wasUpdated: 'was updated',
+            user: 'User',
+            kid: 'Kid',
+            team: 'Team',
+            vehicle: 'Vehicle',
+            newKid: 'New kid',
+            newVehicle: 'New vehicle',
+            statusChanged: 'status changed to',
+            welcomeMessage: 'Welcome to your racing dashboard! Activities will appear here as you use the system.'
         },
 
         events: {
@@ -1365,7 +1374,16 @@ const translations = {
             noRecentActivities: 'לא נמצאו פעילויות אחרונות.',
             activitiesWillAppear: 'פעילויות יופיעו כאן כאשר משתמשים יבצעו פעולות במערכת.',
             noUpcomingEvents: 'אין אירועים קרובים מתוזמנים.',
-            createFirstEvent: 'צור את האירוע הראשון שלך כדי להתחיל!'
+            createFirstEvent: 'צור את האירוע הראשון שלך כדי להתחיל!',
+            wasUpdated: 'עודכנ/ה',
+            user: 'משתמש',
+            kid: 'ילד',
+            team: 'קבוצה',
+            vehicle: 'רכב',
+            newKid: 'ילד חדש',
+            newVehicle: 'רכב חדש',
+            statusChanged: 'סטטוס שונה ל',
+            welcomeMessage: 'ברוכים הבאים לדשבור הראשי של פאראגרוטראלי! כאן תוכלו לראות את כל הפעילות האחרונה במערכת.',
         },
 
         events: {
