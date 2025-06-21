@@ -1504,8 +1504,152 @@ const translations = {
         // Common filters
         'common.filterByEvent': 'Filter by Event',
         'common.allEvents': 'All Events',
+        // Add Vehicle Page
+        'addVehicle.title': 'Add New Racing Vehicle!',
+        'addVehicle.welcomeTitle': 'Welcome to Vehicle Registration!',
+        'addVehicle.subtitle': 'Let\'s add a new racing machine to the fleet! 🏁',
+        'addVehicle.backToVehicles': 'Back to Vehicles',
+        'addVehicle.loadingFormData': 'Loading form data...',
+        'addVehicle.accessDenied': 'Access Denied',
+        'addVehicle.noPermission': 'You don\'t have permission to add vehicles.',
+        'addVehicle.failedToLoadForm': 'Failed to load form data. Please try again.',
+
+        // Vehicle Photo Section
+        'addVehicle.vehiclePhoto': 'Vehicle Photo',
+        'addVehicle.racingVehiclePhoto': 'Racing Vehicle Photo',
+        'addVehicle.photoUploadHint': 'Upload a racing vehicle photo! (Max 5MB, JPEG/PNG)',
+        'addVehicle.changePhoto': 'Change',
+        'addVehicle.uploadPhoto': 'Upload',
+        'addVehicle.removePhoto': 'Remove',
+
+        // Vehicle Information
+        'addVehicle.vehicleInformation': 'Vehicle Information',
+        'addVehicle.makeRequired': 'Vehicle make is required',
+        'addVehicle.modelRequired': 'Vehicle model is required',
+        'addVehicle.licensePlateRequired': 'License plate is required',
+        'addVehicle.makePlaceholder': 'e.g., Ford, Chevrolet, Custom',
+        'addVehicle.modelPlaceholder': 'e.g., Focus, Camaro, Racer X1',
+        'addVehicle.licensePlatePlaceholder': 'e.g., ABC-123 or RACE01',
+        'addVehicle.teamAssignment': 'Team Assignment',
+        'addVehicle.unassignedPool': 'Unassigned (Vehicle Pool)',
+
+        // Technical Specifications
+        'addVehicle.technicalSpecs': 'Technical Specifications',
+        'addVehicle.driveType': 'Drive Type',
+        'addVehicle.steeringType': 'Steering Type',
+        'addVehicle.batteryType': 'Battery Type',
+        'addVehicle.batteryInstallDate': 'Battery Installation Date',
+        'addVehicle.selectDriveSystem': 'Select Drive System',
+        'addVehicle.selectSteeringSystem': 'Select Steering System',
+        'addVehicle.batteryTypePlaceholder': 'e.g., 12V Lead Acid, Lithium Ion, AGM',
+
+        // Drive Types
+        'addVehicle.frontWheelDrive': 'Front-Wheel Drive',
+        'addVehicle.rearWheelDrive': 'Rear-Wheel Drive',
+        'addVehicle.allWheelDrive': 'All-Wheel Drive',
+        'addVehicle.fourWD': '4WD',
+        'addVehicle.electricMotor': 'Electric Motor',
+        'addVehicle.hybrid': 'Hybrid',
+
+        // Steering Types
+        'addVehicle.manualSteering': 'Manual Steering',
+        'addVehicle.powerSteering': 'Power Steering',
+        'addVehicle.electricPowerSteering': 'Electric Power Steering',
+        'addVehicle.hydraulicPowerSteering': 'Hydraulic Power Steering',
+        'addVehicle.electronicSteering': 'Electronic Steering',
+
+        // Modifications & Notes
+        'addVehicle.modificationsNotes': 'Modifications & Notes',
+        'addVehicle.vehicleModifications': 'Vehicle Modifications',
+        'addVehicle.modificationsPlaceholder': 'Describe any modifications made to this vehicle...',
+        'addVehicle.additionalNotes': 'Additional Notes',
+        'addVehicle.notesPlaceholder': 'Any additional notes about this racing vehicle...',
+
+        // Actions
+        'addVehicle.addToFleet': 'Add to Racing Fleet! 🏁',
+        'addVehicle.addingVehicle': 'Adding Vehicle...',
+        'addVehicle.uploadingPhoto': 'Uploading Photo...',
+        'addVehicle.vehicleAddedSuccess': '{make} {model} has been added to the fleet! Ready to race! 🏁',
+        'addVehicle.photoUploadWarning': 'Vehicle was created successfully, but photo upload failed: {error}. You can add a photo later by editing the vehicle.',
+
+        // Photo Upload Errors
+        'addVehicle.photoError.invalidType': 'Please upload a JPEG, PNG, or WebP image file.',
+        'addVehicle.photoError.tooLarge': 'Photo file size must be less than 5MB.',
+        'addVehicle.photoError.processingFailed': 'Failed to process photo. Please try again.',
     },
     he: {
+        // Add Vehicle Page
+        'addVehicle.title': 'הוסף רכב מירוץ חדש!',
+        'addVehicle.welcomeTitle': 'ברוכים הבאים לרישום רכב!',
+        'addVehicle.subtitle': 'בואו נוסיף מכונת מירוץ חדשה לצי! 🏁',
+        'addVehicle.backToVehicles': 'חזור לרכבים',
+        'addVehicle.loadingFormData': 'טוען נתוני טופס...',
+        'addVehicle.accessDenied': 'גישה נדחתה',
+        'addVehicle.noPermission': 'אין לך הרשאה להוסיף רכבים.',
+        'addVehicle.failedToLoadForm': 'כשל בטעינת נתוני הטופס. אנא נסה שוב.',
+
+        // Vehicle Photo Section
+        'addVehicle.vehiclePhoto': 'תמונת רכב',
+        'addVehicle.racingVehiclePhoto': 'תמונת רכב מירוץ',
+        'addVehicle.photoUploadHint': 'העלה תמונת רכב מירוץ! (מקסימום 5MB, JPEG/PNG)',
+        'addVehicle.changePhoto': 'שנה',
+        'addVehicle.uploadPhoto': 'העלה',
+        'addVehicle.removePhoto': 'הסר',
+
+        // Vehicle Information
+        'addVehicle.vehicleInformation': 'מידע רכב',
+        'addVehicle.makeRequired': 'יצרן הרכב הוא שדה חובה',
+        'addVehicle.modelRequired': 'דגם הרכב הוא שדה חובה',
+        'addVehicle.licensePlateRequired': 'לוחית רישוי היא שדה חובה',
+        'addVehicle.makePlaceholder': 'לדוגמה, פורד, שברולט, מותאם אישית',
+        'addVehicle.modelPlaceholder': 'לדוגמה, פוקוס, קמארו, רוכב X1',
+        'addVehicle.licensePlatePlaceholder': 'לדוגמה, ABC-123 או RACE01',
+        'addVehicle.teamAssignment': 'הקצאת קבוצה',
+        'addVehicle.unassignedPool': 'לא מוקצה (מאגר רכבים)',
+
+        // Technical Specifications
+        'addVehicle.technicalSpecs': 'מפרט טכני',
+        'addVehicle.driveType': 'סוג הנעה',
+        'addVehicle.steeringType': 'סוג הגה',
+        'addVehicle.batteryType': 'סוג סוללה',
+        'addVehicle.batteryInstallDate': 'תאריך התקנת סוללה',
+        'addVehicle.selectDriveSystem': 'בחר מערכת הנעה',
+        'addVehicle.selectSteeringSystem': 'בחר מערכת הגה',
+        'addVehicle.batteryTypePlaceholder': 'לדוגמה, 12V עופרת חומצה, ליתיום יון, AGM',
+
+        // Drive Types
+        'addVehicle.frontWheelDrive': 'הנעה קדמית',
+        'addVehicle.rearWheelDrive': 'הנעה אחורית',
+        'addVehicle.allWheelDrive': 'הנעה לכל הגלגלים',
+        'addVehicle.fourWD': '4WD',
+        'addVehicle.electricMotor': 'מנוע חשמלי',
+        'addVehicle.hybrid': 'היברידי',
+
+        // Steering Types
+        'addVehicle.manualSteering': 'הגה ידני',
+        'addVehicle.powerSteering': 'הגה כוח',
+        'addVehicle.electricPowerSteering': 'הגה כוח חשמלי',
+        'addVehicle.hydraulicPowerSteering': 'הגה כוח הידראולי',
+        'addVehicle.electronicSteering': 'הגה אלקטרוני',
+
+        // Modifications & Notes
+        'addVehicle.modificationsNotes': 'שינויים והערות',
+        'addVehicle.vehicleModifications': 'שינויי רכב',
+        'addVehicle.modificationsPlaceholder': 'תאר כל שינוי שנעשה ברכב זה...',
+        'addVehicle.additionalNotes': 'הערות נוספות',
+        'addVehicle.notesPlaceholder': 'כל הערות נוספות על רכב המירוץ הזה...',
+
+        // Actions
+        'addVehicle.addToFleet': 'הוסף לצי המירוצים! 🏁',
+        'addVehicle.addingVehicle': 'מוסיף רכב...',
+        'addVehicle.uploadingPhoto': 'מעלה תמונה...',
+        'addVehicle.vehicleAddedSuccess': '{make} {model} נוסף לצי! מוכן למירוץ! 🏁',
+        'addVehicle.photoUploadWarning': 'הרכב נוצר בהצלחה, אך העלאת התמונה נכשלה: {error}. ניתן להוסיף תמונה מאוחר יותר על ידי עריכת הרכב.',
+
+        // Photo Upload Errors
+        'addVehicle.photoError.invalidType': 'אנא העלה קובץ תמונה JPEG, PNG או WebP.',
+        'addVehicle.photoError.tooLarge': 'גודל קובץ התמונה חייב להיות פחות מ-5MB.',
+        'addVehicle.photoError.processingFailed': 'כשל בעיבוד התמונה. אנא נסה שוב.',
           // Host Dashboard
         'host.dashboard': 'לוח בקרה מארח',
         'host.host': 'מארח',
