@@ -200,13 +200,6 @@ const Sidebar = ({userRole}) => {
                             {t('nav.events', 'Events')}
                         </NavLink>
                         <NavLink
-                            to="/parent/kids"
-                            className={({isActive}) => isActive ? 'active' : ''}
-                        >
-                            <Baby className="sidebar-icon" size={20}/>
-                            {t('nav.kids', 'Kids')}
-                        </NavLink>
-                        <NavLink
                             to="/gallery"
                             className={({isActive}) => isActive ? 'active' : ''}
                         >
