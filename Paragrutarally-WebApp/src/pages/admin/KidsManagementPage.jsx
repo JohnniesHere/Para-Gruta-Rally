@@ -1,4 +1,4 @@
-// src/pages/admin/KidsManagementPage.jsx - FIXED VERSION with working team change button
+// src/pages/admin/KidsManagementPage.jsx - CLEAN VERSION without debug div
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
@@ -281,22 +281,29 @@ const KidsManagementPage = () => {
         handleViewKid(kid);
     };
 
-
-    // TEAM CHANGE MODAL HANDLERS - FIXED
+    // TEAM CHANGE MODAL HANDLERS - FIXED with fresh data
     const handleChangeTeam = (kid) => {
         console.log('🎯 handleChangeTeam called for kid:', kid);
 
-        // Create a stable kid object for the TeamChangeModal
+        // Get the most up-to-date kid data from the current state
+        const currentKidData = kids.find(k => k.id === kid.id);
+
+        if (!currentKidData) {
+            console.error('❌ Kid not found in current state:', kid.id);
+            return;
+        }
+
+        // Create a stable kid object for the TeamChangeModal with current data
         const modalKidData = {
-            id: kid.id,
-            name: kid.name,
-            teamId: kid.teamId,
-            team: kid.team,
-            // Pass the original data which contains all Firestore fields
-            ...kid.originalData
+            id: currentKidData.id,
+            name: currentKidData.name,
+            teamId: currentKidData.teamId, // This will be the updated teamId
+            team: currentKidData.team,     // This will be the updated team name
+            // Pass the updated original data
+            ...currentKidData.originalData
         };
 
-        console.log('📦 Prepared modal kid data:', modalKidData);
+        console.log('📦 Prepared modal kid data with fresh teamId:', modalKidData);
 
         // Set the selected kid FIRST
         setSelectedKidForTeamChange(modalKidData);
@@ -308,16 +315,22 @@ const KidsManagementPage = () => {
         }, 0);
     };
 
-    const handleTeamChanged = (kidId, newTeamId) => {
+    const handleTeamChanged = async (kidId, newTeamId) => {
         console.log(`🔄 Team changed for kid ${kidId} to team ${newTeamId}`);
 
+        // Update the kids state with the new team information
         setKids(prevKids =>
             prevKids.map(kid =>
                 kid.id === kidId
                     ? {
                         ...kid,
                         teamId: newTeamId,
-                        team: getTeamNameById(newTeamId)
+                        team: getTeamNameById(newTeamId),
+                        // IMPORTANT: Update the originalData too so modal gets fresh data
+                        originalData: {
+                            ...kid.originalData,
+                            teamId: newTeamId
+                        }
                     }
                     : kid
             )
@@ -330,11 +343,16 @@ const KidsManagementPage = () => {
         const teamName = newTeamId ? getTeamNameById(newTeamId) : t('kids.noTeam', 'No Team');
         const action = newTeamId ? t('kids.assignedTo', 'assigned to') : t('kids.removedFrom', 'removed from team');
 
+        // Show success message
         alert(t('kids.teamChanged', '{kidName} has been {action} {teamName}', {
             kidName,
             action,
             teamName
         }));
+
+        // Optional: Refresh the entire data to ensure accuracy
+        // Uncomment the line below if you want full data refresh after each change
+        // await loadTeamsAndKids();
     };
 
     const handleCloseTeamModal = () => {
@@ -344,6 +362,17 @@ const KidsManagementPage = () => {
         setTimeout(() => {
             setSelectedKidForTeamChange(null);
         }, 100);
+    };
+
+    // Optional: Add a refresh function that can be called after team changes
+    const refreshKidsData = async () => {
+        console.log('🔄 Refreshing kids data after team change...');
+        try {
+            await loadTeamsAndKids();
+            console.log('✅ Kids data refreshed successfully');
+        } catch (error) {
+            console.error('❌ Error refreshing kids data:', error);
+        }
     };
 
     // EDIT KID MODAL HANDLERS
@@ -529,45 +558,6 @@ const KidsManagementPage = () => {
                                 <div className="stat-value">{stats.kidsWithTeams}</div>
                             </div>
                         </div>
-                    </div>
-
-                    {/* DEBUG MODAL STATE - Add this temporarily */}
-                    <div style={{
-                        background: '#f0f0f0',
-                        padding: '15px',
-                        margin: '10px 0',
-                        border: '2px solid #007bff',
-                        borderRadius: '8px'
-                    }}>
-                        <h4>🔍 DEBUG: Modal State</h4>
-                        <p><strong>teamModalOpen:</strong> {teamModalOpen ? 'TRUE' : 'FALSE'}</p>
-                        <p><strong>selectedKidForTeamChange:</strong> {selectedKidForTeamChange ? 'EXISTS' : 'NULL'}</p>
-                        <p><strong>selectedKidForTeamChange ID:</strong> {selectedKidForTeamChange?.id || 'none'}</p>
-                        <p><strong>selectedKidForTeamChange Name:</strong> {selectedKidForTeamChange?.name || 'none'}</p>
-
-                        <button
-                            onClick={() => {
-                                console.log('🧪 Test button clicked');
-                                setTeamModalOpen(true);
-                                setSelectedKidForTeamChange({
-                                    id: 'test-123',
-                                    name: 'Test Kid',
-                                    teamId: null,
-                                    team: 'No Team'
-                                });
-                            }}
-                            style={{
-                                background: '#007bff',
-                                color: 'white',
-                                padding: '8px 16px',
-                                border: 'none',
-                                borderRadius: '4px',
-                                cursor: 'pointer',
-                                marginTop: '10px'
-                            }}
-                        >
-                            🧪 TEST: Force Open Modal
-                        </button>
                     </div>
 
                     {/* Search and Filters */}
@@ -813,7 +803,7 @@ const KidsManagementPage = () => {
                     </div>
                 </div>
 
-                {/* TEAM CHANGE MODAL */}
+                {/* TEAM CHANGE MODAL - RENDER OUTSIDE DASHBOARD */}
                 {selectedKidForTeamChange && (
                     <TeamChangeModal
                         kid={selectedKidForTeamChange}

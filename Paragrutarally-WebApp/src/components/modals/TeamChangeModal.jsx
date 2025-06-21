@@ -1,4 +1,4 @@
-// src/components/TeamChangeModal.jsx - CLEAN VERSION with CSS classes only
+// src/components/TeamChangeModal.jsx - Standalone with Custom Styles
 import React, { useState, useEffect } from 'react';
 import { getAllTeams } from '../../services/teamService';
 import { updateKidTeam } from '../../services/kidService';
@@ -20,8 +20,11 @@ const TeamChangeModal = ({ kid, isOpen, onClose, onTeamChanged }) => {
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState(null);
 
+    console.log('🔍 TeamChangeModal render:', { kid, isOpen, selectedTeamId });
+
     useEffect(() => {
         if (isOpen && kid) {
+            console.log('📂 Loading teams for modal...');
             loadTeams();
             setSelectedTeamId(kid?.teamId || '');
             setError(null);
@@ -36,6 +39,7 @@ const TeamChangeModal = ({ kid, isOpen, onClose, onTeamChanged }) => {
             const teamsData = await getAllTeams();
             const activeTeams = teamsData.filter(team => team.active !== false);
             setTeams(activeTeams);
+            console.log('✅ Teams loaded for modal:', activeTeams);
         } catch (err) {
             console.error('Error loading teams:', err);
             setError(`Failed to load teams: ${err.message}`);
@@ -83,6 +87,10 @@ const TeamChangeModal = ({ kid, isOpen, onClose, onTeamChanged }) => {
         }
     };
 
+    const handleTeamCardClick = (teamId) => {
+        setSelectedTeamId(teamId);
+    };
+
     if (!isOpen || !kid) {
         return null;
     }
@@ -90,130 +98,161 @@ const TeamChangeModal = ({ kid, isOpen, onClose, onTeamChanged }) => {
     const selectedTeam = teams.find(t => t.id === selectedTeamId);
 
     return (
-        <div className="modal-overlay" onClick={onClose}>
-            <div className="modal-content team-modal-content" onClick={(e) => e.stopPropagation()}>
+        <div className="team-modal-overlay" onClick={onClose}>
+            <div className="team-modal-container" onClick={(e) => e.stopPropagation()}>
 
                 {/* Modal Header */}
-                <div className="modal-header">
-                    <h3 className="modal-title">
-                        <Car size={28} className="modal-title-icon" />
-                        Change Team for {kid?.name}
-                    </h3>
-                    <button className="modal-close" onClick={onClose} aria-label="Close modal">
+                <div className="team-modal-header">
+                    <div className="team-modal-title">
+                        <Car size={28} className="team-modal-title-icon" />
+                        <h3>Change Team for {kid?.name}</h3>
+                    </div>
+                    <button
+                        className="team-modal-close"
+                        onClick={onClose}
+                        aria-label="Close modal"
+                    >
                         <X size={20} />
                     </button>
                 </div>
 
                 {/* Modal Body */}
-                <div className="modal-body">
+                <div className="team-modal-body">
 
                     {/* Error Alert */}
                     {error && (
-                        <div className="alert error-alert">
+                        <div className="team-modal-error">
                             <AlertTriangle size={20} />
-                            <div className="alert-content">
+                            <div className="team-modal-error-content">
                                 <strong>Error:</strong> {error}
-                                <button
-                                    onClick={() => setError(null)}
-                                    className="alert-dismiss"
-                                >
-                                    Dismiss
-                                </button>
                             </div>
+                            <button
+                                onClick={() => setError(null)}
+                                className="team-modal-error-dismiss"
+                            >
+                                Dismiss
+                            </button>
                         </div>
                     )}
 
                     {/* Current Team Section */}
-                    <div className="form-section current-team-section">
-                        <div className="section-header">
-                            <Users className="section-icon" size={20} />
-                            <h3>Current Assignment</h3>
+                    <div className="team-modal-section">
+                        <div className="team-modal-section-header">
+                            <Users className="team-modal-section-icon" size={20} />
+                            <h4>Current Assignment</h4>
                         </div>
-                        <div className="card current-team-card">
-                            <div className="card-header">
-                                <Car className="card-icon" size={16} />
-                                <span className="card-title">
-                                    <strong>Current Team:</strong> {kid?.team || 'No Team'}
-                                </span>
-                            </div>
+                        <div className="team-modal-current-team">
+                            <Car className="team-modal-current-icon" size={16} />
+                            <span><strong>Current Team:</strong> {kid?.team || 'No Team'}</span>
                         </div>
                     </div>
 
                     {/* Loading State */}
                     {isLoading ? (
-                        <div className="loading-container">
-                            <div className="loading-spinner"></div>
+                        <div className="team-modal-loading">
+                            <div className="team-modal-spinner"></div>
                             <p>Loading available teams...</p>
                         </div>
                     ) : (
                         <>
                             {/* Team Selection Section */}
-                            <div className="form-section team-selection-section">
-                                <div className="section-header">
-                                    <Car className="section-icon" size={20} />
-                                    <h3>Select New Team</h3>
+                            <div className="team-modal-section">
+                                <div className="team-modal-section-header">
+                                    <Car className="team-modal-section-icon" size={20} />
+                                    <h4>Select New Team</h4>
                                 </div>
 
-                                <div className="form-group">
-                                    <label className="form-label">
-                                        <Users className="label-icon" size={16} />
-                                        Choose Team Assignment
-                                    </label>
-                                    <select
-                                        className="form-select team-select"
-                                        value={selectedTeamId}
-                                        onChange={(e) => setSelectedTeamId(e.target.value)}
-                                        disabled={isSaving}
-                                    >
-                                        <option value="">🚫 No Team Assigned</option>
+                                {/* "No Team" Option */}
+                                <div
+                                    className={`team-modal-team-card team-modal-no-team ${selectedTeamId === '' ? 'team-modal-selected' : ''}`}
+                                    onClick={() => handleTeamCardClick('')}
+                                >
+                                    <div className="team-modal-team-header">
+                                        <X className="team-modal-team-icon" size={18} />
+                                        <span className="team-modal-team-name">🚫 No Team Assignment</span>
+                                        {selectedTeamId === '' && (
+                                            <Check className="team-modal-selected-icon" size={16} />
+                                        )}
+                                    </div>
+                                    <div className="team-modal-team-description">
+                                        Remove this kid from all teams
+                                    </div>
+                                </div>
+
+                                {/* Teams Grid */}
+                                {teams.length === 0 ? (
+                                    <div className="team-modal-empty">
+                                        <Users className="team-modal-empty-icon" size={40} />
+                                        <h4>No Active Teams</h4>
+                                        <p>There are currently no active teams available for assignment.</p>
+                                    </div>
+                                ) : (
+                                    <div className="team-modal-teams-grid">
                                         {teams.map(team => (
-                                            <option key={team.id} value={team.id}>
-                                                🏁 {team.name} {team.kidIds ? `(${team.kidIds.length} members)` : ''}
-                                            </option>
+                                            <div
+                                                key={team.id}
+                                                className={`team-modal-team-card ${selectedTeamId === team.id ? 'team-modal-selected' : ''}`}
+                                                onClick={() => handleTeamCardClick(team.id)}
+                                            >
+                                                <div className="team-modal-team-header">
+                                                    <Users className="team-modal-team-icon" size={18} />
+                                                    <span className="team-modal-team-name">{team.name}</span>
+                                                    {selectedTeamId === team.id && (
+                                                        <Check className="team-modal-selected-icon" size={16} />
+                                                    )}
+                                                </div>
+                                                <div className="team-modal-team-details">
+                                                    <div className="team-modal-team-members">
+                                                        <Users size={14} />
+                                                        <span>{team.kidIds?.length || 0} / {team.maxCapacity || 15} members</span>
+                                                    </div>
+                                                    {team.description && (
+                                                        <div className="team-modal-team-description">
+                                                            {team.description}
+                                                        </div>
+                                                    )}
+                                                    {team.instructorIds && team.instructorIds.length > 0 && (
+                                                        <div className="team-modal-team-instructors">
+                                                            <User size={12} />
+                                                            <span>{team.instructorIds.length} instructor{team.instructorIds.length !== 1 ? 's' : ''}</span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
                                         ))}
-                                    </select>
-
-                                    {teams.length === 0 && !isLoading && (
-                                        <div className="empty-state">
-                                            <Users className="empty-icon" size={40} />
-                                            <h3>No Active Teams</h3>
-                                            <p>There are currently no active teams available for assignment.</p>
-                                        </div>
-                                    )}
-                                </div>
+                                    </div>
+                                )}
                             </div>
 
                             {/* Selected Team Preview */}
                             {selectedTeam && (
-                                <div className="form-section team-preview-section">
-                                    <div className="section-header">
-                                        <Check className="section-icon" size={20} />
-                                        <h3>Team Preview</h3>
+                                <div className="team-modal-section">
+                                    <div className="team-modal-section-header">
+                                        <Check className="team-modal-section-icon" size={20} />
+                                        <h4>Selected Team Preview</h4>
                                     </div>
-                                    <div className="card selected team-preview-card">
-                                        <div className="card-header">
-                                            <Users className="card-icon" size={18} />
-                                            <h4 className="card-title">{selectedTeam.name}</h4>
+                                    <div className="team-modal-preview">
+                                        <div className="team-modal-preview-header">
+                                            <Users className="team-modal-preview-icon" size={18} />
+                                            <span className="team-modal-preview-name">{selectedTeam.name}</span>
                                         </div>
-                                        <div className="card-body">
-                                            <div className="team-details">
-                                                <div className="team-detail-item">
-                                                    <Users size={14} className="detail-icon" />
-                                                    <span><strong>Members:</strong> {selectedTeam.kidIds?.length || 0}</span>
-                                                </div>
-                                                {selectedTeam.description && (
-                                                    <div className="team-detail-item">
-                                                        <Car size={14} className="detail-icon" />
-                                                        <span><strong>Description:</strong> {selectedTeam.description}</span>
-                                                    </div>
-                                                )}
-                                                {selectedTeam.instructorIds && selectedTeam.instructorIds.length > 0 && (
-                                                    <div className="team-detail-item">
-                                                        <User size={14} className="detail-icon" />
-                                                        <span><strong>Instructors:</strong> {selectedTeam.instructorIds.length}</span>
-                                                    </div>
-                                                )}
+                                        <div className="team-modal-preview-details">
+                                            <div>
+                                                <Users size={14} />
+                                                <span><strong>Members:</strong> {selectedTeam.kidIds?.length || 0} / {selectedTeam.maxCapacity || 15}</span>
                                             </div>
+                                            {selectedTeam.description && (
+                                                <div>
+                                                    <Car size={14} />
+                                                    <span><strong>Description:</strong> {selectedTeam.description}</span>
+                                                </div>
+                                            )}
+                                            {selectedTeam.instructorIds && selectedTeam.instructorIds.length > 0 && (
+                                                <div>
+                                                    <User size={14} />
+                                                    <span><strong>Instructors:</strong> {selectedTeam.instructorIds.length}</span>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -223,18 +262,17 @@ const TeamChangeModal = ({ kid, isOpen, onClose, onTeamChanged }) => {
                 </div>
 
                 {/* Modal Actions */}
-                <div className="modal-actions">
-
+                <div className="team-modal-actions">
                     {/* Remove Button */}
                     {kid?.teamId && (
                         <button
-                            className="btn btn-danger btn-remove-team"
+                            className="team-modal-btn team-modal-btn-danger"
                             onClick={handleRemoveTeam}
                             disabled={isSaving || isLoading}
                         >
                             {isSaving ? (
                                 <>
-                                    <div className="loading-spinner-mini"></div>
+                                    <div className="team-modal-spinner-mini"></div>
                                     Removing...
                                 </>
                             ) : (
@@ -246,10 +284,10 @@ const TeamChangeModal = ({ kid, isOpen, onClose, onTeamChanged }) => {
                         </button>
                     )}
 
-                    {/* Main Action Buttons */}
-                    <div className="modal-action-buttons">
+                    <div className="team-modal-action-buttons">
+                        {/* Cancel Button */}
                         <button
-                            className="btn btn-secondary"
+                            className="team-modal-btn team-modal-btn-secondary"
                             onClick={onClose}
                             disabled={isSaving}
                         >
@@ -257,20 +295,21 @@ const TeamChangeModal = ({ kid, isOpen, onClose, onTeamChanged }) => {
                             Cancel
                         </button>
 
+                        {/* Save Button */}
                         <button
-                            className={`btn btn-primary ${selectedTeamId === (kid?.teamId || '') ? 'btn-disabled' : ''}`}
+                            className={`team-modal-btn team-modal-btn-primary ${selectedTeamId === (kid?.teamId || '') ? 'team-modal-btn-disabled' : ''}`}
                             onClick={handleSave}
                             disabled={isSaving || isLoading || selectedTeamId === (kid?.teamId || '')}
                         >
                             {isSaving ? (
                                 <>
-                                    <div className="loading-spinner-mini"></div>
+                                    <div className="team-modal-spinner-mini"></div>
                                     Saving Changes...
                                 </>
                             ) : (
                                 <>
                                     <Check size={16} />
-                                    Save Changes
+                                    Save Changes! 🏁
                                 </>
                             )}
                         </button>
