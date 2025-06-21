@@ -1,9 +1,9 @@
-// src/pages/admin/ViewTeamPage.jsx - TRANSLATED VERSION
+// src/pages/admin/ViewTeamPage.jsx - FIXED VERSION
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
 import { useTheme } from '../../contexts/ThemeContext';
-import { useLanguage } from '../../contexts/LanguageContext'; // Add this import
+import { useLanguage } from '../../contexts/LanguageContext';
 import { usePermissions } from '../../hooks/usePermissions.jsx';
 import { getTeamWithDetails, deleteTeam } from '../../services/teamService';
 import {
@@ -30,7 +30,7 @@ const ViewTeamPage = () => {
     const { id } = useParams();
     const location = useLocation();
     const { appliedTheme } = useTheme();
-    const { t } = useLanguage(); // Add this hook
+    const { t } = useLanguage();
     const { userRole } = usePermissions();
 
     const [teamData, setTeamData] = useState(null);
@@ -38,10 +38,10 @@ const ViewTeamPage = () => {
     const [error, setError] = useState(null);
     const [successMessage, setSuccessMessage] = useState('');
 
-    // FIXED: Added proper dependencies to useEffect
     const loadTeamData = React.useCallback(async () => {
         try {
             setIsLoading(true);
+            console.log('🔄 Loading team data for ID:', id);
 
             // Load team data with details (kids, instructors, team leader)
             const team = await getTeamWithDetails(id);
@@ -50,15 +50,16 @@ const ViewTeamPage = () => {
                 return;
             }
 
+            console.log('✅ Team data loaded:', team);
             setTeamData(team);
 
         } catch (error) {
-            console.error('Error loading team data:', error);
+            console.error('❌ Error loading team data:', error);
             setError(t('teams.loadTeamDataError', 'Failed to load team data. Please try again.'));
         } finally {
             setIsLoading(false);
         }
-    }, [id, t]); // FIXED: Added id and t as dependencies
+    }, [id, t]);
 
     useEffect(() => {
         // Check for success message from location state
@@ -66,13 +67,13 @@ const ViewTeamPage = () => {
             setSuccessMessage(location.state.message);
             // Clear message after 5 seconds
             const timeoutId = setTimeout(() => setSuccessMessage(''), 5000);
-            return () => clearTimeout(timeoutId); // FIXED: Cleanup timeout
+            return () => clearTimeout(timeoutId);
         }
-    }, [location.state?.message]); // FIXED: Added proper dependency
+    }, [location.state?.message]);
 
     useEffect(() => {
         loadTeamData();
-    }, [loadTeamData]); // FIXED: Added loadTeamData as dependency
+    }, [loadTeamData]);
 
     const handleEdit = () => {
         navigate(`/admin/teams/edit/${id}`);
@@ -116,9 +117,25 @@ const ViewTeamPage = () => {
         if (!teamData?.kids) return { total: 0, ready: 0, pending: 0 };
 
         const total = teamData.kids.length;
-        const ready = teamData.kids.filter(kid => kid.signedFormStatus === 'Completed').length;
-        const pending = teamData.kids.filter(kid => kid.signedFormStatus === 'Pending').length;
+        console.log('📊 Calculating performance for', total, 'kids');
 
+        // Count kids by their signedFormStatus
+        let ready = 0;
+        let pending = 0;
+
+        teamData.kids.forEach(kid => {
+            console.log('Kid status check:', kid.personalInfo?.firstName, 'Status:', kid.signedFormStatus);
+
+            // Check various possible status values that indicate "ready"
+            const status = kid.signedFormStatus;
+            if (status === 'Completed' || status === 'completed' || status === 'Complete' || status === 'complete') {
+                ready++;
+            } else {
+                pending++;
+            }
+        });
+
+        console.log('📈 Performance calculated:', { total, ready, pending });
         return { total, ready, pending };
     };
 
@@ -231,7 +248,7 @@ const ViewTeamPage = () => {
                                     </div>
                                     <div className="stat-item">
                                         <Target className="stat-icon" size={16} />
-                                        <span>{t('teams.maxCapacity', 'Max: {capacity}', { capacity: teamData.maxCapacity })}</span>
+                                        <span>{t('teams.maxCapacity', 'Max: {capacity}', { capacity: teamData.maxCapacity || teamData.maxMembers || 15 })}</span>
                                     </div>
                                 </div>
                             </div>
@@ -266,13 +283,13 @@ const ViewTeamPage = () => {
                                         <span className="capacity-display">
                                             {t('teams.capacityDisplay', '{current} / {max} racers', {
                                                 current: performance.total,
-                                                max: teamData.maxCapacity
+                                                max: teamData.maxCapacity || teamData.maxMembers || 15
                                             })}
                                         </span>
                                         <div className="capacity-bar">
                                             <div
                                                 className="capacity-fill"
-                                                style={{ width: `${(performance.total / teamData.maxCapacity) * 100}%` }}
+                                                style={{ width: `${(performance.total / (teamData.maxCapacity || teamData.maxMembers || 15)) * 100}%` }}
                                             ></div>
                                         </div>
                                     </div>
@@ -295,7 +312,13 @@ const ViewTeamPage = () => {
                                 <div className="info-item">
                                     <label>{t('teams.createdLabel', '📅 Created')}</label>
                                     <div className="info-value">
-                                        {teamData.createdAt ? new Date(teamData.createdAt.seconds * 1000).toLocaleDateString() : t('teams.unknownDate', 'Unknown')}
+                                        {teamData.createdAt ?
+                                            (teamData.createdAt.seconds ?
+                                                    new Date(teamData.createdAt.seconds * 1000).toLocaleDateString() :
+                                                    new Date(teamData.createdAt).toLocaleDateString()
+                                            ) :
+                                            t('teams.unknownDate', 'Unknown')
+                                        }
                                     </div>
                                 </div>
                             </div>
@@ -346,6 +369,12 @@ const ViewTeamPage = () => {
                                                         {instructor.phone}
                                                     </div>
                                                 )}
+                                                {instructor.email && (
+                                                    <div className="contact-info">
+                                                        <Mail size={12} />
+                                                        {instructor.email}
+                                                    </div>
+                                                )}
                                             </div>
                                         ))
                                     ) : (
@@ -365,7 +394,7 @@ const ViewTeamPage = () => {
                                 <Baby className="section-icon" size={24} />
                                 <h3>{t('teams.teamRacersWithCount', '🏎️ Team Racers ({current}/{max})', {
                                     current: performance.total,
-                                    max: teamData.maxCapacity
+                                    max: teamData.maxCapacity || teamData.maxMembers || 15
                                 })}</h3>
                             </div>
 
@@ -405,8 +434,8 @@ const ViewTeamPage = () => {
                                         >
                                             <div className="racer-header">
                                                 <Baby className="racer-icon" size={18} />
-                                                <span className="race-number">#{kid.participantNumber}</span>
-                                                <span className={`status-dot ${kid.signedFormStatus?.toLowerCase()}`}></span>
+                                                <span className="race-number">#{kid.participantNumber || 'N/A'}</span>
+                                                <span className={`status-dot ${(kid.signedFormStatus || 'pending').toLowerCase()}`}></span>
                                             </div>
                                             <div className="racer-info">
                                                 <h4 className="racer-name">

@@ -1,11 +1,12 @@
-// src/pages/admin/TeamsManagementPage.jsx - TRANSLATED VERSION
+// src/pages/admin/TeamsManagementPage.jsx - FIXED VERSION
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
 import { useTheme } from '../../contexts/ThemeContext';
-import { useLanguage } from '../../contexts/LanguageContext'; // Add this import
+import { useLanguage } from '../../contexts/LanguageContext';
 import { usePermissions } from '../../hooks/usePermissions.jsx';
-import { getAllTeams, deleteTeam } from '../../services/teamService';
+import { getAllTeams, deleteTeam, getAllInstructors } from '../../services/teamService';
+import { getAllKids } from '../../services/kidService';
 import {
     IconUsers as Team,
     IconPlus as Plus,
@@ -33,7 +34,7 @@ import './TeamsManagementPage.css';
 const TeamsManagementPage = () => {
     const navigate = useNavigate();
     const { appliedTheme } = useTheme();
-    const { t } = useLanguage(); // Add this hook
+    const { t } = useLanguage();
     const { permissions, userRole, loading: permissionsLoading, error: permissionsError } = usePermissions();
 
     const [teams, setTeams] = useState([]);
@@ -44,6 +45,10 @@ const TeamsManagementPage = () => {
     const [statusFilter, setStatusFilter] = useState('all');
     const [capacityFilter, setCapacityFilter] = useState('all');
     const [showingTeamsWithoutKids, setShowingTeamsWithoutKids] = useState(false);
+
+    // Reference data for lookups
+    const [instructorsMap, setInstructorsMap] = useState(new Map());
+    const [kidsMap, setKidsMap] = useState(new Map());
 
     // Load teams
     useEffect(() => {
@@ -65,23 +70,68 @@ const TeamsManagementPage = () => {
         setError(null);
 
         try {
-            const teamsData = await getAllTeams();
-            console.log(`✅ Loaded ${teamsData.length} teams`);
+            // Load all required data in parallel
+            const [teamsData, instructorsData, kidsData] = await Promise.all([
+                getAllTeams(),
+                getAllInstructors(),
+                getAllKids()
+            ]);
 
-            // Transform teams data for display
-            const processedTeams = teamsData.map(team => ({
-                id: team.id,
-                name: team.name || t('teams.unnamedTeam', 'Unnamed Team'),
-                instructorName: team.instructorName || t('teams.noInstructor', 'No Instructor'),
-                instructorId: team.instructorId,
-                currentMembers: team.currentMembers || 0,
-                maxMembers: team.maxMembers || t('teams.unlimited', 'Unlimited'),
-                status: team.active !== false ? 'active' : 'inactive',
-                description: team.description || '',
-                createdAt: team.createdAt,
-                originalData: team
-            }));
+            console.log(`✅ Loaded ${teamsData.length} teams, ${instructorsData.length} instructors, ${kidsData.length} kids`);
 
+            // Create lookup maps for efficient data processing
+            const instructorsLookup = new Map();
+            instructorsData.forEach(instructor => {
+                instructorsLookup.set(instructor.id, instructor);
+            });
+            setInstructorsMap(instructorsLookup);
+
+            const kidsLookup = new Map();
+            kidsData.forEach(kid => {
+                kidsLookup.set(kid.id, kid);
+            });
+            setKidsMap(kidsLookup);
+
+            // Transform teams data for display with proper lookups
+            const processedTeams = teamsData.map(team => {
+                console.log('Processing team:', team.name, team);
+
+                // Get instructor information
+                let instructorName = t('teams.noInstructor', 'No Instructor');
+                let instructorId = null;
+
+                if (team.instructorIds && team.instructorIds.length > 0) {
+                    // Get the first instructor (or team leader if specified)
+                    const primaryInstructorId = team.teamLeaderId || team.instructorIds[0];
+                    const instructor = instructorsLookup.get(primaryInstructorId);
+
+                    if (instructor) {
+                        instructorName = instructor.displayName || instructor.name || instructor.email || t('teams.unknownInstructor', 'Unknown Instructor');
+                        instructorId = instructor.id;
+                    }
+                }
+
+                // Count current members from kidIds
+                const currentMembers = team.kidIds ? team.kidIds.length : 0;
+
+                // Determine max capacity
+                const maxMembers = team.maxCapacity || 15;
+
+                return {
+                    id: team.id,
+                    name: team.name || t('teams.unnamedTeam', 'Unnamed Team'),
+                    instructorName: instructorName,
+                    instructorId: instructorId,
+                    currentMembers: currentMembers,
+                    maxMembers: maxMembers,
+                    status: team.active !== false ? 'active' : 'inactive',
+                    description: team.description || '',
+                    createdAt: team.createdAt,
+                    originalData: team
+                };
+            });
+
+            console.log('Processed teams:', processedTeams);
             setTeams(processedTeams);
         } catch (err) {
             console.error('💥 Error loading teams:', err);
