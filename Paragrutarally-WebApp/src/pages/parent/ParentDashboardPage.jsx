@@ -13,6 +13,7 @@ import { db } from '../../firebase/config';
 import { usePermissions } from '../../hooks/usePermissions';
 import { useLanguage } from '../../contexts/LanguageContext';
 import Dashboard from '../../components/layout/Dashboard';
+import ParentKidEditModal from '../../components/modals/ParentKidEditModal';
 import {
     IconUser as User,
     IconUsers as Users,
@@ -42,47 +43,51 @@ const ParentDashboardPage = () => {
     const [commentTexts, setCommentTexts] = useState({});
     const [saving, setSaving] = useState({});
 
+    // Edit modal state
+    const [editingKid, setEditingKid] = useState(null);
+    const [showEditModal, setShowEditModal] = useState(false);
+
+    const loadParentKids = async () => {
+        if (!user?.uid || userRole !== 'parent') {
+            setError(t('instructor.accessDenied', 'Access denied: Parent credentials required'));
+            setLoading(false);
+            return;
+        }
+
+        try {
+            setError('');
+
+            // Load kids where parentInfo.parentId matches current user
+            const kidsQuery = query(
+                collection(db, 'kids'),
+                where('parentInfo.parentId', '==', user.uid),
+                orderBy('personalInfo.firstName', 'asc')
+            );
+
+            const kidsSnapshot = await getDocs(kidsQuery);
+            const kidsData = kidsSnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+
+            setKids(kidsData);
+
+            // Initialize comment texts
+            const initialComments = {};
+            kidsData.forEach(kid => {
+                initialComments[kid.id] = kid.comments?.parent || '';
+            });
+            setCommentTexts(initialComments);
+
+        } catch (err) {
+            console.error('Error loading parent kids:', err);
+            setError(t('instructor.failedToLoad', 'Failed to load your kids data. Please try again.'));
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const loadParentKids = async () => {
-            if (!user?.uid || userRole !== 'parent') {
-                setError(t('instructor.accessDenied', 'Access denied: Parent credentials required'));
-                setLoading(false);
-                return;
-            }
-
-            try {
-                setError('');
-
-                // Load kids where parentInfo.parentId matches current user
-                const kidsQuery = query(
-                    collection(db, 'kids'),
-                    where('parentInfo.parentId', '==', user.uid),
-                    orderBy('personalInfo.firstName', 'asc')
-                );
-
-                const kidsSnapshot = await getDocs(kidsQuery);
-                const kidsData = kidsSnapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                }));
-
-                setKids(kidsData);
-
-                // Initialize comment texts
-                const initialComments = {};
-                kidsData.forEach(kid => {
-                    initialComments[kid.id] = kid.comments?.parent || '';
-                });
-                setCommentTexts(initialComments);
-
-            } catch (err) {
-                console.error('Error loading parent kids:', err);
-                setError(t('instructor.failedToLoad', 'Failed to load your kids data. Please try again.'));
-            } finally {
-                setLoading(false);
-            }
-        };
-
         loadParentKids();
     }, [user, userRole, t]);
 
@@ -150,6 +155,28 @@ const ParentDashboardPage = () => {
         } finally {
             setSaving({ ...saving, [kidId]: false });
         }
+    };
+
+    // Handle edit modal
+    const handleEditKid = (kid) => {
+        setEditingKid(kid);
+        setShowEditModal(true);
+    };
+
+    const handleEditModalClose = () => {
+        setShowEditModal(false);
+        setEditingKid(null);
+    };
+
+    const handleEditSuccess = (message) => {
+        // Show success message
+        alert(message);
+
+        // Refresh kids data
+        loadParentKids();
+
+        // Close modal
+        handleEditModalClose();
     };
 
     const getFormStatus = (kid) => {
@@ -306,6 +333,25 @@ const ParentDashboardPage = () => {
                                             </div>
 
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                                                {/* Edit Button */}
+                                                <button
+                                                    className="btn btn-primary btn-sm"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleEditKid(kid);
+                                                    }}
+                                                    style={{
+                                                        padding: '8px 12px',
+                                                        fontSize: '12px',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: '4px'
+                                                    }}
+                                                >
+                                                    <Edit size={14} />
+                                                    {t('general.edit', 'Edit')}
+                                                </button>
+
                                                 <span className={`status-badge ${formStatus.color === 'success' ? 'ready' : formStatus.color === 'warning' ? 'pending' : 'inactive'}`}>
                                                     {formStatus.label}
                                                 </span>
@@ -543,6 +589,14 @@ const ParentDashboardPage = () => {
                         </div>
                     )}
                 </div>
+
+                {/* Edit Modal */}
+                <ParentKidEditModal
+                    kid={editingKid}
+                    isOpen={showEditModal}
+                    onClose={handleEditModalClose}
+                    onSuccess={handleEditSuccess}
+                />
             </div>
         </Dashboard>
     );
