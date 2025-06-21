@@ -1,11 +1,12 @@
-// src/pages/admin/EventManagementPage.jsx - Updated with Separate Delete Modal
+// src/pages/admin/EventManagementPage.jsx - Updated with Export Modal Integration
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { collection, getDocs, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
 import { ref, listAll, deleteObject } from 'firebase/storage';
 import { db, storage } from '../../firebase/config';
 import Dashboard from '../../components/layout/Dashboard';
-import DeleteEventModal from '../../components/modals/DeleteEventModal'; // Import the new modal
+import DeleteEventModal from '../../components/modals/DeleteEventModal';
+import ExportEventsModal from '../../components/modals/ExportEventsModal'; // Import the Export Modal
 import { useTheme } from '../../contexts/ThemeContext.jsx';
 import { useLanguage } from '../../contexts/LanguageContext.jsx';
 import { usePermissions } from '../../hooks/usePermissions.jsx';
@@ -50,11 +51,14 @@ const EventManagementPage = () => {
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [error, setError] = useState(null);
 
-    // Delete modal state - simplified
+    // Delete modal state
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [eventToDelete, setEventToDelete] = useState(null);
     const [deleteGalleryToo, setDeleteGalleryToo] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
+
+    // Export modal state - ADDED THIS
+    const [exportModalOpen, setExportModalOpen] = useState(false);
 
     // Pagination settings
     const eventsPerPage = 4;
@@ -89,7 +93,6 @@ const EventManagementPage = () => {
                     galleryFolderPath: data.galleryFolderPath || null,
                     createdAt: data.createdAt,
                     updatedAt: data.updatedAt,
-                    // Store the image URL for cleanup
                     image: data.image || 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400'
                 });
             });
@@ -115,8 +118,8 @@ const EventManagementPage = () => {
         const locations = events
             .map(event => event.location)
             .filter(location => location && location !== t('events.locationTBD', 'Location TBD'))
-            .filter((location, index, array) => array.indexOf(location) === index) // Remove duplicates
-            .sort(); // Sort alphabetically
+            .filter((location, index, array) => array.indexOf(location) === index)
+            .sort();
 
         return locations;
     };
@@ -200,18 +203,25 @@ const EventManagementPage = () => {
         }
     };
 
+    // ADDED THIS - Handle export events
+    const handleExportEvents = () => {
+        setExportModalOpen(true);
+    };
+
+    // ADDED THIS - Handle close export modal
+    const handleCloseExportModal = () => {
+        setExportModalOpen(false);
+    };
+
     /**
      * Delete event image from Firebase Storage
-     * @param {string} imageUrl - The full URL of the image to delete
      */
     const deleteEventImage = async (imageUrl) => {
         try {
             if (!imageUrl || imageUrl.includes('unsplash.com')) {
-                // Skip deletion for default images or empty URLs
                 return true;
             }
 
-            // Extract the storage path from the URL
             const url = new URL(imageUrl);
             const pathMatch = url.pathname.match(/\/o\/(.+)$/);
 
@@ -236,12 +246,9 @@ const EventManagementPage = () => {
 
     /**
      * Delete gallery folder and all its contents
-     * @param {string} eventName - Name of the event
-     * @param {string} galleryFolderPath - Optional specific path to gallery folder
      */
     const deleteGalleryFolder = async (eventName, galleryFolderPath = null) => {
         try {
-            // Use provided path or construct default path
             const folderPath = galleryFolderPath || `gallery/events/${eventName}`;
             console.log('Deleting gallery folder:', folderPath);
 
@@ -253,7 +260,6 @@ const EventManagementPage = () => {
                 return true;
             }
 
-            // Delete all files in the folder
             const deletePromises = result.items.map(itemRef => {
                 console.log('Deleting file:', itemRef.fullPath);
                 return deleteObject(itemRef);
@@ -278,9 +284,6 @@ const EventManagementPage = () => {
 
     /**
      * Complete event deletion with proper cleanup
-     * @param {Object} eventData - The event object from Firestore
-     * @param {string} eventId - The document ID of the event
-     * @param {boolean} includeGallery - Whether to delete gallery folder
      */
     const deleteEventWithCleanup = async (eventData, eventId, includeGallery = false) => {
         try {
@@ -291,7 +294,7 @@ const EventManagementPage = () => {
                 firestoreDoc: false
             };
 
-            // Step 1: Delete the event image if it exists and is not a default image
+            // Delete the event image if it exists and is not a default image
             if (eventData.image && !eventData.image.includes('unsplash.com')) {
                 console.log('Deleting event image...');
                 cleanupResults.eventImage = await deleteEventImage(eventData.image);
@@ -299,10 +302,10 @@ const EventManagementPage = () => {
                     console.warn('Failed to delete event image, but continuing with event deletion');
                 }
             } else {
-                cleanupResults.eventImage = true; // No image to delete or default image
+                cleanupResults.eventImage = true;
             }
 
-            // Step 2: Delete the gallery folder if requested and it exists
+            // Delete the gallery folder if requested and it exists
             if (includeGallery && (eventData.hasGalleryFolder || eventData.galleryFolderPath)) {
                 console.log('Deleting gallery folder...');
                 cleanupResults.gallery = await deleteGalleryFolder(
@@ -313,17 +316,16 @@ const EventManagementPage = () => {
                     console.warn('Failed to delete gallery folder, but continuing with event deletion');
                 }
             } else {
-                cleanupResults.gallery = true; // No gallery to delete or not requested
+                cleanupResults.gallery = true;
             }
 
-            // Step 3: Delete the event document from Firestore
+            // Delete the event document from Firestore
             console.log('Deleting event document from Firestore...');
             await deleteDoc(doc(db, 'events', eventId));
             cleanupResults.firestoreDoc = true;
 
             console.log('Event deletion completed successfully', cleanupResults);
 
-            // Generate success message based on what was deleted
             let message = t('events.deleteSuccess', 'Event "{eventName}" deleted successfully', { eventName: eventData.name });
             if (includeGallery && eventData.hasGalleryFolder) {
                 message += ` (${t('events.includingGallery', 'including gallery photos')})`;
@@ -345,7 +347,7 @@ const EventManagementPage = () => {
         }
     };
 
-    // Confirm delete event - Updated to work with new modal
+    // Confirm delete event
     const confirmDeleteEvent = async () => {
         if (!eventToDelete) return;
 
@@ -359,7 +361,6 @@ const EventManagementPage = () => {
             );
 
             if (result.success) {
-                // Remove from local state
                 setEvents(events.filter(event => event.id !== eventToDelete.id));
                 console.log('Event deleted successfully');
                 alert(result.message);
@@ -371,7 +372,6 @@ const EventManagementPage = () => {
             console.error('Error deleting event:', error);
             alert(t('events.deleteError', 'Failed to delete event. Please try again.'));
         } finally {
-            // Close modal and reset state
             setIsDeleting(false);
             setDeleteModalOpen(false);
             setEventToDelete(null);
@@ -379,7 +379,7 @@ const EventManagementPage = () => {
         }
     };
 
-    // Cancel delete - Updated for new modal
+    // Cancel delete
     const cancelDelete = () => {
         setDeleteModalOpen(false);
         setEventToDelete(null);
@@ -435,7 +435,6 @@ const EventManagementPage = () => {
             default:
                 break;
         }
-        // Clear other filters when clicking stat cards
         setSearchTerm('');
         setLocationFilter('all');
     };
@@ -475,7 +474,8 @@ const EventManagementPage = () => {
                                 <RefreshCw className="btn-icon" size={18} />
                                 {t('teams.refresh', 'Refresh')}
                             </button>
-                            <button className="btn-export">
+                            {/* UPDATED THIS BUTTON - Added onClick handler */}
+                            <button className="btn-export" onClick={handleExportEvents}>
                                 <Download className="btn-icon" size={18} />
                                 {t('events.exportEvents', 'Export Events')}
                             </button>
@@ -521,7 +521,7 @@ const EventManagementPage = () => {
                         </div>
                     </div>
 
-                    {/* Search and Filters - All in one row */}
+                    {/* Search and Filters */}
                     <div className="search-filter-section-row">
                         <div className="search-container">
                             <div className="search-input-wrapper">
@@ -794,7 +794,7 @@ const EventManagementPage = () => {
                     </div>
                 )}
 
-                {/* New Delete Event Modal Component */}
+                {/* Delete Event Modal Component */}
                 <DeleteEventModal
                     isOpen={deleteModalOpen}
                     eventToDelete={eventToDelete}
@@ -803,6 +803,12 @@ const EventManagementPage = () => {
                     isDeleting={isDeleting}
                     onConfirm={confirmDeleteEvent}
                     onCancel={cancelDelete}
+                />
+
+                {/* Export Events Modal Component */}
+                <ExportEventsModal
+                    isOpen={exportModalOpen}
+                    onClose={handleCloseExportModal}
                 />
             </div>
         </Dashboard>
