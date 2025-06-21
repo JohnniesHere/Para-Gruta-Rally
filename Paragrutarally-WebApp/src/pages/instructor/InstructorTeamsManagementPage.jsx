@@ -1,4 +1,4 @@
-// src/pages/instructor/InstructorTeamsManagementPage.jsx
+// src/pages/instructor/InstructorTeamsManagementPage.jsx - Full Translation Support
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -40,7 +40,7 @@ const InstructorTeamsManagementPage = () => {
     useEffect(() => {
         const loadInstructorTeams = async () => {
             if (!userData?.instructorId || userRole !== 'instructor') {
-                setError('Access denied: Instructor credentials required');
+                setError(t('instructor.accessDeniedTeams', 'Access denied: Instructor credentials required'));
                 setLoading(false);
                 return;
             }
@@ -93,14 +93,14 @@ const InstructorTeamsManagementPage = () => {
                 setEvents(eventsData);
             } catch (err) {
                 console.error('Error loading instructor teams:', err);
-                setError('Failed to load teams data. Please try again.');
+                setError(t('instructor.failedToLoadTeams', 'Failed to load teams data. Please try again.'));
             } finally {
                 setLoading(false);
             }
         };
 
         loadInstructorTeams();
-    }, [userData, userRole]);
+    }, [userData, userRole, t]);
 
     // Filter teams based on search
     const filteredTeams = useMemo(() => {
@@ -129,6 +129,18 @@ const InstructorTeamsManagementPage = () => {
     // Check if instructor can edit this team
     const canEditTeam = (team) => {
         return permissions.canEditKid(team, userData, user); // Using canEditKid logic for consistency
+    };
+
+    // Get translated status label - TRANSLATED
+    const getStatusLabel = (status) => {
+        switch (status) {
+            case 'active':
+                return t('common.active', 'Active');
+            case 'inactive':
+                return t('common.inactive', 'Inactive');
+            default:
+                return t('common.active', 'Active');
+        }
     };
 
     if (loading) {
@@ -162,11 +174,11 @@ const InstructorTeamsManagementPage = () => {
             <div className="admin-page">
                 <h1>
                     <Team className="page-title-icon" size={48} />
-                    {t('instructor.myTeams', 'My Teams')}
+                    {t('stats.myTeams', 'My Teams')}
                 </h1>
 
                 <div className="admin-container">
-                    {/* Racing Header */}
+                    {/* Racing Header - TRANSLATED */}
                     <div className="racing-header">
                         <div className="header-content">
                             <div className="title-section">
@@ -181,7 +193,7 @@ const InstructorTeamsManagementPage = () => {
                         </div>
                     </div>
 
-                    {/* Stats Section */}
+                    {/* Stats Section - TRANSLATED */}
                     <div className="stats-grid">
                         <div className="stat-card total">
                             <div className="stat-icon">
@@ -212,7 +224,7 @@ const InstructorTeamsManagementPage = () => {
                             <div className="stat-content">
                                 <h3>{t('stats.activeEvents', 'Active Events')}</h3>
                                 <div className="stat-value">{events.length}</div>
-                                <div className="stat-subtitle">{t('stats.involving YourTeams', 'Involving Your Teams')}</div>
+                                <div className="stat-subtitle">{t('stats.involvingYourTeams', 'Involving Your Teams')}</div>
                             </div>
                         </div>
 
@@ -230,7 +242,7 @@ const InstructorTeamsManagementPage = () => {
                         </div>
                     </div>
 
-                    {/* Search Section */}
+                    {/* Search Section - TRANSLATED */}
                     <div className="search-filter-section">
                         <div className="search-container">
                             <label className="search-label">
@@ -258,7 +270,7 @@ const InstructorTeamsManagementPage = () => {
                         </div>
                     </div>
 
-                    {/* Results Summary */}
+                    {/* Results Summary - TRANSLATED */}
                     {searchTerm && (
                         <div className="results-summary">
                             <span>{t('common.showing', 'Showing')} {filteredTeams.length} {t('common.results', 'results')}</span>
@@ -266,7 +278,7 @@ const InstructorTeamsManagementPage = () => {
                         </div>
                     )}
 
-                    {/* Teams Display */}
+                    {/* Teams Display - TRANSLATED */}
                     {filteredTeams.length === 0 ? (
                         <div className="empty-state">
                             <div className="empty-icon">
@@ -288,7 +300,7 @@ const InstructorTeamsManagementPage = () => {
                                         <Team className="card-icon" size={24} />
                                         <h3 className="card-title">{team.name}</h3>
                                         <span className={`status-badge ${team.status || 'active'}`}>
-                                            {team.status || 'active'}
+                                            {getStatusLabel(team.status)}
                                         </span>
                                     </div>
 
