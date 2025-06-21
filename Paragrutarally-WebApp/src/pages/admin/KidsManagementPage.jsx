@@ -1,11 +1,11 @@
-// src/pages/admin/KidsManagementPage.jsx - TRANSLATED VERSION
+// src/pages/admin/KidsManagementPage.jsx - FIXED VERSION with working team change button
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
 import TeamChangeModal from '../../components/modals/TeamChangeModal.jsx';
 import EditKidModal from '../../components/modals/EditKidModal.jsx';
 import { useTheme } from '../../contexts/ThemeContext';
-import { useLanguage } from '../../contexts/LanguageContext'; // Add this import
+import { useLanguage } from '../../contexts/LanguageContext';
 import { usePermissions, canUserAccessKid } from '../../hooks/usePermissions.jsx';
 import { db } from '../../firebase/config';
 import {
@@ -43,7 +43,7 @@ import './KidsManagementPage.css';
 const KidsManagementPage = () => {
     const navigate = useNavigate();
     const { appliedTheme } = useTheme();
-    const { t } = useLanguage(); // Add this hook
+    const { t } = useLanguage();
     const { permissions, userRole, userData, user, loading: permissionsLoading, error: permissionsError } = usePermissions();
 
     const [kids, setKids] = useState([]);
@@ -281,13 +281,36 @@ const KidsManagementPage = () => {
         handleViewKid(kid);
     };
 
-    // TEAM CHANGE MODAL HANDLERS
+
+    // TEAM CHANGE MODAL HANDLERS - FIXED
     const handleChangeTeam = (kid) => {
-        setSelectedKidForTeamChange(kid);
-        setTeamModalOpen(true);
+        console.log('🎯 handleChangeTeam called for kid:', kid);
+
+        // Create a stable kid object for the TeamChangeModal
+        const modalKidData = {
+            id: kid.id,
+            name: kid.name,
+            teamId: kid.teamId,
+            team: kid.team,
+            // Pass the original data which contains all Firestore fields
+            ...kid.originalData
+        };
+
+        console.log('📦 Prepared modal kid data:', modalKidData);
+
+        // Set the selected kid FIRST
+        setSelectedKidForTeamChange(modalKidData);
+
+        // Then open the modal in the next tick to avoid race conditions
+        setTimeout(() => {
+            console.log('🔓 Opening team modal...');
+            setTeamModalOpen(true);
+        }, 0);
     };
 
     const handleTeamChanged = (kidId, newTeamId) => {
+        console.log(`🔄 Team changed for kid ${kidId} to team ${newTeamId}`);
+
         setKids(prevKids =>
             prevKids.map(kid =>
                 kid.id === kidId
@@ -300,17 +323,27 @@ const KidsManagementPage = () => {
             )
         );
 
-        setTeamModalOpen(false);
-        setSelectedKidForTeamChange(null);
+        // Close modal and clear selection
+        handleCloseTeamModal();
 
         const kidName = kids.find(k => k.id === kidId)?.name;
-        const teamName = getTeamNameById(newTeamId);
+        const teamName = newTeamId ? getTeamNameById(newTeamId) : t('kids.noTeam', 'No Team');
         const action = newTeamId ? t('kids.assignedTo', 'assigned to') : t('kids.removedFrom', 'removed from team');
+
         alert(t('kids.teamChanged', '{kidName} has been {action} {teamName}', {
             kidName,
             action,
             teamName
         }));
+    };
+
+    const handleCloseTeamModal = () => {
+        console.log('❌ Closing team change modal');
+        setTeamModalOpen(false);
+        // Clear the selected kid after a brief delay to prevent re-render issues
+        setTimeout(() => {
+            setSelectedKidForTeamChange(null);
+        }, 100);
     };
 
     // EDIT KID MODAL HANDLERS
@@ -496,6 +529,45 @@ const KidsManagementPage = () => {
                                 <div className="stat-value">{stats.kidsWithTeams}</div>
                             </div>
                         </div>
+                    </div>
+
+                    {/* DEBUG MODAL STATE - Add this temporarily */}
+                    <div style={{
+                        background: '#f0f0f0',
+                        padding: '15px',
+                        margin: '10px 0',
+                        border: '2px solid #007bff',
+                        borderRadius: '8px'
+                    }}>
+                        <h4>🔍 DEBUG: Modal State</h4>
+                        <p><strong>teamModalOpen:</strong> {teamModalOpen ? 'TRUE' : 'FALSE'}</p>
+                        <p><strong>selectedKidForTeamChange:</strong> {selectedKidForTeamChange ? 'EXISTS' : 'NULL'}</p>
+                        <p><strong>selectedKidForTeamChange ID:</strong> {selectedKidForTeamChange?.id || 'none'}</p>
+                        <p><strong>selectedKidForTeamChange Name:</strong> {selectedKidForTeamChange?.name || 'none'}</p>
+
+                        <button
+                            onClick={() => {
+                                console.log('🧪 Test button clicked');
+                                setTeamModalOpen(true);
+                                setSelectedKidForTeamChange({
+                                    id: 'test-123',
+                                    name: 'Test Kid',
+                                    teamId: null,
+                                    team: 'No Team'
+                                });
+                            }}
+                            style={{
+                                background: '#007bff',
+                                color: 'white',
+                                padding: '8px 16px',
+                                border: 'none',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                marginTop: '10px'
+                            }}
+                        >
+                            🧪 TEST: Force Open Modal
+                        </button>
                     </div>
 
                     {/* Search and Filters */}
@@ -697,6 +769,7 @@ const KidsManagementPage = () => {
                                                         className={`btn-action ${kid.team === t('kids.noTeam', 'No Team') ? 'assign-team priority' : 'change-team'}`}
                                                         onClick={(e) => {
                                                             e.stopPropagation();
+                                                            console.log('Team change button clicked for kid:', kid);
                                                             handleChangeTeam(kid);
                                                         }}
                                                         title={kid.team === t('kids.noTeam', 'No Team') ? t('kids.assignTeam', 'Assign Team') : t('kids.changeTeam', 'Change Team')}
@@ -741,15 +814,14 @@ const KidsManagementPage = () => {
                 </div>
 
                 {/* TEAM CHANGE MODAL */}
-                <TeamChangeModal
-                    kid={selectedKidForTeamChange}
-                    isOpen={teamModalOpen}
-                    onClose={() => {
-                        setTeamModalOpen(false);
-                        setSelectedKidForTeamChange(null);
-                    }}
-                    onTeamChanged={handleTeamChanged}
-                />
+                {selectedKidForTeamChange && (
+                    <TeamChangeModal
+                        kid={selectedKidForTeamChange}
+                        isOpen={teamModalOpen && selectedKidForTeamChange !== null}
+                        onClose={handleCloseTeamModal}
+                        onTeamChanged={handleTeamChanged}
+                    />
+                )}
 
                 {/* EDIT KID MODAL */}
                 <EditKidModal

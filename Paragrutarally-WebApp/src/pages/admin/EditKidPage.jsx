@@ -1,14 +1,14 @@
-// src/pages/admin/EditKidPage.jsx - TRANSLATED VERSION
+// src/pages/admin/EditKidPage.jsx - FIXED VERSION with updated instructors query
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
 import CreateUserModal from '../../components/modals/CreateUserModal';
 import { useTheme } from '../../contexts/ThemeContext';
-import { useLanguage } from '../../contexts/LanguageContext'; // Add this import
+import { useLanguage } from '../../contexts/LanguageContext';
 import { usePermissions } from '../../hooks/usePermissions.jsx';
 import { getKidById, updateKid } from '../../services/kidService';
 import { uploadKidPhoto, deleteKidPhoto, getKidPhotoInfo } from '../../services/kidPhotoService';
-import { getAllTeams } from '../../services/teamService';
+import { getAllTeams, getAllInstructors } from '../../services/teamService'; // Updated import
 import { getAllVehicles, updateVehicle, getVehicleById } from '../../services/vehicleService';
 import { getVehiclePhotoInfo } from '../../services/vehiclePhotoService';
 import { validateKid, formStatusOptions } from '../../schemas/kidSchema';
@@ -48,7 +48,7 @@ const EditKidPage = () => {
     const { id } = useParams();
     const location = useLocation();
     const { isDarkMode, appliedTheme } = useTheme();
-    const { t } = useLanguage(); // Add this hook
+    const { t } = useLanguage();
     const { permissions, userRole, userData } = usePermissions();
 
     const [isLoading, setIsLoading] = useState(true);
@@ -142,11 +142,11 @@ const EditKidPage = () => {
                 setPhotoPreview(photoInfo.url);
             }
 
-            // Load supporting data
+            // Load supporting data - FIXED: Use getAllInstructors instead of manual query
             const [teamsData, vehiclesData, instructorsData, parentsData] = await Promise.all([
                 getAllTeams({ active: true }),
                 getAllVehicles(),
-                getDocs(query(collection(db, 'instructors'))),
+                getAllInstructors(), // FIXED: Use the service function instead of manual query
                 getDocs(query(collection(db, 'users'), where('role', '==', 'parent')))
             ]);
 
@@ -160,8 +160,13 @@ const EditKidPage = () => {
             );
             setAvailableVehicles(available);
 
-            setInstructors(instructorsData.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+            // FIXED: instructorsData is already formatted by getAllInstructors()
+            setInstructors(instructorsData);
             setParents(parentsData.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+
+            console.log('✅ Loaded instructors:', instructorsData.length);
+            console.log('✅ Loaded teams:', teamsData.length);
+            console.log('✅ Loaded vehicles:', vehiclesData.length);
 
         } catch (error) {
             console.error('Error loading kid data:', error);

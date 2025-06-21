@@ -1,26 +1,30 @@
-// src/components/TeamChangeModal.jsx - Simple team change modal
+// src/components/TeamChangeModal.jsx - CLEAN VERSION with CSS classes only
 import React, { useState, useEffect } from 'react';
 import { getAllTeams } from '../../services/teamService';
-import { updateKidTeam } from '../../services/kidService'; // You'll need to create this function
+import { updateKidTeam } from '../../services/kidService';
 import {
     IconX as X,
     IconCar as Car,
     IconCheck as Check,
-    IconLoader as Loader
+    IconLoader as Loader,
+    IconAlertTriangle as AlertTriangle,
+    IconUsers as Users,
+    IconUser as User
 } from '@tabler/icons-react';
 import './TeamChangeModal.css';
 
 const TeamChangeModal = ({ kid, isOpen, onClose, onTeamChanged }) => {
     const [teams, setTeams] = useState([]);
-    const [selectedTeamId, setSelectedTeamId] = useState(kid?.teamId || '');
+    const [selectedTeamId, setSelectedTeamId] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        if (isOpen) {
+        if (isOpen && kid) {
             loadTeams();
             setSelectedTeamId(kid?.teamId || '');
+            setError(null);
         }
     }, [isOpen, kid]);
 
@@ -28,19 +32,21 @@ const TeamChangeModal = ({ kid, isOpen, onClose, onTeamChanged }) => {
         try {
             setIsLoading(true);
             setError(null);
+
             const teamsData = await getAllTeams();
-            setTeams(teamsData.filter(team => team.active !== false)); // Only show active teams
+            const activeTeams = teamsData.filter(team => team.active !== false);
+            setTeams(activeTeams);
         } catch (err) {
             console.error('Error loading teams:', err);
-            setError('Failed to load teams');
+            setError(`Failed to load teams: ${err.message}`);
         } finally {
             setIsLoading(false);
         }
     };
 
     const handleSave = async () => {
-        if (selectedTeamId === kid.teamId) {
-            onClose(); // No change needed
+        if (selectedTeamId === (kid?.teamId || '')) {
+            onClose();
             return;
         }
 
@@ -48,17 +54,14 @@ const TeamChangeModal = ({ kid, isOpen, onClose, onTeamChanged }) => {
             setIsSaving(true);
             setError(null);
 
-            // Update the kid's team in Firestore
-            await updateKidTeam(kid.id, selectedTeamId);
+            await updateKidTeam(kid.id, selectedTeamId || null);
 
-            // Notify parent component
-            onTeamChanged(kid.id, selectedTeamId);
-
-            onClose();
+            if (onTeamChanged) {
+                onTeamChanged(kid.id, selectedTeamId || null);
+            }
         } catch (err) {
             console.error('Error updating team:', err);
-            setError('Failed to update team');
-        } finally {
+            setError(`Failed to update team: ${err.message}`);
             setIsSaving(false);
         }
     };
@@ -68,108 +71,201 @@ const TeamChangeModal = ({ kid, isOpen, onClose, onTeamChanged }) => {
             setIsSaving(true);
             setError(null);
 
-            await updateKidTeam(kid.id, null); // Remove team
-            onTeamChanged(kid.id, null);
-            onClose();
+            await updateKidTeam(kid.id, null);
+
+            if (onTeamChanged) {
+                onTeamChanged(kid.id, null);
+            }
         } catch (err) {
             console.error('Error removing team:', err);
-            setError('Failed to remove team');
-        } finally {
+            setError(`Failed to remove from team: ${err.message}`);
             setIsSaving(false);
         }
     };
 
-    if (!isOpen) return null;
+    if (!isOpen || !kid) {
+        return null;
+    }
+
+    const selectedTeam = teams.find(t => t.id === selectedTeamId);
 
     return (
         <div className="modal-overlay" onClick={onClose}>
-            <div className="team-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-content team-modal-content" onClick={(e) => e.stopPropagation()}>
+
+                {/* Modal Header */}
                 <div className="modal-header">
-                    <h3>
-                        <Car size={24} />
+                    <h3 className="modal-title">
+                        <Car size={28} className="modal-title-icon" />
                         Change Team for {kid?.name}
                     </h3>
-                    <button className="close-button" onClick={onClose}>
+                    <button className="modal-close" onClick={onClose} aria-label="Close modal">
                         <X size={20} />
                     </button>
                 </div>
 
-                <div className="modal-content">
+                {/* Modal Body */}
+                <div className="modal-body">
+
+                    {/* Error Alert */}
                     {error && (
-                        <div className="error-message">
-                            {error}
+                        <div className="alert error-alert">
+                            <AlertTriangle size={20} />
+                            <div className="alert-content">
+                                <strong>Error:</strong> {error}
+                                <button
+                                    onClick={() => setError(null)}
+                                    className="alert-dismiss"
+                                >
+                                    Dismiss
+                                </button>
+                            </div>
                         </div>
                     )}
 
+                    {/* Current Team Section */}
+                    <div className="form-section current-team-section">
+                        <div className="section-header">
+                            <Users className="section-icon" size={20} />
+                            <h3>Current Assignment</h3>
+                        </div>
+                        <div className="card current-team-card">
+                            <div className="card-header">
+                                <Car className="card-icon" size={16} />
+                                <span className="card-title">
+                                    <strong>Current Team:</strong> {kid?.team || 'No Team'}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Loading State */}
                     {isLoading ? (
-                        <div className="loading-state">
-                            <Loader className="spinner" size={24} />
-                            Loading teams...
+                        <div className="loading-container">
+                            <div className="loading-spinner"></div>
+                            <p>Loading available teams...</p>
                         </div>
                     ) : (
                         <>
-                            <div className="current-team">
-                                <strong>Current Team:</strong> {kid?.team || 'No Team'}
+                            {/* Team Selection Section */}
+                            <div className="form-section team-selection-section">
+                                <div className="section-header">
+                                    <Car className="section-icon" size={20} />
+                                    <h3>Select New Team</h3>
+                                </div>
+
+                                <div className="form-group">
+                                    <label className="form-label">
+                                        <Users className="label-icon" size={16} />
+                                        Choose Team Assignment
+                                    </label>
+                                    <select
+                                        className="form-select team-select"
+                                        value={selectedTeamId}
+                                        onChange={(e) => setSelectedTeamId(e.target.value)}
+                                        disabled={isSaving}
+                                    >
+                                        <option value="">🚫 No Team Assigned</option>
+                                        {teams.map(team => (
+                                            <option key={team.id} value={team.id}>
+                                                🏁 {team.name} {team.kidIds ? `(${team.kidIds.length} members)` : ''}
+                                            </option>
+                                        ))}
+                                    </select>
+
+                                    {teams.length === 0 && !isLoading && (
+                                        <div className="empty-state">
+                                            <Users className="empty-icon" size={40} />
+                                            <h3>No Active Teams</h3>
+                                            <p>There are currently no active teams available for assignment.</p>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
 
-                            <div className="team-selection">
-                                <label>Select New Team:</label>
-                                <select
-                                    value={selectedTeamId}
-                                    onChange={(e) => setSelectedTeamId(e.target.value)}
-                                    disabled={isSaving}
-                                >
-                                    <option value="">No Team</option>
-                                    {teams.map(team => (
-                                        <option key={team.id} value={team.id}>
-                                            {team.name} {team.maxMembers ? `(${team.currentMembers || 0}/${team.maxMembers})` : ''}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            <div className="team-info">
-                                {selectedTeamId && teams.find(t => t.id === selectedTeamId) && (
-                                    <div className="selected-team-info">
-                                        <h4>Team Info:</h4>
-                                        <p><strong>Name:</strong> {teams.find(t => t.id === selectedTeamId)?.name}</p>
-                                        <p><strong>Instructor:</strong> {teams.find(t => t.id === selectedTeamId)?.instructorName || 'TBD'}</p>
-                                        <p><strong>Members:</strong> {teams.find(t => t.id === selectedTeamId)?.currentMembers || 0}/{teams.find(t => t.id === selectedTeamId)?.maxMembers || '∞'}</p>
+                            {/* Selected Team Preview */}
+                            {selectedTeam && (
+                                <div className="form-section team-preview-section">
+                                    <div className="section-header">
+                                        <Check className="section-icon" size={20} />
+                                        <h3>Team Preview</h3>
                                     </div>
-                                )}
-                            </div>
+                                    <div className="card selected team-preview-card">
+                                        <div className="card-header">
+                                            <Users className="card-icon" size={18} />
+                                            <h4 className="card-title">{selectedTeam.name}</h4>
+                                        </div>
+                                        <div className="card-body">
+                                            <div className="team-details">
+                                                <div className="team-detail-item">
+                                                    <Users size={14} className="detail-icon" />
+                                                    <span><strong>Members:</strong> {selectedTeam.kidIds?.length || 0}</span>
+                                                </div>
+                                                {selectedTeam.description && (
+                                                    <div className="team-detail-item">
+                                                        <Car size={14} className="detail-icon" />
+                                                        <span><strong>Description:</strong> {selectedTeam.description}</span>
+                                                    </div>
+                                                )}
+                                                {selectedTeam.instructorIds && selectedTeam.instructorIds.length > 0 && (
+                                                    <div className="team-detail-item">
+                                                        <User size={14} className="detail-icon" />
+                                                        <span><strong>Instructors:</strong> {selectedTeam.instructorIds.length}</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </>
                     )}
                 </div>
 
+                {/* Modal Actions */}
                 <div className="modal-actions">
+
+                    {/* Remove Button */}
                     {kid?.teamId && (
                         <button
-                            className="btn-remove"
+                            className="btn btn-danger btn-remove-team"
                             onClick={handleRemoveTeam}
                             disabled={isSaving || isLoading}
                         >
-                            Remove from Team
+                            {isSaving ? (
+                                <>
+                                    <div className="loading-spinner-mini"></div>
+                                    Removing...
+                                </>
+                            ) : (
+                                <>
+                                    <X size={16} />
+                                    Remove from Team
+                                </>
+                            )}
                         </button>
                     )}
 
-                    <div className="action-buttons">
+                    {/* Main Action Buttons */}
+                    <div className="modal-action-buttons">
                         <button
-                            className="btn-secondary"
+                            className="btn btn-secondary"
                             onClick={onClose}
                             disabled={isSaving}
                         >
+                            <X size={16} />
                             Cancel
                         </button>
+
                         <button
-                            className="btn-primary"
+                            className={`btn btn-primary ${selectedTeamId === (kid?.teamId || '') ? 'btn-disabled' : ''}`}
                             onClick={handleSave}
-                            disabled={isSaving || isLoading || selectedTeamId === kid?.teamId}
+                            disabled={isSaving || isLoading || selectedTeamId === (kid?.teamId || '')}
                         >
                             {isSaving ? (
                                 <>
-                                    <Loader className="spinner" size={16} />
-                                    Saving...
+                                    <div className="loading-spinner-mini"></div>
+                                    Saving Changes...
                                 </>
                             ) : (
                                 <>

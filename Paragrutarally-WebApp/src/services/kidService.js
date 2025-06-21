@@ -305,23 +305,85 @@ export const searchKids = async (searchTerm) => {
 };
 
 /**
- * Update a kid's team assignment
+ * Update a kid's team assignment with team membership management
  * @param {string} kidId - The kid's document ID
- * @param {string|null} teamId - The new team ID (null to remove team)
+ * @param {string|null} newTeamId - The new team ID (null to remove team)
  * @returns {Promise<void>}
  */
-export const updateKidTeam = async (kidId, teamId) => {
+export const updateKidTeam = async (kidId, newTeamId) => {
     try {
+        console.log(`🔄 Updating kid ${kidId} team assignment...`);
+        console.log(`📝 New team ID: ${newTeamId || 'null (remove from team)'}`);
+
+        // First, get the current kid data to find the old team
+        const kidDoc = await getDoc(doc(db, 'kids', kidId));
+        if (!kidDoc.exists()) {
+            throw new Error('Kid not found');
+        }
+
+        const currentKidData = kidDoc.data();
+        const oldTeamId = currentKidData.teamId;
+
+        console.log(`📊 Current team ID: ${oldTeamId || 'none'}`);
+
+        // Prepare the kid update data
         const updateData = {
-            teamId: teamId || null,
+            teamId: newTeamId || null,
             updatedAt: Timestamp.now()
         };
 
+        // Update the kid document
+        console.log('💾 Updating kid document...');
         await updateDoc(doc(db, 'kids', kidId), updateData);
-        console.log(`Kid team updated successfully: ${kidId} -> ${teamId || 'No Team'}`);
+        console.log('✅ Kid document updated successfully');
+
+        // Now handle team membership updates
+        try {
+            // Import team service functions
+            const { addKidToTeam, removeKidFromTeam } = await import('./teamService');
+
+            // Remove from old team if it exists and is different from new team
+            if (oldTeamId && oldTeamId !== newTeamId) {
+                console.log(`🗑️ Removing kid from old team: ${oldTeamId}`);
+                try {
+                    await removeKidFromTeam(oldTeamId, kidId);
+                    console.log('✅ Successfully removed from old team');
+                } catch (removeError) {
+                    console.warn('⚠️ Failed to remove from old team (continuing anyway):', removeError.message);
+                }
+            }
+
+            // Add to new team if specified and different from old team
+            if (newTeamId && newTeamId !== oldTeamId) {
+                console.log(`➕ Adding kid to new team: ${newTeamId}`);
+                try {
+                    await addKidToTeam(newTeamId, kidId);
+                    console.log('✅ Successfully added to new team');
+                } catch (addError) {
+                    console.warn('⚠️ Failed to add to new team (kid document was updated):', addError.message);
+                }
+            }
+
+        } catch (teamServiceError) {
+            console.warn('⚠️ Team service operations failed, but kid was updated:', teamServiceError.message);
+            // Don't throw here - the main kid update succeeded
+        }
+
+        console.log('🎉 Team assignment update completed successfully');
+
     } catch (error) {
-        console.error('Error updating kid team:', error);
-        throw new Error(`Failed to update kid team: ${error.message}`);
+        console.error('❌ Error updating kid team:', error);
+
+        // Provide more specific error messages
+        if (error.code === 'permission-denied') {
+            throw new Error('Permission denied. You do not have access to update this kid.');
+        } else if (error.code === 'not-found') {
+            throw new Error('Kid not found. It may have been deleted.');
+        } else if (error.message === 'Kid not found') {
+            throw error;
+        } else {
+            throw new Error(`Failed to update team assignment: ${error.message}`);
+        }
     }
 };
 

@@ -1,11 +1,12 @@
-// src/pages/admin/AddTeamPage.jsx - Updated with Fixed Instructor Loading
+// src/pages/admin/AddTeamPage.jsx - Updated with Schema Integration
 import React, {useState, useEffect} from 'react';
 import {useNavigate} from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
 import {useTheme} from '../../contexts/ThemeContext';
 import {usePermissions} from '../../hooks/usePermissions.jsx';
-import {addTeam, getAllInstructors} from '../../services/teamService'; // Added getAllInstructors import
+import {addTeam, getAllInstructors} from '../../services/teamService';
 import {getAllKids} from '../../services/kidService';
+import {createEmptyTeam, validateTeam} from '../../schemas/teamSchema'; // Fixed import path
 import {
     IconUsers as UsersGroup,
     IconPlus as Plus,
@@ -31,17 +32,9 @@ const AddTeamPage = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [instructors, setInstructors] = useState([]);
     const [availableKids, setAvailableKids] = useState([]);
-    const [formData, setFormData] = useState({
-        name: '',
-        description: '',
-        maxCapacity: 15,
-        active: true,
-        instructorIds: [],
-        kidIds: [],
-        teamLeaderId: '',
-        notes: ''
-    });
+    const [formData, setFormData] = useState(createEmptyTeam()); // Use schema function
     const [errors, setErrors] = useState({});
+    const [fieldErrors, setFieldErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
@@ -80,6 +73,12 @@ const AddTeamPage = () => {
         }));
 
         // Clear specific error when user starts typing
+        if (fieldErrors[field]) {
+            setFieldErrors(prev => ({
+                ...prev,
+                [field]: false
+            }));
+        }
         if (errors[field]) {
             setErrors(prev => ({
                 ...prev,
@@ -107,23 +106,29 @@ const AddTeamPage = () => {
     };
 
     const validateForm = () => {
-        const newErrors = {};
+        console.log('🔍 Validating form data:', formData);
 
-        // Required field validations
-        if (!formData.name.trim()) {
-            newErrors.name = 'Team name is required';
+        // Use schema validation
+        const validation = validateTeam(formData, false); // false = not an update
+
+        if (!validation.isValid) {
+            console.log('❌ Validation failed:', validation.errors);
+            setErrors(validation.errors);
+
+            // Set field errors for visual indicators
+            const newFieldErrors = {};
+            Object.keys(validation.errors).forEach(field => {
+                newFieldErrors[field] = true;
+            });
+            setFieldErrors(newFieldErrors);
+
+            return false;
         }
 
-        if (formData.maxCapacity < 1 || formData.maxCapacity > 50) {
-            newErrors.maxCapacity = 'Max capacity must be between 1 and 50';
-        }
-
-        if (formData.kidIds.length > formData.maxCapacity) {
-            newErrors.kidIds = `Cannot assign more kids (${formData.kidIds.length}) than max capacity (${formData.maxCapacity})`;
-        }
-
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
+        console.log('✅ Validation passed');
+        setErrors({});
+        setFieldErrors({});
+        return true;
     };
 
     const handleSubmit = async (e) => {
@@ -161,6 +166,16 @@ const AddTeamPage = () => {
     // Helper function to get instructor display name
     const getInstructorDisplayName = (instructor) => {
         return instructor.displayName || instructor.name || instructor.email || 'Unknown Instructor';
+    };
+
+    // Helper function to get error message for a field
+    const getErrorMessage = (fieldPath) => {
+        return errors[fieldPath];
+    };
+
+    // Check if field has error
+    const hasFieldError = (fieldPath) => {
+        return fieldErrors[fieldPath] || false;
     };
 
     if (isLoading) {
@@ -235,9 +250,9 @@ const AddTeamPage = () => {
                                             value={formData.name}
                                             onChange={(e) => handleInputChange('name', e.target.value)}
                                             placeholder="Thunder Racers, Speed Demons, Lightning Bolts..."
-                                            className="form-input"
+                                            className={`form-input ${hasFieldError('name') ? 'error' : ''}`}
                                         />
-                                        {errors.name && <span className="error-text">{errors.name}</span>}
+                                        {getErrorMessage('name') && <span className="error-text">{getErrorMessage('name')}</span>}
                                     </div>
                                 </div>
 
@@ -253,9 +268,9 @@ const AddTeamPage = () => {
                                             max="50"
                                             value={formData.maxCapacity}
                                             onChange={(e) => handleInputChange('maxCapacity', parseInt(e.target.value) || 15)}
-                                            className="form-input"
+                                            className={`form-input ${hasFieldError('maxCapacity') ? 'error' : ''}`}
                                         />
-                                        {errors.maxCapacity && <span className="error-text">{errors.maxCapacity}</span>}
+                                        {getErrorMessage('maxCapacity') && <span className="error-text">{getErrorMessage('maxCapacity')}</span>}
                                     </div>
                                 </div>
 
@@ -372,10 +387,10 @@ const AddTeamPage = () => {
                                 <h2>🏎️ Team Racers ({formData.kidIds.length}/{formData.maxCapacity})</h2>
                             </div>
 
-                            {errors.kidIds && (
+                            {getErrorMessage('kidIds') && (
                                 <div className="capacity-warning">
                                     <AlertTriangle size={16}/>
-                                    {errors.kidIds}
+                                    {getErrorMessage('kidIds')}
                                 </div>
                             )}
 

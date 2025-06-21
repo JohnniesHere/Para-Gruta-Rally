@@ -1,4 +1,4 @@
-// src/services/teamService.js - Fixed for Users Collection
+// src/services/teamService.js - Updated with Schema Integration and Collection Creation
 import {
     collection,
     doc,
@@ -15,14 +15,19 @@ import {
     arrayRemove
 } from 'firebase/firestore';
 import { db } from '../firebase/config';
+import { createEmptyTeam, validateTeam } from '../schemas/teamSchema';
 
 /**
  * Get all teams with optional filtering
+ * Handles empty collection gracefully
  * @param {Object} filters - Optional filters for querying
  * @returns {Promise<Array>} Array of teams
  */
 export const getAllTeams = async (filters = {}) => {
     try {
+        console.log('📋 Fetching teams from Firestore...');
+
+        // Start with basic collection reference
         let teamsQuery = collection(db, 'teams');
 
         // Apply filters if provided
@@ -34,22 +39,49 @@ export const getAllTeams = async (filters = {}) => {
             teamsQuery = query(teamsQuery, where('active', '==', filters.active));
         }
 
-        // Always order by creation date
-        teamsQuery = query(teamsQuery, orderBy('createdAt', 'desc'));
+        // Try to add ordering - handle empty collection case
+        try {
+            teamsQuery = query(teamsQuery, orderBy('createdAt', 'desc'));
+            const querySnapshot = await getDocs(teamsQuery);
 
-        const querySnapshot = await getDocs(teamsQuery);
-        const teams = [];
-
-        querySnapshot.forEach((doc) => {
-            teams.push({
-                id: doc.id,
-                ...doc.data()
+            const teams = [];
+            querySnapshot.forEach((doc) => {
+                teams.push({
+                    id: doc.id,
+                    ...doc.data()
+                });
             });
-        });
 
-        return teams;
+            console.log(`✅ Successfully fetched ${teams.length} teams`);
+            return teams;
+
+        } catch (orderError) {
+            // If ordering fails (likely because collection is empty), try without ordering
+            console.log('⚠️ Ordering failed, trying without order (collection might be empty)');
+
+            const querySnapshot = await getDocs(collection(db, 'teams'));
+            const teams = [];
+
+            querySnapshot.forEach((doc) => {
+                teams.push({
+                    id: doc.id,
+                    ...doc.data()
+                });
+            });
+
+            console.log(`✅ Fetched ${teams.length} teams (without ordering)`);
+            return teams;
+        }
+
     } catch (error) {
-        console.error('Error getting teams:', error);
+        console.error('❌ Error getting teams:', error);
+
+        // If collection doesn't exist, return empty array
+        if (error.code === 'not-found' || error.message.includes('collection')) {
+            console.log('📝 Teams collection does not exist yet, returning empty array');
+            return [];
+        }
+
         throw new Error(`Failed to fetch teams: ${error.message}`);
     }
 };
@@ -72,7 +104,7 @@ export const getTeamById = async (teamId) => {
             return null;
         }
     } catch (error) {
-        console.error('Error getting team:', error);
+        console.error('❌ Error getting team:', error);
         throw new Error(`Failed to fetch team: ${error.message}`);
     }
 };
@@ -99,7 +131,7 @@ const getUserById = async (userId) => {
         }
         return null;
     } catch (error) {
-        console.error('Error fetching user:', error);
+        console.error('❌ Error fetching user:', error);
         return null;
     }
 };
@@ -152,48 +184,25 @@ export const getTeamWithDetails = async (teamId) => {
             }
         }
 
-        // Fetch team leader information from users collection
-        if (team.teamLeaderId) {
-            console.log('👨‍🏫 Fetching team leader from users collection...');
-            try {
-                const teamLeader = await getUserById(team.teamLeaderId);
-                if (teamLeader) {
-                    teamWithDetails.teamLeader = teamLeader;
-                    console.log('✅ Team leader loaded:', teamLeader.name);
-                } else {
-                    console.warn('⚠️ Team leader not found in users collection');
-                    teamWithDetails.teamLeader = {
-                        id: team.teamLeaderId,
-                        name: 'Unknown Team Leader',
-                        email: null,
-                        phone: null
-                    };
-                }
-            } catch (leaderError) {
-                console.warn('⚠️ Could not load team leader:', leaderError);
-                teamWithDetails.teamLeader = null;
-            }
-        }
-
-        // Fetch additional instructors from users collection
+        // Fetch instructors from users collection (based on instructorIds array)
         if (team.instructorIds && team.instructorIds.length > 0) {
-            console.log('👥 Fetching additional instructors from users collection...');
+            console.log('👥 Fetching instructors from users collection...');
             try {
                 const instructorsPromises = team.instructorIds.map(instructorId => getUserById(instructorId));
                 const instructorsResults = await Promise.all(instructorsPromises);
                 teamWithDetails.instructors = instructorsResults.filter(instructor => instructor !== null);
 
-                console.log('✅ Additional instructors loaded:', teamWithDetails.instructors.length);
+                console.log('✅ Instructors loaded:', teamWithDetails.instructors.length);
             } catch (instructorError) {
-                console.warn('⚠️ Could not load additional instructors:', instructorError);
+                console.warn('⚠️ Could not load instructors:', instructorError);
                 teamWithDetails.instructors = [];
             }
         }
 
+        // Note: Removed teamLeader logic since it's not in the new schema
         console.log('🎉 Team with details completed:', {
             name: teamWithDetails.name,
             kidsCount: teamWithDetails.kids.length,
-            hasLeader: !!teamWithDetails.teamLeader,
             instructorsCount: teamWithDetails.instructors.length
         });
 
@@ -213,7 +222,7 @@ export const getTeamsByInstructor = async (instructorId) => {
     try {
         const teamsQuery = query(
             collection(db, 'teams'),
-            where('teamLeaderId', '==', instructorId),
+            where('instructorIds', 'array-contains', instructorId),
             orderBy('createdAt', 'desc')
         );
 
@@ -229,7 +238,7 @@ export const getTeamsByInstructor = async (instructorId) => {
 
         return teams;
     } catch (error) {
-        console.error('Error getting teams by instructor:', error);
+        console.error('❌ Error getting teams by instructor:', error);
         throw new Error(`Failed to fetch instructor's teams: ${error.message}`);
     }
 };
@@ -267,57 +276,80 @@ export const getAllInstructors = async () => {
         console.log('✅ Instructors loaded:', instructors.length);
         return instructors;
     } catch (error) {
-        console.error('Error getting instructors:', error);
+        console.error('❌ Error getting instructors:', error);
         throw new Error(`Failed to fetch instructors: ${error.message}`);
     }
 };
 
 /**
- * Add a new team
+ * Add a new team with schema validation
+ * Handles creating the collection if it doesn't exist
  * @param {Object} teamData - The team data to add
  * @returns {Promise<string>} The new team's document ID
  */
 export const addTeam = async (teamData) => {
     try {
-        // Ensure required structure
+        console.log('🏁 Creating new team with data:', teamData);
+
+        // Validate team data using schema
+        const validation = validateTeam(teamData, false); // false = not an update
+
+        if (!validation.isValid) {
+            console.error('❌ Team validation failed:', validation.errors);
+            throw new Error(`Validation failed: ${Object.values(validation.errors).join(', ')}`);
+        }
+
+        // Prepare team data with timestamps
         const newTeam = {
-            name: teamData.name || '',
-            description: teamData.description || '',
-            teamLeaderId: teamData.teamLeaderId || '',
-            kidIds: teamData.kidIds || [],
-            instructorIds: teamData.instructorIds || [],
-            maxCapacity: teamData.maxCapacity || 15,
-            active: teamData.active !== undefined ? teamData.active : true,
+            ...validation.data,
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp()
         };
 
+        console.log('📝 Adding team to Firestore...');
+
+        // This will create the collection if it doesn't exist
         const docRef = await addDoc(collection(db, 'teams'), newTeam);
+
+        console.log('✅ Team created successfully with ID:', docRef.id);
         return docRef.id;
+
     } catch (error) {
-        console.error('Error adding team:', error);
+        console.error('❌ Error adding team:', error);
         throw new Error(`Failed to add team: ${error.message}`);
     }
 };
 
 /**
- * Update an existing team
+ * Update an existing team with schema validation
  * @param {string} teamId - The team's document ID
  * @param {Object} updateData - The data to update
  * @returns {Promise<void>}
  */
 export const updateTeam = async (teamId, updateData) => {
     try {
+        console.log('🔄 Updating team:', teamId, 'with data:', updateData);
+
+        // Validate team data using schema
+        const validation = validateTeam(updateData, true); // true = is an update
+
+        if (!validation.isValid) {
+            console.error('❌ Team validation failed:', validation.errors);
+            throw new Error(`Validation failed: ${Object.values(validation.errors).join(', ')}`);
+        }
+
         const teamRef = doc(db, 'teams', teamId);
 
         const updatedData = {
-            ...updateData,
+            ...validation.data,
             updatedAt: serverTimestamp()
         };
 
         await updateDoc(teamRef, updatedData);
+        console.log('✅ Team updated successfully');
+
     } catch (error) {
-        console.error('Error updating team:', error);
+        console.error('❌ Error updating team:', error);
         throw new Error(`Failed to update team: ${error.message}`);
     }
 };
@@ -331,11 +363,12 @@ export const deleteTeam = async (teamId) => {
     try {
         const teamRef = doc(db, 'teams', teamId);
         await deleteDoc(teamRef);
+        console.log('✅ Team deleted successfully');
 
         // TODO: Update kids that were in this team to remove teamId
         // This would require a separate function to update all kids with this teamId
     } catch (error) {
-        console.error('Error deleting team:', error);
+        console.error('❌ Error deleting team:', error);
         throw new Error(`Failed to delete team: ${error.message}`);
     }
 };
@@ -355,7 +388,7 @@ export const addKidToTeam = async (teamId, kidId) => {
             updatedAt: serverTimestamp()
         });
     } catch (error) {
-        console.error('Error adding kid to team:', error);
+        console.error('❌ Error adding kid to team:', error);
         throw new Error(`Failed to add kid to team: ${error.message}`);
     }
 };
@@ -375,7 +408,7 @@ export const removeKidFromTeam = async (teamId, kidId) => {
             updatedAt: serverTimestamp()
         });
     } catch (error) {
-        console.error('Error removing kid from team:', error);
+        console.error('❌ Error removing kid from team:', error);
         throw new Error(`Failed to remove kid from team: ${error.message}`);
     }
 };
@@ -403,7 +436,7 @@ export const searchTeams = async (searchTerm, filters = {}) => {
             return name.includes(searchLower) || description.includes(searchLower);
         });
     } catch (error) {
-        console.error('Error searching teams:', error);
+        console.error('❌ Error searching teams:', error);
         throw new Error(`Failed to search teams: ${error.message}`);
     }
 };
@@ -419,12 +452,12 @@ export const getTeamsSummary = async () => {
         return {
             total: teams.length,
             active: teams.filter(t => t.active !== false).length,
-            withInstructor: teams.filter(t => t.teamLeaderId).length,
+            withInstructors: teams.filter(t => t.instructorIds && t.instructorIds.length > 0).length,
             averageKidsPerTeam: teams.length > 0 ?
                 Math.round(teams.reduce((sum, t) => sum + (t.kidIds?.length || 0), 0) / teams.length) : 0
         };
     } catch (error) {
-        console.error('Error getting teams summary:', error);
+        console.error('❌ Error getting teams summary:', error);
         throw new Error(`Failed to get teams summary: ${error.message}`);
     }
 };

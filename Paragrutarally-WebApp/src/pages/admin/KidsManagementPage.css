@@ -31,7 +31,6 @@
 
 /* Add visual hint for clickable rows */
 .data-table tbody .clickable-row::after {
-    content: "👁️ Click to view";
     position: absolute;
     right: 10px;
     top: 50%;

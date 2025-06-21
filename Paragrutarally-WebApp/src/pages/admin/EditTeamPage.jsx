@@ -1,14 +1,13 @@
-// src/pages/admin/EditTeamPage.jsx - TRANSLATED VERSION
+// src/pages/admin/EditTeamPage.jsx - Updated with Schema Integration
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
 import { useTheme } from '../../contexts/ThemeContext';
-import { useLanguage } from '../../contexts/LanguageContext'; // Add this import
+import { useLanguage } from '../../contexts/LanguageContext';
 import { usePermissions } from '../../hooks/usePermissions.jsx';
-import { getTeamById, updateTeam } from '../../services/teamService';
+import { getTeamById, updateTeam, getAllInstructors } from '../../services/teamService';
 import { getAllKids } from '../../services/kidService';
-import { getDocs, collection, query, where } from 'firebase/firestore';
-import { db } from '../../firebase/config';
+import { validateTeam } from '../../schemas/teamSchema'; // Fixed import path
 import {
     IconUsers as UsersGroup,
     IconDeviceFloppy as Save,
@@ -32,7 +31,7 @@ const EditTeamPage = () => {
     const { id } = useParams();
     const location = useLocation();
     const { isDarkMode, appliedTheme } = useTheme();
-    const { t } = useLanguage(); // Add this hook
+    const { t } = useLanguage();
     const { permissions, userRole } = usePermissions();
 
     const [isLoading, setIsLoading] = useState(true);
@@ -46,10 +45,10 @@ const EditTeamPage = () => {
         active: true,
         instructorIds: [],
         kidIds: [],
-        teamLeaderId: '',
         notes: ''
     });
     const [errors, setErrors] = useState({});
+    const [fieldErrors, setFieldErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [focusInstructor, setFocusInstructor] = useState(false);
     const [focusKids, setFocusKids] = useState(false);
@@ -81,15 +80,15 @@ const EditTeamPage = () => {
 
             // Load supporting data
             const [instructorsData, allKidsData] = await Promise.all([
-                getDocs(query(collection(db, 'instructors'))),
+                getAllInstructors(), // Use the new service function
                 getAllKids()
             ]);
 
-            setInstructors(instructorsData.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+            setInstructors(instructorsData);
             setAllKids(allKidsData);
 
         } catch (error) {
-            console.error('Error loading team data:', error);
+            console.error('❌ Error loading team data:', error);
             setErrors({ general: t('teams.loadDataError', 'Failed to load team data. Please try again.') });
         } finally {
             setIsLoading(false);
@@ -103,6 +102,12 @@ const EditTeamPage = () => {
         }));
 
         // Clear specific error when user starts typing
+        if (fieldErrors[field]) {
+            setFieldErrors(prev => ({
+                ...prev,
+                [field]: false
+            }));
+        }
         if (errors[field]) {
             setErrors(prev => ({
                 ...prev,
@@ -130,26 +135,29 @@ const EditTeamPage = () => {
     };
 
     const validateForm = () => {
-        const newErrors = {};
+        console.log('🔍 Validating form data:', formData);
 
-        // Required field validations
-        if (!formData.name.trim()) {
-            newErrors.name = t('teams.nameRequired', 'Team name is required');
-        }
+        // Use schema validation
+        const validation = validateTeam(formData, true); // true = is an update
 
-        if (formData.maxCapacity < 1 || formData.maxCapacity > 50) {
-            newErrors.maxCapacity = t('teams.capacityRange', 'Max capacity must be between 1 and 50');
-        }
+        if (!validation.isValid) {
+            console.log('❌ Validation failed:', validation.errors);
+            setErrors(validation.errors);
 
-        if (formData.kidIds.length > formData.maxCapacity) {
-            newErrors.kidIds = t('teams.tooManyKids', 'Cannot assign more kids ({current}) than max capacity ({max})', {
-                current: formData.kidIds.length,
-                max: formData.maxCapacity
+            // Set field errors for visual indicators
+            const newFieldErrors = {};
+            Object.keys(validation.errors).forEach(field => {
+                newFieldErrors[field] = true;
             });
+            setFieldErrors(newFieldErrors);
+
+            return false;
         }
 
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
+        console.log('✅ Validation passed');
+        setErrors({});
+        setFieldErrors({});
+        return true;
     };
 
     const handleSubmit = async (e) => {
@@ -161,6 +169,7 @@ const EditTeamPage = () => {
 
         setIsSubmitting(true);
         try {
+            console.log('🔄 Updating team with validated data:', formData);
             await updateTeam(id, formData);
 
             // Navigate back with success message
@@ -171,8 +180,8 @@ const EditTeamPage = () => {
                 }
             });
         } catch (error) {
-            console.error('Error updating team:', error);
-            setErrors({ general: t('teams.updateError', 'Failed to update team. Please try again.') });
+            console.error('❌ Error updating team:', error);
+            setErrors({ general: error.message || t('teams.updateError', 'Failed to update team. Please try again.') });
         } finally {
             setIsSubmitting(false);
         }
@@ -191,6 +200,21 @@ const EditTeamPage = () => {
         return allKids.filter(kid =>
             !kid.teamId || kid.teamId === id
         );
+    };
+
+    // Helper function to get instructor display name
+    const getInstructorDisplayName = (instructor) => {
+        return instructor.displayName || instructor.name || instructor.email || 'Unknown Instructor';
+    };
+
+    // Helper function to get error message for a field
+    const getErrorMessage = (fieldPath) => {
+        return errors[fieldPath];
+    };
+
+    // Check if field has error
+    const hasFieldError = (fieldPath) => {
+        return fieldErrors[fieldPath] || false;
     };
 
     if (isLoading) {
@@ -273,16 +297,16 @@ const EditTeamPage = () => {
                                     <div className="field-wrapper">
                                         <label className="form-label">
                                             <Target className="label-icon" size={16} />
-                                            {t('teams.teamName', 'Team Name')} {t('editKid.required', '*')}
+                                            {t('teams.teamName', 'Team Name')} *
                                         </label>
                                         <input
                                             type="text"
                                             value={formData.name}
                                             onChange={(e) => handleInputChange('name', e.target.value)}
                                             placeholder={t('teams.teamNamePlaceholder', 'Thunder Racers, Speed Demons, Lightning Bolts...')}
-                                            className="form-input racing-input"
+                                            className={`form-input racing-input ${hasFieldError('name') ? 'error' : ''}`}
                                         />
-                                        {errors.name && <span className="error-text">{errors.name}</span>}
+                                        {getErrorMessage('name') && <span className="error-text">{getErrorMessage('name')}</span>}
                                     </div>
                                 </div>
 
@@ -298,9 +322,9 @@ const EditTeamPage = () => {
                                             max="50"
                                             value={formData.maxCapacity}
                                             onChange={(e) => handleInputChange('maxCapacity', parseInt(e.target.value) || 15)}
-                                            className="form-input racing-input"
+                                            className={`form-input racing-input ${hasFieldError('maxCapacity') ? 'error' : ''}`}
                                         />
-                                        {errors.maxCapacity && <span className="error-text">{errors.maxCapacity}</span>}
+                                        {getErrorMessage('maxCapacity') && <span className="error-text">{getErrorMessage('maxCapacity')}</span>}
                                     </div>
                                 </div>
 
@@ -363,46 +387,23 @@ const EditTeamPage = () => {
                                         >
                                             <div className="card-header">
                                                 <User className="card-icon" size={20} />
-                                                <span className="instructor-name">{instructor.name}</span>
+                                                <span className="instructor-name">{getInstructorDisplayName(instructor)}</span>
                                                 {formData.instructorIds.includes(instructor.id) && (
                                                     <Check className="selected-icon" size={16} />
                                                 )}
                                             </div>
-                                            {instructor.phone && (
-                                                <div className="instructor-details">
-                                                    📱 {instructor.phone}
-                                                </div>
-                                            )}
+                                            <div className="instructor-details">
+                                                {instructor.email && (
+                                                    <div>📧 {instructor.email}</div>
+                                                )}
+                                                {instructor.phone && (
+                                                    <div>📱 {instructor.phone}</div>
+                                                )}
+                                            </div>
                                         </div>
                                     ))
                                 )}
                             </div>
-
-                            {formData.instructorIds.length > 0 && (
-                                <div className="team-leader-section">
-                                    <div className="field-wrapper">
-                                        <label className="form-label">
-                                            <Trophy className="label-icon" size={16} />
-                                            {t('teams.teamLeader', 'Team Leader')}
-                                        </label>
-                                        <select
-                                            value={formData.teamLeaderId}
-                                            onChange={(e) => handleInputChange('teamLeaderId', e.target.value)}
-                                            className={`form-select racing-select ${focusInstructor ? 'focus-field' : ''}`}
-                                        >
-                                            <option value="">{t('teams.chooseTeamLeader', '🎯 Choose Team Leader')}</option>
-                                            {formData.instructorIds.map(instructorId => {
-                                                const instructor = instructors.find(i => i.id === instructorId);
-                                                return (
-                                                    <option key={instructorId} value={instructorId}>
-                                                        {t('teams.leaderOption', '👑 {instructorName}', { instructorName: instructor?.name })}
-                                                    </option>
-                                                );
-                                            })}
-                                        </select>
-                                    </div>
-                                </div>
-                            )}
                         </div>
 
                         {/* Kids Assignment Section - Highlighted if focusKids */}
@@ -418,10 +419,10 @@ const EditTeamPage = () => {
                                 </h2>
                             </div>
 
-                            {errors.kidIds && (
+                            {getErrorMessage('kidIds') && (
                                 <div className="capacity-warning">
                                     <AlertTriangle size={16} />
-                                    {errors.kidIds}
+                                    {getErrorMessage('kidIds')}
                                 </div>
                             )}
 
