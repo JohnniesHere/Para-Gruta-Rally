@@ -1,0 +1,591 @@
+/* src/pages/instructor/InstructorPages.css - Instructor-specific styles */
+
+/* ========================================
+   INSTRUCTOR DASHBOARD ENHANCEMENTS
+   ======================================== */
+
+.instructor-dashboard {
+    /* Inherits from global admin-page styles */
+}
+
+/* ========================================
+   INSTRUCTOR KIDS MANAGEMENT
+   ======================================== */
+
+.instructor-kids-page .kid-name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.instructor-kids-page .capabilities {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.instructor-kids-page .phone-number {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 12px;
+    color: var(--text-muted);
+    direction: ltr; /* Keep phone numbers LTR even in RTL mode */
+}
+
+/* ========================================
+   INSTRUCTOR TEAMS MANAGEMENT
+   ======================================== */
+
+.instructor-teams-page .teams-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 20px;
+}
+
+.instructor-teams-page .team-card {
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.instructor-teams-page .team-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--racing-lilach), var(--racing-purple));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.instructor-teams-page .team-card:hover::before {
+    opacity: 1;
+}
+
+.instructor-teams-page .team-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px var(--shadow-color);
+}
+
+.instructor-teams-page .team-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.instructor-teams-page .stat-item {
+    text-align: center;
+    padding: 10px;
+    background: var(--bg-quaternary);
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+}
+
+.instructor-teams-page .capacity-bar {
+    width: 100%;
+    height: 6px;
+    background: var(--border-color);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 15px;
+}
+
+.instructor-teams-page .capacity-fill {
+    height: 100%;
+    background: var(--success-color);
+    transition: width 0.3s ease;
+}
+
+.instructor-teams-page .capacity-fill.full {
+    background: var(--error-color);
+}
+
+/* ========================================
+   INSTRUCTOR VEHICLES MANAGEMENT
+   ======================================== */
+
+.instructor-vehicles-page .assignment-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.instructor-vehicles-page .assignment-status.assigned {
+    color: var(--success-color);
+}
+
+.instructor-vehicles-page .assignment-status.other {
+    color: var(--warning-color);
+}
+
+.instructor-vehicles-page .assignment-status.unassigned {
+    color: var(--text-muted);
+}
+
+.instructor-vehicles-page .vehicle-type-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 8px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.instructor-vehicles-page .license-plate {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    background: var(--bg-tertiary);
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    direction: ltr; /* Keep license plates LTR */
+}
+
+.instructor-vehicles-page .vehicle-capacity {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+/* ========================================
+   PERMISSION-AWARE FIELD DISPLAY
+   ======================================== */
+
+.instructor-field-hidden {
+    color: var(--text-muted);
+    font-style: italic;
+    font-size: 12px;
+}
+
+.instructor-field-hidden::before {
+    content: '🔒 ';
+    opacity: 0.7;
+}
+
+.instructor-field-readonly {
+    background: var(--bg-quaternary);
+    border: 1px dashed var(--border-color);
+    padding: 4px 8px;
+    border-radius: 4px;
+    opacity: 0.8;
+}
+
+.instructor-editable-indicator {
+    color: var(--success-color);
+    font-size: 12px;
+    margin-left: 8px;
+}
+
+.instructor-editable-indicator::before {
+    content: '✏️ ';
+}
+
+/* ========================================
+   INSTRUCTOR ALERT STYLES
+   ======================================== */
+
+.instructor-alert {
+    background: linear-gradient(135deg, var(--racing-light-purple) 0%, #F3E8FF 100%);
+    border: 2px solid var(--racing-purple);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 25px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    animation: slideInFromTop 0.5s ease-out;
+}
+
+.instructor-alert.urgent {
+    background: linear-gradient(135deg, var(--warning-light) 0%, #FDE68A 100%);
+    border-color: var(--warning-color);
+}
+
+.instructor-alert.success {
+    background: linear-gradient(135deg, var(--success-light) 0%, #D1FAE5 100%);
+    border-color: var(--success-color);
+}
+
+.instructor-alert-icon {
+    color: var(--racing-purple);
+    flex-shrink: 0;
+}
+
+.instructor-alert.urgent .instructor-alert-icon {
+    color: var(--warning-color);
+}
+
+.instructor-alert.success .instructor-alert-icon {
+    color: var(--success-color);
+}
+
+.instructor-alert-content {
+    flex: 1;
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+/* ========================================
+   INSTRUCTOR QUICK ACTIONS
+   ======================================== */
+
+.instructor-quick-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.instructor-action-card {
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-radius: 15px;
+    padding: 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+}
+
+.instructor-action-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px var(--shadow-color);
+    border-color: var(--racing-lilach);
+    text-decoration: none;
+    color: inherit;
+}
+
+.instructor-action-icon {
+    color: var(--racing-purple);
+    margin-bottom: 15px;
+    transition: transform 0.3s ease;
+}
+
+.instructor-action-card:hover .instructor-action-icon {
+    transform: scale(1.1);
+}
+
+.instructor-action-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.instructor-action-description {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+/* ========================================
+   INSTRUCTOR DATA TABLES
+   ======================================== */
+
+.instructor-table-container {
+    position: relative;
+}
+
+.instructor-table-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--racing-lilach), var(--racing-purple), var(--racing-lilach));
+    border-radius: 20px 20px 0 0;
+    z-index: 1;
+}
+
+.instructor-data-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--bg-secondary);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px var(--shadow-color);
+}
+
+.instructor-data-table th {
+    background: linear-gradient(135deg, var(--racing-lilach) 0%, var(--racing-purple) 100%);
+    color: var(--text-primary);
+    font-weight: 700;
+    font-size: 14px;
+    padding: 18px 16px;
+    text-align: left;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.instructor-data-table td {
+    padding: 16px;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.instructor-data-table tbody tr {
+    transition: all 0.2s ease;
+}
+
+.instructor-data-table tbody tr:hover {
+    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-quaternary) 100%);
+    transform: scale(1.01);
+}
+
+.instructor-data-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* ========================================
+   INSTRUCTOR STATS CARDS
+   ======================================== */
+
+.instructor-stat-card {
+    background: var(--bg-secondary);
+    border-radius: 20px;
+    padding: 25px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 2px 10px var(--shadow-color);
+}
+
+.instructor-stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--racing-lilach) 0%, var(--racing-purple) 100%);
+    opacity: 0.05;
+    transition: opacity 0.3s ease;
+}
+
+.instructor-stat-card:hover::before {
+    opacity: 0.1;
+}
+
+.instructor-stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px var(--shadow-hover);
+    border-color: var(--racing-lilach);
+}
+
+.instructor-stat-icon {
+    color: var(--racing-purple);
+    opacity: 0.9;
+    flex-shrink: 0;
+    font-size: 40px;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.instructor-stat-content h3 {
+    margin: 0 0 8px 0;
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.instructor-stat-value {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--racing-purple);
+    margin: 0;
+}
+
+.instructor-stat-subtitle {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 5px;
+}
+
+/* ========================================
+   INSTRUCTOR RESPONSIVE DESIGN
+   ======================================== */
+
+@media (max-width: 768px) {
+    .instructor-teams-page .teams-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .instructor-teams-page .team-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .instructor-quick-actions {
+        grid-template-columns: 1fr;
+    }
+
+    .instructor-data-table {
+        font-size: 12px;
+    }
+
+    .instructor-data-table th,
+    .instructor-data-table td {
+        padding: 12px 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    .instructor-stat-card {
+        padding: 20px;
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .instructor-stat-icon {
+        font-size: 30px;
+    }
+
+    .instructor-stat-value {
+        font-size: 24px;
+    }
+
+    .instructor-action-card {
+        padding: 15px;
+    }
+}
+
+/* ========================================
+   INSTRUCTOR DARK MODE ADJUSTMENTS
+   ======================================== */
+
+[data-theme="dark"] .instructor-stat-card,
+.dark-mode .instructor-stat-card,
+.dark .instructor-stat-card {
+    background: var(--bg-secondary);
+}
+
+[data-theme="dark"] .instructor-alert,
+.dark-mode .instructor-alert,
+.dark .instructor-alert {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(139, 92, 246, 0.1) 100%);
+}
+
+[data-theme="dark"] .instructor-alert.urgent,
+.dark-mode .instructor-alert.urgent,
+.dark .instructor-alert.urgent {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0.1) 100%);
+}
+
+[data-theme="dark"] .instructor-alert.success,
+.dark-mode .instructor-alert.success,
+.dark .instructor-alert.success {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.1) 100%);
+}
+
+/* ========================================
+   INSTRUCTOR RTL SUPPORT
+   ======================================== */
+
+.rtl .instructor-stat-card {
+    flex-direction: row-reverse;
+}
+
+.rtl .instructor-action-card {
+    text-align: center; /* Keep centered for RTL */
+}
+
+.rtl .instructor-teams-page .team-stats {
+    direction: rtl;
+}
+
+.rtl .instructor-data-table th,
+.rtl .instructor-data-table td {
+    text-align: right;
+}
+
+.rtl .instructor-quick-actions {
+    direction: rtl;
+}
+
+/* Keep numbers and technical data LTR even in RTL mode */
+.rtl .instructor-stat-value,
+.rtl .phone-number,
+.rtl .license-plate,
+.rtl .vehicle-capacity {
+    direction: ltr;
+    display: inline-block;
+}
+
+/* ========================================
+   INSTRUCTOR LOADING STATES
+   ======================================== */
+
+.instructor-loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    text-align: center;
+    color: var(--text-muted);
+}
+
+.instructor-loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--border-color);
+    border-top: 4px solid var(--racing-purple);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+}
+
+.instructor-empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-quaternary) 100%);
+    border-radius: 20px;
+    border: 2px dashed var(--racing-purple);
+}
+
+.instructor-empty-icon {
+    font-size: 80px;
+    margin-bottom: 20px;
+    opacity: 0.6;
+    color: var(--racing-purple);
+    animation: bounce 2s infinite;
+}
+
+.instructor-empty-state h3 {
+    color: var(--text-primary);
+    margin-bottom: 15px;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.instructor-empty-state p {
+    margin-bottom: 30px;
+    font-size: 16px;
+    color: var(--text-secondary);
+}

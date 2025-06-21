@@ -1,6 +1,5 @@
-// src/pages/host/HostDashboardPage.jsx - Enhanced Host/Guest Dashboard
+// src/pages/parent/ParentDashboardPage.jsx
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import {
     collection,
     query,
@@ -15,43 +14,38 @@ import { usePermissions } from '../../hooks/usePermissions';
 import { useLanguage } from '../../contexts/LanguageContext';
 import Dashboard from '../../components/layout/Dashboard';
 import {
-    IconHome as Home,
+    IconUser as User,
     IconUsers as Users,
-    IconCalendar as Calendar,
-    IconSearch as Search,
-    IconFilter as Filter,
+    IconChevronDown as ChevronDown,
+    IconChevronUp as ChevronUp,
     IconEdit as Edit,
     IconDeviceFloppy as Save,
     IconX as X,
-    IconEye as Eye,
+    IconCalendar as Calendar,
     IconMapPin as MapPin,
-    IconClock as Clock,
+    IconPhone as Phone,
+    IconMail as Mail,
     IconFileText as FileText,
-    IconUsersGroup as Team,
-    IconPhoto as Photo,
-    IconChevronDown as ChevronDown,
-    IconChevronUp as ChevronUp
+    IconAlertTriangle as Alert,
+    IconCheck as Check
 } from '@tabler/icons-react';
 
-const HostDashboardPage = () => {
+const ParentDashboardPage = () => {
     const { permissions, userRole, userData, user } = usePermissions();
     const { t } = useLanguage();
 
-    const [events, setEvents] = useState([]);
-    const [registeredKids, setRegisteredKids] = useState([]);
+    const [kids, setKids] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [searchTerm, setSearchTerm] = useState('');
-    const [eventFilter, setEventFilter] = useState('');
     const [expandedKid, setExpandedKid] = useState(null);
     const [editingComments, setEditingComments] = useState({});
     const [commentTexts, setCommentTexts] = useState({});
     const [saving, setSaving] = useState({});
 
     useEffect(() => {
-        const loadHostData = async () => {
-            if (userRole !== 'host' && userRole !== 'guest') {
-                setError('Access denied: Host/Guest credentials required');
+        const loadParentKids = async () => {
+            if (!user?.uid || userRole !== 'parent') {
+                setError('Access denied: Parent credentials required');
                 setLoading(false);
                 return;
             }
@@ -59,52 +53,45 @@ const HostDashboardPage = () => {
             try {
                 setError('');
 
-                // Load upcoming events
-                const eventsQuery = query(
-                    collection(db, 'events'),
-                    orderBy('eventDate', 'desc')
-                );
-                const eventsSnapshot = await getDocs(eventsQuery);
-                const eventsData = eventsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-                // Load kids registered for events (guests can only see kids registered for events)
+                // Load kids where parentInfo.parentId matches current user
                 const kidsQuery = query(
                     collection(db, 'kids'),
+                    where('parentInfo.parentId', '==', user.uid),
                     orderBy('personalInfo.firstName', 'asc')
                 );
+
                 const kidsSnapshot = await getDocs(kidsQuery);
-                const allKids = kidsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                const kidsData = kidsSnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
 
-                // Filter kids that are registered for events (have teams assigned)
-                const registeredKids = allKids.filter(kid => kid.teamId);
-
-                setEvents(eventsData);
-                setRegisteredKids(registeredKids);
+                setKids(kidsData);
 
                 // Initialize comment texts
                 const initialComments = {};
-                registeredKids.forEach(kid => {
-                    initialComments[kid.id] = kid.comments?.organization || '';
+                kidsData.forEach(kid => {
+                    initialComments[kid.id] = kid.comments?.parent || '';
                 });
                 setCommentTexts(initialComments);
 
             } catch (err) {
-                console.error('Error loading host data:', err);
-                setError('Failed to load data. Please try again.');
+                console.error('Error loading parent kids:', err);
+                setError('Failed to load your kids data. Please try again.');
             } finally {
                 setLoading(false);
             }
         };
 
-        loadHostData();
-    }, [userRole]);
+        loadParentKids();
+    }, [user, userRole]);
 
     // Helper function to safely display field data based on permissions
     const getFieldValue = (kid, fieldPath, defaultValue = '-') => {
         const context = { kidData: kid, userData, user };
 
         if (!permissions.canViewField(fieldPath, context)) {
-            return null; // Don't show restricted fields for guests
+            return null; // Don't show restricted fields
         }
 
         const value = fieldPath.split('.').reduce((obj, key) => obj?.[key], kid);
@@ -116,34 +103,21 @@ const HostDashboardPage = () => {
         return permissions.canEditField(fieldPath, context);
     };
 
-    // Filter kids based on search and event
-    const filteredKids = registeredKids.filter(kid => {
-        const firstName = getFieldValue(kid, 'personalInfo.firstName');
-        const lastName = getFieldValue(kid, 'personalInfo.lastName');
-        const participantNumber = getFieldValue(kid, 'participantNumber');
+    const toggleKidExpansion = (kidId) => {
+        setExpandedKid(expandedKid === kidId ? null : kidId);
+    };
 
-        const matchesSearch = searchTerm === '' ||
-            firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            participantNumber?.toString().includes(searchTerm);
-
-        const matchesEvent = eventFilter === '' ||
-            events.find(e => e.id === eventFilter && e.participatingTeams?.includes(kid.teamId));
-
-        return matchesSearch && matchesEvent;
-    });
-
-    // Comment editing functions
     const startEditingComments = (kidId) => {
         setEditingComments({ ...editingComments, [kidId]: true });
     };
 
     const cancelEditingComments = (kidId) => {
         setEditingComments({ ...editingComments, [kidId]: false });
-        const kid = registeredKids.find(k => k.id === kidId);
+        // Reset to original value
+        const kid = kids.find(k => k.id === kidId);
         setCommentTexts({
             ...commentTexts,
-            [kidId]: kid.comments?.organization || ''
+            [kidId]: kid.comments?.parent || ''
         });
     };
 
@@ -153,17 +127,17 @@ const HostDashboardPage = () => {
         try {
             const kidRef = doc(db, 'kids', kidId);
             await updateDoc(kidRef, {
-                'comments.organization': commentTexts[kidId] || ''
+                'comments.parent': commentTexts[kidId] || ''
             });
 
             // Update local state
-            setRegisteredKids(registeredKids.map(kid =>
+            setKids(kids.map(kid =>
                 kid.id === kidId
                     ? {
                         ...kid,
                         comments: {
                             ...kid.comments,
-                            organization: commentTexts[kidId] || ''
+                            parent: commentTexts[kidId] || ''
                         }
                     }
                     : kid
@@ -178,13 +152,14 @@ const HostDashboardPage = () => {
         }
     };
 
-    const toggleKidExpansion = (kidId) => {
-        setExpandedKid(expandedKid === kidId ? null : kidId);
+    const getFormStatus = (kid) => {
+        if (kid.signedFormStatus === 'completed' && kid.signedDeclaration) {
+            return { status: 'complete', label: 'Complete', color: 'success' };
+        } else if (kid.signedFormStatus === 'pending' || !kid.signedDeclaration) {
+            return { status: 'pending', label: 'Pending', color: 'warning' };
+        }
+        return { status: 'incomplete', label: 'Incomplete', color: 'danger' };
     };
-
-    // Get upcoming events
-    const upcomingEvents = events.filter(event => new Date(event.eventDate) >= new Date());
-    const pastEvents = events.filter(event => new Date(event.eventDate) < new Date());
 
     if (loading) {
         return (
@@ -212,12 +187,16 @@ const HostDashboardPage = () => {
         );
     }
 
+    // Count kids by form status
+    const completeKids = kids.filter(kid => getFormStatus(kid).status === 'complete').length;
+    const pendingKids = kids.filter(kid => getFormStatus(kid).status !== 'complete').length;
+
     return (
         <Dashboard userRole={userRole}>
             <div className="admin-page">
                 <h1>
-                    <Home className="page-title-icon" size={48} />
-                    {t('host.dashboard', 'Host Dashboard')}
+                    <Users className="page-title-icon" size={48} />
+                    {t('parent.myKids', 'My Kids')}
                 </h1>
 
                 <div className="admin-container">
@@ -226,11 +205,11 @@ const HostDashboardPage = () => {
                         <div className="header-content">
                             <div className="title-section">
                                 <h1>
-                                    <Home size={40} />
-                                    {t('common.welcome', 'Welcome')}, {userData?.displayName || user?.displayName || t('host.host', 'Host')}!
+                                    <User size={40} />
+                                    {t('common.welcome', 'Welcome')}, {userData?.displayName || user?.displayName || t('parent.parent', 'Parent')}!
                                 </h1>
                                 <p className="subtitle">
-                                    {t('host.dashboardSubtitle', 'View event participants and manage organization notes')}
+                                    {t('parent.dashboardSubtitle', 'View and manage your children\'s information')}
                                 </p>
                             </div>
                         </div>
@@ -240,134 +219,71 @@ const HostDashboardPage = () => {
                     <div className="stats-grid">
                         <div className="stat-card total">
                             <div className="stat-icon">
-                                <Calendar size={40} />
+                                <Users size={40} />
                             </div>
                             <div className="stat-content">
-                                <h3>{t('stats.totalEvents', 'Total Events')}</h3>
-                                <div className="stat-value">{events.length}</div>
-                                <div className="stat-subtitle">{t('stats.inSystem', 'In System')}</div>
+                                <h3>{t('stats.totalKids', 'Total Kids')}</h3>
+                                <div className="stat-value">{kids.length}</div>
+                                <div className="stat-subtitle">{t('stats.registered', 'Registered')}</div>
                             </div>
                         </div>
 
-                        <div className="stat-card instructors">
+                        <div className="stat-card parents">
                             <div className="stat-icon">
-                                <Calendar size={40} />
+                                <Check size={40} />
                             </div>
                             <div className="stat-content">
-                                <h3>{t('stats.upcoming', 'Upcoming')}</h3>
-                                <div className="stat-value">{upcomingEvents.length}</div>
-                                <div className="stat-subtitle">{t('stats.futureEvents', 'Future Events')}</div>
+                                <h3>{t('stats.complete', 'Complete')}</h3>
+                                <div className="stat-value">{completeKids}</div>
+                                <div className="stat-subtitle">{t('stats.formsComplete', 'Forms Complete')}</div>
                             </div>
                         </div>
 
                         <div className="stat-card kids">
                             <div className="stat-icon">
-                                <Users size={40} />
+                                <Alert size={40} />
                             </div>
                             <div className="stat-content">
-                                <h3>{t('stats.participants', 'Participants')}</h3>
-                                <div className="stat-value">{registeredKids.length}</div>
-                                <div className="stat-subtitle">{t('stats.registered', 'Registered')}</div>
-                            </div>
-                        </div>
-
-                        <div className="stat-card teams">
-                            <div className="stat-icon">
-                                <Clock size={40} />
-                            </div>
-                            <div className="stat-content">
-                                <h3>{t('stats.pastEvents', 'Past Events')}</h3>
-                                <div className="stat-value">{pastEvents.length}</div>
-                                <div className="stat-subtitle">{t('stats.completed', 'Completed')}</div>
+                                <h3>{t('stats.pending', 'Pending')}</h3>
+                                <div className="stat-value">{pendingKids}</div>
+                                <div className="stat-subtitle">{t('stats.requiresAttention', 'Requires Attention')}</div>
                             </div>
                         </div>
                     </div>
 
-                    {/* Search and Filter Section */}
-                    <div className="search-filter-section">
-                        <div className="search-container">
-                            <label className="search-label">
-                                <Search size={16} />
-                                {t('common.search', 'Search')}
-                            </label>
-                            <div className="search-input-wrapper">
-                                <Search className="search-icon" size={18} />
-                                <input
-                                    type="text"
-                                    className="search-input"
-                                    placeholder={t('host.searchParticipantsPlaceholder', 'Search participants by name or number...')}
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                />
-                                {searchTerm && (
-                                    <button
-                                        className="clear-search"
-                                        onClick={() => setSearchTerm('')}
-                                    >
-                                        ✕
-                                    </button>
-                                )}
-                            </div>
-                        </div>
-
-                        <div className="filter-container">
-                            <label className="filter-label">
-                                <Filter size={16} />
-                                {t('common.filterByEvent', 'Filter by Event')}
-                            </label>
-                            <select
-                                className="filter-select"
-                                value={eventFilter}
-                                onChange={(e) => setEventFilter(e.target.value)}
-                            >
-                                <option value="">{t('common.allEvents', 'All Events')}</option>
-                                {events.map(event => (
-                                    <option key={event.id} value={event.id}>
-                                        {event.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                    </div>
-
-                    {/* Results Summary */}
-                    {(searchTerm || eventFilter) && (
-                        <div className="results-summary">
-                            <span>{t('common.showing', 'Showing')} {filteredKids.length} {t('common.results', 'results')}</span>
-                            {searchTerm && <span className="search-applied">for "{searchTerm}"</span>}
-                            {eventFilter && <span className="filter-applied">in event "{events.find(e => e.id === eventFilter)?.name}"</span>}
+                    {/* Alerts */}
+                    {pendingKids > 0 && (
+                        <div className="alert warning-alert">
+                            <Alert size={20} />
+                            <span>
+                                {t('parent.pendingFormsAlert', 'You have {count} kids with pending forms that need completion',
+                                    { count: pendingKids })}
+                            </span>
                         </div>
                     )}
 
-                    {/* Participants List */}
-                    {filteredKids.length === 0 ? (
+                    {/* Kids List */}
+                    {kids.length === 0 ? (
                         <div className="empty-state">
                             <div className="empty-icon">
                                 <Users size={80} />
                             </div>
-                            <h3>{t('host.noParticipantsFound', 'No Participants Found')}</h3>
-                            <p>
-                                {searchTerm || eventFilter
-                                    ? t('host.noParticipantsMatchFilter', 'No participants match your current filter')
-                                    : t('host.noParticipantsRegistered', 'No participants are registered for events yet')
-                                }
-                            </p>
+                            <h3>{t('parent.noKidsFound', 'No Kids Found')}</h3>
+                            <p>{t('parent.noKidsRegistered', 'You don\'t have any kids registered in the system yet')}</p>
                         </div>
                     ) : (
-                        <div className="participants-list" style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                            {filteredKids.map(kid => {
+                        <div className="kids-list" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                            {kids.map(kid => {
+                                const formStatus = getFormStatus(kid);
                                 const isExpanded = expandedKid === kid.id;
                                 const isEditingComment = editingComments[kid.id];
                                 const isSavingComment = saving[kid.id];
-                                const firstName = getFieldValue(kid, 'personalInfo.firstName');
-                                const lastName = getFieldValue(kid, 'personalInfo.lastName');
-                                const participantNumber = getFieldValue(kid, 'participantNumber');
 
                                 return (
-                                    <div key={kid.id} className="card participant-card" style={{ padding: '20px' }}>
-                                        {/* Participant Header */}
+                                    <div key={kid.id} className="card kid-card" style={{ padding: '20px' }}>
+                                        {/* Kid Header */}
                                         <div
-                                            className="participant-header"
+                                            className="kid-header"
                                             style={{
                                                 display: 'flex',
                                                 justifyContent: 'space-between',
@@ -378,30 +294,30 @@ const HostDashboardPage = () => {
                                             onClick={() => toggleKidExpansion(kid.id)}
                                         >
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                                                <Users size={24} style={{ color: 'var(--racing-purple)' }} />
+                                                <User size={24} style={{ color: 'var(--racing-purple)' }} />
                                                 <div>
                                                     <h3 style={{ margin: 0, color: 'var(--text-primary)' }}>
-                                                        {firstName} {lastName}
+                                                        {getFieldValue(kid, 'personalInfo.firstName')} {getFieldValue(kid, 'personalInfo.lastName')}
                                                     </h3>
                                                     <p style={{ margin: 0, fontSize: '14px', color: 'var(--text-muted)' }}>
-                                                        {t('common.participantNumber', 'Participant #')}: {participantNumber}
+                                                        {t('common.participantNumber', 'Participant #')}: {getFieldValue(kid, 'participantNumber')}
                                                     </p>
                                                 </div>
                                             </div>
 
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                                                <span className={`status-badge ${getFieldValue(kid, 'signedFormStatus') === 'completed' ? 'ready' : 'pending'}`}>
-                                                    {getFieldValue(kid, 'signedFormStatus', 'pending')}
+                                                <span className={`status-badge ${formStatus.color === 'success' ? 'ready' : formStatus.color === 'warning' ? 'pending' : 'inactive'}`}>
+                                                    {formStatus.label}
                                                 </span>
                                                 {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                                             </div>
                                         </div>
 
-                                        {/* Expanded Participant Details */}
+                                        {/* Expanded Kid Details */}
                                         {isExpanded && (
-                                            <div className="participant-details" style={{ paddingTop: '20px', borderTop: '1px solid var(--border-color)' }}>
+                                            <div className="kid-details" style={{ paddingTop: '20px', borderTop: '1px solid var(--border-color)' }}>
 
-                                                {/* Basic Information - Only what guests can see */}
+                                                {/* Personal Information */}
                                                 <div className="detail-section" style={{ marginBottom: '25px' }}>
                                                     <h4 style={{
                                                         margin: '0 0 15px 0',
@@ -410,17 +326,29 @@ const HostDashboardPage = () => {
                                                         alignItems: 'center',
                                                         gap: '8px'
                                                     }}>
-                                                        <Users size={18} />
-                                                        {t('host.participantInfo', 'Participant Information')}
+                                                        <User size={18} />
+                                                        {t('parent.personalInfo', 'Personal Information')}
                                                     </h4>
 
                                                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '15px' }}>
                                                         <div>
                                                             <label style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>
-                                                                {t('common.fullName', 'Full Name')}
+                                                                {t('common.dateOfBirth', 'Date of Birth')}
                                                             </label>
                                                             <div style={{ color: 'var(--text-primary)' }}>
-                                                                {firstName} {lastName}
+                                                                {getFieldValue(kid, 'personalInfo.dateOfBirth')
+                                                                    ? new Date(getFieldValue(kid, 'personalInfo.dateOfBirth')).toLocaleDateString()
+                                                                    : '-'
+                                                                }
+                                                            </div>
+                                                        </div>
+
+                                                        <div>
+                                                            <label style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>
+                                                                {t('common.address', 'Address')}
+                                                            </label>
+                                                            <div style={{ color: 'var(--text-primary)' }}>
+                                                                {getFieldValue(kid, 'personalInfo.address')}
                                                             </div>
                                                         </div>
 
@@ -432,21 +360,86 @@ const HostDashboardPage = () => {
                                                                 {getFieldValue(kid, 'personalInfo.capabilities') || t('common.none', 'None')}
                                                             </div>
                                                         </div>
+                                                    </div>
+                                                </div>
 
+                                                {/* Parent Information */}
+                                                <div className="detail-section" style={{ marginBottom: '25px' }}>
+                                                    <h4 style={{
+                                                        margin: '0 0 15px 0',
+                                                        color: 'var(--text-primary)',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: '8px'
+                                                    }}>
+                                                        <Phone size={18} />
+                                                        {t('parent.contactInfo', 'Contact Information')}
+                                                    </h4>
+
+                                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '15px' }}>
                                                         <div>
                                                             <label style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>
-                                                                {t('common.team', 'Team')}
+                                                                {t('common.parentName', 'Parent Name')}
                                                             </label>
                                                             <div style={{ color: 'var(--text-primary)' }}>
-                                                                <span className="badge secondary">
-                                                                    {getFieldValue(kid, 'teamId') || t('common.unassigned', 'Unassigned')}
-                                                                </span>
+                                                                {getFieldValue(kid, 'parentInfo.name')}
                                                             </div>
                                                         </div>
 
                                                         <div>
                                                             <label style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>
-                                                                {t('common.status', 'Status')}
+                                                                {t('common.email', 'Email')}
+                                                            </label>
+                                                            <div style={{ color: 'var(--text-primary)', fontFamily: 'monospace' }}>
+                                                                {getFieldValue(kid, 'parentInfo.email')}
+                                                            </div>
+                                                        </div>
+
+                                                        <div>
+                                                            <label style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>
+                                                                {t('common.phone', 'Phone')}
+                                                            </label>
+                                                            <div style={{ color: 'var(--text-primary)', fontFamily: 'monospace', direction: 'ltr' }}>
+                                                                {getFieldValue(kid, 'parentInfo.phone')}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Grandparents Info */}
+                                                    {getFieldValue(kid, 'parentInfo.grandparentsInfo.names') && (
+                                                        <div style={{ marginTop: '15px' }}>
+                                                            <label style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>
+                                                                {t('parent.grandparentsInfo', 'Grandparents Information')}
+                                                            </label>
+                                                            <div style={{ color: 'var(--text-primary)' }}>
+                                                                <div>{getFieldValue(kid, 'parentInfo.grandparentsInfo.names')}</div>
+                                                                {getFieldValue(kid, 'parentInfo.grandparentsInfo.phone') && (
+                                                                    <div style={{ fontFamily: 'monospace', direction: 'ltr', fontSize: '14px', color: 'var(--text-secondary)' }}>
+                                                                        {getFieldValue(kid, 'parentInfo.grandparentsInfo.phone')}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                {/* Forms Status */}
+                                                <div className="detail-section" style={{ marginBottom: '25px' }}>
+                                                    <h4 style={{
+                                                        margin: '0 0 15px 0',
+                                                        color: 'var(--text-primary)',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: '8px'
+                                                    }}>
+                                                        <FileText size={18} />
+                                                        {t('parent.formsStatus', 'Forms & Status')}
+                                                    </h4>
+
+                                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
+                                                        <div>
+                                                            <label style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>
+                                                                {t('common.signedFormStatus', 'Form Status')}
                                                             </label>
                                                             <div>
                                                                 <span className={`status-badge ${getFieldValue(kid, 'signedFormStatus') === 'completed' ? 'ready' : 'pending'}`}>
@@ -454,33 +447,22 @@ const HostDashboardPage = () => {
                                                                 </span>
                                                             </div>
                                                         </div>
+
+                                                        <div>
+                                                            <label style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>
+                                                                {t('common.declaration', 'Declaration')}
+                                                            </label>
+                                                            <div>
+                                                                <span className={`status-badge ${getFieldValue(kid, 'signedDeclaration') ? 'ready' : 'pending'}`}>
+                                                                    {getFieldValue(kid, 'signedDeclaration') ? 'Signed' : 'Pending'}
+                                                                </span>
+                                                            </div>
+                                                        </div>
                                                     </div>
-
-                                                    {getFieldValue(kid, 'personalInfo.announcersNotes') && (
-                                                        <div style={{ marginTop: '15px' }}>
-                                                            <label style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>
-                                                                {t('host.announcersNotes', 'Announcer\'s Notes')}
-                                                            </label>
-                                                            <div style={{ color: 'var(--text-primary)', fontStyle: 'italic' }}>
-                                                                {getFieldValue(kid, 'personalInfo.announcersNotes')}
-                                                            </div>
-                                                        </div>
-                                                    )}
-
-                                                    {getFieldValue(kid, 'additionalComments') && (
-                                                        <div style={{ marginTop: '15px' }}>
-                                                            <label style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>
-                                                                {t('host.additionalComments', 'Additional Comments')}
-                                                            </label>
-                                                            <div style={{ color: 'var(--text-primary)' }}>
-                                                                {getFieldValue(kid, 'additionalComments')}
-                                                            </div>
-                                                        </div>
-                                                    )}
                                                 </div>
 
-                                                {/* Organization Comments - Editable by guests */}
-                                                {canEditField(kid, 'comments.organization') && (
+                                                {/* Parent Comments - Editable */}
+                                                {canEditField(kid, 'comments.parent') && (
                                                     <div className="detail-section">
                                                         <h4 style={{
                                                             margin: '0 0 15px 0',
@@ -490,7 +472,7 @@ const HostDashboardPage = () => {
                                                             gap: '8px'
                                                         }}>
                                                             <Edit size={18} />
-                                                            {t('host.organizationComments', 'Organization Comments')}
+                                                            {t('parent.myComments', 'My Comments')}
                                                         </h4>
 
                                                         {isEditingComment ? (
@@ -502,7 +484,7 @@ const HostDashboardPage = () => {
                                                                         ...commentTexts,
                                                                         [kid.id]: e.target.value
                                                                     })}
-                                                                    placeholder={t('host.addOrgCommentsPlaceholder', 'Add organization notes for this participant...')}
+                                                                    placeholder={t('parent.addCommentsPlaceholder', 'Add your comments about your child...')}
                                                                     rows={4}
                                                                     style={{ minHeight: '100px' }}
                                                                 />
@@ -540,14 +522,14 @@ const HostDashboardPage = () => {
                                                                     marginBottom: '10px',
                                                                     color: 'var(--text-primary)'
                                                                 }}>
-                                                                    {commentTexts[kid.id] || t('host.noOrgCommentsYet', 'No organization comments added yet')}
+                                                                    {commentTexts[kid.id] || t('parent.noCommentsYet', 'No comments added yet')}
                                                                 </div>
                                                                 <button
                                                                     className="btn btn-primary btn-sm"
                                                                     onClick={() => startEditingComments(kid.id)}
                                                                 >
                                                                     <Edit size={14} />
-                                                                    {commentTexts[kid.id] ? t('common.edit', 'Edit') : t('host.addOrgComments', 'Add Comments')}
+                                                                    {commentTexts[kid.id] ? t('common.edit', 'Edit') : t('parent.addComments', 'Add Comments')}
                                                                 </button>
                                                             </div>
                                                         )}
@@ -560,24 +542,10 @@ const HostDashboardPage = () => {
                             })}
                         </div>
                     )}
-
-                    {/* Quick Actions */}
-                    <div className="racing-actions" style={{ marginTop: '30px' }}>
-                        <Link to="/gallery" className="btn btn-primary">
-                            <Photo size={18} />
-                            {t('host.viewGallery', 'View Gallery')}
-                        </Link>
-                        {upcomingEvents.length > 0 && (
-                            <div className="btn btn-secondary" style={{ cursor: 'default' }}>
-                                <Calendar size={18} />
-                                {t('host.upcomingEvents', 'Next Event')}: {upcomingEvents[0]?.name}
-                            </div>
-                        )}
-                    </div>
                 </div>
             </div>
         </Dashboard>
     );
 };
 
-export default HostDashboardPage;
+export default ParentDashboardPage;

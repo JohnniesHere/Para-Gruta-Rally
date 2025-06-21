@@ -1,0 +1,889 @@
+/* src/pages/host/HostPages.css - Host/Guest-specific styles */
+
+/* ========================================
+   HOST DASHBOARD STYLES
+   ======================================== */
+
+.host-dashboard {
+    /* Inherits from global admin-page styles */
+}
+
+/* ========================================
+   HOST PARTICIPANTS LIST
+   ======================================== */
+
+.host-participants-list .participant-card {
+    transition: all 0.3s ease;
+    border: 2px solid var(--border-color);
+    position: relative;
+    overflow: hidden;
+}
+
+.host-participants-list .participant-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--racing-lilach), var(--racing-purple));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.host-participants-list .participant-card:hover::before {
+    opacity: 1;
+}
+
+.host-participants-list .participant-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px var(--shadow-color);
+    border-color: var(--racing-lilach);
+}
+
+.host-participants-list .participant-header {
+    transition: all 0.3s ease;
+    padding: 5px;
+    border-radius: 8px;
+}
+
+.host-participants-list .participant-header:hover {
+    background: var(--bg-tertiary);
+}
+
+/* ========================================
+   PARTICIPANT DETAILS SECTION
+   ======================================== */
+
+.host-participant-details .detail-section {
+    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-quaternary) 100%);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.host-participant-details .detail-section:hover {
+    box-shadow: 0 5px 15px var(--shadow-color);
+    transform: translateY(-2px);
+}
+
+.host-participant-details .detail-section h4 {
+    color: var(--racing-purple);
+    font-weight: 700;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.host-participant-details .detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+}
+
+.host-participant-details .detail-item label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 5px;
+}
+
+.host-participant-details .detail-item .value {
+    color: var(--text-primary);
+    font-weight: 500;
+    min-height: 20px;
+}
+
+/* ========================================
+   HOST ORGANIZATION COMMENTS SECTION
+   ======================================== */
+
+.host-org-comments-section {
+    background: linear-gradient(135deg, #FFF9E6 0%, #FFFBEF 100%);
+    border: 2px solid var(--racing-lilach);
+    border-radius: 15px;
+    padding: 25px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Dark mode adjustments for org comments section */
+[data-theme="dark"] .host-org-comments-section,
+.dark-mode .host-org-comments-section,
+.dark .host-org-comments-section {
+    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-quaternary) 100%);
+}
+
+.host-org-comments-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--racing-lilach), var(--racing-purple), var(--racing-lilach));
+    z-index: 1;
+}
+
+.host-org-comments-display {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 15px;
+    min-height: 100px;
+    color: var(--text-primary);
+    white-space: pre-wrap;
+    line-height: 1.6;
+    font-size: 14px;
+    margin-bottom: 15px;
+    position: relative;
+}
+
+.host-org-comments-display.empty {
+    color: var(--text-muted);
+    font-style: italic;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.host-org-comments-display.empty::before {
+    content: '🏢';
+    font-size: 24px;
+    margin-right: 10px;
+}
+
+.host-org-comments-textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 15px;
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    font-size: 14px;
+    font-family: inherit;
+    background: var(--input-bg);
+    color: var(--text-primary);
+    resize: vertical;
+    transition: all 0.3s ease;
+    line-height: 1.6;
+}
+
+.host-org-comments-textarea:focus {
+    outline: none;
+    border-color: var(--racing-lilach);
+    box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.2);
+    transform: translateY(-1px);
+}
+
+.host-org-comments-textarea::placeholder {
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+/* ========================================
+   HOST STATUS INDICATORS
+   ======================================== */
+
+.host-status-overview {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 25px;
+    padding: 20px;
+    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-quaternary) 100%);
+    border-radius: 15px;
+    border: 1px solid var(--border-color);
+}
+
+.host-status-item {
+    text-align: center;
+    padding: 15px;
+    background: var(--bg-secondary);
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.host-status-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px var(--shadow-color);
+}
+
+.host-status-icon {
+    font-size: 32px;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.host-status-icon.complete {
+    color: var(--success-color);
+}
+
+.host-status-icon.pending {
+    color: var(--warning-color);
+}
+
+.host-status-icon.active {
+    color: var(--info-color);
+}
+
+.host-status-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 5px;
+}
+
+.host-status-value {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+/* ========================================
+   HOST ALERTS
+   ======================================== */
+
+.host-alert {
+    background: linear-gradient(135deg, var(--info-light) 0%, #DBEAFE 100%);
+    border: 2px solid var(--info-color);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 25px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    animation: slideInFromTop 0.5s ease-out;
+}
+
+.host-alert.warning {
+    background: linear-gradient(135deg, var(--warning-light) 0%, #FDE68A 100%);
+    border-color: var(--warning-color);
+}
+
+.host-alert.success {
+    background: linear-gradient(135deg, var(--success-light) 0%, #D1FAE5 100%);
+    border-color: var(--success-color);
+}
+
+.host-alert-icon {
+    color: var(--info-color);
+    flex-shrink: 0;
+    animation: pulse 2s infinite;
+}
+
+.host-alert.warning .host-alert-icon {
+    color: var(--warning-color);
+}
+
+.host-alert.success .host-alert-icon {
+    color: var(--success-color);
+}
+
+.host-alert-content {
+    flex: 1;
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+/* ========================================
+   HOST EXPANDABLE SECTIONS
+   ======================================== */
+
+.host-expandable-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    user-select: none;
+}
+
+.host-expandable-header:hover {
+    background: var(--bg-tertiary);
+}
+
+.host-expandable-content {
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.host-expandable-content.expanded {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+.host-expand-icon {
+    transition: transform 0.3s ease;
+    color: var(--racing-purple);
+}
+
+.host-expand-icon.expanded {
+    transform: rotate(180deg);
+}
+
+/* ========================================
+   HOST ACTION BUTTONS
+   ======================================== */
+
+.host-action-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.host-btn-edit {
+    background: linear-gradient(135deg, var(--racing-lilach) 0%, var(--racing-purple) 100%);
+    color: var(--text-primary);
+    border: none;
+    padding: 12px 25px;
+    border-radius: 25px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+}
+
+.host-btn-edit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+    background: linear-gradient(135deg, var(--racing-purple) 0%, var(--racing-lilach) 100%);
+    text-decoration: none;
+    color: var(--text-primary);
+}
+
+.host-btn-save {
+    background: linear-gradient(135deg, var(--success-color) 0%, var(--success-hover) 100%);
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 25px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+}
+
+.host-btn-save:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+.host-btn-save:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.host-btn-cancel {
+    background: linear-gradient(135deg, #6B7280 0%, #9CA3AF 100%);
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 25px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 15px rgba(107, 114, 128, 0.3);
+}
+
+.host-btn-cancel:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(107, 114, 128, 0.4);
+    background: linear-gradient(135deg, #4B5563 0%, #6B7280 100%);
+}
+
+/* ========================================
+   HOST PERMISSION INDICATORS
+   ======================================== */
+
+.host-field-hidden {
+    color: var(--text-muted);
+    font-style: italic;
+    font-size: 12px;
+}
+
+.host-field-hidden::before {
+    content: '🔒 ';
+    opacity: 0.7;
+}
+
+.host-field-readonly {
+    background: var(--bg-quaternary);
+    border: 1px dashed var(--border-color);
+    padding: 4px 8px;
+    border-radius: 4px;
+    opacity: 0.8;
+}
+
+.host-editable-indicator {
+    color: var(--success-color);
+    font-size: 12px;
+    margin-left: 8px;
+}
+
+.host-editable-indicator::before {
+    content: '✏️ ';
+}
+
+/* ========================================
+   HOST EVENTS DISPLAY
+   ======================================== */
+
+.host-events-section {
+    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-quaternary) 100%);
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 25px;
+    border: 1px solid var(--border-color);
+}
+
+.host-event-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 15px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.host-event-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--racing-lilach);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.host-event-card:hover::before {
+    opacity: 1;
+}
+
+.host-event-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px var(--shadow-color);
+    border-color: var(--racing-lilach);
+}
+
+.host-event-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.host-event-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.host-event-status {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.host-event-status.upcoming {
+    background: var(--warning-light);
+    color: var(--warning-color);
+    border: 1px solid var(--warning-color);
+}
+
+.host-event-status.active {
+    background: var(--success-light);
+    color: var(--success-color);
+    border: 1px solid var(--success-color);
+}
+
+.host-event-status.completed {
+    background: var(--bg-tertiary);
+    color: var(--text-muted);
+    border: 1px solid var(--border-color);
+}
+
+.host-event-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.host-event-detail {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.host-event-detail-icon {
+    color: var(--racing-purple);
+    flex-shrink: 0;
+}
+
+/* ========================================
+   HOST LOADING STATES
+   ======================================== */
+
+.host-loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+    text-align: center;
+    color: var(--text-muted);
+}
+
+.host-loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--border-color);
+    border-top: 4px solid var(--racing-purple);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+}
+
+.host-loading-text {
+    font-size: 16px;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+/* ========================================
+   HOST EMPTY STATES
+   ======================================== */
+
+.host-empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-quaternary) 100%);
+    border-radius: 20px;
+    border: 2px dashed var(--racing-purple);
+}
+
+.host-empty-icon {
+    font-size: 80px;
+    margin-bottom: 20px;
+    opacity: 0.6;
+    color: var(--racing-purple);
+    animation: bounce 2s infinite;
+}
+
+.host-empty-state h3 {
+    color: var(--text-primary);
+    margin-bottom: 15px;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.host-empty-state p {
+    margin-bottom: 30px;
+    font-size: 16px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+/* ========================================
+   HOST RESPONSIVE DESIGN
+   ======================================== */
+
+@media (max-width: 768px) {
+    .host-participant-details .detail-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .host-status-overview {
+        grid-template-columns: 1fr;
+    }
+
+    .host-action-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .host-btn-edit,
+    .host-btn-save,
+    .host-btn-cancel {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .host-expandable-header {
+        padding: 15px 10px;
+    }
+
+    .host-participant-details .detail-section {
+        padding: 15px;
+    }
+
+    .host-org-comments-section {
+        padding: 20px;
+    }
+
+    .host-event-details {
+        grid-template-columns: 1fr;
+    }
+
+    .host-event-header {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+    }
+}
+
+@media (max-width: 480px) {
+    .host-empty-icon {
+        font-size: 60px;
+    }
+
+    .host-empty-state h3 {
+        font-size: 20px;
+    }
+
+    .host-empty-state p {
+        font-size: 14px;
+    }
+
+    .host-alert {
+        padding: 15px;
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .host-status-item {
+        padding: 12px;
+    }
+
+    .host-status-icon {
+        font-size: 24px;
+    }
+
+    .host-event-card {
+        padding: 15px;
+    }
+}
+
+/* ========================================
+   HOST DARK MODE ADJUSTMENTS
+   ======================================== */
+
+[data-theme="dark"] .host-org-comments-section,
+.dark-mode .host-org-comments-section,
+.dark .host-org-comments-section {
+    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-quaternary) 100%);
+}
+
+[data-theme="dark"] .host-alert,
+.dark-mode .host-alert,
+.dark .host-alert {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0.1) 100%);
+}
+
+[data-theme="dark"] .host-alert.warning,
+.dark-mode .host-alert.warning,
+.dark .host-alert.warning {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0.1) 100%);
+}
+
+[data-theme="dark"] .host-alert.success,
+.dark-mode .host-alert.success,
+.dark .host-alert.success {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.1) 100%);
+}
+
+[data-theme="dark"] .host-events-section,
+.dark-mode .host-events-section,
+.dark .host-events-section {
+    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-quaternary) 100%);
+}
+
+/* ========================================
+   HOST RTL SUPPORT
+   ======================================== */
+
+.rtl .host-expandable-header {
+    flex-direction: row-reverse;
+}
+
+.rtl .host-action-buttons {
+    flex-direction: row-reverse;
+}
+
+.rtl .host-alert {
+    flex-direction: row-reverse;
+}
+
+.rtl .host-status-overview {
+    direction: rtl;
+}
+
+.rtl .host-participant-details .detail-grid {
+    direction: rtl;
+}
+
+.rtl .host-event-header {
+    flex-direction: row-reverse;
+}
+
+.rtl .host-event-details {
+    direction: rtl;
+}
+
+.rtl .host-event-detail {
+    flex-direction: row-reverse;
+}
+
+/* Keep technical data LTR in RTL mode */
+.rtl .host-org-comments-display {
+    text-align: right;
+    direction: rtl;
+}
+
+.rtl .host-org-comments-textarea {
+    text-align: right;
+    direction: rtl;
+}
+
+/* ========================================
+   HOST ANIMATIONS
+   ======================================== */
+
+@keyframes hostSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes hostFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes hostPulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.05); opacity: 0.8; }
+}
+
+.host-participant-card {
+    animation: hostSlideIn 0.5s ease-out;
+}
+
+.host-participant-card:nth-child(1) { animation-delay: 0.1s; }
+.host-participant-card:nth-child(2) { animation-delay: 0.2s; }
+.host-participant-card:nth-child(3) { animation-delay: 0.3s; }
+.host-participant-card:nth-child(4) { animation-delay: 0.4s; }
+.host-participant-card:nth-child(5) { animation-delay: 0.5s; }
+
+.host-detail-section {
+    animation: hostSlideIn 0.4s ease-out;
+}
+
+.host-detail-section:nth-child(1) { animation-delay: 0.1s; }
+.host-detail-section:nth-child(2) { animation-delay: 0.2s; }
+.host-detail-section:nth-child(3) { animation-delay: 0.3s; }
+
+.host-alert {
+    animation: hostSlideIn 0.6s ease-out;
+}
+
+.host-event-card {
+    animation: hostSlideIn 0.5s ease-out;
+}
+
+/* ========================================
+   HOST ACCESSIBILITY ENHANCEMENTS
+   ======================================== */
+
+.host-expandable-header:focus {
+    outline: 2px solid var(--racing-lilach);
+    outline-offset: 2px;
+}
+
+.host-btn-edit:focus,
+.host-btn-save:focus,
+.host-btn-cancel:focus {
+    outline: 2px solid var(--racing-lilach);
+    outline-offset: 2px;
+}
+
+.host-org-comments-textarea:focus {
+    outline: none;
+    border-color: var(--racing-lilach);
+    box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.2);
+}
+
+/* High contrast mode adjustments */
+@media (prefers-contrast: more) {
+    .host-participant-card {
+        border-width: 3px;
+    }
+
+    .host-event-status {
+        border-width: 2px;
+        font-weight: 700;
+    }
+
+    .host-btn-edit,
+    .host-btn-save,
+    .host-btn-cancel {
+        border: 2px solid currentColor;
+    }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+    .host-participant-card,
+    .host-detail-section,
+    .host-alert,
+    .host-expand-icon,
+    .host-event-card {
+        animation: none;
+        transition: none;
+    }
+
+    .host-expandable-header:hover,
+    .host-participant-card:hover,
+    .host-btn-edit:hover {
+        transform: none;
+    }
+}

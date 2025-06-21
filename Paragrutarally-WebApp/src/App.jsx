@@ -4,50 +4,66 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { LanguageProvider } from './contexts/LanguageContext';
-import { PermissionProvider } from './hooks/usePermissions.jsx'; // Add a permission provider
+import { PermissionProvider } from './hooks/usePermissions.jsx';
 import ErrorBoundary from './components/layout/ErrorBoundary';
 
 // Import pages
 import Login from './components/auth/Login';
+
+// Admin pages
 import AdminDashboardPage from './pages/admin/AdminDashboardPage';
 import EventManagementPage from './pages/admin/EventManagementPage';
 import CreateEventPage from './pages/admin/CreateEventPage';
 import ViewEventsPage from './pages/admin/ViewEventsPage';
+import EditEventPage from './pages/admin/EditEventPage';
 import UserManagementPage from './pages/admin/UserManagementPage';
 import FormsManagementPage from './pages/admin/FormsManagementPage';
 import BackupSyncPage from './pages/admin/BackupSyncPage';
 import ImportExportPage from './pages/admin/ImportExportPage';
-import GalleryPage from './pages/shared/GalleryPage';
-import InstructorDashboardPage from './pages/instructor/InstructorDashboardPage';
-import HostDashboardPage from './pages/host/HostDashboardPage';
-import MyAccountPage from './pages/shared/MyAccountPage';
 import AnalyticsDashboardPage from './pages/admin/AnalyticsDashboardPage';
 
+// Admin Kids Management
+import KidsManagementPage from './pages/admin/KidsManagementPage';
+import AddKidPage from './pages/admin/AddKidPage';
+import EditKidPage from './pages/admin/EditKidPage';
+import ViewKidPage from './pages/admin/ViewKidPage';
 
-// Import vehicle management components
+// Admin Teams Management
+import TeamsManagementPage from './pages/admin/TeamsManagementPage';
+import AddTeamPage from './pages/admin/AddTeamPage';
+import EditTeamPage from './pages/admin/EditTeamPage';
+import ViewTeamPage from './pages/admin/ViewTeamPage';
+
+// Admin Vehicles Management
 import VehiclesPage from './pages/admin/VehiclesPage';
 import ViewVehiclePage from './pages/admin/ViewVehiclePage';
 import AddVehiclePage from './pages/admin/AddVehiclePage';
 import EditVehiclePage from './pages/admin/EditVehiclePage';
 
-// Import new management components
-import KidsManagementPage from './pages/admin/KidsManagementPage';
-import TeamsManagementPage from './pages/admin/TeamsManagementPage';
-// Import new page components
-import AddKidPage from './pages/admin/AddKidPage';
-import EditKidPage from './pages/admin/EditKidPage';
-import ViewKidPage from './pages/admin/ViewKidPage';
-import AddTeamPage from './pages/admin/AddTeamPage';
-import EditTeamPage from './pages/admin/EditTeamPage';
-import ViewTeamPage from './pages/admin/ViewTeamPage';
+// Instructor pages
+import InstructorDashboardPage from './pages/instructor/InstructorDashboardPage';
+import InstructorKidsManagementPage from './pages/instructor/InstructorKidsManagementPage';
+import InstructorTeamsManagementPage from './pages/instructor/InstructorTeamsManagementPage';
+import InstructorVehiclesPage from './pages/instructor/InstructorVehiclesPage';
+import InstructorEventsPage from './pages/instructor/InstructorEventsPage';
 
-// Import permission-aware components
-import KidDetailView from './components/kids/KidDetail.jsx'; // Use existing component path
+// Parent pages
+import ParentDashboardPage from './pages/parent/ParentDashboardPage';
+import ParentKidDetailPage from './pages/parent/ParentKidDetailPage';
+
+// Host pages
+import HostDashboardPage from './pages/host/HostDashboardPage';
+
+// Shared pages
+import GalleryPage from './pages/shared/GalleryPage';
+import MyAccountPage from './pages/shared/MyAccountPage';
+
+// Permission-aware components
+import KidDetailView from './components/kids/KidDetail.jsx';
 
 // Import styles
 import './styles/theme.css';
 import './App.css';
-import EditEventPage from "./pages/admin/EditEventPage.jsx";
 
 // Protected Route component
 const ProtectedRoute = ({ children, requiredRole }) => {
@@ -63,15 +79,19 @@ function App() {
             <LanguageProvider>
                 <ThemeProvider>
                     <AuthProvider>
-                        <PermissionProvider>  {/* Add permission provider inside AuthProvider */}
+                        <PermissionProvider>
                             <Router>
                                 <div className="App">
                                     <Routes>
-                                        {/* Public routes */}
+                                        {/* ========================================
+                                           PUBLIC ROUTES
+                                           ======================================== */}
                                         <Route path="/login" element={<Login />} />
                                         <Route path="/forgot-password" element={<Login />} />
 
-                                        {/* Protected routes */}
+                                        {/* ========================================
+                                           ADMIN ROUTES
+                                           ======================================== */}
                                         <Route
                                             path="/admin/dashboard"
                                             element={
@@ -81,34 +101,7 @@ function App() {
                                             }
                                         />
 
-                                        <Route
-                                            path="/instructor/dashboard"
-                                            element={
-                                                <ProtectedRoute requiredRole="instructor">
-                                                    <InstructorDashboardPage />
-                                                </ProtectedRoute>
-                                            }
-                                        />
-
-                                        <Route
-                                            path="/host/dashboard"
-                                            element={
-                                                <ProtectedRoute requiredRole="host">
-                                                    <HostDashboardPage />
-                                                </ProtectedRoute>
-                                            }
-                                        />
-
-                                        <Route
-                                            path="/my-account"
-                                            element={
-                                                <ProtectedRoute>
-                                                    <MyAccountPage />
-                                                </ProtectedRoute>
-                                            }
-                                        />
-
-                                        {/* Admin routes */}
+                                        {/* Admin Events Management */}
                                         <Route
                                             path="/admin/events"
                                             element={
@@ -117,8 +110,6 @@ function App() {
                                                 </ProtectedRoute>
                                             }
                                         />
-
-                                        {/* Event management routes - UPDATED */}
                                         <Route
                                             path="/admin/events/create"
                                             element={
@@ -127,7 +118,6 @@ function App() {
                                                 </ProtectedRoute>
                                             }
                                         />
-
                                         <Route
                                             path="/admin/events/view"
                                             element={
@@ -136,7 +126,14 @@ function App() {
                                                 </ProtectedRoute>
                                             }
                                         />
-
+                                        <Route
+                                            path="/admin/events/view/:eventId"
+                                            element={
+                                                <ProtectedRoute requiredRole="admin">
+                                                    <ViewEventsPage />
+                                                </ProtectedRoute>
+                                            }
+                                        />
                                         <Route
                                             path="/admin/events/edit/:eventId"
                                             element={
@@ -146,16 +143,7 @@ function App() {
                                             }
                                         />
 
-                                        {/* FIXED: Event view route with correct parameter name */}
-                                        <Route
-                                            path="/admin/events/view/:eventId"
-                                            element={
-                                                <ProtectedRoute requiredRole="admin">
-                                                    <ViewEventsPage />
-                                                </ProtectedRoute>
-                                            }
-                                        />
-
+                                        {/* Admin Users Management */}
                                         <Route
                                             path="/admin/users"
                                             element={
@@ -165,6 +153,7 @@ function App() {
                                             }
                                         />
 
+                                        {/* Admin Kids Management */}
                                         <Route
                                             path="/admin/kids"
                                             element={
@@ -182,14 +171,6 @@ function App() {
                                             }
                                         />
                                         <Route
-                                            path="/admin/kids/edit/:id"
-                                            element={
-                                                <ProtectedRoute requiredRole="admin">
-                                                    <EditKidPage />
-                                                </ProtectedRoute>
-                                            }
-                                        />
-                                        <Route
                                             path="/admin/kids/view/:id"
                                             element={
                                                 <ProtectedRoute requiredRole="admin">
@@ -197,17 +178,16 @@ function App() {
                                                 </ProtectedRoute>
                                             }
                                         />
-
-                                        {/* Permission-aware kid detail route for testing */}
                                         <Route
-                                            path="/kid/:kidId"
+                                            path="/admin/kids/edit/:id"
                                             element={
-                                                <ProtectedRoute>
-                                                    <KidDetailView />
+                                                <ProtectedRoute requiredRole="admin">
+                                                    <EditKidPage />
                                                 </ProtectedRoute>
                                             }
                                         />
 
+                                        {/* Admin Teams Management */}
                                         <Route
                                             path="/admin/teams"
                                             element={
@@ -225,14 +205,6 @@ function App() {
                                             }
                                         />
                                         <Route
-                                            path="/admin/teams/edit/:id"
-                                            element={
-                                                <ProtectedRoute requiredRole="admin">
-                                                    <EditTeamPage />
-                                                </ProtectedRoute>
-                                            }
-                                        />
-                                        <Route
                                             path="/admin/teams/view/:id"
                                             element={
                                                 <ProtectedRoute requiredRole="admin">
@@ -240,51 +212,50 @@ function App() {
                                                 </ProtectedRoute>
                                             }
                                         />
+                                        <Route
+                                            path="/admin/teams/edit/:id"
+                                            element={
+                                                <ProtectedRoute requiredRole="admin">
+                                                    <EditTeamPage />
+                                                </ProtectedRoute>
+                                            }
+                                        />
 
-                                        {/* ========================================
-                                           VEHICLES MANAGEMENT ROUTES
-                                           ======================================== */}
-
-                                        {/* Main vehicles page - accessible to admin, instructor, parent */}
+                                        {/* Admin Vehicles Management */}
                                         <Route
                                             path="/admin/vehicles"
                                             element={
-                                                <ProtectedRoute>
+                                                <ProtectedRoute requiredRole="admin">
                                                     <VehiclesPage />
                                                 </ProtectedRoute>
                                             }
                                         />
-
-                                        {/* View vehicle details - accessible to admin, instructor, parent */}
-                                        <Route
-                                            path="/admin/vehicles/view/:id"
-                                            element={
-                                                <ProtectedRoute>
-                                                    <ViewVehiclePage />
-                                                </ProtectedRoute>
-                                            }
-                                        />
-
-                                        {/* Add new vehicle - admin and instructor only */}
                                         <Route
                                             path="/admin/vehicles/add"
                                             element={
-                                                <ProtectedRoute>
+                                                <ProtectedRoute requiredRole="admin">
                                                     <AddVehiclePage />
                                                 </ProtectedRoute>
                                             }
                                         />
-
-                                        {/* Edit vehicle - admin and instructor only */}
+                                        <Route
+                                            path="/admin/vehicles/view/:id"
+                                            element={
+                                                <ProtectedRoute requiredRole="admin">
+                                                    <ViewVehiclePage />
+                                                </ProtectedRoute>
+                                            }
+                                        />
                                         <Route
                                             path="/admin/vehicles/edit/:id"
                                             element={
-                                                <ProtectedRoute>
+                                                <ProtectedRoute requiredRole="admin">
                                                     <EditVehiclePage />
                                                 </ProtectedRoute>
                                             }
                                         />
 
+                                        {/* Admin Other Management */}
                                         <Route
                                             path="/admin/forms"
                                             element={
@@ -293,7 +264,6 @@ function App() {
                                                 </ProtectedRoute>
                                             }
                                         />
-
                                         <Route
                                             path="/admin/backup"
                                             element={
@@ -302,7 +272,6 @@ function App() {
                                                 </ProtectedRoute>
                                             }
                                         />
-
                                         <Route
                                             path="/admin/import-export"
                                             element={
@@ -311,37 +280,146 @@ function App() {
                                                 </ProtectedRoute>
                                             }
                                         />
+                                        <Route
+                                            path="/admin/analytics"
+                                            element={
+                                                <ProtectedRoute requiredRole="admin">
+                                                    <AnalyticsDashboardPage />
+                                                </ProtectedRoute>
+                                            }
+                                        />
 
-                                        {/* Instructor routes */}
+                                        {/* ========================================
+                                           INSTRUCTOR ROUTES
+                                           ======================================== */}
+                                        <Route
+                                            path="/instructor/dashboard"
+                                            element={
+                                                <ProtectedRoute requiredRole="instructor">
+                                                    <InstructorDashboardPage />
+                                                </ProtectedRoute>
+                                            }
+                                        />
+
+                                        {/* Instructor Events */}
                                         <Route
                                             path="/instructor/events"
                                             element={
                                                 <ProtectedRoute requiredRole="instructor">
-                                                    <InstructorDashboardPage />
+                                                    <InstructorEventsPage />
                                                 </ProtectedRoute>
                                             }
                                         />
 
+                                        {/* Instructor Kids Management */}
+                                        <Route
+                                            path="/instructor/kids"
+                                            element={
+                                                <ProtectedRoute requiredRole="instructor">
+                                                    <InstructorKidsManagementPage />
+                                                </ProtectedRoute>
+                                            }
+                                        />
+                                        <Route
+                                            path="/instructor/kids/view/:id"
+                                            element={
+                                                <ProtectedRoute requiredRole="instructor">
+                                                    <ViewKidPage />
+                                                </ProtectedRoute>
+                                            }
+                                        />
+                                        <Route
+                                            path="/instructor/kids/edit/:id"
+                                            element={
+                                                <ProtectedRoute requiredRole="instructor">
+                                                    <EditKidPage />
+                                                </ProtectedRoute>
+                                            }
+                                        />
+
+                                        {/* Instructor Teams Management */}
                                         <Route
                                             path="/instructor/teams"
                                             element={
                                                 <ProtectedRoute requiredRole="instructor">
-                                                    <InstructorDashboardPage />
+                                                    <InstructorTeamsManagementPage />
+                                                </ProtectedRoute>
+                                            }
+                                        />
+                                        <Route
+                                            path="/instructor/teams/view/:id"
+                                            element={
+                                                <ProtectedRoute requiredRole="instructor">
+                                                    <ViewTeamPage />
+                                                </ProtectedRoute>
+                                            }
+                                        />
+                                        <Route
+                                            path="/instructor/teams/edit/:id"
+                                            element={
+                                                <ProtectedRoute requiredRole="instructor">
+                                                    <EditTeamPage />
                                                 </ProtectedRoute>
                                             }
                                         />
 
-                                        {/* Instructor-specific vehicle routes */}
+                                        {/* Instructor Vehicles Management */}
                                         <Route
                                             path="/instructor/vehicles"
                                             element={
                                                 <ProtectedRoute requiredRole="instructor">
-                                                    <VehiclesPage />
+                                                    <InstructorVehiclesPage />
+                                                </ProtectedRoute>
+                                            }
+                                        />
+                                        <Route
+                                            path="/instructor/vehicles/view/:id"
+                                            element={
+                                                <ProtectedRoute requiredRole="instructor">
+                                                    <ViewVehiclePage />
+                                                </ProtectedRoute>
+                                            }
+                                        />
+                                        <Route
+                                            path="/instructor/vehicles/edit/:id"
+                                            element={
+                                                <ProtectedRoute requiredRole="instructor">
+                                                    <EditVehiclePage />
                                                 </ProtectedRoute>
                                             }
                                         />
 
-                                        {/* Host routes */}
+                                        {/* ========================================
+                                           PARENT ROUTES
+                                           ======================================== */}
+                                        <Route
+                                            path="/parent/dashboard"
+                                            element={
+                                                <ProtectedRoute requiredRole="parent">
+                                                    <ParentDashboardPage />
+                                                </ProtectedRoute>
+                                            }
+                                        />
+                                        <Route
+                                            path="/parent/kid/:id"
+                                            element={
+                                                <ProtectedRoute requiredRole="parent">
+                                                    <ParentKidDetailPage />
+                                                </ProtectedRoute>
+                                            }
+                                        />
+
+                                        {/* ========================================
+                                           HOST/GUEST ROUTES
+                                           ======================================== */}
+                                        <Route
+                                            path="/host/dashboard"
+                                            element={
+                                                <ProtectedRoute requiredRole="host">
+                                                    <HostDashboardPage />
+                                                </ProtectedRoute>
+                                            }
+                                        />
                                         <Route
                                             path="/host/events"
                                             element={
@@ -352,10 +430,20 @@ function App() {
                                         />
 
                                         {/* ========================================
-                                           GALLERY ROUTES - NEW
+                                           SHARED ROUTES
                                            ======================================== */}
 
-                                        {/* Main gallery - accessible to all authenticated users */}
+                                        {/* My Account - accessible to all authenticated users */}
+                                        <Route
+                                            path="/my-account"
+                                            element={
+                                                <ProtectedRoute>
+                                                    <MyAccountPage />
+                                                </ProtectedRoute>
+                                            }
+                                        />
+
+                                        {/* Gallery - accessible to all authenticated users */}
                                         <Route
                                             path="/gallery"
                                             element={
@@ -364,8 +452,6 @@ function App() {
                                                 </ProtectedRoute>
                                             }
                                         />
-
-                                        {/* Event-specific gallery - accessible to all authenticated users */}
                                         <Route
                                             path="/gallery/:eventId"
                                             element={
@@ -375,25 +461,21 @@ function App() {
                                             }
                                         />
 
-                                         {/* ========================================
-                                             ANALYTICS ROUTES - NEW
-                                            ======================================== */}
-
-                                        {/* Analytics Dashboard - Admin only */}
+                                        {/* Permission-aware kid detail route for testing */}
                                         <Route
-                                            path="/admin/analytics"
+                                            path="/kid/:kidId"
                                             element={
-                                                <ProtectedRoute requiredRole="admin">
-                                                    <AnalyticsDashboardPage />
+                                                <ProtectedRoute>
+                                                    <KidDetailView />
                                                 </ProtectedRoute>
                                             }
                                         />
 
-                                        {/* Default redirects */}
+                                        {/* ========================================
+                                           DEFAULT REDIRECTS & 404
+                                           ======================================== */}
                                         <Route path="/dashboard" element={<Navigate to="/admin/dashboard" replace />} />
                                         <Route path="/" element={<Navigate to="/login" replace />} />
-
-                                        {/* 404 catch-all */}
                                         <Route path="*" element={<Navigate to="/login" replace />} />
                                     </Routes>
                                 </div>

@@ -1,0 +1,833 @@
+/* src/pages/parent/ParentPages.css - Parent-specific styles */
+
+/* ========================================
+   PARENT DASHBOARD STYLES
+   ======================================== */
+
+.parent-dashboard {
+    /* Inherits from global admin-page styles */
+}
+
+/* ========================================
+   PARENT KIDS LIST
+   ======================================== */
+
+.parent-kids-list .kid-card {
+    transition: all 0.3s ease;
+    border: 2px solid var(--border-color);
+    position: relative;
+    overflow: hidden;
+}
+
+.parent-kids-list .kid-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--racing-lilach), var(--racing-purple));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.parent-kids-list .kid-card:hover::before {
+    opacity: 1;
+}
+
+.parent-kids-list .kid-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px var(--shadow-color);
+    border-color: var(--racing-lilach);
+}
+
+.parent-kids-list .kid-header {
+    transition: all 0.3s ease;
+    padding: 5px;
+    border-radius: 8px;
+}
+
+.parent-kids-list .kid-header:hover {
+    background: var(--bg-tertiary);
+}
+
+/* ========================================
+   KID DETAILS SECTION
+   ======================================== */
+
+.parent-kid-details .detail-section {
+    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-quaternary) 100%);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.parent-kid-details .detail-section:hover {
+    box-shadow: 0 5px 15px var(--shadow-color);
+    transform: translateY(-2px);
+}
+
+.parent-kid-details .detail-section h4 {
+    color: var(--racing-purple);
+    font-weight: 700;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.parent-kid-details .detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+}
+
+.parent-kid-details .detail-item label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 5px;
+}
+
+.parent-kid-details .detail-item .value {
+    color: var(--text-primary);
+    font-weight: 500;
+    min-height: 20px;
+}
+
+/* ========================================
+   FORM DISPLAY VALUES
+   ======================================== */
+
+.form-display-value {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: var(--text-primary);
+    font-weight: 500;
+    min-height: 20px;
+    transition: all 0.3s ease;
+}
+
+.form-display-value:hover {
+    border-color: var(--racing-lilach);
+    box-shadow: 0 2px 8px rgba(255, 215, 0, 0.1);
+}
+
+.form-display-value.empty {
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+/* ========================================
+   PARENT COMMENTS SECTION
+   ======================================== */
+
+.parent-comments-section {
+    background: linear-gradient(135deg, #FFF9E6 0%, #FFFBEF 100%);
+    border: 2px solid var(--racing-lilach);
+    border-radius: 15px;
+    padding: 25px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Dark mode adjustments for comments section */
+[data-theme="dark"] .parent-comments-section,
+.dark-mode .parent-comments-section,
+.dark .parent-comments-section {
+    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-quaternary) 100%);
+}
+
+.parent-comments-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--racing-lilach), var(--racing-purple), var(--racing-lilach));
+    z-index: 1;
+}
+
+.parent-comments-display {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 15px;
+    min-height: 100px;
+    color: var(--text-primary);
+    white-space: pre-wrap;
+    line-height: 1.6;
+    font-size: 14px;
+    margin-bottom: 15px;
+    position: relative;
+}
+
+.parent-comments-display.empty {
+    color: var(--text-muted);
+    font-style: italic;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.parent-comments-display.empty::before {
+    content: '📝';
+    font-size: 24px;
+    margin-right: 10px;
+}
+
+.parent-comments-textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 15px;
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    font-size: 14px;
+    font-family: inherit;
+    background: var(--input-bg);
+    color: var(--text-primary);
+    resize: vertical;
+    transition: all 0.3s ease;
+    line-height: 1.6;
+}
+
+.parent-comments-textarea:focus {
+    outline: none;
+    border-color: var(--racing-lilach);
+    box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.2);
+    transform: translateY(-1px);
+}
+
+.parent-comments-textarea::placeholder {
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+/* ========================================
+   PARENT STATUS INDICATORS
+   ======================================== */
+
+.parent-status-overview {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 25px;
+    padding: 20px;
+    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-quaternary) 100%);
+    border-radius: 15px;
+    border: 1px solid var(--border-color);
+}
+
+.parent-status-item {
+    text-align: center;
+    padding: 15px;
+    background: var(--bg-secondary);
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.parent-status-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px var(--shadow-color);
+}
+
+.parent-status-icon {
+    font-size: 32px;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.parent-status-icon.complete {
+    color: var(--success-color);
+}
+
+.parent-status-icon.pending {
+    color: var(--warning-color);
+}
+
+.parent-status-icon.incomplete {
+    color: var(--error-color);
+}
+
+.parent-status-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 5px;
+}
+
+.parent-status-value {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+/* ========================================
+   PARENT ALERTS
+   ======================================== */
+
+.parent-alert {
+    background: linear-gradient(135deg, var(--warning-light) 0%, #FDE68A 100%);
+    border: 2px solid var(--warning-color);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 25px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    animation: slideInFromTop 0.5s ease-out;
+}
+
+.parent-alert.success {
+    background: linear-gradient(135deg, var(--success-light) 0%, #D1FAE5 100%);
+    border-color: var(--success-color);
+}
+
+.parent-alert.info {
+    background: linear-gradient(135deg, var(--info-light) 0%, #DBEAFE 100%);
+    border-color: var(--info-color);
+}
+
+.parent-alert-icon {
+    color: var(--warning-color);
+    flex-shrink: 0;
+    animation: pulse 2s infinite;
+}
+
+.parent-alert.success .parent-alert-icon {
+    color: var(--success-color);
+}
+
+.parent-alert.info .parent-alert-icon {
+    color: var(--info-color);
+}
+
+.parent-alert-content {
+    flex: 1;
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+/* ========================================
+   PARENT PHOTO DISPLAY
+   ======================================== */
+
+.parent-photo-container {
+    text-align: center;
+    padding: 20px;
+    background: var(--bg-tertiary);
+    border-radius: 15px;
+    border: 1px solid var(--border-color);
+}
+
+.parent-photo-image {
+    max-width: 200px;
+    max-height: 200px;
+    border-radius: 15px;
+    border: 3px solid var(--racing-lilach);
+    box-shadow: 0 8px 25px var(--shadow-color);
+    transition: all 0.3s ease;
+}
+
+.parent-photo-image:hover {
+    transform: scale(1.05);
+    box-shadow: 0 12px 35px var(--shadow-hover);
+}
+
+.parent-photo-placeholder {
+    width: 200px;
+    height: 200px;
+    background: var(--bg-quaternary);
+    border: 2px dashed var(--border-color);
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    font-size: 48px;
+    margin: 0 auto;
+}
+
+/* ========================================
+   PARENT EXPANDABLE SECTIONS
+   ======================================== */
+
+.parent-expandable-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    user-select: none;
+}
+
+.parent-expandable-header:hover {
+    background: var(--bg-tertiary);
+}
+
+.parent-expandable-content {
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.parent-expandable-content.expanded {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+.parent-expand-icon {
+    transition: transform 0.3s ease;
+    color: var(--racing-purple);
+}
+
+.parent-expand-icon.expanded {
+    transform: rotate(180deg);
+}
+
+/* ========================================
+   PARENT ACTION BUTTONS
+   ======================================== */
+
+.parent-action-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.parent-btn-edit {
+    background: linear-gradient(135deg, var(--racing-lilach) 0%, var(--racing-purple) 100%);
+    color: var(--text-primary);
+    border: none;
+    padding: 12px 25px;
+    border-radius: 25px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+}
+
+.parent-btn-edit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+    background: linear-gradient(135deg, var(--racing-purple) 0%, var(--racing-lilach) 100%);
+    text-decoration: none;
+    color: var(--text-primary);
+}
+
+.parent-btn-save {
+    background: linear-gradient(135deg, var(--success-color) 0%, var(--success-hover) 100%);
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 25px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+}
+
+.parent-btn-save:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+.parent-btn-save:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.parent-btn-cancel {
+    background: linear-gradient(135deg, #6B7280 0%, #9CA3AF 100%);
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 25px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 15px rgba(107, 114, 128, 0.3);
+}
+
+.parent-btn-cancel:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(107, 114, 128, 0.4);
+    background: linear-gradient(135deg, #4B5563 0%, #6B7280 100%);
+}
+
+/* ========================================
+   PARENT LOADING STATES
+   ======================================== */
+
+.parent-loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+    text-align: center;
+    color: var(--text-muted);
+}
+
+.parent-loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--border-color);
+    border-top: 4px solid var(--racing-purple);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+}
+
+.parent-loading-text {
+    font-size: 16px;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+/* ========================================
+   PARENT EMPTY STATES
+   ======================================== */
+
+.parent-empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-quaternary) 100%);
+    border-radius: 20px;
+    border: 2px dashed var(--racing-purple);
+}
+
+.parent-empty-icon {
+    font-size: 80px;
+    margin-bottom: 20px;
+    opacity: 0.6;
+    color: var(--racing-purple);
+    animation: bounce 2s infinite;
+}
+
+.parent-empty-state h3 {
+    color: var(--text-primary);
+    margin-bottom: 15px;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.parent-empty-state p {
+    margin-bottom: 30px;
+    font-size: 16px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+/* ========================================
+   PARENT RESPONSIVE DESIGN
+   ======================================== */
+
+@media (max-width: 768px) {
+    .parent-kid-details .detail-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .parent-status-overview {
+        grid-template-columns: 1fr;
+    }
+
+    .parent-action-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .parent-btn-edit,
+    .parent-btn-save,
+    .parent-btn-cancel {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .parent-expandable-header {
+        padding: 15px 10px;
+    }
+
+    .parent-kid-details .detail-section {
+        padding: 15px;
+    }
+
+    .parent-comments-section {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .parent-photo-image,
+    .parent-photo-placeholder {
+        width: 150px;
+        height: 150px;
+    }
+
+    .parent-empty-icon {
+        font-size: 60px;
+    }
+
+    .parent-empty-state h3 {
+        font-size: 20px;
+    }
+
+    .parent-empty-state p {
+        font-size: 14px;
+    }
+
+    .parent-alert {
+        padding: 15px;
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .parent-status-item {
+        padding: 12px;
+    }
+
+    .parent-status-icon {
+        font-size: 24px;
+    }
+}
+
+/* ========================================
+   PARENT DARK MODE ADJUSTMENTS
+   ======================================== */
+
+[data-theme="dark"] .parent-comments-section,
+.dark-mode .parent-comments-section,
+.dark .parent-comments-section {
+    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-quaternary) 100%);
+}
+
+[data-theme="dark"] .parent-alert,
+.dark-mode .parent-alert,
+.dark .parent-alert {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0.1) 100%);
+}
+
+[data-theme="dark"] .parent-alert.success,
+.dark-mode .parent-alert.success,
+.dark .parent-alert.success {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.1) 100%);
+}
+
+[data-theme="dark"] .parent-alert.info,
+.dark-mode .parent-alert.info,
+.dark .parent-alert.info {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0.1) 100%);
+}
+
+/* ========================================
+   PARENT RTL SUPPORT
+   ======================================== */
+
+.rtl .parent-expandable-header {
+    flex-direction: row-reverse;
+}
+
+.rtl .parent-action-buttons {
+    flex-direction: row-reverse;
+}
+
+.rtl .parent-alert {
+    flex-direction: row-reverse;
+}
+
+.rtl .parent-status-overview {
+    direction: rtl;
+}
+
+.rtl .parent-kid-details .detail-grid {
+    direction: rtl;
+}
+
+/* Keep technical data LTR in RTL mode */
+.rtl .form-display-value.phone,
+.rtl .form-display-value.email {
+    direction: ltr;
+    text-align: left;
+}
+
+.rtl .parent-comments-display {
+    text-align: right;
+    direction: rtl;
+}
+
+.rtl .parent-comments-textarea {
+    text-align: right;
+    direction: rtl;
+}
+
+/* ========================================
+   PARENT ANIMATIONS
+   ======================================== */
+
+@keyframes parentSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes parentFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes parentPulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.05); opacity: 0.8; }
+}
+
+.parent-kid-card {
+    animation: parentSlideIn 0.5s ease-out;
+}
+
+.parent-kid-card:nth-child(1) { animation-delay: 0.1s; }
+.parent-kid-card:nth-child(2) { animation-delay: 0.2s; }
+.parent-kid-card:nth-child(3) { animation-delay: 0.3s; }
+.parent-kid-card:nth-child(4) { animation-delay: 0.4s; }
+.parent-kid-card:nth-child(5) { animation-delay: 0.5s; }
+
+.parent-detail-section {
+    animation: parentSlideIn 0.4s ease-out;
+}
+
+.parent-detail-section:nth-child(1) { animation-delay: 0.1s; }
+.parent-detail-section:nth-child(2) { animation-delay: 0.2s; }
+.parent-detail-section:nth-child(3) { animation-delay: 0.3s; }
+.parent-detail-section:nth-child(4) { animation-delay: 0.4s; }
+
+.parent-alert {
+    animation: parentSlideIn 0.6s ease-out;
+}
+
+/* ========================================
+   PARENT FORM VALIDATION
+   ======================================== */
+
+.parent-form-error {
+    color: var(--error-color);
+    font-size: 12px;
+    margin-top: 5px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-weight: 600;
+    background: rgba(239, 68, 68, 0.1);
+    padding: 4px 8px;
+    border-radius: 8px;
+}
+
+.parent-form-error::before {
+    content: '⚠️';
+    font-size: 14px;
+}
+
+.parent-form-success {
+    color: var(--success-color);
+    font-size: 12px;
+    margin-top: 5px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-weight: 600;
+    background: rgba(16, 185, 129, 0.1);
+    padding: 4px 8px;
+    border-radius: 8px;
+}
+
+.parent-form-success::before {
+    content: '✅';
+    font-size: 14px;
+}
+
+/* ========================================
+   PARENT ACCESSIBILITY ENHANCEMENTS
+   ======================================== */
+
+.parent-expandable-header:focus {
+    outline: 2px solid var(--racing-lilach);
+    outline-offset: 2px;
+}
+
+.parent-btn-edit:focus,
+.parent-btn-save:focus,
+.parent-btn-cancel:focus {
+    outline: 2px solid var(--racing-lilach);
+    outline-offset: 2px;
+}
+
+.parent-comments-textarea:focus {
+    outline: none;
+    border-color: var(--racing-lilach);
+    box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.2);
+}
+
+/* High contrast mode adjustments */
+@media (prefers-contrast: high) {
+    .parent-kid-card {
+        border-width: 3px;
+    }
+
+    .parent-status-badge {
+        border-width: 2px;
+        font-weight: 700;
+    }
+
+    .parent-btn-edit,
+    .parent-btn-save,
+    .parent-btn-cancel {
+        border: 2px solid currentColor;
+    }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+    .parent-kid-card,
+    .parent-detail-section,
+    .parent-alert,
+    .parent-expand-icon,
+    .parent-photo-image {
+        animation: none;
+        transition: none;
+    }
+
+    .parent-expandable-header:hover,
+    .parent-kid-card:hover,
+    .parent-btn-edit:hover {
+        transform: none;
+    }
+}
