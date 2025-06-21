@@ -336,7 +336,7 @@ const EditVehiclePage = () => {
     };
 
     const handleCancel = () => {
-        navigate(`/admin/vehicles/view/${id}`);
+        navigate(`/admin/vehicles`);
     };
 
     // Get photo display info
