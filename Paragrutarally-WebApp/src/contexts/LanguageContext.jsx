@@ -2419,7 +2419,7 @@ const translations = {
         'teams.backToTeams': 'חזור לקבוצות',
         'teams.teamIdentity': '🏎️ זהות הקבוצה',
         'teams.racingInstructors': '👨‍🏫 מדריכי מירוצים',
-        'teams.teamRacers': '🏎️ רוכבי הקבוצה ({current}/{max})',
+        'teams.teamRacers': '🏎️ רוכבי הקבוצה ({max}/{current})',
         'teams.teamNotes': '📝 הערות קבוצה',
         'teams.teamName': 'שם הקבוצה',
         'teams.teamNamePlaceholder': 'רוכבי הרעם, שדי המהירות, ברקי הזעם...',
@@ -3346,18 +3346,18 @@ export const LanguageProvider = ({ children }) => {
     };
 
     // Function to get translation with interpolation support
-    const t = (key, defaultValue = '', interpolations = {}) => {
-        const translation = translations[currentLanguage]?.[key] || defaultValue || key;
+const t = (key, defaultValue = '', interpolations = {}) => {
+    let translation = translations[currentLanguage]?.[key] || defaultValue || key;
 
-        // Handle interpolations like {teamName}, {kidName}, etc.
-        if (interpolations && Object.keys(interpolations).length > 0) {
-            return translation.replace(/{(\w+)}/g, (match, placeholder) => {
-                return interpolations[placeholder] || match;
-            });
-        }
+    // Handle interpolations like {teamName}, {kidName}, etc.
+    if (interpolations && Object.keys(interpolations).length > 0) {
+        translation = translation.replace(/{(\w+)}/g, (match, placeholder) => {
+            return interpolations[placeholder] !== undefined ? interpolations[placeholder] : match;
+        });
+    }
 
-        return translation;
-    };
+    return translation;
+};
 
     // Computed values
     const isRTL = currentLanguage === LANGUAGES.HEBREW;

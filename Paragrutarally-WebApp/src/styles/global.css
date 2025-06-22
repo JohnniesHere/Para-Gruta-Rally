@@ -1090,10 +1090,35 @@ body.dark .stat-card.total::before {
     cursor: pointer;
 }
 
+/* Target the specific card classes when selected */
+.instructor-card.selected,
+.kid-card.selected {
+    border-color: var(--racing-lilach) !important;
+    background: linear-gradient(135deg, var(--racing-lilach) 0%, var(--racing-purple) 100%) !important;
+    box-shadow: 0 4px 15px rgba(211, 189, 245, 0.5) !important;
+    color: white !important; /* Make text white on the dark background */
+}
+
+/* Make sure the text inside selected cards is visible */
+.instructor-card.selected .instructor-name,
+.instructor-card.selected .instructor-details,
+.kid-card.selected .kid-name,
+.kid-card.selected .kid-details {
+    color: white !important;
+}
+
+/* Make the icons white too */
+.instructor-card.selected .card-icon,
+.instructor-card.selected .selected-icon,
+.kid-card.selected .card-icon,
+.kid-card.selected .selected-icon {
+    color: white !important;
+}
+
 .card.selected {
-    border-color: var(--success-color);
-    background: linear-gradient(135deg, var(--success-light) 0%, #D1FAE5 100%);
-    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    border-color: var(--racing-lilach);
+    background: linear-gradient(135deg, var(--racing-lilach) 0%, var(--racing-purple) 100%);
+    box-shadow: 0 4px 15px rgba(211, 189, 245, 0.5);
 }
 
 .card-header {

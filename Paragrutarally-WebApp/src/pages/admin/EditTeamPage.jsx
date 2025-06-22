@@ -248,6 +248,13 @@ const EditTeamPage = () => {
     }
 
     const availableKids = getAvailableKids();
+        //debugging:
+        const currentCount = formData.kidIds?.length || 0;
+        const maxCount = formData.maxCapacity || 15;
+
+        console.log('Current count:', currentCount);
+        console.log('Max count:', maxCount);
+        console.log('Interpolations object:', { current: currentCount, max: maxCount });
 
     return (
         <Dashboard requiredRole={userRole}>
@@ -411,10 +418,12 @@ const EditTeamPage = () => {
                             <div className="section-header">
                                 <Baby className="section-icon" size={24} />
                                 <h2>
-                                    {t('teams.teamRacers', '🏎️ Team Racers ({current}/{max})', {
-                                        current: formData.kidIds.length,
-                                        max: formData.maxCapacity
-                                    })}
+                                 <h2>
+                                  {t('teams.teamRacers', '🏎️ Team Racers ({current}/{max})', {
+                                    current: currentCount,
+                                    max: maxCount
+                                  })}
+                                </h2>
                                     {focusKids && <span className="focus-indicator">{t('teams.focusIndicator', '← Update Here!')}</span>}
                                 </h2>
                             </div>
