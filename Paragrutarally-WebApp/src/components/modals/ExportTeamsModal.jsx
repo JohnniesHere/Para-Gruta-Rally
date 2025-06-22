@@ -1,4 +1,4 @@
-// src/components/modals/ExportTeamsModal.jsx
+// src/components/modals/ExportTeamsModal.jsx - WITH HEBREW SUPPORT
 import React, { useState } from 'react';
 import { collection, getDocs, query, where, orderBy } from 'firebase/firestore';
 import { db } from '../../firebase/config';
@@ -12,7 +12,7 @@ import {
 } from '@tabler/icons-react';
 
 const ExportTeamsModal = ({ isOpen, onClose }) => {
-    const { t, isRTL } = useLanguage();
+    const { t, isRTL, currentLanguage } = useLanguage();
     const { userRole, userData, user } = usePermissions();
     const [exportOptions, setExportOptions] = useState({
         statusFilter: 'all',
@@ -25,6 +25,86 @@ const ExportTeamsModal = ({ isOpen, onClose }) => {
         includeKidsDetails: false
     });
     const [isExporting, setIsExporting] = useState(false);
+
+    // Hebrew headers mapping
+    const getHeaders = () => {
+        const headers = [];
+
+        if (currentLanguage === 'he') {
+            if (exportOptions.includeBasicInfo) {
+                headers.push('שם הצוות', 'תיאור', 'סטטוס');
+            }
+
+            if (exportOptions.includeInstructorInfo) {
+                headers.push('מדריך ראשי', 'אימייל המדריך', 'טלפון המדריך', 'כל המדריכים');
+            }
+
+            if (exportOptions.includeCapacityInfo) {
+                headers.push('חברים נוכחיים', 'קיבולת מקסימלית', 'מקומות פנויים', 'אחוז קיבולת');
+            }
+
+            if (exportOptions.includeMemberInfo) {
+                headers.push('שמות חברים');
+            }
+
+            if (exportOptions.includeKidsDetails) {
+                headers.push('פרטי ילדים');
+            }
+
+            if (exportOptions.includeTimestamps) {
+                headers.push('נוצר בתאריך', 'עודכן בתאריך');
+            }
+        } else {
+            if (exportOptions.includeBasicInfo) {
+                headers.push(
+                    t('exportTeams.teamName', 'Team Name'),
+                    t('events.description', 'Description'),
+                    t('teams.status', 'Status')
+                );
+            }
+
+            if (exportOptions.includeInstructorInfo) {
+                headers.push(
+                    t('exportTeams.primaryInstructor', 'Primary Instructor'),
+                    t('exportTeams.instructorEmail', 'Instructor Email'),
+                    t('exportTeams.instructorPhone', 'Instructor Phone'),
+                    t('exportTeams.allInstructors', 'All Instructors')
+                );
+            }
+
+            if (exportOptions.includeCapacityInfo) {
+                headers.push(
+                    t('exportTeams.currentMembers', 'Current Members'),
+                    t('exportTeams.maxCapacity', 'Max Capacity'),
+                    t('teams.availableSpots', 'Available Spots'),
+                    t('exportTeams.capacityPercentage', 'Capacity %')
+                );
+            }
+
+            if (exportOptions.includeMemberInfo) {
+                headers.push(t('exportTeams.memberNames', 'Member Names'));
+            }
+
+            if (exportOptions.includeKidsDetails) {
+                headers.push(t('exportTeams.kidsDetails', 'Kids Details'));
+            }
+
+            if (exportOptions.includeTimestamps) {
+                headers.push(t('users.createdAt', 'Created At'), t('exportEvents.updatedAt', 'Updated At'));
+            }
+        }
+
+        return headers;
+    };
+
+    // Helper function to format CSV for RTL
+    const formatCsvForRTL = (csvContent) => {
+        if (currentLanguage !== 'he') return csvContent;
+
+        // Add BOM for proper Hebrew encoding
+        const BOM = '\uFEFF';
+        return BOM + csvContent;
+    };
 
     const handleExport = async () => {
         setIsExporting(true);
@@ -186,47 +266,8 @@ const ExportTeamsModal = ({ isOpen, onClose }) => {
                 teams.push(team);
             });
 
-            // Create CSV content
-            const headers = [];
-
-            if (exportOptions.includeBasicInfo) {
-                headers.push(
-                    t('exportTeams.teamName', 'Team Name'),
-                    t('events.description', 'Description'),
-                    t('teams.status', 'Status')
-                );
-            }
-
-            if (exportOptions.includeInstructorInfo) {
-                headers.push(
-                    t('exportTeams.primaryInstructor', 'Primary Instructor'),
-                    t('exportTeams.instructorEmail', 'Instructor Email'),
-                    t('exportTeams.instructorPhone', 'Instructor Phone'),
-                    t('exportTeams.allInstructors', 'All Instructors')
-                );
-            }
-
-            if (exportOptions.includeCapacityInfo) {
-                headers.push(
-                    t('exportTeams.currentMembers', 'Current Members'),
-                    t('exportTeams.maxCapacity', 'Max Capacity'),
-                    t('teams.availableSpots', 'Available Spots'),
-                    t('exportTeams.capacityPercentage', 'Capacity %')
-                );
-            }
-
-            if (exportOptions.includeMemberInfo) {
-                headers.push(t('exportTeams.memberNames', 'Member Names'));
-            }
-
-            if (exportOptions.includeKidsDetails) {
-                headers.push(t('exportTeams.kidsDetails', 'Kids Details'));
-            }
-
-            if (exportOptions.includeTimestamps) {
-                headers.push(t('users.createdAt', 'Created At'), t('exportEvents.updatedAt', 'Updated At'));
-            }
-
+            // Create CSV content with proper headers
+            const headers = getHeaders();
             let csvContent = headers.join(',') + '\n';
 
             teams.forEach(team => {
@@ -273,11 +314,15 @@ const ExportTeamsModal = ({ isOpen, onClose }) => {
                 csvContent += row.join(',') + '\n';
             });
 
+            // Format for RTL if Hebrew
+            csvContent = formatCsvForRTL(csvContent);
+
             // Generate filename
             const timestamp = new Date().toISOString().split('T')[0];
             const statusFilter = exportOptions.statusFilter === 'all' ? 'all' : exportOptions.statusFilter;
             const capacityFilter = exportOptions.capacityFilter === 'all' ? 'all' : exportOptions.capacityFilter;
-            const filename = `teams_export_${statusFilter}_${capacityFilter}_${timestamp}.csv`;
+            const langSuffix = currentLanguage === 'he' ? '_he' : '';
+            const filename = `teams_export_${statusFilter}_${capacityFilter}_${timestamp}${langSuffix}.csv`;
 
             // Create and download file
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -323,7 +368,7 @@ const ExportTeamsModal = ({ isOpen, onClose }) => {
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                 <div className="modal-header">
                     <h3>
-                        <Download size={20} style={{ marginRight: '8px' }} />
+                        <Download size={20} style={{ marginRight: isRTL ? '0' : '8px', marginLeft: isRTL ? '8px' : '0' }} />
                         {t('teams.exportTeams', 'Export Teams')}
                     </h3>
                     <button
@@ -387,9 +432,9 @@ const ExportTeamsModal = ({ isOpen, onClose }) => {
                                         includeBasicInfo: e.target.checked
                                     }))}
                                     disabled={isExporting}
-                                    style={{ marginRight: '8px' }}
+                                    style={{ marginRight: isRTL ? '0' : '8px', marginLeft: isRTL ? '8px' : '0' }}
                                 />
-                                <Team size={16} style={{ marginRight: '4px' }} />
+                                <Team size={16} style={{ marginRight: isRTL ? '0' : '4px', marginLeft: isRTL ? '4px' : '0' }} />
                                 {t('exportTeams.includeBasicInfo', 'Include basic information (name, description, status)')}
                             </label>
                         </div>
@@ -404,7 +449,7 @@ const ExportTeamsModal = ({ isOpen, onClose }) => {
                                         includeInstructorInfo: e.target.checked
                                     }))}
                                     disabled={isExporting}
-                                    style={{ marginRight: '8px' }}
+                                    style={{ marginRight: isRTL ? '0' : '8px', marginLeft: isRTL ? '8px' : '0' }}
                                 />
                                 👨‍🏫 {t('exportTeams.includeInstructorInfo', 'Include instructor information')}
                             </label>
@@ -420,7 +465,7 @@ const ExportTeamsModal = ({ isOpen, onClose }) => {
                                         includeCapacityInfo: e.target.checked
                                     }))}
                                     disabled={isExporting}
-                                    style={{ marginRight: '8px' }}
+                                    style={{ marginRight: isRTL ? '0' : '8px', marginLeft: isRTL ? '8px' : '0' }}
                                 />
                                 📊 {t('exportTeams.includeCapacityInfo', 'Include capacity and member count')}
                             </label>
@@ -436,7 +481,7 @@ const ExportTeamsModal = ({ isOpen, onClose }) => {
                                         includeMemberInfo: e.target.checked
                                     }))}
                                     disabled={isExporting}
-                                    style={{ marginRight: '8px' }}
+                                    style={{ marginRight: isRTL ? '0' : '8px', marginLeft: isRTL ? '8px' : '0' }}
                                 />
                                 👥 {t('exportTeams.includeMemberInfo', 'Include member names list')}
                             </label>
@@ -452,7 +497,7 @@ const ExportTeamsModal = ({ isOpen, onClose }) => {
                                         includeKidsDetails: e.target.checked
                                     }))}
                                     disabled={isExporting}
-                                    style={{ marginRight: '8px' }}
+                                    style={{ marginRight: isRTL ? '0' : '8px', marginLeft: isRTL ? '8px' : '0' }}
                                 />
                                 🎯 {t('exportTeams.includeKidsDetails', 'Include detailed kids information (age, parent)')}
                             </label>
@@ -468,7 +513,7 @@ const ExportTeamsModal = ({ isOpen, onClose }) => {
                                         includeTimestamps: e.target.checked
                                     }))}
                                     disabled={isExporting}
-                                    style={{ marginRight: '8px' }}
+                                    style={{ marginRight: isRTL ? '0' : '8px', marginLeft: isRTL ? '8px' : '0' }}
                                 />
                                 ⏰ {t('import.includeTimestamp', 'Include Created At and Updated At timestamps')}
                             </label>
@@ -479,6 +524,14 @@ const ExportTeamsModal = ({ isOpen, onClose }) => {
                         <div className="export-notice">
                             <p style={{ fontSize: '14px', color: '#666', fontStyle: 'italic' }}>
                                 👨‍🏫 {t('exportTeams.instructorExportNotice', 'You can export all teams data based on your instructor permissions.')}
+                            </p>
+                        </div>
+                    )}
+
+                    {currentLanguage === 'he' && (
+                        <div className="export-notice">
+                            <p style={{ fontSize: '14px', color: '#666', fontStyle: 'italic' }}>
+                                🌐 {t('export.hebrewNotice', 'הקובץ יוצא עם כותרות בעברית ותמיכה ב-RTL')}
                             </p>
                         </div>
                     )}
@@ -501,12 +554,12 @@ const ExportTeamsModal = ({ isOpen, onClose }) => {
                     >
                         {isExporting ? (
                             <>
-                                <Clock className="loading-spinner" size={16} style={{ marginRight: '6px' }} />
+                                <Clock className="loading-spinner" size={16} style={{ marginRight: isRTL ? '0' : '6px', marginLeft: isRTL ? '6px' : '0' }} />
                                 {t('users.exporting', 'Exporting...')}
                             </>
                         ) : (
                             <>
-                                <Download size={16} style={{ marginRight: '6px' }} />
+                                <Download size={16} style={{ marginRight: isRTL ? '0' : '6px', marginLeft: isRTL ? '6px' : '0' }} />
                                 {t('users.exportToCsv', 'Export to CSV')}
                             </>
                         )}

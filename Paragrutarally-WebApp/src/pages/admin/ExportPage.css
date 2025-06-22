@@ -1,236 +1,486 @@
-/* src/pages/admin/ExportPage.css - Page-specific styles only */
+/* src/pages/admin/ExportPage.css - Clean Export Page Styles */
 @import url('./../../styles/global.css');
 
 /* ========================================
-   IMPORT EXPORT PAGE SPECIFIC STYLES
+   EXPORT PAGE LAYOUT
    ======================================== */
 
-/* Page uses .admin-page class from global.css */
-.import-export-page {
-    /* No additional styles needed - inherits from .admin-page */
-}
-
-/* Content sections use .form-section structure from global.css */
-.content-section {
-    /* Inherits from .form-section in global.css */
+.export-page {
+    /* Inherits from .admin-page in global.css */
 }
 
 /* ========================================
-   IMPORT/EXPORT SPECIFIC COMPONENTS
+   PAGE HEADER
    ======================================== */
 
-.import-form,
-.export-form {
+.page-header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding: 30px 0;
+}
+
+.page-title {
+    color: var(--text-primary);
+    margin: 0 0 15px 0;
+    font-size: 2.5rem;
+    font-weight: 700;
     display: flex;
-    flex-direction: column;
-    gap: 20px;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    transition: color 0.3s ease;
 }
 
-.file-input {
-    /* Inherits most styles from .form-input in global.css */
-    cursor: pointer;
+.page-title-icon {
+    color: var(--racing-lilach);
+    filter: drop-shadow(0 2px 4px rgba(190, 163, 243, 0.3));
 }
 
-/* File info display */
-.file-info {
-    background-color: var(--bg-tertiary);
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    padding: 12px;
-    margin-top: 8px;
-    transition: background-color 0.3s ease, border-color 0.3s ease;
-}
-
-.file-info p {
-    margin: 0;
+.page-subtitle {
     color: var(--text-secondary);
-    font-size: 14px;
-}
-
-/* ========================================
-   OPTIONS STYLING
-   ======================================== */
-
-.import-options,
-.export-options {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.option {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 12px;
-    background-color: var(--bg-tertiary);
-    border-radius: 6px;
-    transition: background-color 0.3s ease;
-}
-
-.option:hover {
-    background-color: var(--bg-quaternary);
-}
-
-.option input[type="checkbox"] {
-    accent-color: var(--accent-color);
-    width: 16px;
-    height: 16px;
-}
-
-.option label {
-    color: var(--text-primary);
-    cursor: pointer;
-    font-size: 14px;
-    user-select: none;
-    transition: color 0.3s ease;
-}
-
-/* ========================================
-   FORMAT OPTIONS
-   ======================================== */
-
-.format-options {
-    display: flex;
-    gap: 20px;
-    margin-top: 8px;
-}
-
-.format-option {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.format-option input[type="radio"] {
-    accent-color: var(--accent-color);
-    width: 16px;
-    height: 16px;
-}
-
-.format-option label {
-    color: var(--text-primary);
-    cursor: pointer;
-    font-size: 14px;
+    font-size: 18px;
     font-weight: 500;
-    user-select: none;
-    transition: color 0.3s ease;
+    margin: 0;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 /* ========================================
-   ACTIVITY LIST
+   EXPORT CARDS GRID
    ======================================== */
 
-.activity-list {
+.export-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+    margin-bottom: 40px;
+}
+
+.export-card {
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-radius: 20px;
+    padding: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px var(--shadow-color);
+    position: relative;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    min-height: 200px;
 }
 
-.activity-item {
+.export-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--card-color) 0%, var(--card-color-light) 100%);
+    opacity: 0.1;
+    transition: opacity 0.3s ease;
+}
+
+.export-card:hover::before {
+    opacity: 0.2;
+}
+
+.export-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px var(--shadow-hover);
+    border-color: var(--card-color);
+}
+
+/* Card color variants */
+.export-card.users {
+    --card-color: var(--racing-lilach);
+    --card-color-light: rgba(190, 163, 243, 0.2);
+}
+
+.export-card.kids {
+    --card-color: var(--racing-pink);
+    --card-color-light: rgba(236, 72, 153, 0.2);
+}
+
+.export-card.events {
+    --card-color: var(--success-color);
+    --card-color-light: rgba(16, 185, 129, 0.2);
+}
+
+.export-card.teams {
+    --card-color: var(--info-color);
+    --card-color-light: rgba(59, 130, 246, 0.2);
+}
+
+/* ========================================
+   EXPORT CARD COMPONENTS
+   ======================================== */
+
+.export-card-header {
     display: flex;
-    align-items: flex-start;
-    gap: 15px;
-    padding: 15px;
-    background-color: var(--bg-tertiary);
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    transition: background-color 0.3s ease, border-color 0.3s ease;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 2;
 }
 
-.activity-item:hover {
-    background-color: var(--bg-quaternary);
-    border-color: var(--accent-color);
+.export-card-icon {
+    background: linear-gradient(135deg, var(--card-color) 0%, var(--card-color-light) 100%);
+    color: white;
+    width: 60px;
+    height: 60px;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
 }
 
-.activity-icon {
+.export-card:hover .export-card-icon {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.export-card-download {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--card-color);
     width: 40px;
     height: 40px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
-    font-weight: bold;
-    flex-shrink: 0;
+    border: 2px solid var(--card-color);
+    transition: all 0.3s ease;
+    opacity: 0.7;
 }
 
-.import-icon {
-    background-color: var(--success-light);
-    color: var(--success-color);
+.export-card:hover .export-card-download {
+    opacity: 1;
+    transform: scale(1.1);
+    background: var(--card-color);
+    color: white;
 }
 
-.export-icon {
-    background-color: var(--info-light);
-    color: var(--info-color);
-}
-
-.activity-details {
+.export-card-content {
     flex: 1;
+    position: relative;
+    z-index: 2;
 }
 
-.activity-title {
+.export-card-title {
     color: var(--text-primary);
-    font-weight: 500;
-    font-size: 16px;
-    margin-bottom: 5px;
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0 0 10px 0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
     transition: color 0.3s ease;
 }
 
-.activity-meta {
+.export-card:hover .export-card-title {
+    color: var(--card-color);
+}
+
+.export-card-description {
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0;
+    transition: color 0.3s ease;
+}
+
+.export-card-footer {
+    margin-top: auto;
+    padding-top: 20px;
+    position: relative;
+    z-index: 2;
+}
+
+.export-card-action {
+    color: var(--card-color);
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 5px;
+    gap: 8px;
+    transition: all 0.3s ease;
 }
 
-.activity-time {
-    color: var(--text-secondary);
-    font-size: 14px;
-    transition: color 0.3s ease;
+.export-card-action::after {
+    content: '→';
+    font-size: 16px;
+    font-weight: bold;
+    transform: translateX(0);
+    transition: transform 0.3s ease;
 }
 
-.activity-status {
-    padding: 2px 8px;
-    border-radius: 12px;
-    font-size: 12px;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.activity-status.success {
-    background-color: var(--success-light);
-    color: var(--success-color);
-}
-
-.activity-status.error {
-    background-color: var(--error-light);
-    color: var(--error-color);
-}
-
-.activity-description {
-    color: var(--text-secondary);
-    font-size: 14px;
-    transition: color 0.3s ease;
+.export-card:hover .export-card-action::after {
+    transform: translateX(5px);
 }
 
 /* ========================================
-   RESPONSIVE OVERRIDES
+   EXPORT INFO SECTION
+   ======================================== */
+
+.export-info-section {
+    margin-top: 40px;
+}
+
+.export-info-card {
+    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-quaternary) 100%);
+    border: 2px solid var(--border-color);
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 4px 15px var(--shadow-color);
+    transition: all 0.3s ease;
+}
+
+.export-info-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px var(--shadow-color);
+}
+
+.export-info-card h3 {
+    color: var(--text-primary);
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0 0 20px 0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.export-info-card h3::before {
+    content: 'ℹ️';
+    font-size: 24px;
+    color: var(--info-color);
+}
+
+.export-info-card ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.export-info-card li {
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 12px;
+    padding-left: 25px;
+    position: relative;
+    transition: color 0.3s ease;
+}
+
+.export-info-card li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: var(--success-color);
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.export-info-card li:hover {
+    color: var(--text-primary);
+}
+
+/* ========================================
+   ACTIVE STATES
+   ======================================== */
+
+.export-card:active {
+    transform: translateY(-2px) scale(0.98);
+}
+
+/* ========================================
+   LOADING STATE FOR CARDS
+   ======================================== */
+
+.export-card.loading {
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.export-card.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 30px;
+    height: 30px;
+    border: 3px solid var(--border-color);
+    border-top: 3px solid var(--card-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    transform: translate(-50%, -50%);
+    z-index: 3;
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
    ======================================== */
 
 @media (max-width: 768px) {
-    .format-options {
+    .export-cards-grid {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+    }
+
+    .page-title {
+        font-size: 2rem;
         flex-direction: column;
         gap: 10px;
     }
 
-    .activity-item {
-        flex-direction: column;
-        text-align: center;
+    .page-subtitle {
+        font-size: 16px;
     }
 
-    .activity-meta {
-        justify-content: center;
+    .export-card {
+        padding: 20px;
+        min-height: 180px;
     }
+
+    .export-card-icon {
+        width: 50px;
+        height: 50px;
+    }
+
+    .export-card-download {
+        width: 35px;
+        height: 35px;
+    }
+
+    .export-card-title {
+        font-size: 18px;
+    }
+
+    .export-info-card {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .export-cards-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .page-header {
+        padding: 20px 0;
+        margin-bottom: 30px;
+    }
+
+    .page-title {
+        font-size: 1.8rem;
+    }
+
+    .page-subtitle {
+        font-size: 14px;
+    }
+
+    .export-card {
+        padding: 15px;
+        min-height: 160px;
+    }
+
+    .export-card-header {
+        margin-bottom: 15px;
+    }
+
+    .export-card-icon {
+        width: 45px;
+        height: 45px;
+    }
+
+    .export-card-download {
+        width: 30px;
+        height: 30px;
+    }
+
+    .export-card-title {
+        font-size: 16px;
+    }
+
+    .export-card-description {
+        font-size: 13px;
+    }
+
+    .export-info-card {
+        padding: 15px;
+    }
+
+    .export-info-card h3 {
+        font-size: 18px;
+    }
+
+    .export-info-card li {
+        font-size: 13px;
+    }
+}
+
+/* ========================================
+   RTL SUPPORT
+   ======================================== */
+
+.rtl .export-card-header {
+    flex-direction: row-reverse;
+}
+
+.rtl .export-card-action::after {
+    content: '←';
+}
+
+.rtl .export-card:hover .export-card-action::after {
+    transform: translateX(-5px);
+}
+
+.rtl .export-info-card li {
+    padding-right: 25px;
+    padding-left: 0;
+}
+
+.rtl .export-info-card li::before {
+    right: 0;
+    left: auto;
+}
+
+/* ========================================
+   DARK MODE SPECIFIC ADJUSTMENTS
+   ======================================== */
+
+[data-theme="dark"] .export-card.users,
+.dark-mode .export-card.users,
+.dark .export-card.users {
+    --card-color-light: rgba(190, 163, 243, 0.15);
+}
+
+[data-theme="dark"] .export-card.kids,
+.dark-mode .export-card.kids,
+.dark .export-card.kids {
+    --card-color-light: rgba(236, 72, 153, 0.15);
+}
+
+[data-theme="dark"] .export-card.events,
+.dark-mode .export-card.events,
+.dark .export-card.events {
+    --card-color-light: rgba(16, 185, 129, 0.15);
+}
+
+[data-theme="dark"] .export-card.teams,
+.dark-mode .export-card.teams,
+.dark .export-card.teams {
+    --card-color-light: rgba(59, 130, 246, 0.15);
 }

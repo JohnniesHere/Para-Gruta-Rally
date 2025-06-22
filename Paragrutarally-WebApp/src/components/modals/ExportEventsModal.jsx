@@ -1,4 +1,4 @@
-// src/components/modals/ExportEventsModal.jsx
+// src/components/modals/ExportEventsModal.jsx - WITH HEBREW SUPPORT
 import React, { useState } from 'react';
 import { collection, getDocs, query, where, orderBy } from 'firebase/firestore';
 import { db } from '../../firebase/config';
@@ -10,7 +10,7 @@ import {
 } from '@tabler/icons-react';
 
 const ExportEventsModal = ({ isOpen, onClose }) => {
-    const { t, isRTL } = useLanguage();
+    const { t, isRTL, currentLanguage } = useLanguage();
     const [exportOptions, setExportOptions] = useState({
         statusFilter: 'all',
         includeTimestamps: true,
@@ -18,6 +18,59 @@ const ExportEventsModal = ({ isOpen, onClose }) => {
         includeTeams: true
     });
     const [isExporting, setIsExporting] = useState(false);
+
+    // Hebrew headers mapping
+    const getHeaders = () => {
+        if (currentLanguage === 'he') {
+            const headers = ['שם האירוע', 'תיאור', 'מקום', 'תאריך', 'סטטוס', 'הערות'];
+
+            if (exportOptions.includeParticipants) {
+                headers.push('משתתפים');
+            }
+
+            if (exportOptions.includeTeams) {
+                headers.push('מספר צוותים');
+            }
+
+            if (exportOptions.includeTimestamps) {
+                headers.push('נוצר בתאריך', 'עודכן בתאריך');
+            }
+
+            return headers;
+        } else {
+            const headers = [
+                t('events.eventName', 'Event Name'),
+                t('events.description', 'Description'),
+                t('events.location', 'Location'),
+                t('events.date', 'Date'),
+                t('events.status', 'Status'),
+                t('events.notes', 'Notes')
+            ];
+
+            if (exportOptions.includeParticipants) {
+                headers.push(t('events.participants', 'Participants'));
+            }
+
+            if (exportOptions.includeTeams) {
+                headers.push(t('exportEvents.teamsCount', 'Teams Count'));
+            }
+
+            if (exportOptions.includeTimestamps) {
+                headers.push(t('users.createdAt', 'Created At'), t('exportEvents.updatedAt', 'Updated At'));
+            }
+
+            return headers;
+        }
+    };
+
+    // Helper function to format CSV for RTL
+    const formatCsvForRTL = (csvContent) => {
+        if (currentLanguage !== 'he') return csvContent;
+
+        // Add BOM for proper Hebrew encoding
+        const BOM = '\uFEFF';
+        return BOM + csvContent;
+    };
 
     const handleExport = async () => {
         setIsExporting(true);
@@ -71,28 +124,8 @@ const ExportEventsModal = ({ isOpen, onClose }) => {
                 events.push(event);
             });
 
-            // Create CSV content
-            const headers = [
-                t('events.eventName', 'Event Name'),
-                t('events.description', 'Description'),
-                t('events.location', 'Location'),
-                t('events.date', 'Date'),
-                t('events.status', 'Status'),
-                t('events.notes', 'Notes')
-            ];
-
-            if (exportOptions.includeParticipants) {
-                headers.push(t('events.participants', 'Participants'));
-            }
-
-            if (exportOptions.includeTeams) {
-                headers.push(t('exportEvents.teamsCount', 'Teams Count'));
-            }
-
-            if (exportOptions.includeTimestaments) {
-                headers.push(t('users.createdAt', 'Created At'), t('exportEvents.updatedAt', 'Updated At'));
-            }
-
+            // Create CSV content with proper headers
+            const headers = getHeaders();
             let csvContent = headers.join(',') + '\n';
 
             events.forEach(event => {
@@ -120,10 +153,14 @@ const ExportEventsModal = ({ isOpen, onClose }) => {
                 csvContent += row.join(',') + '\n';
             });
 
+            // Format for RTL if Hebrew
+            csvContent = formatCsvForRTL(csvContent);
+
             // Generate filename
             const timestamp = new Date().toISOString().split('T')[0];
             const statusFilter = exportOptions.statusFilter === 'all' ? 'all' : exportOptions.statusFilter;
-            const filename = `events_export_${statusFilter}_${timestamp}.csv`;
+            const langSuffix = currentLanguage === 'he' ? '_he' : '';
+            const filename = `events_export_${statusFilter}_${timestamp}${langSuffix}.csv`;
 
             // Create and download file
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -165,7 +202,7 @@ const ExportEventsModal = ({ isOpen, onClose }) => {
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                 <div className="modal-header">
                     <h3>
-                        <Download size={20} style={{ marginRight: '8px' }} />
+                        <Download size={20} style={{ marginRight: isRTL ? '0' : '8px', marginLeft: isRTL ? '8px' : '0' }} />
                         {t('events.exportEvents', 'Export Events')}
                     </h3>
                     <button
@@ -207,7 +244,7 @@ const ExportEventsModal = ({ isOpen, onClose }) => {
                                     includeParticipants: e.target.checked
                                 }))}
                                 disabled={isExporting}
-                                style={{ marginRight: '8px' }}
+                                style={{ marginRight: isRTL ? '0' : '8px', marginLeft: isRTL ? '8px' : '0' }}
                             />
                             {t('exportEvents.includeParticipants', 'Include participant count')}
                         </label>
@@ -223,7 +260,7 @@ const ExportEventsModal = ({ isOpen, onClose }) => {
                                     includeTeams: e.target.checked
                                 }))}
                                 disabled={isExporting}
-                                style={{ marginRight: '8px' }}
+                                style={{ marginRight: isRTL ? '0' : '8px', marginLeft: isRTL ? '8px' : '0' }}
                             />
                             {t('exportEvents.includeTeams', 'Include participating teams count')}
                         </label>
@@ -239,11 +276,19 @@ const ExportEventsModal = ({ isOpen, onClose }) => {
                                     includeTimestamps: e.target.checked
                                 }))}
                                 disabled={isExporting}
-                                style={{ marginRight: '8px' }}
+                                style={{ marginRight: isRTL ? '0' : '8px', marginLeft: isRTL ? '8px' : '0' }}
                             />
                             {t('import.includeTimestamp', 'Include Created At and Updated At timestamps')}
                         </label>
                     </div>
+
+                    {currentLanguage === 'he' && (
+                        <div className="export-notice">
+                            <p style={{ fontSize: '14px', color: '#666', fontStyle: 'italic' }}>
+                                🌐 {t('export.hebrewNotice', 'הקובץ יוצא עם כותרות בעברית ותמיכה ב-RTL')}
+                            </p>
+                        </div>
+                    )}
                 </div>
 
                 <div className="modal-footer">
@@ -263,12 +308,12 @@ const ExportEventsModal = ({ isOpen, onClose }) => {
                     >
                         {isExporting ? (
                             <>
-                                <Clock className="loading-spinner" size={16} style={{ marginRight: '6px' }} />
+                                <Clock className="loading-spinner" size={16} style={{ marginRight: isRTL ? '0' : '6px', marginLeft: isRTL ? '6px' : '0' }} />
                                 {t('users.exporting', 'Exporting...')}
                             </>
                         ) : (
                             <>
-                                <Download size={16} style={{ marginRight: '6px' }} />
+                                <Download size={16} style={{ marginRight: isRTL ? '0' : '6px', marginLeft: isRTL ? '6px' : '0' }} />
                                 {t('users.exportToCsv', 'Export to CSV')}
                             </>
                         )}

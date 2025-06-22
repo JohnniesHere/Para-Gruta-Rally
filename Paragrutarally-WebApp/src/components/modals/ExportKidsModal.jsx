@@ -1,4 +1,4 @@
-// src/components/modals/ExportKidsModal.jsx
+// src/components/modals/ExportKidsModal.jsx - WITH HEBREW SUPPORT
 import React, { useState } from 'react';
 import { collection, getDocs, query, where, orderBy } from 'firebase/firestore';
 import { db } from '../../firebase/config';
@@ -12,7 +12,7 @@ import {
 } from '@tabler/icons-react';
 
 const ExportKidsModal = ({ isOpen, onClose }) => {
-    const { t, isRTL } = useLanguage();
+    const { t, isRTL, currentLanguage } = useLanguage();
     const { userRole, userData, user } = usePermissions();
     const [exportOptions, setExportOptions] = useState({
         statusFilter: 'all',
@@ -24,6 +24,95 @@ const ExportKidsModal = ({ isOpen, onClose }) => {
         includeInstructorInfo: false
     });
     const [isExporting, setIsExporting] = useState(false);
+
+    // Hebrew headers mapping
+    const getHeaders = () => {
+        const headers = [];
+
+        if (currentLanguage === 'he') {
+            headers.push('מספר משתתף', 'סטטוס');
+
+            if (exportOptions.includePersonalInfo) {
+                headers.push('שם פרטי', 'שם משפחה', 'גיל', 'תאריך לידה', 'כתובת', 'יכולות מדהימות', 'הערות הכרוז');
+            }
+
+            if (exportOptions.includeParentInfo) {
+                headers.push('שם הורה', 'אימייל הורה', 'טלפון הורה', 'שמות סבים וסבתות', 'טלפון סבים וסבתות');
+            }
+
+            if (exportOptions.includeTeamInfo) {
+                headers.push('שם הצוות', 'תיאור הצוות');
+            }
+
+            if (exportOptions.includeInstructorInfo) {
+                headers.push('שם המדריך', 'אימייל המדריך');
+            }
+
+            headers.push('הצהרה חתומה', 'הערות נוספות');
+
+            if (exportOptions.includeTimestamps) {
+                headers.push('נוצר בתאריך', 'עודכן בתאריך');
+            }
+        } else {
+            headers.push(t('kids.participantNumber', 'Participant Number'), t('kids.status', 'Status'));
+
+            if (exportOptions.includePersonalInfo) {
+                headers.push(
+                    t('editKid.firstName', 'First Name'),
+                    t('editKid.lastName', 'Last Name'),
+                    t('kids.age', 'Age'),
+                    t('common.dateOfBirth', 'Date of Birth'),
+                    t('common.address', 'Address'),
+                    t('editKid.amazingAbilities', 'Capabilities'),
+                    t('editKid.announcerNotes', 'Announcer Notes')
+                );
+            }
+
+            if (exportOptions.includeParentInfo) {
+                headers.push(
+                    t('kids.parentName', 'Parent Name'),
+                    t('editKid.emailAddress', 'Parent Email'),
+                    t('editKid.phoneNumber', 'Parent Phone'),
+                    t('editKid.grandparentsNames', 'Grandparents Names'),
+                    t('editKid.grandparentsPhone', 'Grandparents Phone')
+                );
+            }
+
+            if (exportOptions.includeTeamInfo) {
+                headers.push(
+                    t('exportTeams.teamName', 'Team Name'),
+                    t('events.description', 'Team Description')
+                );
+            }
+
+            if (exportOptions.includeInstructorInfo) {
+                headers.push(
+                    t('exportTeams.instructorName', 'Instructor Name'),
+                    t('exportTeams.instructorEmail', 'Instructor Email')
+                );
+            }
+
+            headers.push(
+                t('exportKids.signedDeclaration', 'Signed Declaration'),
+                t('exportKids.additionalComments', 'Additional Comments')
+            );
+
+            if (exportOptions.includeTimestamps) {
+                headers.push(t('users.createdAt', 'Created At'), t('exportEvents.updatedAt', 'Updated At'));
+            }
+        }
+
+        return headers;
+    };
+
+    // Helper function to format CSV for RTL
+    const formatCsvForRTL = (csvContent) => {
+        if (currentLanguage !== 'he') return csvContent;
+
+        // Add BOM for proper Hebrew encoding
+        const BOM = '\uFEFF';
+        return BOM + csvContent;
+    };
 
     const handleExport = async () => {
         setIsExporting(true);
@@ -158,57 +247,8 @@ const ExportKidsModal = ({ isOpen, onClose }) => {
                 kids.push(kid);
             });
 
-            // Create CSV content
-            const headers = [
-                t('kids.participantNumber', 'Participant Number'),
-                t('kids.status', 'Status')
-            ];
-
-            if (exportOptions.includePersonalInfo) {
-                headers.push(
-                    t('editKid.firstName', 'First Name'),
-                    t('editKid.lastName', 'Last Name'),
-                    t('kids.age', 'Age'),
-                    t('common.dateOfBirth', 'Date of Birth'),
-                    t('common.address', 'Address'),
-                    t('editKid.amazingAbilities', 'Capabilities'),
-                    t('editKid.announcerNotes', 'Announcer Notes')
-                );
-            }
-
-            if (exportOptions.includeParentInfo) {
-                headers.push(
-                    t('kids.parentName', 'Parent Name'),
-                    t('editKid.emailAddress', 'Parent Email'),
-                    t('editKid.phoneNumber', 'Parent Phone'),
-                    t('editKid.grandparentsNames', 'Grandparents Names'),
-                    t('editKid.grandparentsPhone', 'Grandparents Phone')
-                );
-            }
-
-            if (exportOptions.includeTeamInfo) {
-                headers.push(
-                    t('exportTeams.teamName', 'Team Name'),
-                    t('events.description', 'Team Description')
-                );
-            }
-
-            if (exportOptions.includeInstructorInfo) {
-                headers.push(
-                    t('exportTeams.instructorName', 'Instructor Name'),
-                    t('exportTeams.instructorEmail', 'Instructor Email')
-                );
-            }
-
-            headers.push(
-                t('exportKids.signedDeclaration', 'Signed Declaration'),
-                t('exportKids.additionalComments', 'Additional Comments')
-            );
-
-            if (exportOptions.includeTimestamps) {
-                headers.push(t('users.createdAt', 'Created At'), t('exportEvents.updatedAt', 'Updated At'));
-            }
-
+            // Create CSV content with proper headers
+            const headers = getHeaders();
             let csvContent = headers.join(',') + '\n';
 
             kids.forEach(kid => {
@@ -265,12 +305,16 @@ const ExportKidsModal = ({ isOpen, onClose }) => {
                 csvContent += row.join(',') + '\n';
             });
 
+            // Format for RTL if Hebrew
+            csvContent = formatCsvForRTL(csvContent);
+
             // Generate filename
             const timestamp = new Date().toISOString().split('T')[0];
             const statusFilter = exportOptions.statusFilter === 'all' ? 'all' : exportOptions.statusFilter;
             const teamFilter = exportOptions.teamFilter === 'all' ? 'all' : exportOptions.teamFilter;
             const rolePrefix = userRole === 'instructor' ? 'instructor_' : userRole === 'parent' ? 'parent_' : '';
-            const filename = `${rolePrefix}kids_export_${statusFilter}_${teamFilter}_${timestamp}.csv`;
+            const langSuffix = currentLanguage === 'he' ? '_he' : '';
+            const filename = `${rolePrefix}kids_export_${statusFilter}_${teamFilter}_${timestamp}${langSuffix}.csv`;
 
             // Create and download file
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -315,7 +359,7 @@ const ExportKidsModal = ({ isOpen, onClose }) => {
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                 <div className="modal-header">
                     <h3>
-                        <Download size={20} style={{ marginRight: '8px' }} />
+                        <Download size={20} style={{ marginRight: isRTL ? '0' : '8px', marginLeft: isRTL ? '8px' : '0' }} />
                         {t('kids.exportKids', 'Export Kids')}
                     </h3>
                     <button
@@ -380,9 +424,9 @@ const ExportKidsModal = ({ isOpen, onClose }) => {
                                         includePersonalInfo: e.target.checked
                                     }))}
                                     disabled={isExporting}
-                                    style={{ marginRight: '8px' }}
+                                    style={{ marginRight: isRTL ? '0' : '8px', marginLeft: isRTL ? '8px' : '0' }}
                                 />
-                                <Baby size={16} style={{ marginRight: '4px' }} />
+                                <Baby size={16} style={{ marginRight: isRTL ? '0' : '4px', marginLeft: isRTL ? '4px' : '0' }} />
                                 {t('exportKids.includePersonalInfo', 'Include personal information (name, age, address)')}
                             </label>
                         </div>
@@ -397,7 +441,7 @@ const ExportKidsModal = ({ isOpen, onClose }) => {
                                         includeParentInfo: e.target.checked
                                     }))}
                                     disabled={isExporting}
-                                    style={{ marginRight: '8px' }}
+                                    style={{ marginRight: isRTL ? '0' : '8px', marginLeft: isRTL ? '8px' : '0' }}
                                 />
                                 👨‍👩‍👧‍👦 {t('exportKids.includeParentInfo', 'Include parent/guardian information')}
                             </label>
@@ -413,7 +457,7 @@ const ExportKidsModal = ({ isOpen, onClose }) => {
                                         includeTeamInfo: e.target.checked
                                     }))}
                                     disabled={isExporting}
-                                    style={{ marginRight: '8px' }}
+                                    style={{ marginRight: isRTL ? '0' : '8px', marginLeft: isRTL ? '8px' : '0' }}
                                 />
                                 🏎️ {t('exportKids.includeTeamInfo', 'Include team information')}
                             </label>
@@ -430,7 +474,7 @@ const ExportKidsModal = ({ isOpen, onClose }) => {
                                             includeInstructorInfo: e.target.checked
                                         }))}
                                         disabled={isExporting}
-                                        style={{ marginRight: '8px' }}
+                                        style={{ marginRight: isRTL ? '0' : '8px', marginLeft: isRTL ? '8px' : '0' }}
                                     />
                                     👨‍🏫 {t('exportKids.includeInstructorInfo', 'Include instructor information')}
                                 </label>
@@ -447,7 +491,7 @@ const ExportKidsModal = ({ isOpen, onClose }) => {
                                         includeTimestamps: e.target.checked
                                     }))}
                                     disabled={isExporting}
-                                    style={{ marginRight: '8px' }}
+                                    style={{ marginRight: isRTL ? '0' : '8px', marginLeft: isRTL ? '8px' : '0' }}
                                 />
                                 ⏰ {t('import.includeTimestamp', 'Include Created At and Updated At timestamps')}
                             </label>
@@ -466,6 +510,14 @@ const ExportKidsModal = ({ isOpen, onClose }) => {
                         <div className="export-notice">
                             <p style={{ fontSize: '14px', color: '#666', fontStyle: 'italic' }}>
                                 👨‍🏫 {t('exportKids.instructorExportNotice', 'You can only export kids assigned to you.')}
+                            </p>
+                        </div>
+                    )}
+
+                    {currentLanguage === 'he' && (
+                        <div className="export-notice">
+                            <p style={{ fontSize: '14px', color: '#666', fontStyle: 'italic' }}>
+                                🌐 {t('export.hebrewNotice', 'הקובץ יוצא עם כותרות בעברית ותמיכה ב-RTL')}
                             </p>
                         </div>
                     )}
@@ -488,12 +540,12 @@ const ExportKidsModal = ({ isOpen, onClose }) => {
                     >
                         {isExporting ? (
                             <>
-                                <Clock className="loading-spinner" size={16} style={{ marginRight: '6px' }} />
+                                <Clock className="loading-spinner" size={16} style={{ marginRight: isRTL ? '0' : '6px', marginLeft: isRTL ? '6px' : '0' }} />
                                 {t('users.exporting', 'Exporting...')}
                             </>
                         ) : (
                             <>
-                                <Download size={16} style={{ marginRight: '6px' }} />
+                                <Download size={16} style={{ marginRight: isRTL ? '0' : '6px', marginLeft: isRTL ? '6px' : '0' }} />
                                 {t('users.exportToCsv', 'Export to CSV')}
                             </>
                         )}

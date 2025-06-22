@@ -65,6 +65,7 @@ const translations = {
         'exportKids.no': 'No',
         'exportKids.signedDeclaration': 'Signed Declaration',
         'exportKids.additionalComments': 'Additional Comments',
+
         // Export Teams Modal
         'exportTeams.filterByStatus': 'Filter by Status',
         'exportTeams.filterByCapacity': 'Filter by Capacity',
@@ -75,11 +76,9 @@ const translations = {
         'exportTeams.includeMemberInfo': 'Include member names list',
         'exportTeams.includeKidsDetails': 'Include detailed kids information (age, parent)',
         'exportTeams.instructorExportNotice': 'You can export all teams data based on your instructor permissions.',
-        'exportTeams.exportError': 'Failed to export teams. Please try again.',
-
-        // CSV Headers
         'exportTeams.teamName': 'Team Name',
         'exportTeams.primaryInstructor': 'Primary Instructor',
+        'exportTeams.instructorName': 'Instructor Name',
         'exportTeams.instructorEmail': 'Instructor Email',
         'exportTeams.instructorPhone': 'Instructor Phone',
         'exportTeams.allInstructors': 'All Instructors',
@@ -88,19 +87,20 @@ const translations = {
         'exportTeams.capacityPercentage': 'Capacity %',
         'exportTeams.memberNames': 'Member Names',
         'exportTeams.kidsDetails': 'Kids Details',
-
-        // Data content
         'exportTeams.noMembers': 'No Members',
+        'exportTeams.unknownKid': 'Unknown Kid',
         'exportTeams.age': 'Age',
         'exportTeams.parent': 'Parent',
-        'exportTeams.unknownKid': 'Unknown Kid',
-           // Export Events Modal
+        'exportTeams.exportError': 'Failed to export teams. Please try again.',
+
+        // Export Events Modal
         'exportEvents.filterByStatus': 'Filter by Status',
         'exportEvents.includeParticipants': 'Include participant count',
         'exportEvents.includeTeams': 'Include participating teams count',
         'exportEvents.teamsCount': 'Teams Count',
         'exportEvents.updatedAt': 'Updated At',
         'exportEvents.exportError': 'Failed to export events. Please try again.',
+
          // Add Kid Page
         'addKid.title': 'Add A New Kid',
         'addKid.subtitle': 'Let\'s get this future champion on the track! 🏁',
@@ -518,6 +518,7 @@ const translations = {
         'events.create.success': 'Event created successfully!',
         'events.create.error': 'Error creating event: {error}',
 
+
         // User Management
         'users.title': 'User Management',
         'users.manage': 'Manage Users',
@@ -586,6 +587,10 @@ const translations = {
         'users.phoneNumberPlaceholder': 'Enter phone number',
         'users.updating': 'Updating...',
         'users.updateUserButton': 'Update User',
+        'users.includeTimestamps': 'Include Created At and Last Login timestamps',
+        'users.exportError': 'Failed to export users. Please try again.',
+        'users.exporting': 'Exporting...',
+        'users.exportToCsv': 'Export to CSV',
 
         // My Account
         'account.title': 'My Account',
@@ -638,44 +643,38 @@ const translations = {
         'backup.custom': 'Custom',
         'backup.saveSettings': 'Save Settings',
 
-        // Import/Export
-        'import.title': 'Import/Export Data',
-        'import.importData': 'Import Data',
-        'import.importDescription': 'Upload data files to import information into the system.',
-        'import.selectDataType': 'Select Data Type to Import:',
-        'import.selectFile': 'Select File (CSV or Excel):',
+        // Export Page
+        'export.title': 'Export Data',
+        'export.subtitle': 'Download your data in CSV format for backup or analysis',
+        'export.usersDescription': 'Export user accounts, roles, and contact information',
+        'export.kidsDescription': 'Export kids profiles, parent info, and team assignments',
+        'export.eventsDescription': 'Export events, schedules, and participant data',
+        'export.teamsDescription': 'Export team information, members, and instructors',
+        'export.clickToExport': 'Click to Export',
+        'export.exportInfo': 'Export Information',
+        'export.csvFormat': 'All exports are in CSV format for easy import into Excel or other tools',
+        'export.filterOptions': 'Use filter options in each export to customize your data',
+        'export.timestampInfo': 'Timestamps can be included for data tracking purposes',
+        'export.permissionInfo': 'Export permissions are based on your role and access level',
+
+        // Keep existing import translations for compatibility
         'import.users': 'Users',
         'import.kids': 'Kids',
         'import.teams': 'Teams',
         'import.events': 'Events',
-        'import.selectedFile': 'Selected file:',
-        'import.size': 'Size:',
-        'import.overwriteRecords': 'Overwrite existing records',
-        'import.skipHeader': 'Skip header row',
-        'import.importButton': 'Import Data',
-        'import.exportData': 'Export Data',
-        'import.exportDescription': 'Download data from the system as CSV or Excel files.',
-        'import.selectExportType': 'Select Data Type to Export:',
         'import.allData': 'All Data',
-        'import.exportFormat': 'Export Format:',
         'import.csv': 'CSV',
         'import.excel': 'Excel',
-        'import.includeHeaders': 'Include header row',
-        'import.includeTimestamp': 'Include timestamp in filename',
-        'import.exportButton': 'Export Data',
-        'import.recentActivity': 'Recent Activity',
-        'import.usersImport': 'Users Import',
-        'import.eventsExport': 'Events Export',
-        'import.teamsImport': 'Teams Import',
-        'import.daysAgo': '{count} days ago',
-        'import.weekAgo': '1 week ago',
-        'import.success': 'Success',
-        'import.error': 'Error',
-        'import.recordsImported': '{count} records imported',
-        'import.exportedAs': 'Exported as {filename}',
-        'import.invalidFormat': 'Invalid format in row {row}',
-        'import.importingData': 'Importing {type} data from {filename}',
-        'import.exportingData': 'Exporting {type} data',
+        'import.includeTimestamp': 'Include Created At and Updated At timestamps',
+
+        // Export Modal Common
+        'exportCommon.filterByStatus': 'Filter by Status',
+        'exportCommon.dataToInclude': 'Data to Include',
+        'exportCommon.includeTimestamps': 'Include Created At and Updated At timestamps',
+        'exportCommon.exportError': 'Failed to export. Please try again.',
+        'exportCommon.exporting': 'Exporting...',
+        'exportCommon.exportToCsv': 'Export to CSV',
+
 
 
 
@@ -816,6 +815,8 @@ const translations = {
         'teams.teams': 'Team(s)',
         'teams.leader': 'Leader',
         'teams.kidsInTeam': 'kids in team',
+        'teams.unknownInstructor': 'Unknown Instructor',
+        'teams.noTeam': 'No Team',
 
 
         // Kids Management - NEW TRANSLATIONS
@@ -878,7 +879,6 @@ const translations = {
         'kids.loadingPermissions': 'Loading permissions...',
 
         // Export functionality
-        'export.title': 'Export Data',
         'export.description': 'Download data as Excel or CSV files',
         'export.selectFormat': 'Select Format',
         'export.excel': 'Excel (XLSX)',
@@ -1037,6 +1037,7 @@ const translations = {
         'editKid.formStatusOptions.completed': 'ready',
         'editKid.formStatusOptions.needs_review': 'needs review',
         'editKid.formStatusOptions.cancelled': 'cancelled',
+
 
         // View Kid Page
         'viewKid.racingStarProfile': 'Racing Star Profile!',
@@ -1628,6 +1629,7 @@ const translations = {
         'common.parentName': 'Parent Name',
         'common.signedFormStatus': 'Form Status',
         'common.declaration': 'Declaration',
+
             // Parent Kid Detail Page
         'parent.backToMyKids': 'Back to My Kids',
         'parent.kidNotFound': 'Kid not found or access denied',
@@ -1850,6 +1852,7 @@ const translations = {
         'exportKids.no': 'לא',
         'exportKids.signedDeclaration': 'הצהרה חתומה',
         'exportKids.additionalComments': 'הערות נוספות',
+
           // Export Teams Modal - NEW KEYS ONLY
         'exportTeams.filterByStatus': 'סנן לפי סטטוס',
         'exportTeams.filterByCapacity': 'סנן לפי קיבולת',
@@ -1861,6 +1864,14 @@ const translations = {
         'exportTeams.includeKidsDetails': 'כלול מידע מפורט על ילדים (גיל, הורה)',
         'exportTeams.instructorExportNotice': 'אתה יכול לייצא את כל נתוני הצוותים בהתבסס על הרשאות המדריך שלך.',
         'exportTeams.exportError': 'כשל בייצוא צוותים. אנא נסה שוב.',
+
+        // Export Modal Common
+        'exportCommon.filterByStatus': 'סנן לפי סטטוס',
+        'exportCommon.dataToInclude': 'נתונים לכלול',
+        'exportCommon.includeTimestamps': 'כלול חותמות זמן של יצירה ועדכון',
+        'exportCommon.exportError': 'הייצוא נכשל. אנא נסה שוב.',
+        'exportCommon.exporting': 'מייצא...',
+        'exportCommon.exportToCsv': 'ייצא ל-CSV',
 
         // CSV Headers
         'exportTeams.teamName': 'שם הצוות',
@@ -1879,6 +1890,9 @@ const translations = {
         'exportTeams.age': 'גיל',
         'exportTeams.parent': 'הורה',
         'exportTeams.unknownKid': 'ילד לא ידוע',
+
+        'exportTeams.instructorName': 'שם המדריך',
+
         'exportEvents.filterByStatus': 'סנן לפי סטטוס',
         'exportEvents.includeParticipants': 'כלול ספירת משתתפים',
         'exportEvents.includeTeams': 'כלול ספירת צוותים משתתפים',
@@ -2488,6 +2502,7 @@ const translations = {
         'events.create.error': 'שגיאה ביצירת אירוע: {error}',
 
 
+
         // User Management
         'users.title': 'ניהול משתמשים',
         'users.manage': 'נהל משתמשים',
@@ -2564,6 +2579,7 @@ const translations = {
         'users.includeTimestamps':' כלול חותמת זמן',
         'users.exportToCsv':'ייצא ל-CSV',
         'users.exporting': 'מייצא משתמשים ל-CSV...',
+        'users.exportError': 'ייצוא המשתמשים נכשל. אנא נסה שוב.',
 
 
         // My Account
@@ -2624,10 +2640,6 @@ const translations = {
         'import.importDescription': 'העלה קבצי נתונים כדי לייבא מידע למערכת.',
         'import.selectDataType': 'בחר סוג נתונים לייבוא:',
         'import.selectFile': 'בחר קובץ (CSV או Excel):',
-        'import.users': 'משתמשים',
-        'import.kids': 'ילדים',
-        'import.teams': 'קבוצות',
-        'import.events': 'אירועים',
         'import.selectedFile': 'קובץ נבחר:',
         'import.size': 'גודל:',
         'import.overwriteRecords': 'דרוס רשומות קיימות',
@@ -2636,10 +2648,7 @@ const translations = {
         'import.exportData': 'ייצוא נתונים',
         'import.exportDescription': 'הורד נתונים מהמערכת כקבצי CSV או Excel.',
         'import.selectExportType': 'בחר סוג נתונים לייצוא:',
-        'import.allData': 'כל הנתונים',
         'import.exportFormat': 'פורמט ייצוא:',
-        'import.csv': 'CSV',
-        'import.excel': 'Excel',
         'import.includeHeaders': 'כלול שורת כותרת',
         'import.includeTimestamp': 'כלול חותמת זמן בשם הקובץ',
         'import.exportButton': 'ייצא נתונים',
@@ -2656,6 +2665,13 @@ const translations = {
         'import.invalidFormat': 'פורמט לא תקין בשורה {row}',
         'import.importingData': 'מייבא נתוני {type} מ-{filename}',
         'import.exportingData': 'מייצא נתוני {type}',
+        'import.users': 'משתמשים',
+        'import.kids': 'ילדים',
+        'import.teams': 'צוותים',
+        'import.events': 'אירועים',
+        'import.allData': 'כל הנתונים',
+        'import.csv': 'CSV',
+        'import.excel': 'אקסל',
 
         // Gallery
         'gallery.title': 'גלריה',
@@ -2703,7 +2719,6 @@ const translations = {
         'teams.title': 'ניהול קבוצות',
         'teams.addNewTeam': 'הוסף קבוצה חדשה',
         'teams.refresh': 'רענן',
-        'teams.exportTeams': 'ייצא קבוצות',
         'teams.totalTeams': 'סך הקבוצות',
         'teams.activeTeams': 'קבוצות פעילות',
         'teams.teamsWithoutKids': 'קבוצות ללא ילדים',
@@ -2719,10 +2734,6 @@ const translations = {
         'teams.allStatus': 'כל הסטטוסים',
         'teams.active': 'פעיל',
         'teams.inactive': 'לא פעיל',
-        'teams.allTeams': 'כל הקבוצות',
-        'teams.emptyTeams': 'קבוצות ריקות',
-        'teams.availableSpots': 'מקומות פנויים',
-        'teams.fullTeams': 'קבוצות מלאות',
         'teams.teamInfo': 'מידע קבוצה',
         'teams.instructor': 'מדריך',
         'teams.members': 'חברים',
@@ -2836,6 +2847,13 @@ const translations = {
         'teams.teamsSelected': 'צוות(ים) נבחרו',
         'teams.leader': 'ראש הצוות',
         'teams.kidsInTeam': 'ילדים בצוות',
+        'teams.exportTeams': 'ייצוא צוותים',
+        'teams.allTeams': 'כל הצוותים',
+        'teams.emptyTeams': 'צוותים ריקים',
+        'teams.availableSpots': 'צוותים עם מקומות פנויים',
+        'teams.fullTeams': 'צוותים מלאים',
+        'teams.unknownInstructor': 'מדריך לא ידוע',
+        'teams.noTeam': 'ללא צוות',
 
        // Kids Management Page (Hebrew)
         'kids.title': 'ניהול ילדים',
@@ -2896,6 +2914,7 @@ const translations = {
         'kids.tryAgain': 'נסה שוב',
         'kids.loadingPermissions': 'טוען הרשאות...',
 
+
         // Status badges (Hebrew)
         'status.active': 'פעיל',
         'status.pending': 'ממתין',
@@ -2915,6 +2934,17 @@ const translations = {
         'export.failed': 'הייצוא נכשל: {error}',
         'export.downloadStarted': 'ההורדה החלה...',
         'export.noData': 'אין נתונים לייצוא',
+        'export.subtitle': 'הורד את הנתונים שלך בפורמט CSV לגיבוי או ניתוח',
+        'export.usersDescription': 'ייצוא חשבונות משתמשים, תפקידים ופרטי יצירת קשר',
+        'export.kidsDescription': 'ייצוא פרופילי ילדים, מידע הורים והקצאות צוותים',
+        'export.eventsDescription': 'ייצוא אירועים, לוחות זמנים ונתוני משתתפים',
+        'export.teamsDescription': 'ייצוא מידע צוותים, חברים ומדריכים',
+        'export.clickToExport': 'לחץ לייצוא',
+        'export.exportInfo': 'מידע על ייצוא',
+        'export.csvFormat': 'כל הייצואים הם בפורמט CSV לייבוא קל לאקסל או כלים אחרים',
+        'export.filterOptions': 'השתמש באפשרויות סינון בכל ייצוא להתאמה אישית של הנתונים',
+        'export.timestampInfo': 'ניתן לכלול חותמות זמן למטרות מעקב אחר נתונים',
+        'export.permissionInfo': 'הרשאות ייצוא מבוססות על התפקיד ורמת הגישה שלך',
 
         // Common table/filter terms (Hebrew) - NEW TRANSLATIONS
         'common.clickToView': 'לחץ לצפייה',
@@ -2937,8 +2967,8 @@ const translations = {
         // General
         'general.loading': 'טוען...',
         'general.save': 'שמור',
-        'general.cancel': 'בטל',
         'general.edit': 'ערוך',
+        'general.cancel': 'ביטול',
         'general.delete': 'מחק',
         'general.view': 'צפה',
         'general.close': 'סגור',
@@ -3057,6 +3087,8 @@ const translations = {
         'editKid.formStatusOptions.completed': 'מוכן',
         'editKid.formStatusOptions.needs_review': 'דורש בדיקה',
         'editKid.formStatusOptions.cancelled': 'בוטל',
+
+
 
          // View Kid Page
         'viewKid.racingStarProfile': 'פרופיל ילד',
