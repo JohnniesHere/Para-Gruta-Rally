@@ -3,6 +3,7 @@ import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext.jsx';
 import { useTheme } from '../../contexts/ThemeContext.jsx';
+import { useLanguage } from '../../contexts/LanguageContext.jsx';
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
 import './Dashboard.css';
@@ -10,11 +11,16 @@ import './Dashboard.css';
 const Dashboard = ({ children, requiredRole }) => {
     const { currentUser, userRole, loading } = useAuth();
     const { isDark } = useTheme();
+    const { t } = useLanguage();
     const location = useLocation();
 
     // Show loading state if auth is still being determined
     if (loading) {
-        return <div className={`loading-screen ${isDark ? 'dark-mode' : 'light-mode'}`}>Loading...</div>;
+        return (
+            <div className={`loading-screen ${isDark ? 'dark-mode' : 'light-mode'}`}>
+                {t('general.loading')}...
+            </div>
+        );
     }
 
     // Redirect to login if not authenticated

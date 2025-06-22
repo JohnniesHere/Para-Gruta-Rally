@@ -1,13 +1,15 @@
-// src/components/auth/UserProfile.jsx - Updated with Google Auth Support
+// src/components/auth/UserProfile.jsx - Updated with Translation Support
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { updateUserProfile, updateUserPassword, getUserData, validatePassword } from '../../services/userService';
 import './UserProfile.css';
 
 const UserProfile = () => {
     const { currentUser } = useAuth();
     const { isDarkMode } = useTheme();
+    const { t } = useLanguage();
 
     const [activeTab, setActiveTab] = useState('profile');
     const [isEditing, setIsEditing] = useState(false);
@@ -51,13 +53,13 @@ const UserProfile = () => {
                     });
                 } catch (error) {
                     console.error('Error loading user data:', error);
-                    setMessage({ type: 'error', text: 'Failed to load user data' });
+                    setMessage({ type: 'error', text: t('general.error') });
                 }
             }
         };
 
         loadUserData();
-    }, [currentUser]);
+    }, [currentUser, t]);
 
     // Clear messages after 5 seconds
     useEffect(() => {
@@ -111,7 +113,7 @@ const UserProfile = () => {
         e.preventDefault();
 
         if (!profileData.displayName.trim() || !profileData.name.trim() || !profileData.phone.trim()) {
-            setMessage({ type: 'error', text: 'Please fill in all required fields' });
+            setMessage({ type: 'error', text: t('forms.requiredField') });
             return;
         }
 
@@ -125,7 +127,7 @@ const UserProfile = () => {
                 phone: profileData.phone
             });
 
-            setMessage({ type: 'success', text: 'Profile updated successfully!' });
+            setMessage({ type: 'success', text: t('account.saveChanges') + ' ' + t('general.loading').toLowerCase() + '!' });
             setIsEditing(false);
         } catch (error) {
             setMessage({ type: 'error', text: error.message });
@@ -147,24 +149,24 @@ const UserProfile = () => {
         const newErrors = {};
 
         if (!passwordData.currentPassword.trim()) {
-            newErrors.currentPassword = 'Current password is required';
+            newErrors.currentPassword = t('auth.currentPassword') + ' ' + t('forms.requiredField');
         }
 
         if (!passwordData.newPassword.trim()) {
-            newErrors.newPassword = 'New password is required';
+            newErrors.newPassword = t('auth.newPassword') + ' ' + t('forms.requiredField');
         } else if (passwordData.newPassword.length < 6) {
-            newErrors.newPassword = 'New password must be at least 6 characters long';
+            newErrors.newPassword = t('auth.passwordMinLength');
         }
 
         if (!passwordData.confirmPassword.trim()) {
-            newErrors.confirmPassword = 'Please confirm your new password';
+            newErrors.confirmPassword = t('auth.confirmPasswordRequired');
         } else if (passwordData.newPassword !== passwordData.confirmPassword) {
-            newErrors.confirmPassword = 'New passwords do not match';
+            newErrors.confirmPassword = t('auth.passwordsDoNotMatch');
         }
 
         // Check if trying to use the same password
         if (passwordData.currentPassword === passwordData.newPassword) {
-            newErrors.newPassword = 'New password must be different from current password';
+            newErrors.newPassword = t('auth.newPasswordDifferent');
         }
 
         if (Object.keys(newErrors).length > 0) {
@@ -185,7 +187,7 @@ const UserProfile = () => {
 
             setMessage({
                 type: 'success',
-                text: 'Password updated successfully! Your account is now more secure.'
+                text: t('auth.passwordUpdatedSuccess')
             });
 
             // Reset form
@@ -205,7 +207,7 @@ const UserProfile = () => {
             // Show user-friendly error message
             setMessage({
                 type: 'error',
-                text: error.message || 'Failed to update password. Please try again.'
+                text: error.message || t('auth.passwordUpdateFailed')
             });
 
             // If it's an authentication error, clear the current password field
@@ -216,7 +218,7 @@ const UserProfile = () => {
                     currentPassword: ''
                 }));
                 setPasswordErrors({
-                    currentPassword: 'Please re-enter your current password'
+                    currentPassword: t('auth.reenterCurrentPassword')
                 });
             }
 
@@ -235,13 +237,13 @@ const UserProfile = () => {
                     {profileData.displayName.charAt(0).toUpperCase() || 'U'}
                 </div>
                 <div className="profile-info">
-                    <h2>{profileData.displayName || 'User'}</h2>
+                    <h2>{profileData.displayName || t('common.user')}</h2>
                     <p>{profileData.email}</p>
-                    <p className="user-role">Role: {profileData.role || 'User'}</p>
+                    <p className="user-role">{t('users.role')}: {profileData.role || t('common.user')}</p>
                     {isGoogleUser && (
                         <p className="auth-provider">
                             <span style={{ color: '#4285f4', fontWeight: '500' }}>
-                                🔗 Signed in with Google
+                                🔗 {t('login.googleSignIn')}
                             </span>
                         </p>
                     )}
@@ -253,19 +255,19 @@ const UserProfile = () => {
                     className={`tab-button ${activeTab === 'profile' ? 'active' : ''}`}
                     onClick={() => setActiveTab('profile')}
                 >
-                    Profile Information
+                    {t('account.profile')}
                 </button>
                 <button
                     className={`tab-button ${activeTab === 'security' ? 'active' : ''}`}
                     onClick={() => setActiveTab('security')}
                 >
-                    Password Settings
+                    {t('account.security')}
                 </button>
                 <button
                     className={`tab-button ${activeTab === 'preferences' ? 'active' : ''}`}
                     onClick={() => setActiveTab('preferences')}
                 >
-                    Preferences
+                    {t('account.preferences')}
                 </button>
             </div>
 
@@ -280,13 +282,13 @@ const UserProfile = () => {
                 {activeTab === 'profile' && (
                     <div className="profile-section">
                         <div className="section-header">
-                            <h3>Profile Information</h3>
+                            <h3>{t('account.profile')}</h3>
                             {!isEditing && (
                                 <button
                                     className="edit-button"
                                     onClick={() => setIsEditing(true)}
                                 >
-                                    Edit Profile
+                                    {t('account.editProfile')}
                                 </button>
                             )}
                         </div>
@@ -294,7 +296,7 @@ const UserProfile = () => {
                         {isEditing ? (
                             <form onSubmit={handleProfileUpdate} className="profile-form">
                                 <div className="form-group">
-                                    <label htmlFor="displayName">Display Name *</label>
+                                    <label htmlFor="displayName">{t('users.displayName')} *</label>
                                     <input
                                         type="text"
                                         id="displayName"
@@ -303,11 +305,12 @@ const UserProfile = () => {
                                         onChange={handleProfileChange}
                                         required
                                         disabled={isLoading}
+                                        placeholder={t('users.displayNamePlaceholder')}
                                     />
                                 </div>
 
                                 <div className="form-group">
-                                    <label htmlFor="email">Email Address</label>
+                                    <label htmlFor="email">{t('account.email')}</label>
                                     <input
                                         type="email"
                                         id="email"
@@ -319,15 +322,15 @@ const UserProfile = () => {
                                             cursor: 'not-allowed',
                                             opacity: 0.6
                                         }}
-                                        placeholder="Email cannot be changed"
+                                        placeholder={t('users.emailCannotChange')}
                                     />
                                     <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px' }}>
-                                        Email cannot be changed as it's linked to authentication
+                                        {t('users.emailLinkedToAuth')}
                                     </div>
                                 </div>
 
                                 <div className="form-group">
-                                    <label htmlFor="name">Full Name *</label>
+                                    <label htmlFor="name">{t('account.fullName')} *</label>
                                     <input
                                         type="text"
                                         id="name"
@@ -336,11 +339,12 @@ const UserProfile = () => {
                                         onChange={handleProfileChange}
                                         required
                                         disabled={isLoading}
+                                        placeholder={t('users.fullNamePlaceholder')}
                                     />
                                 </div>
 
                                 <div className="form-group">
-                                    <label htmlFor="phone">Phone Number *</label>
+                                    <label htmlFor="phone">{t('account.phone')} *</label>
                                     <input
                                         type="tel"
                                         id="phone"
@@ -349,6 +353,7 @@ const UserProfile = () => {
                                         onChange={handleProfileChange}
                                         required
                                         disabled={isLoading}
+                                        placeholder={t('users.phoneNumberPlaceholder')}
                                     />
                                 </div>
 
@@ -358,7 +363,7 @@ const UserProfile = () => {
                                         className="save-button"
                                         disabled={isLoading}
                                     >
-                                        {isLoading ? 'Saving...' : 'Save Changes'}
+                                        {isLoading ? t('common.saving') : t('account.saveChanges')}
                                     </button>
                                     <button
                                         type="button"
@@ -366,30 +371,30 @@ const UserProfile = () => {
                                         onClick={() => setIsEditing(false)}
                                         disabled={isLoading}
                                     >
-                                        Cancel
+                                        {t('account.cancel')}
                                     </button>
                                 </div>
                             </form>
                         ) : (
                             <div className="profile-details">
                                 <div className="detail-item">
-                                    <span className="detail-label">Display Name:</span>
+                                    <span className="detail-label">{t('users.displayName')}:</span>
                                     <span className="detail-value">{profileData.displayName}</span>
                                 </div>
 
                                 <div className="detail-item">
-                                    <span className="detail-label">Email:</span>
+                                    <span className="detail-label">{t('users.email')}:</span>
                                     <span className="detail-value">{profileData.email}</span>
                                 </div>
 
                                 <div className="detail-item">
-                                    <span className="detail-label">Full Name:</span>
+                                    <span className="detail-label">{t('users.fullName')}:</span>
                                     <span className="detail-value">{profileData.name}</span>
                                 </div>
 
                                 {profileData.phone && (
                                     <div className="detail-item">
-                                        <span className="detail-label">Phone:</span>
+                                        <span className="detail-label">{t('users.phone')}:</span>
                                         <span className="detail-value">{profileData.phone}</span>
                                     </div>
                                 )}
@@ -401,7 +406,7 @@ const UserProfile = () => {
                 {activeTab === 'security' && (
                     <div className="security-section">
                         <div className="section-header">
-                            <h3>Password Settings</h3>
+                            <h3>{t('account.security')}</h3>
                         </div>
 
                         {isGoogleUser ? (
@@ -413,11 +418,9 @@ const UserProfile = () => {
                                         </svg>
                                     </div>
                                     <div className="notice-content">
-                                        <h4>Google Account Authentication</h4>
+                                        <h4>{t('auth.googleAccountAuth')}</h4>
                                         <p>
-                                            Your account is authenticated through Google. Password management is handled
-                                            by Google's secure systems. To change your password, please visit your
-                                            Google Account settings.
+                                            {t('auth.googleAuthDescription')}
                                         </p>
                                         <a
                                             href="https://myaccount.google.com/security"
@@ -425,31 +428,31 @@ const UserProfile = () => {
                                             rel="noopener noreferrer"
                                             className="google-settings-link"
                                         >
-                                            Manage Google Account Security
+                                            {t('auth.manageGoogleSecurity')}
                                         </a>
                                     </div>
                                 </div>
 
                                 <div className="security-benefits">
-                                    <h4>Security Benefits</h4>
+                                    <h4>{t('auth.securityBenefits')}</h4>
                                     <ul>
-                                        <li>✅ Two-factor authentication managed by Google</li>
-                                        <li>✅ Advanced threat protection</li>
-                                        <li>✅ Automatic security updates</li>
-                                        <li>✅ Sign-in alerts and monitoring</li>
+                                        <li>✅ {t('auth.twoFactorGoogle')}</li>
+                                        <li>✅ {t('auth.advancedThreatProtection')}</li>
+                                        <li>✅ {t('auth.automaticSecurityUpdates')}</li>
+                                        <li>✅ {t('auth.signInAlerts')}</li>
                                     </ul>
                                 </div>
                             </div>
                         ) : (
                             <div className="password-change">
-                                <h4>Change Password</h4>
+                                <h4>{t('auth.changePassword')}</h4>
                                 <p style={{ color: 'var(--text-secondary)', marginBottom: '20px', fontSize: '0.9rem' }}>
-                                    Update your password to keep your account secure. Use a strong, unique password.
+                                    {t('auth.passwordUpdateDescription')}
                                 </p>
 
                                 <form onSubmit={handlePasswordUpdate} className="password-form">
                                     <div className={`form-group ${passwordErrors.currentPassword ? 'error' : ''}`}>
-                                        <label htmlFor="currentPassword">Current Password *</label>
+                                        <label htmlFor="currentPassword">{t('auth.currentPassword')} *</label>
                                         <input
                                             type="password"
                                             id="currentPassword"
@@ -457,7 +460,7 @@ const UserProfile = () => {
                                             value={passwordData.currentPassword}
                                             onChange={handlePasswordChange}
                                             disabled={isPasswordLoading}
-                                            placeholder="Enter your current password"
+                                            placeholder={t('login.passwordPlaceholder')}
                                         />
                                         {passwordErrors.currentPassword && (
                                             <div className="error-message">{passwordErrors.currentPassword}</div>
@@ -465,7 +468,7 @@ const UserProfile = () => {
                                     </div>
 
                                     <div className={`form-group ${passwordErrors.newPassword ? 'error' : ''}`}>
-                                        <label htmlFor="newPassword">New Password *</label>
+                                        <label htmlFor="newPassword">{t('auth.newPassword')} *</label>
                                         <input
                                             type="password"
                                             id="newPassword"
@@ -473,7 +476,7 @@ const UserProfile = () => {
                                             value={passwordData.newPassword}
                                             onChange={handlePasswordChange}
                                             disabled={isPasswordLoading}
-                                            placeholder="Enter your new password"
+                                            placeholder={t('auth.newPassword')}
                                         />
                                         {passwordErrors.newPassword && (
                                             <div className="error-message">{passwordErrors.newPassword}</div>
@@ -481,7 +484,7 @@ const UserProfile = () => {
                                     </div>
 
                                     <div className={`form-group ${passwordErrors.confirmPassword ? 'error' : ''}`}>
-                                        <label htmlFor="confirmPassword">Confirm New Password *</label>
+                                        <label htmlFor="confirmPassword">{t('auth.confirmNewPassword')} *</label>
                                         <input
                                             type="password"
                                             id="confirmPassword"
@@ -489,7 +492,7 @@ const UserProfile = () => {
                                             value={passwordData.confirmPassword}
                                             onChange={handlePasswordChange}
                                             disabled={isPasswordLoading}
-                                            placeholder="Confirm your new password"
+                                            placeholder={t('auth.confirmNewPassword')}
                                         />
                                         {passwordErrors.confirmPassword && (
                                             <div className="error-message">{passwordErrors.confirmPassword}</div>
@@ -501,7 +504,7 @@ const UserProfile = () => {
                                         className="save-button"
                                         disabled={isPasswordLoading}
                                     >
-                                        {isPasswordLoading ? 'Updating...' : 'Update Password'}
+                                        {isPasswordLoading ? t('users.updating') : t('auth.updatePassword')}
                                     </button>
                                 </form>
                             </div>
@@ -512,13 +515,13 @@ const UserProfile = () => {
                 {activeTab === 'preferences' && (
                     <div className="preferences-section">
                         <div className="section-header">
-                            <h3>User Preferences</h3>
+                            <h3>{t('account.preferences')}</h3>
                         </div>
 
                         <div className="theme-settings">
-                            <h4>Display Settings</h4>
+                            <h4>{t('settings.displaySettings')}</h4>
                             <div className="preference-group">
-                                <label>Theme</label>
+                                <label>{t('settings.theme')}</label>
                                 <div className="theme-options">
                                     <div className="theme-option">
                                         <input
@@ -528,7 +531,7 @@ const UserProfile = () => {
                                             value="dark"
                                             defaultChecked={isDarkMode}
                                         />
-                                        <label htmlFor="darkTheme">Dark Mode</label>
+                                        <label htmlFor="darkTheme">{t('settings.darkMode')}</label>
                                     </div>
                                     <div className="theme-option">
                                         <input
@@ -538,14 +541,14 @@ const UserProfile = () => {
                                             value="light"
                                             defaultChecked={!isDarkMode}
                                         />
-                                        <label htmlFor="lightTheme">Light Mode</label>
+                                        <label htmlFor="lightTheme">{t('settings.lightMode')}</label>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
                         <div className="notification-settings">
-                            <h4>Notification Preferences</h4>
+                            <h4>{t('settings.notificationPreferences')}</h4>
                             <div className="notification-options">
                                 <div className="notification-option">
                                     <input
@@ -553,7 +556,7 @@ const UserProfile = () => {
                                         id="emailNotifications"
                                         defaultChecked
                                     />
-                                    <label htmlFor="emailNotifications">Email notifications for new events</label>
+                                    <label htmlFor="emailNotifications">{t('settings.emailNotificationsEvents')}</label>
                                 </div>
                                 <div className="notification-option">
                                     <input
@@ -561,14 +564,14 @@ const UserProfile = () => {
                                         id="reminderNotifications"
                                         defaultChecked
                                     />
-                                    <label htmlFor="reminderNotifications">Event reminders</label>
+                                    <label htmlFor="reminderNotifications">{t('settings.eventReminders')}</label>
                                 </div>
                                 <div className="notification-option">
                                     <input
                                         type="checkbox"
                                         id="systemNotifications"
                                     />
-                                    <label htmlFor="systemNotifications">System updates</label>
+                                    <label htmlFor="systemNotifications">{t('settings.systemUpdates')}</label>
                                 </div>
                                 <div className="notification-option">
                                     <input
@@ -576,13 +579,13 @@ const UserProfile = () => {
                                         id="weeklyDigest"
                                         defaultChecked
                                     />
-                                    <label htmlFor="weeklyDigest">Weekly activity digest</label>
+                                    <label htmlFor="weeklyDigest">{t('settings.weeklyDigest')}</label>
                                 </div>
                             </div>
                         </div>
 
                         <button className="save-button">
-                            Save Preferences
+                            {t('settings.savePreferences')}
                         </button>
                     </div>
                 )}

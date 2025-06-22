@@ -10,6 +10,44 @@ export const LANGUAGES = {
 // Translations object - COMPLETE WITH ALL YOUR EXISTING and NEW TRANSLATIONS
 const translations = {
     en: {
+           // Common user terms
+        'common.user': 'User',
+
+        // Additional account/auth related
+        'auth.signedInWithGoogle': 'Signed in with Google',
+        'auth.googleAccountAuth': 'Google Account Authentication',
+        'auth.googleAuthDescription': 'Your account is authenticated through Google. Password management is handled by Google\'s secure systems. To change your password, please visit your Google Account settings.',
+        'auth.manageGoogleSecurity': 'Manage Google Account Security',
+        'auth.securityBenefits': 'Security Benefits',
+        'auth.twoFactorGoogle': 'Two-factor authentication managed by Google',
+        'auth.advancedThreatProtection': 'Advanced threat protection',
+        'auth.automaticSecurityUpdates': 'Automatic security updates',
+        'auth.signInAlerts': 'Sign-in alerts and monitoring',
+        'auth.changePassword': 'Change Password',
+        'auth.passwordUpdateDescription': 'Update your password to keep your account secure. Use a strong, unique password.',
+        'auth.currentPassword': 'Current Password',
+        'auth.newPassword': 'New Password',
+        'auth.confirmNewPassword': 'Confirm New Password',
+        'auth.updatePassword': 'Update Password',
+        'auth.passwordUpdatedSuccess': 'Password updated successfully! Your account is now more secure.',
+        'auth.passwordUpdateFailed': 'Failed to update password. Please try again.',
+        'auth.reenterCurrentPassword': 'Please re-enter your current password',
+        'auth.newPasswordDifferent': 'New password must be different from current password',
+        'auth.passwordsDoNotMatch': 'New passwords do not match',
+        'auth.confirmPasswordRequired': 'Please confirm your new password',
+        'auth.passwordMinLength': 'Password must be at least 6 characters long',
+
+        // Display and notification settings
+        'settings.displaySettings': 'Display Settings',
+        'settings.theme': 'Theme',
+        'settings.darkMode': 'Dark Mode',
+        'settings.lightMode': 'Light Mode',
+        'settings.notificationPreferences': 'Notification Preferences',
+        'settings.emailNotificationsEvents': 'Email notifications for new events',
+        'settings.eventReminders': 'Event reminders',
+        'settings.systemUpdates': 'System updates',
+        'settings.weeklyDigest': 'Weekly activity digest',
+        'settings.savePreferences': 'Save Preferences',
        // Export Kids Modal
         'exportKids.filterByStatus': 'Filter by Status',
         'exportKids.filterByTeam': 'Filter by Team',
@@ -1757,7 +1795,45 @@ const translations = {
         'addTeam.unknown': 'Unknown',
     },
     he: {
-            // Export Kids Modal 
+            // Common user terms
+        'common.user': 'משתמש',
+
+        // Additional account/auth related
+        'auth.signedInWithGoogle': 'מחובר עם Google',
+        'auth.googleAccountAuth': 'אימות חשבון Google',
+        'auth.googleAuthDescription': 'החשבון שלך מאומת דרך Google. ניהול הסיסמה מטופל על ידי המערכות המאובטחות של Google. כדי לשנות את הסיסמה שלך, אנא בקר בהגדרות חשבון Google שלך.',
+        'auth.manageGoogleSecurity': 'נהל אבטחת חשבון Google',
+        'auth.securityBenefits': 'יתרונות אבטחה',
+        'auth.twoFactorGoogle': 'אימות דו-שלבי מנוהל על ידי Google',
+        'auth.advancedThreatProtection': 'הגנה מתקדמת מפני איומים',
+        'auth.automaticSecurityUpdates': 'עדכוני אבטחה אוטומטיים',
+        'auth.signInAlerts': 'התראות כניסה ומעקב',
+        'auth.changePassword': 'שנה סיסמה',
+        'auth.passwordUpdateDescription': 'עדכן את הסיסמה שלך כדי לשמור על החשבון מאובטח. השתמש בסיסמה חזקה וייחודית.',
+        'auth.currentPassword': 'סיסמה נוכחית',
+        'auth.newPassword': 'סיסמה חדשה',
+        'auth.confirmNewPassword': 'אשר סיסמה חדשה',
+        'auth.updatePassword': 'עדכן סיסמה',
+        'auth.passwordUpdatedSuccess': 'הסיסמה עודכנה בהצלחה! החשבון שלך מאובטח יותר כעת.',
+        'auth.passwordUpdateFailed': 'כשל בעדכון הסיסמה. אנא נסה שוב.',
+        'auth.reenterCurrentPassword': 'אנא הכנס שוב את הסיסמה הנוכחית',
+        'auth.newPasswordDifferent': 'הסיסמה החדשה חייבת להיות שונה מהסיסמה הנוכחית',
+        'auth.passwordsDoNotMatch': 'הסיסמאות החדשות אינן תואמות',
+        'auth.confirmPasswordRequired': 'אנא אשר את הסיסמה החדשה',
+        'auth.passwordMinLength': 'הסיסמה חייבת להיות באורך של לפחות 6 תווים',
+
+        // Display and notification settings
+        'settings.displaySettings': 'הגדרות תצוגה',
+        'settings.theme': 'ערכת נושא',
+        'settings.darkMode': 'מצב כהה',
+        'settings.lightMode': 'מצב בהיר',
+        'settings.notificationPreferences': 'העדפות התראות',
+        'settings.emailNotificationsEvents': 'התראות אימייל לאירועים חדשים',
+        'settings.eventReminders': 'תזכורות אירועים',
+        'settings.systemUpdates': 'עדכוני מערכת',
+        'settings.weeklyDigest': 'סיכום שבועי של פעילות',
+        'settings.savePreferences': 'שמור העדפות',
+            // Export Kids Modal
         'exportKids.filterByStatus': 'סנן לפי סטטוס',
         'exportKids.filterByTeam': 'סנן לפי צוות',
         'exportKids.dataToInclude': 'נתונים לכלול',
