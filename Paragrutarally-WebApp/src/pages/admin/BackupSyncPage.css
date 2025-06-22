@@ -1,55 +1,205 @@
-/* src/pages/admin/BackupSyncPage.css - Page-specific styles only */
-@import url('./../../styles/global.css');
+/* src/pages/admin/BackupSyncPage.css - Updated Version */
 
-/* ========================================
-   BACKUP SYNC PAGE SPECIFIC STYLES
-   ======================================== */
-
-/* Page uses .admin-page class from global.css */
+/* Base layout */
 .backup-sync-page {
-    /* No additional styles needed - inherits from .admin-page */
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Content sections use similar structure to .form-section from global.css */
+.backup-sync-page h1 {
+    font-size: 2rem;
+    margin-bottom: 30px;
+    color: var(--text-primary);
+    font-weight: 700;
+    text-align: center;
+}
+
+/* Content sections */
 .content-section {
     background-color: var(--bg-secondary);
     border: 1px solid var(--border-color);
     border-radius: 8px;
     padding: 25px;
     margin-bottom: 25px;
-    box-shadow: 0 2px 10px var(--shadow-color);
-    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .content-section h2 {
     margin-top: 0;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
     color: var(--text-primary);
-    font-size: 1.25rem;
+    font-size: 1.5rem;
     font-weight: 600;
-    transition: color 0.3s ease;
 }
 
 .content-section h3 {
+    margin-bottom: 15px;
     color: var(--text-primary);
-    font-size: 1.1rem;
+    font-size: 1.25rem;
     font-weight: 500;
-    margin-bottom: 10px;
-    transition: color 0.3s ease;
 }
 
 .content-section p {
-    color: var(--text-secondary);
     margin-bottom: 20px;
-    line-height: 1.5;
-    transition: color 0.3s ease;
+    color: var(--text-secondary);
+    line-height: 1.6;
 }
 
-/* ========================================
-   BACKUP/SYNC SPECIFIC COMPONENTS
-   ======================================== */
+/* Action buttons */
+.action-buttons {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
 
-/* Sync options grid */
+.primary-button {
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 14px;
+    min-width: 120px;
+}
+
+.primary-button:hover:not(:disabled) {
+    background-color: var(--accent-hover);
+    transform: translateY(-1px);
+}
+
+.primary-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.secondary-button {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    padding: 12px 20px;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 14px;
+}
+
+.secondary-button:hover {
+    background-color: var(--bg-quaternary);
+    border-color: var(--accent-color);
+}
+
+/* Backup status */
+.backup-status {
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin: 15px 0;
+    font-weight: 500;
+    text-align: center;
+}
+
+.backup-status.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.backup-status.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* Backup history */
+.backup-history {
+    margin-top: 20px;
+}
+
+.backup-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.backup-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    transition: all 0.3s ease;
+}
+
+.backup-item:hover {
+    background-color: var(--bg-quaternary);
+    border-color: var(--accent-color);
+}
+
+.backup-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.backup-date {
+    font-weight: 500;
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+.backup-size, .backup-collections {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.backup-status-badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: capitalize;
+}
+
+.backup-status-badge.completed {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.backup-status-badge.pending {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.backup-status-badge.failed {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    background-color: var(--bg-tertiary);
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.empty-state p {
+    color: var(--text-secondary);
+    font-style: italic;
+    margin: 0;
+}
+
+/* Sync options */
 .sync-options {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -83,10 +233,7 @@
     font-size: 14px;
 }
 
-/* ========================================
-   SCHEDULE OPTIONS
-   ======================================== */
-
+/* Schedule options */
 .schedule-options {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -126,16 +273,82 @@
     user-select: none;
 }
 
-/* ========================================
-   RESPONSIVE OVERRIDES
-   ======================================== */
+/* Dark mode adjustments */
+.backup-sync-page.dark-mode .backup-status.success {
+    background-color: #1e4d2b;
+    color: #a7d4aa;
+    border-color: #2d5a3a;
+}
 
+.backup-sync-page.dark-mode .backup-status.error {
+    background-color: #4d1e24;
+    color: #d4a7aa;
+    border-color: #5a2d3a;
+}
+
+.backup-sync-page.dark-mode .backup-status-badge.completed {
+    background-color: #1e4d2b;
+    color: #a7d4aa;
+}
+
+.backup-sync-page.dark-mode .backup-status-badge.pending {
+    background-color: #4d4d1e;
+    color: #d4d4a7;
+}
+
+.backup-sync-page.dark-mode .backup-status-badge.failed {
+    background-color: #4d1e24;
+    color: #d4a7aa;
+}
+
+/* Responsive design */
 @media (max-width: 768px) {
+    .backup-sync-page {
+        padding: 15px;
+    }
+
+    .content-section {
+        padding: 20px;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+    }
+
+    .action-buttons button {
+        width: 100%;
+    }
+
     .sync-options {
         grid-template-columns: 1fr;
     }
 
     .schedule-options {
         grid-template-columns: 1fr;
+    }
+
+    .backup-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .backup-info {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .backup-sync-page h1 {
+        font-size: 1.75rem;
+        margin-bottom: 20px;
+    }
+
+    .content-section {
+        padding: 15px;
+    }
+
+    .backup-item {
+        padding: 12px;
     }
 }
