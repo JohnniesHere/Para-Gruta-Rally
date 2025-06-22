@@ -72,18 +72,25 @@ const ExportEventsModal = ({ isOpen, onClose }) => {
             });
 
             // Create CSV content
-            const headers = ['Event Name', 'Description', 'Location', 'Date', 'Status', 'Notes'];
+            const headers = [
+                t('events.eventName', 'Event Name'),
+                t('events.description', 'Description'),
+                t('events.location', 'Location'),
+                t('events.date', 'Date'),
+                t('events.status', 'Status'),
+                t('events.notes', 'Notes')
+            ];
 
             if (exportOptions.includeParticipants) {
-                headers.push('Participants');
+                headers.push(t('events.participants', 'Participants'));
             }
 
             if (exportOptions.includeTeams) {
-                headers.push('Teams Count');
+                headers.push(t('exportEvents.teamsCount', 'Teams Count'));
             }
 
-            if (exportOptions.includeTimestamps) {
-                headers.push('Created At', 'Updated At');
+            if (exportOptions.includeTimestaments) {
+                headers.push(t('users.createdAt', 'Created At'), t('exportEvents.updatedAt', 'Updated At'));
             }
 
             let csvContent = headers.join(',') + '\n';
@@ -133,7 +140,7 @@ const ExportEventsModal = ({ isOpen, onClose }) => {
             onClose();
         } catch (error) {
             console.error('Error exporting events:', error);
-            alert(t('events.exportError', 'Failed to export events. Please try again.'));
+            alert(t('exportEvents.exportError', 'Failed to export events. Please try again.'));
         } finally {
             setIsExporting(false);
         }
@@ -173,7 +180,7 @@ const ExportEventsModal = ({ isOpen, onClose }) => {
 
                 <div className="modal-body">
                     <div className="form-group">
-                        <label htmlFor="statusFilter">{t('events.filterByStatus', 'Filter by Status')}</label>
+                        <label htmlFor="statusFilter">{t('exportEvents.filterByStatus', 'Filter by Status')}</label>
                         <select
                             id="statusFilter"
                             value={exportOptions.statusFilter}
@@ -202,7 +209,7 @@ const ExportEventsModal = ({ isOpen, onClose }) => {
                                 disabled={isExporting}
                                 style={{ marginRight: '8px' }}
                             />
-                            {t('events.includeParticipants', 'Include participant count')}
+                            {t('exportEvents.includeParticipants', 'Include participant count')}
                         </label>
                     </div>
 
@@ -218,7 +225,7 @@ const ExportEventsModal = ({ isOpen, onClose }) => {
                                 disabled={isExporting}
                                 style={{ marginRight: '8px' }}
                             />
-                            {t('events.includeTeams', 'Include participating teams count')}
+                            {t('exportEvents.includeTeams', 'Include participating teams count')}
                         </label>
                     </div>
 
@@ -234,7 +241,7 @@ const ExportEventsModal = ({ isOpen, onClose }) => {
                                 disabled={isExporting}
                                 style={{ marginRight: '8px' }}
                             />
-                            {t('events.includeTimestamps', 'Include Created At and Updated At timestamps')}
+                            {t('import.includeTimestamp', 'Include Created At and Updated At timestamps')}
                         </label>
                     </div>
                 </div>
@@ -257,12 +264,12 @@ const ExportEventsModal = ({ isOpen, onClose }) => {
                         {isExporting ? (
                             <>
                                 <Clock className="loading-spinner" size={16} style={{ marginRight: '6px' }} />
-                                {t('events.exporting', 'Exporting...')}
+                                {t('users.exporting', 'Exporting...')}
                             </>
                         ) : (
                             <>
                                 <Download size={16} style={{ marginRight: '6px' }} />
-                                {t('events.exportToCsv', 'Export to CSV')}
+                                {t('users.exportToCsv', 'Export to CSV')}
                             </>
                         )}
                     </button>

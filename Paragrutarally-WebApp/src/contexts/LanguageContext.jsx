@@ -10,6 +10,13 @@ export const LANGUAGES = {
 // Translations object - COMPLETE WITH ALL YOUR EXISTING and NEW TRANSLATIONS
 const translations = {
     en: {
+           // Export Events Modal
+        'exportEvents.filterByStatus': 'Filter by Status',
+        'exportEvents.includeParticipants': 'Include participant count',
+        'exportEvents.includeTeams': 'Include participating teams count',
+        'exportEvents.teamsCount': 'Teams Count',
+        'exportEvents.updatedAt': 'Updated At',
+        'exportEvents.exportError': 'Failed to export events. Please try again.',
          // Add Kid Page
         'addKid.title': 'Add A New Kid',
         'addKid.subtitle': 'Let\'s get this future champion on the track! 🏁',
@@ -1704,6 +1711,12 @@ const translations = {
         'addTeam.unknown': 'Unknown',
     },
     he: {
+        'exportEvents.filterByStatus': 'סנן לפי סטטוס',
+        'exportEvents.includeParticipants': 'כלול ספירת משתתפים',
+        'exportEvents.includeTeams': 'כלול ספירת צוותים משתתפים',
+        'exportEvents.teamsCount': 'מספר צוותים',
+        'exportEvents.updatedAt': 'עודכן ב',
+        'exportEvents.exportError': 'כשל בייצוא אירועים. אנא נסה שוב.',
          // Add Kid Page
         'addKid.title': 'הוסף ילד חדש',
         'addKid.subtitle': 'בואו נכניס את האלוף העתידי הזה למסלול! 🏁',
