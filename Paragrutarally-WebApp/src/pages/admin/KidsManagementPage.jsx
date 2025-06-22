@@ -1,4 +1,4 @@
-// src/pages/admin/KidsManagementPage.jsx - CLEAN VERSION without debug div
+// src/pages/admin/KidsManagementPage.jsx - COMPLETE FIX with Vehicle Pattern for Cards
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
@@ -58,6 +58,7 @@ const KidsManagementPage = () => {
     const [statusFilter, setStatusFilter] = useState('all');
     const [showingKidsWithoutTeams, setShowingKidsWithoutTeams] = useState(false);
     const [exportModalOpen, setExportModalOpen] = useState(false);
+    const [activeCardFilter, setActiveCardFilter] = useState('total'); // NEW: Track active card
 
     // TEAM CHANGE MODAL STATE
     const [teamModalOpen, setTeamModalOpen] = useState(false);
@@ -212,15 +213,20 @@ const KidsManagementPage = () => {
                 (teamFilter === 'no-team' && kid.team === t('kids.noTeam', 'No Team')) ||
                 (teamFilter === 'with-team' && kid.team !== t('kids.noTeam', 'No Team'));
 
-            const matchesStatus = statusFilter === 'all' || kid.status === statusFilter;
+            // FIXED: Active kids should check for 'completed' status
+            const matchesStatus = statusFilter === 'all' ||
+                (statusFilter === 'active' && kid.status === 'completed') ||
+                (statusFilter !== 'active' && kid.status === statusFilter);
 
             return matchesSearch && matchesTeam && matchesStatus;
         });
         setFilteredKids(filtered);
     };
 
-    // Handle stat card clicks to filter kids
+    // Handle stat card clicks to filter kids - FIXED WITH VEHICLE PATTERN
     const handleStatCardClick = (filterType) => {
+        setActiveCardFilter(filterType); // NEW: Set active card
+
         switch (filterType) {
             case 'total':
                 setTeamFilter('all');
@@ -234,7 +240,7 @@ const KidsManagementPage = () => {
                 break;
             case 'active':
                 setTeamFilter('all');
-                setStatusFilter('active');
+                setStatusFilter('active'); // This will filter for 'completed' status
                 setShowingKidsWithoutTeams(false);
                 break;
             case 'with-teams':
@@ -253,6 +259,7 @@ const KidsManagementPage = () => {
         setTeamFilter('all');
         setStatusFilter('all');
         setShowingKidsWithoutTeams(false);
+        setActiveCardFilter('total'); // NEW: Reset to total
     };
 
     const handleDeleteKid = async (kid) => {
@@ -352,10 +359,6 @@ const KidsManagementPage = () => {
             action,
             teamName
         }));
-
-        // Optional: Refresh the entire data to ensure accuracy
-        // Uncomment the line below if you want full data refresh after each change
-        // await loadTeamsAndKids();
     };
 
     const handleCloseTeamModal = () => {
@@ -365,17 +368,6 @@ const KidsManagementPage = () => {
         setTimeout(() => {
             setSelectedKidForTeamChange(null);
         }, 100);
-    };
-
-    // Optional: Add a refresh function that can be called after team changes
-    const refreshKidsData = async () => {
-        console.log('🔄 Refreshing kids data after team change...');
-        try {
-            await loadTeamsAndKids();
-            console.log('✅ Kids data refreshed successfully');
-        } catch (error) {
-            console.error('❌ Error refreshing kids data:', error);
-        }
     };
 
     // EDIT KID MODAL HANDLERS
@@ -417,12 +409,10 @@ const KidsManagementPage = () => {
         alert(t('kids.updated', '{kidName} has been updated successfully!', { kidName }));
     };
 
-        // ADDED THIS - Handle export kids
     const handleExportKids = () => {
         setExportModalOpen(true);
     };
 
-    // ADDED THIS - Handle close export modal
     const handleCloseExportModal = () => {
         setExportModalOpen(false);
     };
@@ -434,7 +424,7 @@ const KidsManagementPage = () => {
     const stats = {
         kidsWithoutTeams: kids.filter(k => k.team === t('kids.noTeam', 'No Team')).length,
         totalKids: kids.length,
-        activeKids: kids.filter(k => k.status === 'active' || k.status === 'completed').length,
+        activeKids: kids.filter(k => k.status === 'completed').length, // FIXED: Active = completed status
         kidsWithTeams: kids.filter(k => k.team !== t('kids.noTeam', 'No Team')).length
     };
 
@@ -516,15 +506,12 @@ const KidsManagementPage = () => {
                         </div>
                     </div>
 
-                    {/* Clickable Stats Cards */}
+                    {/* Stats Cards with Active States - FIXED TO MATCH VEHICLES PATTERN */}
                     <div className="stats-grid">
                         {(userRole === 'admin' || userRole === 'instructor') && (
                             <div
-                                className={`stat-card priority-warning clickable ${showingKidsWithoutTeams ? 'active' : ''}`}
+                                className={`stat-card priority-warning clickable ${activeCardFilter === 'without-teams' ? 'active' : ''}`}
                                 onClick={() => handleStatCardClick('without-teams')}
-                                role="button"
-                                tabIndex={0}
-                                onKeyDown={(e) => e.key === 'Enter' && handleStatCardClick('without-teams')}
                                 style={{ cursor: 'pointer' }}
                             >
                                 <AlertTriangle className="stat-icon warning" size={45} />
@@ -537,7 +524,7 @@ const KidsManagementPage = () => {
                         )}
 
                         <div
-                            className={`stat-card total ${teamFilter === 'all' && statusFilter === 'all' && !showingKidsWithoutTeams ? 'active' : ''}`}
+                            className={`stat-card total ${activeCardFilter === 'total' ? 'active' : ''}`}
                             onClick={() => handleStatCardClick('total')}
                             style={{ cursor: 'pointer' }}
                         >
@@ -549,7 +536,7 @@ const KidsManagementPage = () => {
                         </div>
 
                         <div
-                            className={`stat-card active ${statusFilter === 'active' ? 'active' : ''}`}
+                            className={`stat-card active-kids ${activeCardFilter === 'active' ? 'active' : ''}`}
                             onClick={() => handleStatCardClick('active')}
                             style={{ cursor: 'pointer' }}
                         >
@@ -561,7 +548,7 @@ const KidsManagementPage = () => {
                         </div>
 
                         <div
-                            className={`stat-card with-teams ${teamFilter === 'with-team' ? 'active' : ''}`}
+                            className={`stat-card with-teams ${activeCardFilter === 'with-teams' ? 'active' : ''}`}
                             onClick={() => handleStatCardClick('with-teams')}
                             style={{ cursor: 'pointer' }}
                         >

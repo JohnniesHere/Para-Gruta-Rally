@@ -1,4 +1,4 @@
-// src/pages/admin/TeamsManagementPage.jsx - FIXED VERSION
+// src/pages/admin/TeamsManagementPage.jsx - FIXED VERSION with proper active card logic
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
@@ -159,7 +159,7 @@ const TeamsManagementPage = () => {
         setFilteredTeams(filtered);
     };
 
-    // Handle stat card clicks to filter teams
+    // Handle stat card clicks to filter teams - FIXED LOGIC
     const handleStatCardClick = (filterType) => {
         switch (filterType) {
             case 'total':
@@ -225,10 +225,10 @@ const TeamsManagementPage = () => {
         setExportModalOpen(true);
     };
 
-
     const handleCloseExportModal = () => {
         setExportModalOpen(false);
     };
+
     const handleViewTeam = (team) => {
         navigate(`/admin/teams/view/${team.id}`);
     };
@@ -326,7 +326,7 @@ const TeamsManagementPage = () => {
                         </div>
                     </div>
 
-                    {/* Clickable Stats Cards */}
+                    {/* Clickable Stats Cards - FIXED ACTIVE LOGIC */}
                     <div className="stats-grid">
                         <div
                             className={`stat-card total ${statusFilter === 'all' && capacityFilter === 'all' && !showingTeamsWithoutKids ? 'active' : ''}`}
@@ -341,7 +341,7 @@ const TeamsManagementPage = () => {
                         </div>
 
                         <div
-                            className={`stat-card active ${statusFilter === 'active' ? 'active' : ''}`}
+                            className={`stat-card active-teams ${statusFilter === 'active' ? 'active' : ''}`}
                             onClick={() => handleStatCardClick('active')}
                             style={{ cursor: 'pointer' }}
                         >
@@ -361,7 +361,6 @@ const TeamsManagementPage = () => {
                             <div className="stat-content">
                                 <h3>{t('teams.teamsWithoutKids', 'Teams without Kids')}</h3>
                                 <div className="stat-value">{stats.teamsWithoutKids}</div>
-                                <div className="stat-subtitle">{t('common.clickToView', 'Click to view')}</div>
                             </div>
                         </div>
 
