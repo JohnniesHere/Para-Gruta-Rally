@@ -40,10 +40,10 @@
     --shadow-hover: rgba(0, 0, 0, 0.15);
 
     /* Racing Theme Colors */
-    --racing-lilach: rgba(211, 189, 245, 0.79);
-    --racing-purple: #d18dee;
+    --racing-lilach: rgba(190, 163, 243, 0.79);
+    --racing-purple: #c57de1;
     --racing-blurple: #ad83f2;
-    --racing-light-purple: #dda3ff;
+    --racing-light-purple: #cc8bef;
     --racing-blue: #3B82F6;
     --racing-green: #10B981;
     --racing-pink: #EC4899;
@@ -51,7 +51,7 @@
     /* Input Colors */
     --input-bg: #FFFFFF;
     --input-border: #E2E8F0;
-    --input-focus: #BF94FF;
+    --input-focus: #aa80e3;
 }
 
 /* Dark Mode Colors */
@@ -77,7 +77,7 @@
     --success-light: #064E3B;
     --success-hover: #10B981;
 
-    --warning-color: #BF94FF;
+    --warning-color: #a87ee5;
     --warning-light: #451A03;
     --warning-hover: #F59E0B;
 
@@ -94,7 +94,7 @@
     /* Input Colors for Dark Mode */
     --input-bg: #374151;
     --input-border: #6B7280;
-    --input-focus: #BF94FF;
+    --input-focus: #aa7fea;
 
     /* Racing Theme Colors */
     --racing-lilach: #9146FF;
