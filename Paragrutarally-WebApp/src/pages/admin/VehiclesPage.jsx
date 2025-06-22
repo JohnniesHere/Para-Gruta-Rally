@@ -1,4 +1,4 @@
-// src/pages/admin/VehiclesPage.jsx - Enhanced with Mobile-Responsive Card Layout, Delete Function, and Full Translation Support
+// src/pages/admin/VehiclesPage.jsx - Enhanced with Mobile-Responsive Card Layout, Delete Function, and Active Card Borders
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
@@ -143,6 +143,31 @@ const VehiclesPage = () => {
         if (!teamId) return t('vehicles.unassigned', 'Unassigned');
         const team = teams.find(t => t.id === teamId);
         return team ? team.name : t('vehicles.unknownTeam', 'Unknown Team');
+    };
+
+    // Handle stat card clicks to filter vehicles - NEW FUNCTIONALITY
+    const handleStatCardClick = (filterType) => {
+        switch (filterType) {
+            case 'total':
+                setStatusFilter('');
+                setTeamFilter('');
+                break;
+            case 'active':
+                setStatusFilter('active');
+                setTeamFilter('');
+                break;
+            case 'in-use':
+                setStatusFilter('in-use');
+                setTeamFilter('');
+                break;
+            case 'available':
+                setStatusFilter('available');
+                setTeamFilter('');
+                break;
+            default:
+                break;
+        }
+        setSearchTerm('');
     };
 
     const handleViewVehicle = (vehicleId) => {
@@ -373,9 +398,13 @@ const VehiclesPage = () => {
                     </div>
                 </div>
                 <div className="vehicle-management-container">
-                    {/* Stats Cards - TRANSLATED */}
+                    {/* Stats Cards with Active States - UPDATED */}
                     <div className="stats-grid">
-                        <div className="stat-card total">
+                        <div
+                            className={`stat-card total ${!statusFilter && !teamFilter ? 'active' : ''}`}
+                            onClick={() => handleStatCardClick('total')}
+                            style={{ cursor: 'pointer' }}
+                        >
                             <div className="stat-icon">
                                 <Car size={40} />
                             </div>
@@ -386,7 +415,11 @@ const VehiclesPage = () => {
                             </div>
                         </div>
 
-                        <div className="stat-card teams">
+                        <div
+                            className={`stat-card teams ${statusFilter === 'active' ? 'active' : ''}`}
+                            onClick={() => handleStatCardClick('active')}
+                            style={{ cursor: 'pointer' }}
+                        >
                             <div className="stat-icon">
                                 <Settings size={40} />
                             </div>
@@ -397,7 +430,11 @@ const VehiclesPage = () => {
                             </div>
                         </div>
 
-                        <div className="stat-card kids">
+                        <div
+                            className={`stat-card kids ${statusFilter === 'in-use' ? 'active' : ''}`}
+                            onClick={() => handleStatCardClick('in-use')}
+                            style={{ cursor: 'pointer' }}
+                        >
                             <div className="stat-icon">
                                 <User size={40} />
                             </div>
@@ -408,7 +445,11 @@ const VehiclesPage = () => {
                             </div>
                         </div>
 
-                        <div className="stat-card open-instructors">
+                        <div
+                            className={`stat-card open-instructors ${statusFilter === 'available' ? 'active' : ''}`}
+                            onClick={() => handleStatCardClick('available')}
+                            style={{ cursor: 'pointer' }}
+                        >
                             <div className="stat-icon">
                                 <Battery size={40} />
                             </div>
