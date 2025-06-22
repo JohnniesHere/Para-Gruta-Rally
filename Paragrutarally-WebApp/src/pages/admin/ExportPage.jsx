@@ -1,11 +1,11 @@
-// src/pages/admin/ImportExportPage.jsx - Full Translation Support
+// src/pages/admin/ExportPage.jsx - Full Translation Support
 import React, { useState } from 'react';
 import Dashboard from '../../components/layout/Dashboard';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
-import './ImportExportPage.css';
+import './ExportPage.css';
 
-const ImportExportPage = () => {
+const ExportPage = () => {
     const { isDarkMode, appliedTheme } = useTheme(); // Added theme integration
     const { t } = useLanguage();
     const [selectedImportType, setSelectedImportType] = useState('users');
@@ -218,4 +218,4 @@ const ImportExportPage = () => {
     );
 };
 
-export default ImportExportPage;
+export default ExportPage;

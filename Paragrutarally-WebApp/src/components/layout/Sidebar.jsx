@@ -84,11 +84,11 @@ const Sidebar = ({userRole}) => {
                             {t('nav.backupSync', 'Backup/Sync')}
                         </NavLink>
                         <NavLink
-                            to="/admin/import-export"
+                            to="/admin/export"
                             className={({isActive}) => isActive ? 'active' : ''}
                         >
                             <Download className="sidebar-icon" size={20}/>
-                            {t('nav.importExport', 'Import/Export')}
+                            {t('nav.importExport', 'Export')}
                         </NavLink>
                         <NavLink
                             to="/gallery"

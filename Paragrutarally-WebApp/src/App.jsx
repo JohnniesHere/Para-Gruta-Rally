@@ -32,7 +32,7 @@ import EditEventPage from './pages/admin/EditEventPage';
 import UserManagementPage from './pages/admin/UserManagementPage';
 import FormsManagementPage from './pages/admin/FormsManagementPage';
 import BackupSyncPage from './pages/admin/BackupSyncPage';
-import ImportExportPage from './pages/admin/ImportExportPage';
+import ExportPage from './pages/admin/ExportPage.jsx';
 import AnalyticsDashboardPage from './pages/admin/AnalyticsDashboardPage';
 
 // Admin Kids Management
@@ -272,10 +272,10 @@ function App() {
                                                 }
                                             />
                                             <Route
-                                                path="/admin/import-export"
+                                                path="/admin/export"
                                                 element={
                                                     <RequireAdmin>
-                                                        <ImportExportPage />
+                                                        <ExportPage />
                                                     </RequireAdmin>
                                                 }
                                             />
