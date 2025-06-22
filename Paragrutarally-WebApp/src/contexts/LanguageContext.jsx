@@ -10,7 +10,24 @@ export const LANGUAGES = {
 // Translations object - COMPLETE WITH ALL YOUR EXISTING and NEW TRANSLATIONS
 const translations = {
     en: {
-            // Export Teams Modal - NEW KEYS ONLY
+       // Export Kids Modal
+        'exportKids.filterByStatus': 'Filter by Status',
+        'exportKids.filterByTeam': 'Filter by Team',
+        'exportKids.dataToInclude': 'Data to Include',
+        'exportKids.includePersonalInfo': 'Include personal information (name, age, address)',
+        'exportKids.includeParentInfo': 'Include parent/guardian information',
+        'exportKids.includeTeamInfo': 'Include team information',
+        'exportKids.includeInstructorInfo': 'Include instructor information',
+        'exportKids.parentExportNotice': 'You can only export your own kids\' data.',
+        'exportKids.instructorExportNotice': 'You can only export kids assigned to you.',
+        'exportKids.exportError': 'Failed to export kids. Please try again.',
+
+        // CSV Content
+        'exportKids.yes': 'Yes',
+        'exportKids.no': 'No',
+        'exportKids.signedDeclaration': 'Signed Declaration',
+        'exportKids.additionalComments': 'Additional Comments',
+        // Export Teams Modal
         'exportTeams.filterByStatus': 'Filter by Status',
         'exportTeams.filterByCapacity': 'Filter by Capacity',
         'exportTeams.dataToInclude': 'Data to Include',
@@ -1740,6 +1757,23 @@ const translations = {
         'addTeam.unknown': 'Unknown',
     },
     he: {
+            // Export Kids Modal 
+        'exportKids.filterByStatus': 'סנן לפי סטטוס',
+        'exportKids.filterByTeam': 'סנן לפי צוות',
+        'exportKids.dataToInclude': 'נתונים לכלול',
+        'exportKids.includePersonalInfo': 'כלול מידע אישי (שם, גיל, כתובת)',
+        'exportKids.includeParentInfo': 'כלול מידע הורה/אפוטרופוס',
+        'exportKids.includeTeamInfo': 'כלול מידע צוות',
+        'exportKids.includeInstructorInfo': 'כלול מידע מדריך',
+        'exportKids.parentExportNotice': 'אתה יכול לייצא רק את הנתונים של הילדים שלך.',
+        'exportKids.instructorExportNotice': 'אתה יכול לייצא רק ילדים המוקצים אליך.',
+        'exportKids.exportError': 'כשל בייצוא ילדים. אנא נסה שוב.',
+
+        // CSV Content
+        'exportKids.yes': 'כן',
+        'exportKids.no': 'לא',
+        'exportKids.signedDeclaration': 'הצהרה חתומה',
+        'exportKids.additionalComments': 'הערות נוספות',
           // Export Teams Modal - NEW KEYS ONLY
         'exportTeams.filterByStatus': 'סנן לפי סטטוס',
         'exportTeams.filterByCapacity': 'סנן לפי קיבולת',
@@ -1763,7 +1797,7 @@ const translations = {
         'exportTeams.capacityPercentage': 'אחוז קיבולת',
         'exportTeams.memberNames': 'שמות חברים',
         'exportTeams.kidsDetails': 'פרטי ילדים',
- 
+
         // Data content
         'exportTeams.noMembers': 'אין חברים',
         'exportTeams.age': 'גיל',
