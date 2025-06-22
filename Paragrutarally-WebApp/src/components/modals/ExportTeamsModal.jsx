@@ -100,7 +100,7 @@ const ExportTeamsModal = ({ isOpen, onClose }) => {
                             team.instructorEmail = instructor.email || '';
                             team.instructorPhone = instructor.phone || '';
                         } else {
-                            team.instructorName = 'Unknown Instructor';
+                            team.instructorName = t('teams.unknownInstructor', 'Unknown Instructor');
                             team.instructorEmail = '';
                             team.instructorPhone = '';
                         }
@@ -110,7 +110,7 @@ const ExportTeamsModal = ({ isOpen, onClose }) => {
                             const allInstructorNames = teamData.instructorIds
                                 .map(id => {
                                     const inst = instructorsData[id];
-                                    return inst ? (inst.displayName || inst.name || inst.email) : 'Unknown';
+                                    return inst ? (inst.displayName || inst.name || inst.email) : t('common.unknown', 'Unknown');
                                 })
                                 .join(', ');
                             team.allInstructors = allInstructorNames;
@@ -118,10 +118,10 @@ const ExportTeamsModal = ({ isOpen, onClose }) => {
                             team.allInstructors = team.instructorName || '';
                         }
                     } else {
-                        team.instructorName = 'No Instructor';
+                        team.instructorName = t('teams.noInstructor', 'No Instructor');
                         team.instructorEmail = '';
                         team.instructorPhone = '';
-                        team.allInstructors = 'No Instructor';
+                        team.allInstructors = t('teams.noInstructor', 'No Instructor');
                     }
                 }
 
@@ -142,14 +142,14 @@ const ExportTeamsModal = ({ isOpen, onClose }) => {
                                 if (kid && kid.personalInfo) {
                                     const firstName = kid.personalInfo.firstName || '';
                                     const lastName = kid.personalInfo.lastName || '';
-                                    return `${firstName} ${lastName}`.trim() || kid.participantNumber || 'Unknown';
+                                    return `${firstName} ${lastName}`.trim() || kid.participantNumber || t('common.unknown', 'Unknown');
                                 }
-                                return 'Unknown';
+                                return t('common.unknown', 'Unknown');
                             })
                             .join(', ');
                         team.memberNames = memberNames;
                     } else {
-                        team.memberNames = 'No Members';
+                        team.memberNames = t('exportTeams.noMembers', 'No Members');
                     }
                 }
 
@@ -165,9 +165,9 @@ const ExportTeamsModal = ({ isOpen, onClose }) => {
                                 const age = kid.personalInfo?.dateOfBirth ?
                                     new Date().getFullYear() - new Date(kid.personalInfo.dateOfBirth).getFullYear() : '';
 
-                                return `${firstName} ${lastName} (Age: ${age}, Parent: ${parentName})`.trim();
+                                return `${firstName} ${lastName} (${t('exportTeams.age', 'Age')}: ${age}, ${t('exportTeams.parent', 'Parent')}: ${parentName})`.trim();
                             }
-                            return 'Unknown Kid';
+                            return t('exportTeams.unknownKid', 'Unknown Kid');
                         })
                         .join(' | ');
                     team.kidsDetails = kidsDetails;
@@ -190,27 +190,41 @@ const ExportTeamsModal = ({ isOpen, onClose }) => {
             const headers = [];
 
             if (exportOptions.includeBasicInfo) {
-                headers.push('Team Name', 'Description', 'Status');
+                headers.push(
+                    t('exportTeams.teamName', 'Team Name'),
+                    t('events.description', 'Description'),
+                    t('teams.status', 'Status')
+                );
             }
 
             if (exportOptions.includeInstructorInfo) {
-                headers.push('Primary Instructor', 'Instructor Email', 'Instructor Phone', 'All Instructors');
+                headers.push(
+                    t('exportTeams.primaryInstructor', 'Primary Instructor'),
+                    t('exportTeams.instructorEmail', 'Instructor Email'),
+                    t('exportTeams.instructorPhone', 'Instructor Phone'),
+                    t('exportTeams.allInstructors', 'All Instructors')
+                );
             }
 
             if (exportOptions.includeCapacityInfo) {
-                headers.push('Current Members', 'Max Capacity', 'Available Spots', 'Capacity %');
+                headers.push(
+                    t('exportTeams.currentMembers', 'Current Members'),
+                    t('exportTeams.maxCapacity', 'Max Capacity'),
+                    t('teams.availableSpots', 'Available Spots'),
+                    t('exportTeams.capacityPercentage', 'Capacity %')
+                );
             }
 
             if (exportOptions.includeMemberInfo) {
-                headers.push('Member Names');
+                headers.push(t('exportTeams.memberNames', 'Member Names'));
             }
 
             if (exportOptions.includeKidsDetails) {
-                headers.push('Kids Details');
+                headers.push(t('exportTeams.kidsDetails', 'Kids Details'));
             }
 
             if (exportOptions.includeTimestamps) {
-                headers.push('Created At', 'Updated At');
+                headers.push(t('users.createdAt', 'Created At'), t('exportEvents.updatedAt', 'Updated At'));
             }
 
             let csvContent = headers.join(',') + '\n';
@@ -280,7 +294,7 @@ const ExportTeamsModal = ({ isOpen, onClose }) => {
             onClose();
         } catch (error) {
             console.error('Error exporting teams:', error);
-            alert(t('teams.exportError', 'Failed to export teams. Please try again.'));
+            alert(t('exportTeams.exportError', 'Failed to export teams. Please try again.'));
         } finally {
             setIsExporting(false);
         }
@@ -324,7 +338,7 @@ const ExportTeamsModal = ({ isOpen, onClose }) => {
 
                 <div className="modal-body">
                     <div className="form-group">
-                        <label htmlFor="statusFilter">{t('teams.filterByStatus', 'Filter by Status')}</label>
+                        <label htmlFor="statusFilter">{t('exportTeams.filterByStatus', 'Filter by Status')}</label>
                         <select
                             id="statusFilter"
                             value={exportOptions.statusFilter}
@@ -342,7 +356,7 @@ const ExportTeamsModal = ({ isOpen, onClose }) => {
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="capacityFilter">{t('teams.filterByCapacity', 'Filter by Capacity')}</label>
+                        <label htmlFor="capacityFilter">{t('exportTeams.filterByCapacity', 'Filter by Capacity')}</label>
                         <select
                             id="capacityFilter"
                             value={exportOptions.capacityFilter}
@@ -361,7 +375,7 @@ const ExportTeamsModal = ({ isOpen, onClose }) => {
                     </div>
 
                     <div className="form-group">
-                        <label>{t('teams.dataToInclude', 'Data to Include')}</label>
+                        <label>{t('exportTeams.dataToInclude', 'Data to Include')}</label>
 
                         <div className="checkbox-group">
                             <label>
@@ -376,7 +390,7 @@ const ExportTeamsModal = ({ isOpen, onClose }) => {
                                     style={{ marginRight: '8px' }}
                                 />
                                 <Team size={16} style={{ marginRight: '4px' }} />
-                                {t('teams.includeBasicInfo', 'Include basic information (name, description, status)')}
+                                {t('exportTeams.includeBasicInfo', 'Include basic information (name, description, status)')}
                             </label>
                         </div>
 
@@ -392,7 +406,7 @@ const ExportTeamsModal = ({ isOpen, onClose }) => {
                                     disabled={isExporting}
                                     style={{ marginRight: '8px' }}
                                 />
-                                👨‍🏫 {t('teams.includeInstructorInfo', 'Include instructor information')}
+                                👨‍🏫 {t('exportTeams.includeInstructorInfo', 'Include instructor information')}
                             </label>
                         </div>
 
@@ -408,7 +422,7 @@ const ExportTeamsModal = ({ isOpen, onClose }) => {
                                     disabled={isExporting}
                                     style={{ marginRight: '8px' }}
                                 />
-                                📊 {t('teams.includeCapacityInfo', 'Include capacity and member count')}
+                                📊 {t('exportTeams.includeCapacityInfo', 'Include capacity and member count')}
                             </label>
                         </div>
 
@@ -424,7 +438,7 @@ const ExportTeamsModal = ({ isOpen, onClose }) => {
                                     disabled={isExporting}
                                     style={{ marginRight: '8px' }}
                                 />
-                                👥 {t('teams.includeMemberInfo', 'Include member names list')}
+                                👥 {t('exportTeams.includeMemberInfo', 'Include member names list')}
                             </label>
                         </div>
 
@@ -440,7 +454,7 @@ const ExportTeamsModal = ({ isOpen, onClose }) => {
                                     disabled={isExporting}
                                     style={{ marginRight: '8px' }}
                                 />
-                                🎯 {t('teams.includeKidsDetails', 'Include detailed kids information (age, parent)')}
+                                🎯 {t('exportTeams.includeKidsDetails', 'Include detailed kids information (age, parent)')}
                             </label>
                         </div>
 
@@ -456,7 +470,7 @@ const ExportTeamsModal = ({ isOpen, onClose }) => {
                                     disabled={isExporting}
                                     style={{ marginRight: '8px' }}
                                 />
-                                ⏰ {t('teams.includeTimestamps', 'Include Created At and Updated At timestamps')}
+                                ⏰ {t('import.includeTimestamp', 'Include Created At and Updated At timestamps')}
                             </label>
                         </div>
                     </div>
@@ -464,7 +478,7 @@ const ExportTeamsModal = ({ isOpen, onClose }) => {
                     {userRole === 'instructor' && (
                         <div className="export-notice">
                             <p style={{ fontSize: '14px', color: '#666', fontStyle: 'italic' }}>
-                                👨‍🏫 {t('teams.instructorExportNotice', 'You can export all teams data based on your instructor permissions.')}
+                                👨‍🏫 {t('exportTeams.instructorExportNotice', 'You can export all teams data based on your instructor permissions.')}
                             </p>
                         </div>
                     )}
@@ -488,12 +502,12 @@ const ExportTeamsModal = ({ isOpen, onClose }) => {
                         {isExporting ? (
                             <>
                                 <Clock className="loading-spinner" size={16} style={{ marginRight: '6px' }} />
-                                {t('teams.exporting', 'Exporting...')}
+                                {t('users.exporting', 'Exporting...')}
                             </>
                         ) : (
                             <>
                                 <Download size={16} style={{ marginRight: '6px' }} />
-                                {t('teams.exportToCsv', 'Export to CSV')}
+                                {t('users.exportToCsv', 'Export to CSV')}
                             </>
                         )}
                     </button>

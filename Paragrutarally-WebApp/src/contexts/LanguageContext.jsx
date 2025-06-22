@@ -10,6 +10,35 @@ export const LANGUAGES = {
 // Translations object - COMPLETE WITH ALL YOUR EXISTING and NEW TRANSLATIONS
 const translations = {
     en: {
+            // Export Teams Modal - NEW KEYS ONLY
+        'exportTeams.filterByStatus': 'Filter by Status',
+        'exportTeams.filterByCapacity': 'Filter by Capacity',
+        'exportTeams.dataToInclude': 'Data to Include',
+        'exportTeams.includeBasicInfo': 'Include basic information (name, description, status)',
+        'exportTeams.includeInstructorInfo': 'Include instructor information',
+        'exportTeams.includeCapacityInfo': 'Include capacity and member count',
+        'exportTeams.includeMemberInfo': 'Include member names list',
+        'exportTeams.includeKidsDetails': 'Include detailed kids information (age, parent)',
+        'exportTeams.instructorExportNotice': 'You can export all teams data based on your instructor permissions.',
+        'exportTeams.exportError': 'Failed to export teams. Please try again.',
+
+        // CSV Headers
+        'exportTeams.teamName': 'Team Name',
+        'exportTeams.primaryInstructor': 'Primary Instructor',
+        'exportTeams.instructorEmail': 'Instructor Email',
+        'exportTeams.instructorPhone': 'Instructor Phone',
+        'exportTeams.allInstructors': 'All Instructors',
+        'exportTeams.currentMembers': 'Current Members',
+        'exportTeams.maxCapacity': 'Max Capacity',
+        'exportTeams.capacityPercentage': 'Capacity %',
+        'exportTeams.memberNames': 'Member Names',
+        'exportTeams.kidsDetails': 'Kids Details',
+
+        // Data content
+        'exportTeams.noMembers': 'No Members',
+        'exportTeams.age': 'Age',
+        'exportTeams.parent': 'Parent',
+        'exportTeams.unknownKid': 'Unknown Kid',
            // Export Events Modal
         'exportEvents.filterByStatus': 'Filter by Status',
         'exportEvents.includeParticipants': 'Include participant count',
@@ -1711,6 +1740,35 @@ const translations = {
         'addTeam.unknown': 'Unknown',
     },
     he: {
+          // Export Teams Modal - NEW KEYS ONLY
+        'exportTeams.filterByStatus': 'סנן לפי סטטוס',
+        'exportTeams.filterByCapacity': 'סנן לפי קיבולת',
+        'exportTeams.dataToInclude': 'נתונים לכלול',
+        'exportTeams.includeBasicInfo': 'כלול מידע בסיסי (שם, תיאור, סטטוס)',
+        'exportTeams.includeInstructorInfo': 'כלול מידע מדריכים',
+        'exportTeams.includeCapacityInfo': 'כלול קיבולת וספירת חברים',
+        'exportTeams.includeMemberInfo': 'כלול רשימת שמות חברים',
+        'exportTeams.includeKidsDetails': 'כלול מידע מפורט על ילדים (גיל, הורה)',
+        'exportTeams.instructorExportNotice': 'אתה יכול לייצא את כל נתוני הצוותים בהתבסס על הרשאות המדריך שלך.',
+        'exportTeams.exportError': 'כשל בייצוא צוותים. אנא נסה שוב.',
+
+        // CSV Headers
+        'exportTeams.teamName': 'שם הצוות',
+        'exportTeams.primaryInstructor': 'מדריך ראשי',
+        'exportTeams.instructorEmail': 'אימייל מדריך',
+        'exportTeams.instructorPhone': 'טלפון מדריך',
+        'exportTeams.allInstructors': 'כל המדריכים',
+        'exportTeams.currentMembers': 'חברים נוכחיים',
+        'exportTeams.maxCapacity': 'קיבולת מקסימלית',
+        'exportTeams.capacityPercentage': 'אחוז קיבולת',
+        'exportTeams.memberNames': 'שמות חברים',
+        'exportTeams.kidsDetails': 'פרטי ילדים',
+ 
+        // Data content
+        'exportTeams.noMembers': 'אין חברים',
+        'exportTeams.age': 'גיל',
+        'exportTeams.parent': 'הורה',
+        'exportTeams.unknownKid': 'ילד לא ידוע',
         'exportEvents.filterByStatus': 'סנן לפי סטטוס',
         'exportEvents.includeParticipants': 'כלול ספירת משתתפים',
         'exportEvents.includeTeams': 'כלול ספירת צוותים משתתפים',
