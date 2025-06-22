@@ -10,6 +10,87 @@ export const LANGUAGES = {
 // Translations object - COMPLETE WITH ALL YOUR EXISTING and NEW TRANSLATIONS
 const translations = {
     en: {
+         // Add Kid Page
+        'addKid.title': 'Add A New Kid',
+        'addKid.subtitle': 'Let\'s get this future champion on the track! 🏁',
+        'addKid.backToKids': 'Back to Kids',
+        'addKid.loadError': 'Some form data failed to load, but you can still create a kid. Please check your internet connection.',
+        'addKid.confirmCreateNewParent': 'This will open a form to create a new parent user. Continue?',
+        'addKid.unknownInstructor': 'Unknown Instructor',
+        'addKid.newRacer': 'New racer',
+        'addKid.successMessage': '🎉 {firstName} has been added to the race! Welcome to the team! 🏎️',
+        'addKid.generalError': 'Failed to add kid. Please try again.',
+        'addKid.racerProfile': '🏎️ {firstName}\'s Profile',
+        'addKid.racerProfileGeneric': '🏎️ Racer Profile',
+
+        // Photo handling
+        'addKid.racingPhoto': '📸 Racing Photo',
+        'addKid.photoAlt': 'Kid preview',
+        'addKid.changePhoto': 'Change',
+        'addKid.uploadPhoto': 'Upload',
+        'addKid.removePhoto': 'Remove',
+        'addKid.photoRequirements': '📸 Upload a racing photo! (Max 5MB, JPEG/PNG)',
+        'addKid.photoError.invalidType': 'Please upload a JPEG, PNG, or WebP image file.',
+        'addKid.photoError.tooLarge': 'Photo file size must be less than 5MB.',
+        'addKid.photoError.processingFailed': 'Failed to process photo. Please try again.',
+        'addKid.photoUploadWarning': 'Kid was created successfully, but photo upload failed: {error}. You can add a photo later by editing the kid.',
+
+        // Form fields
+        'addKid.raceNumber': '🏁 Race Number',
+        'addKid.raceNumberPlaceholder': '001',
+        'addKid.firstName': '👤 First Name',
+        'addKid.firstNamePlaceholder': 'Future champion\'s first name',
+        'addKid.lastName': '👨‍👩‍👧‍👦 Last Name',
+        'addKid.lastNamePlaceholder': 'Racing family name',
+        'addKid.birthday': '🎂 Birthday',
+        'addKid.homeBaseLocation': '🏠 Home Base Location',
+        'addKid.homeBaseLocationPlaceholder': 'Where our racer calls home',
+
+        // Skills section
+        'addKid.superPowersSkills': '💪 Super Powers & Skills',
+        'addKid.amazingAbilities': '🌟 Amazing Abilities',
+        'addKid.amazingAbilitiesPlaceholder': 'Tell us about this racer\'s awesome skills and abilities!',
+        'addKid.announcerNotes': '📢 Announcer\'s Special Notes',
+        'addKid.announcerNotesPlaceholder': 'Fun facts to share during the race!',
+
+        // Parent information
+        'addKid.racingFamilyInfo': '👨‍👩‍👧‍👦 Racing Family Info',
+        'addKid.selectParentGuardian': '👤 Select Parent/Guardian',
+        'addKid.chooseParentAccount': '🔗 Choose Parent Account',
+        'addKid.createNewParent': '➕ Create New Parent',
+        'addKid.parentGuardianName': '👤 Parent/Guardian Name',
+        'addKid.emailAddress': '📧 Email Address',
+        'addKid.phoneNumber': '📱 Phone Number',
+        'addKid.parentNamePlaceholder': 'Racing coach\'s name',
+        'addKid.emailPlaceholder': 'parent@racingfamily.com',
+        'addKid.phonePlaceholder': 'Racing hotline',
+        'addKid.grandparentsNames': '👵👴 Grandparents Names',
+        'addKid.grandparentsNamesPlaceholder': 'Racing legends in the family',
+        'addKid.grandparentsPhone': '☎️ Grandparents Phone',
+        'addKid.grandparentsPhonePlaceholder': 'Backup racing support',
+
+        // Team assignment
+        'addKid.teamVehicleAssignment': '🏎️ Racing Team Assignment',
+        'addKid.racingTeam': 'Racing Team',
+        'addKid.noTeamAssigned': '🚫 No Team Assigned (Yet!)',
+        'addKid.racers': 'racers',
+        'addKid.racingInstructor': 'Racing Instructor',
+        'addKid.noInstructorAssigned': '👨‍🏫 No Instructor Assigned',
+
+        // Status and forms
+        'addKid.racingStatusForms': '📋 Racing Status & Forms',
+        'addKid.formStatus': 'Form Status',
+        'addKid.healthDeclarationSigned': '🛡️ Racing Safety Declaration Signed',
+
+        // Comments
+        'addKid.racingNotesCommunication': '💬 Racing Notes & Comments',
+        'addKid.additionalRacingNotes': '🗒️ Additional Racing Notes',
+        'addKid.additionalRacingNotesPlaceholder': 'Any special notes about our new racing star!',
+
+        // Actions
+        'addKid.addToRacingTeam': 'Add to Racing Team! 🏁',
+        'addKid.uploadingPhoto': 'Uploading Photo...',
+        'addKid.addingRacer': 'Adding Racer...',
 
 
         dashboard: {
@@ -1623,6 +1704,88 @@ const translations = {
         'addTeam.unknown': 'Unknown',
     },
     he: {
+         // Add Kid Page
+        'addKid.title': 'הוסף ילד חדש',
+        'addKid.subtitle': 'בואו נכניס את האלוף העתידי הזה למסלול! 🏁',
+        'addKid.backToKids': 'חזור לילדים',
+        'addKid.loadError': 'חלק מנתוני הטופס נכשלו בטעינה, אך עדיין ניתן ליצור ילד. אנא בדוק את החיבור לאינטרנט.',
+        'addKid.confirmCreateNewParent': 'זה יפתח טופס ליצירת משתמש הורה חדש. להמשיך?',
+        'addKid.unknownInstructor': 'מדריך לא ידוע',
+        'addKid.newRacer': 'רוכב חדש',
+        'addKid.successMessage': '🎉 {firstName} נוסף למירוץ! ברוכים הבאים לצוות! 🏎️',
+        'addKid.generalError': 'כשל בהוספת ילד. אנא נסה שוב.',
+        'addKid.racerProfile': '🏎️ הפרופיל של {firstName}',
+        'addKid.racerProfileGeneric': '🏎️ פרופיל רוכב',
+
+        // Photo handling
+        'addKid.racingPhoto': '📸 תמונת מירוץ',
+        'addKid.photoAlt': 'תצוגה מקדימה של הילד',
+        'addKid.changePhoto': 'שנה',
+        'addKid.uploadPhoto': 'העלה',
+        'addKid.removePhoto': 'הסר',
+        'addKid.photoRequirements': '📸 העלה תמונת מירוץ! (מקסימום 5MB, JPEG/PNG)',
+        'addKid.photoError.invalidType': 'אנא העלה קובץ תמונה JPEG, PNG או WebP.',
+        'addKid.photoError.tooLarge': 'גודל קובץ התמונה חייב להיות פחות מ-5MB.',
+        'addKid.photoError.processingFailed': 'כשל בעיבוד התמונה. אנא נסה שוב.',
+        'addKid.photoUploadWarning': 'הילד נוצר בהצלחה, אך העלאת התמונה נכשלה: {error}. ניתן להוסיף תמונה מאוחר יותר על ידי עריכת הילד.',
+
+        // Form fields
+        'addKid.raceNumber': '🏁 מספר מירוץ',
+        'addKid.raceNumberPlaceholder': '001',
+        'addKid.firstName': '👤 שם פרטי',
+        'addKid.firstNamePlaceholder': 'שם פרטי של האלוף העתידי',
+        'addKid.lastName': '👨‍👩‍👧‍👦 שם משפחה',
+        'addKid.lastNamePlaceholder': 'שם משפחת המירוצים',
+        'addKid.birthday': '🎂 יום הולדת',
+        'addKid.homeBaseLocation': '🏠 מיקום בית',
+        'addKid.homeBaseLocationPlaceholder': 'איפה הרוכב שלנו גר',
+
+        // Skills section
+        'addKid.superPowersSkills': '💪 כוחות על וכישורים',
+        'addKid.amazingAbilities': '🌟 יכולות מדהימות',
+        'addKid.amazingAbilitiesPlaceholder': 'ספר לנו על הכישורים והיכולות המדהימות של הרוכב הזה!',
+        'addKid.announcerNotes': '📢 הערות מיוחדות לקריין',
+        'addKid.announcerNotesPlaceholder': 'עובדות כיפיות לשתף במהלך המירוץ!',
+
+        // Parent information
+        'addKid.racingFamilyInfo': '👨‍👩‍👧‍👦 מידע משפחת המירוצים',
+        'addKid.selectParentGuardian': '👤 בחר הורה/אפוטרופוס',
+        'addKid.chooseParentAccount': '🔗 בחר חשבון הורה',
+        'addKid.createNewParent': '➕ צור הורה חדש',
+        'addKid.parentGuardianName': '👤 שם הורה/אפוטרופוס',
+        'addKid.emailAddress': '📧 כתובת אימייל',
+        'addKid.phoneNumber': '📱 מספר טלפון',
+        'addKid.parentNamePlaceholder': 'שם מאמן המירוצים',
+        'addKid.emailPlaceholder': 'parent@racingfamily.com',
+        'addKid.phonePlaceholder': 'קו חם למירוצים',
+        'addKid.grandparentsNames': '👵👴 שמות סבא וסבתא',
+        'addKid.grandparentsNamesPlaceholder': 'אגדות מירוצים במשפחה',
+        'addKid.grandparentsPhone': '☎️ טלפון סבא וסבתא',
+        'addKid.grandparentsPhonePlaceholder': 'תמיכת מירוצים גיבוי',
+
+        // Team assignment
+        'addKid.teamVehicleAssignment': '🏎️ הקצאת צוות מירוצים',
+        'addKid.racingTeam': 'צוות מירוצים',
+        'addKid.noTeamAssigned': '🚫 לא הוקצה צוות (עדיין!)',
+        'addKid.racers': 'רוכבים',
+        'addKid.racingInstructor': 'מדריך מירוצים',
+        'addKid.noInstructorAssigned': '👨‍🏫 לא הוקצה מדריך',
+
+        // Status and forms
+        'addKid.racingStatusForms': '📋 סטטוס מירוצים וטפסים',
+        'addKid.formStatus': 'סטטוס טופס',
+        'addKid.healthDeclarationSigned': '🛡️ הצהרת בטיחות מירוצים חתומה',
+
+        // Comments
+        'addKid.racingNotesCommunication': '💬 הערות מירוצים ותקשורת',
+        'addKid.additionalRacingNotes': '🗒️ הערות מירוצים נוספות',
+        'addKid.additionalRacingNotesPlaceholder': 'הערות מיוחדות על כוכב המירוצים החדש שלנו!',
+
+        // Actions
+        'addKid.addToRacingTeam': 'הוסף לצוות המירוצים! 🏁',
+        'addKid.uploadingPhoto': 'מעלה תמונה...',
+        'addKid.addingRacer': 'מוסיף רוכב...',
+
          // Add Team Page
         'addTeam.title': 'צור קבוצה!',
         'addTeam.subtitle': 'בואו נבנה את צוות המירוצים האולטימטיבי! 🏁',
