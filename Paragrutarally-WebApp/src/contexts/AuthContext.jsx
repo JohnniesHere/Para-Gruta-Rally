@@ -1,4 +1,4 @@
-// src/contexts/AuthContext.jsx - COMPLETE SIMPLIFIED VERSION
+// src/contexts/AuthContext.jsx - FIXED WITH PROPER ROLE LOGIC
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import {
     signInWithEmailAndPassword,
@@ -20,14 +20,61 @@ export function useAuth() {
     return useContext(AuthContext);
 }
 
-// Role-based redirect mapping
+// Role-based redirect mapping (removed guest and external)
 const ROLE_REDIRECTS = {
     admin: '/admin/dashboard',
     instructor: '/instructor/dashboard',
     parent: '/parent/dashboard',
-    host: '/host/dashboard',
-    guest: '/host/dashboard',
-    external: '/host/dashboard'
+    host: '/host/dashboard'
+};
+
+// Helper function to wait for a delay
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+// Helper function to retry Firestore reads with exponential backoff
+const retryFirestoreRead = async (docRef, maxRetries = 3, baseDelay = 1000) => {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        console.log(`Firestore read attempt ${attempt}/${maxRetries}`);
+
+        const doc = await getDoc(docRef);
+
+        if (doc.exists()) {
+            const data = doc.data();
+            console.log(`Attempt ${attempt} - Document data:`, data);
+
+            // Check if we have meaningful data (not just lastLogin)
+            const hasRole = data.role && typeof data.role === 'string';
+            const hasEmail = data.email && typeof data.email === 'string';
+            const hasDisplayName = data.displayName !== undefined;
+
+            // If we have a role or this is our last attempt, return the data
+            if (hasRole || attempt === maxRetries) {
+                console.log(`Using data from attempt ${attempt}:`, {
+                    hasRole,
+                    hasEmail,
+                    hasDisplayName,
+                    role: data.role
+                });
+                return { exists: true, data };
+            }
+
+            // If we only have partial data, wait longer before next attempt
+            if (attempt < maxRetries) {
+                const waitTime = baseDelay * Math.pow(2, attempt - 1); // Exponential backoff
+                console.log(`Partial data detected, waiting ${waitTime}ms before retry...`);
+                await delay(waitTime);
+            }
+        } else {
+            // Document doesn't exist, wait before retry (except on last attempt)
+            if (attempt < maxRetries) {
+                const waitTime = baseDelay * Math.pow(2, attempt - 1);
+                console.log(`Document not found, waiting ${waitTime}ms before retry...`);
+                await delay(waitTime);
+            }
+        }
+    }
+
+    return { exists: false, data: null };
 };
 
 // Get appropriate dashboard for role
@@ -56,30 +103,29 @@ export function AuthProvider({ children }) {
 
         if (!userDoc.exists()) {
             const { displayName, email } = user;
-            const defaultRole = additionalData.role || 'external';
+            // Default role should be 'host' instead of external
+            const defaultRole = additionalData.role || 'host';
 
             try {
                 await setDoc(userRef, {
                     displayName: displayName || '',
                     email,
-                    role: defaultRole, // Use 'role' field consistently
-                    assignee: defaultRole, // Also set 'assignee' for backward compatibility
+                    role: defaultRole,
                     createdAt: serverTimestamp(),
                     lastLogin: serverTimestamp(),
                     ...additionalData
                 });
 
-                return { displayName, email, role: defaultRole, assignee: defaultRole, ...additionalData };
+                return { displayName, email, role: defaultRole, ...additionalData };
             } catch (error) {
                 console.error("Error creating user document:", error);
                 throw error;
             }
         }
 
-        // If document exists, return the data with role handling
+        // If document exists, return the data
         const existingData = userDoc.data();
-        const userRole = existingData.role || existingData.assignee || 'external';
-        return { ...existingData, role: userRole };
+        return existingData;
     }
 
     // Enhanced login function with role detection
@@ -121,7 +167,6 @@ export function AuthProvider({ children }) {
 
             // Email exists, update user document
             const existingUserDoc = emailQuerySnapshot.docs[0];
-            const existingUserData = existingUserDoc.data();
             const existingUserId = existingUserDoc.id;
 
             // Update the existing user document with Google auth info
@@ -129,9 +174,7 @@ export function AuthProvider({ children }) {
             await setDoc(userRef, {
                 lastLogin: serverTimestamp(),
                 authProvider: 'google',
-                ...(user.displayName && !existingUserData.displayName
-                    ? { displayName: user.displayName }
-                    : {}),
+                ...(user.displayName ? { displayName: user.displayName } : {}),
                 ...(user.photoURL ? { photoURL: user.photoURL } : {})
             }, { merge: true });
 
@@ -144,7 +187,7 @@ export function AuthProvider({ children }) {
     }
 
     // Function to register a new user (admin only)
-    async function registerUser(email, password, displayName, role = 'external') {
+    async function registerUser(email, password, displayName, role = 'host') {
         try {
             setError(null);
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -169,9 +212,9 @@ export function AuthProvider({ children }) {
     async function logout() {
         try {
             setError(null);
-            setLoading(true); // Set loading during logout
+            setLoading(true);
 
-            // IMPORTANT: Clear all state BEFORE signing out
+            // Clear all state BEFORE signing out
             setCurrentUser(null);
             setUserRole(null);
             setUserData(null);
@@ -179,12 +222,10 @@ export function AuthProvider({ children }) {
             // Sign out from Firebase
             await signOut(auth);
 
-            // Additional cleanup - clear any cached data
+            // Additional cleanup
             if (typeof window !== 'undefined') {
-                // Clear any localStorage items if you're using them
                 localStorage.removeItem('userRole');
                 localStorage.removeItem('userData');
-                // Clear sessionStorage as well
                 sessionStorage.clear();
             }
 
@@ -216,45 +257,7 @@ export function AuthProvider({ children }) {
         }
     }
 
-    // Utility function to determine if we should redirect after login (for use by components)
-    function shouldRedirectAfterLogin(role, currentPath = window.location.pathname) {
-        console.log(`shouldRedirectAfterLogin called with role: ${role}, currentPath: ${currentPath}`);
-
-        // Don't redirect if we don't have a role yet
-        if (!role) {
-            console.log('No role provided, not redirecting');
-            return null;
-        }
-
-        // Only redirect if we're on specific paths
-        const redirectPaths = ['/login', '/', '/dashboard'];
-        const isOnRedirectPath = redirectPaths.includes(currentPath) || currentPath === '/';
-
-        console.log(`Is on redirect path: ${isOnRedirectPath}`);
-
-        // Also redirect if user is trying to access wrong dashboard
-        const isOnWrongDashboard = (
-            (role === 'parent' && currentPath.startsWith('/admin')) ||
-            (role === 'admin' && (currentPath.startsWith('/parent') || currentPath.startsWith('/host') || currentPath.startsWith('/instructor'))) ||
-            (role === 'instructor' && (currentPath.startsWith('/admin') || currentPath.startsWith('/parent') || currentPath.startsWith('/host'))) ||
-            (role === 'host' && !currentPath.startsWith('/host')) ||
-            (role === 'guest' && !currentPath.startsWith('/host')) ||
-            (role === 'external' && !currentPath.startsWith('/host'))
-        );
-
-        console.log(`Is on wrong dashboard: ${isOnWrongDashboard}`);
-
-        if (isOnRedirectPath || isOnWrongDashboard) {
-            const targetDashboard = getDashboardForRole(role);
-            console.log(`Should redirect ${role} from ${currentPath} to ${targetDashboard}`);
-            return targetDashboard;
-        }
-
-        console.log('No redirect needed');
-        return null;
-    }
-
-    // Enhanced auth state change handler
+    // FIXED: Proper auth state change handler
     useEffect(() => {
         console.log("Setting up auth state change listener");
 
@@ -262,7 +265,7 @@ export function AuthProvider({ children }) {
             console.log("=== AUTH STATE CHANGE ===");
             console.log("User:", user ? `${user.email} (${user.uid})` : "No user");
 
-            // Clear state immediately when user changes or signs out
+            // If no user, clear all state
             if (!user) {
                 console.log("User signed out - clearing all state");
                 setCurrentUser(null);
@@ -287,63 +290,153 @@ export function AuthProvider({ children }) {
 
             try {
                 console.log("Fetching user data from Firestore...");
+
+                // Add initial delay for international users
+                console.log("Adding initial delay for international latency...");
+                await delay(500);
+
+                // FIXED: Try to get user by UID with retry logic
                 const userRef = doc(db, 'users', user.uid);
-                const userDoc = await getDoc(userRef);
+                let userDocResult = await retryFirestoreRead(userRef, 3, 1000);
+                let firestoreData = null;
+                let actualDocId = user.uid;
 
-                if (userDoc.exists()) {
-                    const firestoreData = userDoc.data();
-                    console.log("Firestore data:", {
-                        email: firestoreData.email,
-                        role: firestoreData.role,
-                        assignee: firestoreData.assignee,
-                        displayName: firestoreData.displayName
-                    });
+                if (userDocResult.exists) {
+                    firestoreData = userDocResult.data;
+                    console.log("Found user by UID after retries:", firestoreData);
+                } else {
+                    // If no document by UID, try to find by email
+                    console.log("No document found by UID after retries, searching by email...");
 
-                    // Better role determination logic
-                    let userRole = null;
+                    // Add delay before email search
+                    await delay(1000);
 
-                    // Priority 1: Check 'role' field
-                    if (firestoreData.role && firestoreData.role !== null && firestoreData.role !== '') {
-                        userRole = firestoreData.role;
-                        console.log(`Role found in 'role' field: ${userRole}`);
-                    }
-                    // Priority 2: Check 'assignee' field for backward compatibility
-                    else if (firestoreData.assignee && firestoreData.assignee !== null && firestoreData.assignee !== '') {
-                        userRole = firestoreData.assignee;
-                        console.log(`Role found in 'assignee' field: ${userRole}`);
-                    }
-                    // Priority 3: Determine from email pattern
-                    else {
-                        if (user.email.includes('admin')) {
-                            userRole = 'admin';
-                        } else if (user.email.includes('parent')) {
-                            userRole = 'parent';
-                        } else if (user.email.includes('instructor')) {
-                            userRole = 'instructor';
-                        } else {
-                            userRole = 'external';
+                    const usersRef = collection(db, 'users');
+                    const emailQuery = query(usersRef, where('email', '==', user.email));
+
+                    // Retry email query as well
+                    let emailFound = false;
+                    for (let attempt = 1; attempt <= 3; attempt++) {
+                        console.log(`Email search attempt ${attempt}/3`);
+
+                        const emailQuerySnapshot = await getDocs(emailQuery);
+
+                        if (!emailQuerySnapshot.empty) {
+                            const existingUserDoc = emailQuerySnapshot.docs[0];
+                            actualDocId = existingUserDoc.id;
+                            firestoreData = existingUserDoc.data();
+                            console.log(`Found user by email on attempt ${attempt}:`, {
+                                docId: actualDocId,
+                                data: firestoreData
+                            });
+                            emailFound = true;
+                            break;
                         }
-                        console.log(`Role determined from email: ${userRole}`);
 
-                        // Update Firestore with the determined role
+                        if (attempt < 3) {
+                            const waitTime = 1000 * Math.pow(2, attempt - 1);
+                            console.log(`Email search failed, waiting ${waitTime}ms before retry...`);
+                            await delay(waitTime);
+                        }
+                    }
+
+                    if (emailFound && firestoreData) {
+                        // IMPORTANT: Copy the data to the correct UID document for future lookups
+                        console.log("Copying data to UID-based document for future consistency");
+
                         try {
                             await setDoc(userRef, {
+                                ...firestoreData,
+                                lastLogin: serverTimestamp()
+                            });
+                            console.log("Data copied to UID document successfully");
+
+                            // Wait a bit for the write to propagate
+                            await delay(500);
+                        } catch (copyError) {
+                            console.warn("Could not copy data to UID document:", copyError);
+                        }
+                    }
+                }
+
+                // If we found user data, process it
+                if (firestoreData) {
+                    console.log("=== DETAILED ROLE ANALYSIS ===");
+                    console.log("Raw Firestore data:", JSON.stringify(firestoreData, null, 2));
+                    console.log("All keys in firestoreData:", Object.keys(firestoreData));
+
+                    // FIXED: Get role with proper validation
+                    let userRole = firestoreData.role;
+                    console.log(`Role from database: "${userRole}"`);
+                    console.log(`Role type: ${typeof userRole}`);
+
+                    if (userRole && typeof userRole === 'string') {
+                        userRole = userRole.trim();
+                        console.log(`Role after trim: "${userRole}"`);
+                    }
+
+                    const allowedRoles = ['admin', 'instructor', 'parent', 'host'];
+                    console.log(`Allowed roles:`, allowedRoles);
+                    console.log(`Role includes check:`, allowedRoles.includes(userRole));
+
+                    // Enhanced validation
+                    const isRoleValid = userRole &&
+                        typeof userRole === 'string' &&
+                        userRole.trim().length > 0 &&
+                        allowedRoles.includes(userRole.trim());
+
+                    console.log(`Is role valid: ${isRoleValid}`);
+
+                    if (!isRoleValid) {
+                        console.log(`❌ ROLE INVALID - Original: "${userRole}", setting to 'host'`);
+                        userRole = 'host';
+
+                        // Update the document we're actually using
+                        const updateRef = doc(db, 'users', actualDocId);
+                        try {
+                            await setDoc(updateRef, {
                                 role: userRole,
                                 lastLogin: serverTimestamp()
                             }, { merge: true });
-                            console.log(`Updated role in Firestore: ${userRole}`);
+                            console.log(`✅ Updated document ${actualDocId} with role: ${userRole}`);
+
+                            // Wait for update to propagate
+                            await delay(500);
                         } catch (updateError) {
-                            console.warn('Could not update role in Firestore:', updateError);
+                            console.warn('❌ Could not update role in Firestore:', updateError);
+                        }
+                    } else {
+                        console.log(`✅ ROLE VALID - Keeping role: "${userRole}"`);
+                        // Role is valid, just update lastLogin
+                        const updateRef = doc(db, 'users', actualDocId);
+                        try {
+                            await setDoc(updateRef, {
+                                lastLogin: serverTimestamp()
+                            }, { merge: true });
+                            console.log(`Updated lastLogin for document: ${actualDocId}`);
+                        } catch (updateError) {
+                            console.warn('Could not update lastLogin:', updateError);
                         }
                     }
 
-                    console.log(`Final determined role: ${userRole}`);
+                    console.log(`Final role: "${userRole}"`);
+                    console.log("=== END ROLE ANALYSIS ===");
+
+                    // Create clean user data
+                    const cleanUserData = {
+                        displayName: firestoreData.displayName || user.displayName || '',
+                        email: firestoreData.email || user.email,
+                        name: firestoreData.name || '',
+                        phone: firestoreData.phone || '',
+                        role: userRole,
+                        createdAt: firestoreData.createdAt,
+                        lastLogin: serverTimestamp()
+                    };
 
                     // Create enhanced user object
                     const enhancedUser = {
                         ...user,
-                        ...firestoreData,
-                        role: userRole,
+                        ...cleanUserData,
                         uid: user.uid,
                         email: user.email
                     };
@@ -351,20 +444,27 @@ export function AuthProvider({ children }) {
                     // Set all state
                     console.log("Setting user state...");
                     setCurrentUser(enhancedUser);
-                    setUserData({ ...firestoreData, role: userRole });
+                    setUserData(cleanUserData);
                     setUserRole(userRole);
                     setError(null);
 
                     console.log(`User state updated: ${user.email} with role ${userRole}`);
 
+                    setLoading(false);
+                    setAuthInitialized(true);
+                    console.log("Loading set to false manually");
                 } else {
-                    console.log("No Firestore document - creating default");
+                    // No user found in database after retries - create with default role
+                    console.log("User not found in database after retries - creating with default role");
 
                     const defaultUserData = await createUserDocument(user, {
-                        role: 'external'
+                        role: 'host'
                     });
 
-                    const userRole = defaultUserData.role || 'external';
+                    // Wait for document creation to propagate
+                    await delay(1000);
+
+                    const userRole = defaultUserData.role;
                     const enhancedUser = {
                         ...user,
                         ...defaultUserData,
@@ -372,7 +472,7 @@ export function AuthProvider({ children }) {
                     };
 
                     setCurrentUser(enhancedUser);
-                    setUserData({ ...defaultUserData, role: userRole });
+                    setUserData(defaultUserData);
                     setUserRole(userRole);
                     setError(null);
 
@@ -382,26 +482,24 @@ export function AuthProvider({ children }) {
                 console.error("Error in auth state change handler:", firestoreError);
                 setError("Error loading user data");
 
-                // Fallback: set basic user info
-                setCurrentUser(user);
-                setUserData({ role: 'external' });
-                setUserRole('external');
-            } finally {
-                setLoading(false);
-                setAuthInitialized(true);
-                console.log("Auth state change complete");
+                // Clear user state on error
+                setCurrentUser(null);
+                setUserData(null);
+                setUserRole(null);
             }
         });
 
         return unsubscribe;
     }, []); // Keep dependencies empty to avoid loops
 
+    // Utility function to determine redirect path based on role
+    const shouldRedirect = userRole ? getDashboardForRole(userRole) : null;
+
     // Enhanced role checking functions based on current userRole
     const isAdmin = userRole === 'admin';
     const isInstructor = userRole === 'instructor' || userRole === 'admin';
     const isParent = userRole === 'parent' || userRole === 'admin';
-    const isHost = userRole === 'host' || userRole === 'guest' || userRole === 'admin';
-    const isExternal = userRole === 'external';
+    const isHost = userRole === 'host' || userRole === 'admin';
 
     // Function to check if user has specific role
     const hasRole = (requiredRole) => {
@@ -426,13 +524,14 @@ export function AuthProvider({ children }) {
         loading,
         error,
         authInitialized,
+        shouldRedirect, // Add this for the RoleRedirectHandler
 
         // Auth functions
         signIn,
         signInWithGoogle,
         registerUser,
         logout,
-        signOut: logout, // Alias for consistency
+        signOut: logout,
         resetPassword,
 
         // Role checking functions
@@ -440,23 +539,22 @@ export function AuthProvider({ children }) {
         isInstructor,
         isParent,
         isHost,
-        isExternal,
         hasRole,
         hasAnyRole,
 
         // Utility functions
         getDashboardForRole,
-        shouldRedirectAfterLogin,
 
         // Legacy compatibility
-        login: signIn // Keep for backward compatibility
+        login: signIn
     };
 
     console.log("AuthProvider rendering", {
         loading,
         userRole,
         authInitialized,
-        hasUser: !!currentUser
+        hasUser: !!currentUser,
+        shouldRedirect
     });
 
     // Show loading spinner while initializing

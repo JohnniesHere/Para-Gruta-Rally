@@ -1,4 +1,4 @@
-// src/components/routing/RoleRedirectHandler.jsx - FIXED VERSION
+// src/components/routing/RoleRedirectHandler.jsx - FIXED VERSION that allows shared pages
 import { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -17,46 +17,82 @@ const RoleRedirectHandler = ({ children }) => {
             currentPath: location.pathname
         });
 
-        // Only redirect if:
-        // 1. Auth is initialized
-        // 2. User is logged in
-        // 3. We have a redirect destination
-        // 4. We have a valid user role
-        // 5. CRITICAL: The redirect destination is DIFFERENT from current path
+        // Only redirect if all conditions are met
         if (authInitialized && currentUser && shouldRedirect && userRole) {
 
-            // FIXED: Check if we're already on the target page
+            // FIXED: Define shared/allowed pages that should NOT be redirected
+            const sharedPages = [
+                '/my-account',
+                '/gallery',
+                '/kid/', // for /kid/:id routes
+                '/kids/view/', // for /kids/view/:id routes
+                '/teams/view/', // for /teams/view/:id routes
+                '/vehicles/view/', // for /vehicles/view/:id routes
+            ];
+
+            // Check if current path is a shared page
+            const isSharedPage = sharedPages.some(sharedPath => {
+                if (sharedPath.endsWith('/')) {
+                    // For dynamic routes like /kid/:id
+                    return location.pathname.startsWith(sharedPath);
+                } else {
+                    // For exact matches
+                    return location.pathname === sharedPath || location.pathname.startsWith(sharedPath + '/');
+                }
+            });
+
+            if (isSharedPage) {
+                console.log(`Current path ${location.pathname} is a shared page, allowing access`);
+                return;
+            }
+
+            // Check if we're already on the target page or in the correct area
             if (location.pathname === shouldRedirect) {
-                console.log(`RoleRedirectHandler: Already on target page ${shouldRedirect}, skipping redirect`);
+                console.log(`Already on target page ${shouldRedirect}, skipping redirect`);
                 return;
             }
 
-            // FIXED: Also check if we're on a sub-path of the target
-            if (shouldRedirect.startsWith('/admin') && location.pathname.startsWith('/admin')) {
-                console.log(`RoleRedirectHandler: Already in admin area, skipping redirect`);
-                return;
-            }
-            if (shouldRedirect.startsWith('/host') && location.pathname.startsWith('/host')) {
-                console.log(`RoleRedirectHandler: Already in host area, skipping redirect`);
-                return;
-            }
-            if (shouldRedirect.startsWith('/parent') && location.pathname.startsWith('/parent')) {
-                console.log(`RoleRedirectHandler: Already in parent area, skipping redirect`);
-                return;
-            }
-            if (shouldRedirect.startsWith('/instructor') && location.pathname.startsWith('/instructor')) {
-                console.log(`RoleRedirectHandler: Already in instructor area, skipping redirect`);
+            // Check if we're already in the correct role area
+            const currentArea = location.pathname.split('/')[1]; // Get the first part of the path
+            const targetArea = shouldRedirect.split('/')[1]; // Get the target area
+
+            if (currentArea === targetArea) {
+                console.log(`Already in ${targetArea} area, skipping redirect`);
                 return;
             }
 
-            console.log(`RoleRedirectHandler: Redirecting ${userRole} to ${shouldRedirect} from ${location.pathname}`);
+            // Only redirect from login page, root, or wrong dashboard areas
+            const shouldActuallyRedirect = (
+                location.pathname === '/login' ||
+                location.pathname === '/' ||
+                location.pathname === '/dashboard' ||
+                // Wrong dashboard areas (but not shared pages)
+                (userRole === 'admin' && location.pathname.startsWith('/instructor') && !isSharedPage) ||
+                (userRole === 'admin' && location.pathname.startsWith('/parent') && !isSharedPage) ||
+                (userRole === 'admin' && location.pathname.startsWith('/host') && !isSharedPage) ||
+                (userRole === 'instructor' && location.pathname.startsWith('/admin') && !isSharedPage) ||
+                (userRole === 'instructor' && location.pathname.startsWith('/parent') && !isSharedPage) ||
+                (userRole === 'instructor' && location.pathname.startsWith('/host') && !isSharedPage) ||
+                (userRole === 'parent' && location.pathname.startsWith('/admin') && !isSharedPage) ||
+                (userRole === 'parent' && location.pathname.startsWith('/instructor') && !isSharedPage) ||
+                (userRole === 'parent' && location.pathname.startsWith('/host') && !isSharedPage) ||
+                (userRole === 'host' && location.pathname.startsWith('/admin') && !isSharedPage) ||
+                (userRole === 'host' && location.pathname.startsWith('/instructor') && !isSharedPage) ||
+                (userRole === 'host' && location.pathname.startsWith('/parent') && !isSharedPage)
+            );
 
-            // Small delay to ensure state has settled
-            const redirectTimer = setTimeout(() => {
-                navigate(shouldRedirect, { replace: true });
-            }, 100);
+            if (shouldActuallyRedirect) {
+                console.log(`Redirecting ${userRole} to ${shouldRedirect} from ${location.pathname}`);
 
-            return () => clearTimeout(redirectTimer);
+                // Small delay to ensure state has settled
+                const redirectTimer = setTimeout(() => {
+                    navigate(shouldRedirect, { replace: true });
+                }, 100);
+
+                return () => clearTimeout(redirectTimer);
+            } else {
+                console.log(`No redirect needed for ${userRole} on ${location.pathname}`);
+            }
         }
     }, [shouldRedirect, authInitialized, currentUser, userRole, navigate, location.pathname]);
 

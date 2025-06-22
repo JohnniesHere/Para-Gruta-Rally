@@ -1,10 +1,10 @@
 // src/components/modals/CreateUserModal.jsx - FIXED VERSION
 import React, { useState } from 'react';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import {doc, setDoc, serverTimestamp, getDoc} from 'firebase/firestore';
 import { initializeApp, deleteApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { db } from '../../firebase/config';
+import { db} from '@/firebase/config.js';
 import { useLanguage } from '../../contexts/LanguageContext';
 
 const CreateUserModal = ({ isOpen, onClose, onUserCreated }) => {
@@ -104,7 +104,7 @@ const CreateUserModal = ({ isOpen, onClose, onUserCreated }) => {
 
                 console.log('User created in auth, UID:', uid);
 
-                // Create user document in Firestore
+                // FIXED: Create comprehensive user document
                 const userDoc = {
                     createdAt: now,
                     displayName: formData.displayName.trim(),
@@ -112,12 +112,28 @@ const CreateUserModal = ({ isOpen, onClose, onUserCreated }) => {
                     lastLogin: now,
                     name: formData.name.trim(),
                     phone: formData.phone.trim(),
-                    role: formData.role,
-                    updatedAt: now
+                    role: formData.role, // Make sure this is set correctly
+                    updatedAt: now,
+                    // Add any other fields that might be expected
+                    authProvider: 'email' // Track how user was created
                 };
 
+                console.log('Creating user document with data:', userDoc);
+
+                // Create the document using the UID from Firebase Auth
                 await setDoc(doc(db, 'users', uid), userDoc);
-                console.log('User document created in Firestore');
+                console.log('User document created in Firestore with UID:', uid);
+
+                // VERIFICATION: Read back the document to confirm it was created correctly
+                const verificationDoc = await getDoc(doc(db, 'users', uid));
+                if (verificationDoc.exists()) {
+                    const verificationData = verificationDoc.data();
+                    console.log('✅ VERIFICATION: Document created successfully:', verificationData);
+                    console.log('✅ VERIFICATION: Role in document:', verificationData.role);
+                } else {
+                    console.error('❌ VERIFICATION: Document was not created properly');
+                    throw new Error('User document verification failed');
+                }
 
                 // Clean up secondary app
                 await deleteApp(secondaryApp);
@@ -137,7 +153,9 @@ const CreateUserModal = ({ isOpen, onClose, onUserCreated }) => {
                     `✅ ${t('users.createSuccess', 'SUCCESS!')}\n\n` +
                     `${t('users.userCreated', 'User has been created successfully!')}\n\n` +
                     `📧 ${t('users.email', 'Email')}: ${formData.email}\n` +
-                    `👤 ${t('users.role', 'Role')}: ${formData.role}\n\n`
+                    `👤 ${t('users.role', 'Role')}: ${formData.role}\n` +
+                    `🆔 UID: ${uid}\n\n` +
+                    `Default password: 123456`
                 );
 
                 // Notify parent and close

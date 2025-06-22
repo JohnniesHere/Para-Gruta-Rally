@@ -1,4 +1,4 @@
-// src/components/auth/Login.jsx - SIMPLIFIED VERSION with Single Redirect Logic
+// src/components/auth/Login.jsx - FIXED VERSION with proper loading and redirect logic
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -17,6 +17,7 @@ const Login = () => {
     const [googleLoading, setGoogleLoading] = useState(false);
     const [error, setError] = useState('');
     const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+    const [isRedirecting, setIsRedirecting] = useState(false);
 
     const {
         signIn,
@@ -24,7 +25,8 @@ const Login = () => {
         currentUser,
         userRole,
         getDashboardForRole,
-        authInitialized
+        authInitialized,
+        loading: authLoading
     } = useAuth();
 
     const { isDarkMode } = useTheme();
@@ -35,16 +37,46 @@ const Login = () => {
     // Get the intended destination (from protected route redirect)
     const from = location.state?.from?.pathname || null;
 
-    // SIMPLIFIED: Single redirect logic - only redirect authenticated users away from login
+    // FIXED: Enhanced redirect logic with proper conditions and debugging
     useEffect(() => {
-        if (authInitialized && currentUser && userRole) {
-            const targetPath = from || getDashboardForRole(userRole);
-            console.log(`User authenticated, redirecting to: ${targetPath}`);
+        console.log('Login useEffect triggered:', {
+            authInitialized,
+            currentUser: !!currentUser,
+            userRole,
+            from,
+            authLoading,
+            isRedirecting
+        });
 
-            // Use window.location.href for a clean redirect with reload
-            window.location.href = targetPath;
+        // Only proceed if auth is fully initialized and not currently loading
+        if (!authInitialized || authLoading) {
+            console.log('Auth not ready yet - authInitialized:', authInitialized, 'authLoading:', authLoading);
+            return;
         }
-    }, [authInitialized, currentUser, userRole, from, getDashboardForRole]);
+
+        // If we have a user and role, and we're not already redirecting
+        if (currentUser && userRole && !isRedirecting) {
+            const targetPath = from || getDashboardForRole(userRole);
+            console.log(`User authenticated, preparing redirect to: ${targetPath}`);
+
+            setIsRedirecting(true);
+
+            // Add a delay to ensure all state has settled, then redirect
+            const redirectTimer = setTimeout(() => {
+                console.log(`Executing redirect to: ${targetPath}`);
+                navigate(targetPath, { replace: true });
+            }, 800); // Slightly longer delay to ensure everything is ready
+
+            return () => {
+                console.log('Cleaning up redirect timer');
+                clearTimeout(redirectTimer);
+            };
+        } else if (authInitialized && !currentUser && !authLoading) {
+            // User is not authenticated, make sure we're not in redirecting state
+            console.log('User not authenticated, staying on login page');
+            setIsRedirecting(false);
+        }
+    }, [authInitialized, currentUser, userRole, from, getDashboardForRole, navigate, authLoading, isRedirecting]);
 
     // Handle form submission
     const handleSubmit = async (e) => {
@@ -85,6 +117,7 @@ const Login = () => {
             }
 
             setError(errorMessage);
+            setIsRedirecting(false); // Reset redirecting state on error
         } finally {
             setLoading(false);
         }
@@ -120,6 +153,7 @@ const Login = () => {
             }
 
             setError(errorMessage);
+            setIsRedirecting(false); // Reset redirecting state on error
         } finally {
             setGoogleLoading(false);
         }
@@ -129,8 +163,43 @@ const Login = () => {
         setShowPassword(!showPassword);
     };
 
-    // Show loading while auth is initializing
-    if (!authInitialized) {
+    // FIXED: More precise loading conditions
+    const shouldShowLoadingSpinner = (
+        !authInitialized ||
+        authLoading ||
+        isRedirecting ||
+        (authInitialized && currentUser && userRole) // Show loading if we have user data (about to redirect)
+    );
+
+    const shouldShowLoginForm = (
+        authInitialized &&
+        !authLoading &&
+        !currentUser &&
+        !isRedirecting
+    );
+
+    console.log('=== LOGIN RENDER DECISION ===');
+    console.log('authInitialized:', authInitialized);
+    console.log('authLoading:', authLoading);
+    console.log('currentUser:', !!currentUser);
+    console.log('userRole:', userRole);
+    console.log('isRedirecting:', isRedirecting);
+    console.log('shouldShowLoadingSpinner:', shouldShowLoadingSpinner);
+    console.log('shouldShowLoginForm:', shouldShowLoginForm);
+    console.log('=== END RENDER DECISION ===');
+
+    // Show loading while auth is initializing OR we have a user and are redirecting
+    if (shouldShowLoadingSpinner) {
+        let loadingMessage = t('login.initializing', 'Initializing...');
+
+        if (isRedirecting) {
+            loadingMessage = t('login.redirecting', 'Redirecting...');
+        } else if (authLoading) {
+            loadingMessage = t('login.loading', 'Loading user data...');
+        } else if (authInitialized && currentUser && userRole) {
+            loadingMessage = t('login.redirecting', 'Redirecting to dashboard...');
+        }
+
         return (
             <div className={`login-page ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
                 <div style={{
@@ -149,13 +218,41 @@ const Login = () => {
                         animation: 'spin 1s linear infinite'
                     }}></div>
                     <p style={{ marginTop: '16px', color: '#666' }}>
-                        {t('login.initializing', 'Initializing...')}
+                        {loadingMessage}
                     </p>
                 </div>
             </div>
         );
     }
 
+    // If we don't meet the conditions to show the login form, show a fallback loading
+    if (!shouldShowLoginForm) {
+        return (
+            <div className={`login-page ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    height: '100vh',
+                    flexDirection: 'column'
+                }}>
+                    <div style={{
+                        width: '40px',
+                        height: '40px',
+                        border: '4px solid #f3f3f3',
+                        borderTop: '4px solid #3498db',
+                        borderRadius: '50%',
+                        animation: 'spin 1s linear infinite'
+                    }}></div>
+                    <p style={{ marginTop: '16px', color: '#666' }}>
+                        {t('login.preparing', 'Preparing...')}
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
+    // Show the login form
     return (
         <div className={`login-page ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
             <div className="theme-toggle-container">
