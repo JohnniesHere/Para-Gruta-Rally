@@ -26,21 +26,54 @@ const VEHICLES_COLLECTION = 'vehicles';
  */
 export const getAllVehicles = async () => {
     try {
-        const vehiclesQuery = query(
-            collection(db, VEHICLES_COLLECTION),
-            orderBy('createdAt', 'desc')
-        );
-        const snapshot = await getDocs(vehiclesQuery);
+        console.log('🔍 Fetching all vehicles...');
 
-        return snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data(),
-            createdAt: doc.data().createdAt?.toDate(),
-            updatedAt: doc.data().updatedAt?.toDate()
-        }));
+        // Simple query without ordering to avoid index issues
+        const vehiclesRef = collection(db, VEHICLES_COLLECTION);
+        const snapshot = await getDocs(vehiclesRef);
+
+        console.log('📊 Vehicles snapshot size:', snapshot.size);
+
+        if (snapshot.empty) {
+            console.log('📝 No vehicles found, returning empty array');
+            return [];
+        }
+
+        const vehicles = snapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                id: doc.id,
+                ...data,
+                createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : (data.createdAt || null),
+                updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : (data.updatedAt || null)
+            };
+        });
+
+        // Sort in JavaScript instead of Firestore to avoid index requirements
+        vehicles.sort((a, b) => {
+            const dateA = a.createdAt ? new Date(a.createdAt) : new Date(0);
+            const dateB = b.createdAt ? new Date(b.createdAt) : new Date(0);
+            return dateB - dateA; // Descending order (newest first)
+        });
+
+        console.log('✅ Successfully fetched vehicles:', vehicles.length);
+        return vehicles;
     } catch (error) {
-        console.error('Error fetching all vehicles:', error);
-        throw new Error('Failed to fetch vehicles');
+        console.error('❌ Error fetching all vehicles:', error);
+
+        // Handle specific error cases
+        if (error.code === 'failed-precondition') {
+            console.log('📝 Index not available, returning empty array');
+            return [];
+        }
+
+        if (error.code === 'permission-denied') {
+            throw new Error('Permission denied: Please check your authentication and Firestore rules');
+        }
+
+        // For other errors, return empty array to prevent app crash
+        console.log('🔄 Returning empty array due to error:', error.message);
+        return [];
     }
 };
 
@@ -49,22 +82,39 @@ export const getAllVehicles = async () => {
  */
 export const getVehiclesByTeam = async (teamId) => {
     try {
-        const vehiclesQuery = query(
-            collection(db, VEHICLES_COLLECTION),
-            where('teamId', '==', teamId),
-            orderBy('createdAt', 'desc')
-        );
+        console.log('🔍 Fetching vehicles for team:', teamId);
+
+        const vehiclesRef = collection(db, VEHICLES_COLLECTION);
+        const vehiclesQuery = query(vehiclesRef, where('teamId', '==', teamId));
         const snapshot = await getDocs(vehiclesQuery);
 
-        return snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data(),
-            createdAt: doc.data().createdAt?.toDate(),
-            updatedAt: doc.data().updatedAt?.toDate()
-        }));
+        if (snapshot.empty) {
+            console.log('📝 No vehicles found for team, returning empty array');
+            return [];
+        }
+
+        const vehicles = snapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                id: doc.id,
+                ...data,
+                createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : (data.createdAt || null),
+                updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : (data.updatedAt || null)
+            };
+        });
+
+        // Sort in JavaScript
+        vehicles.sort((a, b) => {
+            const dateA = a.createdAt ? new Date(a.createdAt) : new Date(0);
+            const dateB = b.createdAt ? new Date(b.createdAt) : new Date(0);
+            return dateB - dateA;
+        });
+
+        console.log('✅ Successfully fetched team vehicles:', vehicles.length);
+        return vehicles;
     } catch (error) {
-        console.error('Error fetching vehicles by team:', error);
-        throw new Error('Failed to fetch team vehicles');
+        console.error('❌ Error fetching vehicles by team:', error);
+        return [];
     }
 };
 
@@ -83,12 +133,15 @@ export const getVehiclesByKids = async (kidIds) => {
         );
         const snapshot = await getDocs(vehiclesQuery);
 
-        return snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data(),
-            createdAt: doc.data().createdAt?.toDate(),
-            updatedAt: doc.data().updatedAt?.toDate()
-        }));
+        return snapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                id: doc.id,
+                ...data,
+                createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : (data.createdAt || null),
+                updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : (data.updatedAt || null)
+            };
+        });
     } catch (error) {
         console.error('Error fetching vehicles by kids:', error);
         throw new Error('Failed to fetch assigned vehicles');
@@ -96,7 +149,7 @@ export const getVehiclesByKids = async (kidIds) => {
 };
 
 /**
- * Get a single vehicle by ID
+ * Get a single vehicle by ID - FIXED
  */
 export const getVehicleById = async (vehicleId) => {
     try {
@@ -106,17 +159,21 @@ export const getVehicleById = async (vehicleId) => {
             throw new Error('Vehicle not found');
         }
 
+        const data = vehicleDoc.data();
+
         return {
             id: vehicleDoc.id,
-            ...vehicleDoc.data(),
-            createdAt: vehicleDoc.data().createdAt?.toDate(),
-            updatedAt: vehicleDoc.data().updatedAt?.toDate()
+            ...data,
+            // Safe timestamp conversion - handle both Firestore timestamps and existing Date objects
+            createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : (data.createdAt || null),
+            updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : (data.updatedAt || null)
         };
     } catch (error) {
         console.error('Error fetching vehicle:', error);
         throw new Error('Failed to fetch vehicle details');
     }
 };
+
 
 /**
  * Create a new vehicle with schema validation
@@ -311,12 +368,15 @@ export const getAvailableVehicles = async (teamId = null) => {
 
         const snapshot = await getDocs(vehiclesQuery);
 
-        return snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data(),
-            createdAt: doc.data().createdAt?.toDate(),
-            updatedAt: doc.data().updatedAt?.toDate()
-        }));
+        return snapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                id: doc.id,
+                ...data,
+                createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : (data.createdAt || null),
+                updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : (data.updatedAt || null)
+            };
+        });
     } catch (error) {
         console.error('Error fetching available vehicles:', error);
         throw new Error('Failed to fetch available vehicles');
@@ -362,8 +422,9 @@ export const updateVehicleBattery = async (vehicleId, batteryType, batteryDate) 
  */
 export const getVehicleStats = async (teamId = null) => {
     try {
-        let vehicles;
+        console.log('📊 Calculating vehicle stats for team:', teamId);
 
+        let vehicles;
         if (teamId) {
             vehicles = await getVehiclesByTeam(teamId);
         } else {
@@ -377,19 +438,31 @@ export const getVehicleStats = async (teamId = null) => {
             inUse: vehicles.filter(v => v.currentKidId && v.active === true).length,
             available: vehicles.filter(v => !v.currentKidId && v.active === true).length,
             needsMaintenance: vehicles.filter(v => {
-                // Check if battery date is old (example: older than 6 months)
                 if (!v.batteryDate) return false;
-                const batteryDate = new Date(v.batteryDate);
-                const sixMonthsAgo = new Date();
-                sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-                return batteryDate < sixMonthsAgo;
+                try {
+                    const batteryDate = new Date(v.batteryDate);
+                    const sixMonthsAgo = new Date();
+                    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+                    return batteryDate < sixMonthsAgo;
+                } catch (error) {
+                    return false;
+                }
             }).length
         };
 
+        console.log('✅ Vehicle stats calculated:', stats);
         return stats;
     } catch (error) {
-        console.error('Error calculating vehicle stats:', error);
-        throw new Error('Failed to calculate vehicle statistics');
+        console.error('❌ Error calculating vehicle stats:', error);
+        // Return default stats to prevent dashboard crash
+        return {
+            total: 0,
+            active: 0,
+            inactive: 0,
+            inUse: 0,
+            available: 0,
+            needsMaintenance: 0
+        };
     }
 };
 
