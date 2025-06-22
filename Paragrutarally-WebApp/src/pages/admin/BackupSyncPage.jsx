@@ -73,11 +73,11 @@ const BackupSyncPage = () => {
         try {
             await googleDriveService.signIn();
             await checkGoogleDriveStatus();
-            setBackupStatus('Successfully connected to Google Drive!');
+            setBackupStatus(t('backup.successfullyConnected', 'Successfully connected to Google Drive!'));
             setTimeout(() => setBackupStatus(''), 3000);
         } catch (error) {
             console.error('Error connecting to Google Drive:', error);
-            setBackupStatus(`Error connecting to Google Drive: ${error.message}`);
+            setBackupStatus(t('backup.errorConnecting', 'Error connecting to Google Drive: {error}', { error: error.message }));
             setTimeout(() => setBackupStatus(''), 5000);
         } finally {
             setGoogleDriveStatus(prev => ({ ...prev, isConnecting: false }));
@@ -95,11 +95,11 @@ const BackupSyncPage = () => {
             });
             setDriveBackups([]);
             setStorageInfo(null);
-            setBackupStatus('Disconnected from Google Drive');
+            setBackupStatus(t('backup.disconnectedFromGoogleDrive', 'Disconnected from Google Drive'));
             setTimeout(() => setBackupStatus(''), 3000);
         } catch (error) {
             console.error('Error disconnecting from Google Drive:', error);
-            setBackupStatus(`Error disconnecting: ${error.message}`);
+            setBackupStatus(t('backup.errorDisconnecting', 'Error disconnecting: {error}', { error: error.message }));
             setTimeout(() => setBackupStatus(''), 5000);
         }
     };
@@ -236,7 +236,7 @@ const BackupSyncPage = () => {
         // Re-setup automated backup
         setupAutomatedBackup();
 
-        setBackupStatus(value ? 'Automated backup enabled' : 'Automated backup disabled');
+        setBackupStatus(value ? t('backup.automatedBackupEnabled', 'Automated backup enabled') : t('backup.automatedBackupDisabled', 'Automated backup disabled'));
         setTimeout(() => setBackupStatus(''), 3000);
     };
 
@@ -258,7 +258,7 @@ const BackupSyncPage = () => {
     const handleCreateBackup = async (uploadToGoogleDrive = false, isAutomated = false) => {
         if (!isAutomated) {
             setIsCreatingBackup(true);
-            setBackupStatus('Creating backup...');
+            setBackupStatus(t('backup.creatingBackup', 'Creating backup...'));
         }
 
         try {
@@ -291,7 +291,7 @@ const BackupSyncPage = () => {
                 createdAt: serverTimestamp(),
                 size: JSON.stringify(completeBackup).length,
                 collections: collections,
-                status: 'completed',
+                status: t('backup.statusCompleted', 'completed'),
                 uploadedToGoogleDrive: uploadToGoogleDrive,
                 isAutomated: isAutomated
             };
@@ -300,7 +300,7 @@ const BackupSyncPage = () => {
 
             if (uploadToGoogleDrive && googleDriveStatus.isConnected) {
                 if (!isAutomated) {
-                    setBackupStatus('Uploading to Google Drive...');
+                    setBackupStatus(t('backup.uploadingToGoogleDrive', 'Uploading to Google Drive...'));
                 }
 
                 const filename = `charity-backup-${new Date().toISOString().split('T')[0]}-${docRef.id}${isAutomated ? '-auto' : ''}.json`;
@@ -310,11 +310,11 @@ const BackupSyncPage = () => {
                 setDriveBackups(backups);
 
                 if (!isAutomated) {
-                    setBackupStatus('Backup created and uploaded to Google Drive successfully!');
+                    setBackupStatus(t('backup.backupCreatedAndUploaded', 'Backup created and uploaded to Google Drive successfully!'));
                 }
             } else {
                 if (!isAutomated) {
-                    setBackupStatus('Backup created successfully!');
+                    setBackupStatus(t('backup.backupCreatedSuccessfully', 'Backup created successfully!'));
                 }
             }
 
@@ -327,7 +327,7 @@ const BackupSyncPage = () => {
         } catch (error) {
             console.error('Error creating backup:', error);
             if (!isAutomated) {
-                setBackupStatus(`Error creating backup: ${error.message}`);
+                setBackupStatus(t('backup.errorCreatingBackup', 'Error creating backup: {error}', { error: error.message }));
                 setTimeout(() => setBackupStatus(''), 5000);
             }
         } finally {
@@ -351,13 +351,13 @@ const BackupSyncPage = () => {
     // Restore from local file
     const handleRestoreFromFile = async () => {
         if (!selectedFile) {
-            setBackupStatus('Please select a backup file first');
+            setBackupStatus(t('backup.selectBackupFile', 'Please select a backup file first'));
             setTimeout(() => setBackupStatus(''), 3000);
             return;
         }
 
         setIsRestoring(true);
-        setBackupStatus('Restoring from backup file...');
+        setBackupStatus(t('backup.restoreFromFile', 'Restoring from backup file...'));
 
         try {
             const fileContent = await selectedFile.text();
@@ -366,7 +366,7 @@ const BackupSyncPage = () => {
             await restoreBackupData(backupData);
         } catch (error) {
             console.error('Error restoring from file:', error);
-            setBackupStatus(`Error restoring backup: ${error.message}`);
+            setBackupStatus(t('backup.errorCreatingBackup', 'Error restoring backup: {error}', { error: error.message }));
             setTimeout(() => setBackupStatus(''), 5000);
         } finally {
             setIsRestoring(false);
@@ -379,19 +379,19 @@ const BackupSyncPage = () => {
 
     // Restore from Google Drive backup
     const handleRestoreFromDrive = async (fileId, fileName) => {
-        if (!window.confirm(`Are you sure you want to restore from "${fileName}"? This will overwrite existing data.`)) {
+        if (!window.confirm(t('backup.restoreWarning', 'Are you sure you want to restore from "{fileName}"? This will overwrite existing data.', { fileName }))) {
             return;
         }
 
         setIsRestoring(true);
-        setBackupStatus('Downloading and restoring from Google Drive...');
+        setBackupStatus(t('backup.restoreFromDrive', 'Downloading and restoring from Google Drive...'));
 
         try {
             const backupData = await googleDriveService.downloadBackup(fileId);
             await restoreBackupData(backupData);
         } catch (error) {
             console.error('Error restoring from Google Drive:', error);
-            setBackupStatus(`Error restoring backup: ${error.message}`);
+            setBackupStatus(t('backup.errorCreatingBackup', 'Error restoring backup: {error}', { error: error.message }));
             setTimeout(() => setBackupStatus(''), 5000);
         } finally {
             setIsRestoring(false);
@@ -404,10 +404,17 @@ const BackupSyncPage = () => {
             const results = await googleDriveService.restoreBackup(backupData);
 
             if (results.errors.length > 0) {
-                setBackupStatus(`Restore completed: ${results.restoredDocuments}/${results.totalDocuments} documents restored. ${results.errors.length} errors occurred. Check console for details.`);
+                setBackupStatus(t('backup.restoreCompleted', 'Restore completed: {restoredDocuments}/{totalDocuments} documents restored. {errors} errors occurred. Check console for details.', {
+                    restoredDocuments: results.restoredDocuments,
+                    totalDocuments: results.totalDocuments,
+                    errors: results.errors.length
+                }));
                 console.error('Restore errors:', results.errors);
             } else {
-                setBackupStatus(`Successfully restored ${results.restoredDocuments} documents across ${results.success.length} collections!`);
+                setBackupStatus(t('backup.successfullyRestored', 'Successfully restored {restoredDocuments} documents across {collections} collections!', {
+                    restoredDocuments: results.restoredDocuments,
+                    collections: results.success.length
+                }));
             }
 
             console.log('Restore results:', results);
@@ -460,7 +467,7 @@ const BackupSyncPage = () => {
                             </button>
                         ) : (
                             <div className="backup-notice">
-                                <p>Connect to Google Drive to create backups</p>
+                                <p>{t('backup.connectToCreateBackups', 'Connect to Google Drive to create backups')}</p>
                             </div>
                         )}
                     </div>
@@ -519,7 +526,7 @@ const BackupSyncPage = () => {
                                 disabled={isRestoring || isCreatingBackup}
                             />
                             <label htmlFor="backup-file-input" className="file-input-label">
-                                {selectedFile ? selectedFile.name : 'Choose backup file...'}
+                                {selectedFile ? selectedFile.name : t('backup.chooseBackupFile', 'Choose backup file...')}
                             </label>
                         </div>
 
@@ -528,7 +535,7 @@ const BackupSyncPage = () => {
                             onClick={handleRestoreFromFile}
                             disabled={!selectedFile || isRestoring || isCreatingBackup}
                         >
-                            {isRestoring ? 'Restoring...' : 'Restore from File'}
+                            {isRestoring ? t('backup.restoring', 'Restoring...') : t('backup.restoreFromFile', 'Restore from File')}
                         </button>
                     </div>
                 </div>
@@ -687,16 +694,16 @@ const BackupSyncPage = () => {
                         {automatedBackup.enabled && (
                             <div className="backup-schedule-info">
                                 {automatedBackup.nextBackup && (
-                                    <p>Next backup: {new Date(automatedBackup.nextBackup).toLocaleString()}</p>
+                                    <p>{t('backup.nextBackup', 'Next backup: {date}', {date: new Date(automatedBackup.nextBackup).toLocaleString()})}</p>
                                 )}
                                 {automatedBackup.lastBackup && (
-                                    <p>Last backup: {new Date(automatedBackup.lastBackup).toLocaleString()}</p>
+                                    <p>{t('backup.lastBackup', 'Last backup: {date}', {date: new Date(automatedBackup.lastBackup).toLocaleString()})}</p>
                                 )}
                             </div>
                         )}
 
                         {!googleDriveStatus.isConnected && (
-                            <p className="warning-text">Connect to Google Drive to enable automated backups</p>
+                            <p className="warning-text">{t('backup.connectToEnableAutomated', 'Connect to Google Drive to enable automated backups')}</p>
                         )}
                     </div>
                 </div>
