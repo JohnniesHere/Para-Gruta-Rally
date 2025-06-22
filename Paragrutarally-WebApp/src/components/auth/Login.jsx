@@ -263,24 +263,6 @@ const Login = () => {
                             }
                         </button>
                     </div>
-
-                    {/* Development/Debug info (remove in production) */}
-                    {process.env.NODE_ENV === 'development' && (
-                        <div className="debug-info" style={{
-                            marginTop: '20px',
-                            padding: '12px',
-                            backgroundColor: '#f5f5f5',
-                            borderRadius: '4px',
-                            fontSize: '12px',
-                            color: '#666'
-                        }}>
-                            <strong>Development Info:</strong><br />
-                            Current Role: {userRole || 'None'}<br />
-                            Auth Initialized: {authInitialized ? 'Yes' : 'No'}<br />
-                            Current User: {currentUser?.email || 'None'}<br />
-                            {from && `Original Target: ${from}`}
-                        </div>
-                    )}
                 </div>
 
                 <div className="contact-container">
