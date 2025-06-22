@@ -1,24 +1,244 @@
-// src/pages/admin/BackupSyncPage.jsx - Updated Version
+// src/pages/admin/BackupSyncPage.jsx - Production Version
 import React, { useEffect, useState } from 'react';
 import Dashboard from '../../components/layout/Dashboard';
 import { useTheme } from '../../contexts/ThemeContext.jsx';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { db } from '../../firebase/config';
 import { collection, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
+import googleDriveService from '../../services/GoogleDriveService';
 import './BackupSyncPage.css';
 
 const BackupSyncPage = () => {
     const { isDarkMode, appliedTheme } = useTheme();
     const { t } = useLanguage();
     const [isCreatingBackup, setIsCreatingBackup] = useState(false);
+    const [isRestoring, setIsRestoring] = useState(false);
     const [backupStatus, setBackupStatus] = useState('');
     const [recentBackups, setRecentBackups] = useState([]);
+    const [googleDriveStatus, setGoogleDriveStatus] = useState({
+        isConnected: false,
+        userEmail: null,
+        isConnecting: false
+    });
+    const [driveBackups, setDriveBackups] = useState([]);
+    const [storageInfo, setStorageInfo] = useState(null);
+    const [selectedFile, setSelectedFile] = useState(null);
 
-    // This useEffect will run whenever the component mounts
+    const [automatedBackup, setAutomatedBackup] = useState({
+        enabled: false,
+        frequency: 'weekly',
+        nextBackup: null,
+        lastBackup: null
+    });
+
     useEffect(() => {
         document.title = `${t('backup.title', 'Backup & Sync')} - Charity Racing App`;
         fetchRecentBackups();
+        checkGoogleDriveStatus();
+        loadAutomatedBackupSettings();
+        setupAutomatedBackup();
     }, [t]);
+
+    // Check Google Drive connection status
+    const checkGoogleDriveStatus = async () => {
+        try {
+            const status = googleDriveService.getConnectionStatus();
+            setGoogleDriveStatus(prev => ({
+                ...prev,
+                isConnected: status.isConnected,
+                userEmail: status.userEmail
+            }));
+
+            if (status.isConnected && googleDriveService.isSignedIn) {
+                try {
+                    const storage = await googleDriveService.getStorageInfo();
+                    setStorageInfo(storage);
+
+                    const backups = await googleDriveService.listBackups();
+                    setDriveBackups(backups);
+                } catch (error) {
+                    console.error('Error checking Google Drive:', error);
+                    setGoogleDriveStatus(prev => ({ ...prev, isConnected: false, userEmail: null }));
+                }
+            }
+        } catch (error) {
+            console.error('Error checking Google Drive status:', error);
+        }
+    };
+
+    // Connect to Google Drive
+    const handleConnectGoogleDrive = async () => {
+        setGoogleDriveStatus(prev => ({ ...prev, isConnecting: true }));
+
+        try {
+            await googleDriveService.signIn();
+            await checkGoogleDriveStatus();
+            setBackupStatus('Successfully connected to Google Drive!');
+            setTimeout(() => setBackupStatus(''), 3000);
+        } catch (error) {
+            console.error('Error connecting to Google Drive:', error);
+            setBackupStatus(`Error connecting to Google Drive: ${error.message}`);
+            setTimeout(() => setBackupStatus(''), 5000);
+        } finally {
+            setGoogleDriveStatus(prev => ({ ...prev, isConnecting: false }));
+        }
+    };
+
+    // Disconnect from Google Drive
+    const handleDisconnectGoogleDrive = async () => {
+        try {
+            await googleDriveService.signOut();
+            setGoogleDriveStatus({
+                isConnected: false,
+                userEmail: null,
+                isConnecting: false
+            });
+            setDriveBackups([]);
+            setStorageInfo(null);
+            setBackupStatus('Disconnected from Google Drive');
+            setTimeout(() => setBackupStatus(''), 3000);
+        } catch (error) {
+            console.error('Error disconnecting from Google Drive:', error);
+            setBackupStatus(`Error disconnecting: ${error.message}`);
+            setTimeout(() => setBackupStatus(''), 5000);
+        }
+    };
+
+    // Load automated backup settings
+    const loadAutomatedBackupSettings = () => {
+        const settings = localStorage.getItem('automatedBackupSettings');
+        if (settings) {
+            const parsed = JSON.parse(settings);
+            setAutomatedBackup(parsed);
+        }
+    };
+
+    // Save automated backup settings
+    const saveAutomatedBackupSettings = (settings) => {
+        localStorage.setItem('automatedBackupSettings', JSON.stringify(settings));
+        setAutomatedBackup(settings);
+    };
+
+    // Setup automated backup
+    const setupAutomatedBackup = () => {
+        // Clear any existing interval
+        if (window.backupInterval) {
+            clearInterval(window.backupInterval);
+        }
+
+        const settings = JSON.parse(localStorage.getItem('automatedBackupSettings') || '{}');
+        if (!settings.enabled || !googleDriveStatus.isConnected) {
+            return;
+        }
+
+        // Calculate interval based on frequency
+        let intervalMs;
+        switch (settings.frequency) {
+            case 'daily':
+                intervalMs = 24 * 60 * 60 * 1000; // 24 hours
+                break;
+            case 'weekly':
+                intervalMs = 7 * 24 * 60 * 60 * 1000; // 7 days
+                break;
+            case 'monthly':
+                intervalMs = 30 * 24 * 60 * 60 * 1000; // 30 days
+                break;
+            default:
+                return;
+        }
+
+        // Check if it's time for next backup
+        const now = new Date().getTime();
+        const nextBackupTime = settings.nextBackup ? new Date(settings.nextBackup).getTime() : now;
+
+        if (now >= nextBackupTime) {
+            // Time for backup
+            performAutomatedBackup();
+        }
+
+        // Set up interval for future backups
+        window.backupInterval = setInterval(() => {
+            performAutomatedBackup();
+        }, intervalMs);
+    };
+
+    // Perform automated backup
+    const performAutomatedBackup = async () => {
+        if (!googleDriveStatus.isConnected) {
+            console.log('Automated backup skipped: Google Drive not connected');
+            return;
+        }
+
+        try {
+            console.log('Performing automated backup...');
+            await handleCreateBackup(true, true); // true for Google Drive, true for automated
+
+            // Update next backup time
+            const settings = JSON.parse(localStorage.getItem('automatedBackupSettings') || '{}');
+            const now = new Date();
+            let nextBackup = new Date(now);
+
+            switch (settings.frequency) {
+                case 'daily':
+                    nextBackup.setDate(nextBackup.getDate() + 1);
+                    break;
+                case 'weekly':
+                    nextBackup.setDate(nextBackup.getDate() + 7);
+                    break;
+                case 'monthly':
+                    nextBackup.setMonth(nextBackup.getMonth() + 1);
+                    break;
+            }
+
+            const updatedSettings = {
+                ...settings,
+                lastBackup: now.toISOString(),
+                nextBackup: nextBackup.toISOString()
+            };
+
+            saveAutomatedBackupSettings(updatedSettings);
+            console.log('Automated backup completed');
+        } catch (error) {
+            console.error('Automated backup failed:', error);
+        }
+    };
+
+    // Handle automated backup settings change
+    const handleAutomatedBackupChange = (field, value) => {
+        const currentSettings = JSON.parse(localStorage.getItem('automatedBackupSettings') || '{}');
+        const updatedSettings = {
+            ...currentSettings,
+            [field]: value
+        };
+
+        // If enabling, set next backup time
+        if (field === 'enabled' && value && googleDriveStatus.isConnected) {
+            const now = new Date();
+            const nextBackup = new Date(now);
+
+            switch (updatedSettings.frequency || 'weekly') {
+                case 'daily':
+                    nextBackup.setDate(nextBackup.getDate() + 1);
+                    break;
+                case 'weekly':
+                    nextBackup.setDate(nextBackup.getDate() + 7);
+                    break;
+                case 'monthly':
+                    nextBackup.setMonth(nextBackup.getMonth() + 1);
+                    break;
+            }
+
+            updatedSettings.nextBackup = nextBackup.toISOString();
+        }
+
+        saveAutomatedBackupSettings(updatedSettings);
+
+        // Re-setup automated backup
+        setupAutomatedBackup();
+
+        setBackupStatus(value ? 'Automated backup enabled' : 'Automated backup disabled');
+        setTimeout(() => setBackupStatus(''), 3000);
+    };
 
     // Fetch recent backups from Firebase
     const fetchRecentBackups = async () => {
@@ -26,8 +246,7 @@ const BackupSyncPage = () => {
             const backupsSnapshot = await getDocs(collection(db, 'backups'));
             const backupsData = backupsSnapshot.docs
                 .map(doc => ({ id: doc.id, ...doc.data() }))
-                .sort((a, b) => b.createdAt?.toMillis() - a.createdAt?.toMillis())
-                .slice(0, 5); // Show only last 5 backups
+                .sort((a, b) => b.createdAt?.toMillis() - a.createdAt?.toMillis());
 
             setRecentBackups(backupsData);
         } catch (error) {
@@ -36,13 +255,14 @@ const BackupSyncPage = () => {
     };
 
     // Create new backup
-    const handleCreateBackup = async () => {
-        setIsCreatingBackup(true);
-        setBackupStatus('Creating backup...');
+    const handleCreateBackup = async (uploadToGoogleDrive = false, isAutomated = false) => {
+        if (!isAutomated) {
+            setIsCreatingBackup(true);
+            setBackupStatus('Creating backup...');
+        }
 
         try {
-            // Get all collections data
-            const collections = ['kids', 'teams', 'users', 'events', 'forms'];
+            const collections = ['kids', 'teams', 'users', 'events', 'forms', 'instructors', 'eventParticipants', 'reports', 'vehicles'];
             const backupData = {};
 
             for (const collectionName of collections) {
@@ -53,36 +273,162 @@ const BackupSyncPage = () => {
                 }));
             }
 
-            // Create backup record
-            await addDoc(collection(db, 'backups'), {
+            const backupMetadata = {
+                timestamp: new Date().toISOString(),
+                collections: collections,
+                version: '1.0',
+                appName: 'Charity Racing App',
+                isAutomated: isAutomated
+            };
+
+            const completeBackup = {
+                metadata: backupMetadata,
+                data: backupData
+            };
+
+            const backupRecord = {
                 data: backupData,
                 createdAt: serverTimestamp(),
-                size: JSON.stringify(backupData).length,
+                size: JSON.stringify(completeBackup).length,
                 collections: collections,
-                status: 'completed'
-            });
+                status: 'completed',
+                uploadedToGoogleDrive: uploadToGoogleDrive,
+                isAutomated: isAutomated
+            };
 
-            setBackupStatus('Backup created successfully!');
-            fetchRecentBackups(); // Refresh the list
+            const docRef = await addDoc(collection(db, 'backups'), backupRecord);
 
-            // Clear status after 3 seconds
-            setTimeout(() => setBackupStatus(''), 3000);
+            if (uploadToGoogleDrive && googleDriveStatus.isConnected) {
+                if (!isAutomated) {
+                    setBackupStatus('Uploading to Google Drive...');
+                }
+
+                const filename = `charity-backup-${new Date().toISOString().split('T')[0]}-${docRef.id}${isAutomated ? '-auto' : ''}.json`;
+                await googleDriveService.uploadBackup(completeBackup, filename);
+
+                const backups = await googleDriveService.listBackups();
+                setDriveBackups(backups);
+
+                if (!isAutomated) {
+                    setBackupStatus('Backup created and uploaded to Google Drive successfully!');
+                }
+            } else {
+                if (!isAutomated) {
+                    setBackupStatus('Backup created successfully!');
+                }
+            }
+
+            fetchRecentBackups();
+
+            if (!isAutomated) {
+                setTimeout(() => setBackupStatus(''), 3000);
+            }
 
         } catch (error) {
             console.error('Error creating backup:', error);
-            setBackupStatus('Error creating backup. Please try again.');
+            if (!isAutomated) {
+                setBackupStatus(`Error creating backup: ${error.message}`);
+                setTimeout(() => setBackupStatus(''), 5000);
+            }
         } finally {
-            setIsCreatingBackup(false);
+            if (!isAutomated) {
+                setIsCreatingBackup(false);
+            }
         }
     };
 
-    // Format backup date
+    // Handle file selection for restore
+    const handleFileSelect = (event) => {
+        const file = event.target.files[0];
+        if (file && file.type === 'application/json') {
+            setSelectedFile(file);
+        } else {
+            setBackupStatus('Please select a valid JSON backup file');
+            setTimeout(() => setBackupStatus(''), 3000);
+        }
+    };
+
+    // Restore from local file
+    const handleRestoreFromFile = async () => {
+        if (!selectedFile) {
+            setBackupStatus('Please select a backup file first');
+            setTimeout(() => setBackupStatus(''), 3000);
+            return;
+        }
+
+        setIsRestoring(true);
+        setBackupStatus('Restoring from backup file...');
+
+        try {
+            const fileContent = await selectedFile.text();
+            const backupData = JSON.parse(fileContent);
+
+            await restoreBackupData(backupData);
+        } catch (error) {
+            console.error('Error restoring from file:', error);
+            setBackupStatus(`Error restoring backup: ${error.message}`);
+            setTimeout(() => setBackupStatus(''), 5000);
+        } finally {
+            setIsRestoring(false);
+            setSelectedFile(null);
+            // Reset file input
+            const fileInput = document.getElementById('backup-file-input');
+            if (fileInput) fileInput.value = '';
+        }
+    };
+
+    // Restore from Google Drive backup
+    const handleRestoreFromDrive = async (fileId, fileName) => {
+        if (!window.confirm(`Are you sure you want to restore from "${fileName}"? This will overwrite existing data.`)) {
+            return;
+        }
+
+        setIsRestoring(true);
+        setBackupStatus('Downloading and restoring from Google Drive...');
+
+        try {
+            const backupData = await googleDriveService.downloadBackup(fileId);
+            await restoreBackupData(backupData);
+        } catch (error) {
+            console.error('Error restoring from Google Drive:', error);
+            setBackupStatus(`Error restoring backup: ${error.message}`);
+            setTimeout(() => setBackupStatus(''), 5000);
+        } finally {
+            setIsRestoring(false);
+        }
+    };
+
+    // Common restore logic
+    const restoreBackupData = async (backupData) => {
+        try {
+            const results = await googleDriveService.restoreBackup(backupData);
+
+            if (results.errors.length > 0) {
+                setBackupStatus(`Restore completed: ${results.restoredDocuments}/${results.totalDocuments} documents restored. ${results.errors.length} errors occurred. Check console for details.`);
+                console.error('Restore errors:', results.errors);
+            } else {
+                setBackupStatus(`Successfully restored ${results.restoredDocuments} documents across ${results.success.length} collections!`);
+            }
+
+            console.log('Restore results:', results);
+
+        } catch (error) {
+            throw error; // Re-throw to be handled by calling function
+        }
+
+        // Refresh backup list and clear status after delay
+        setTimeout(() => {
+            fetchRecentBackups();
+            setBackupStatus('');
+        }, 5000); // Longer delay to read the success message
+    };
+
+    // Format helpers
     const formatDate = (timestamp) => {
         if (!timestamp) return 'Unknown';
         return new Date(timestamp.toMillis()).toLocaleString();
     };
 
-    // Format backup size
     const formatSize = (bytes) => {
         if (!bytes) return '0 KB';
         const kb = bytes / 1024;
@@ -101,16 +447,22 @@ const BackupSyncPage = () => {
                     <p>{t('backup.description', 'Create and manage backups of your application data.')}</p>
 
                     <div className="action-buttons">
-                        <button
-                            className="primary-button"
-                            onClick={handleCreateBackup}
-                            disabled={isCreatingBackup}
-                        >
-                            {isCreatingBackup
-                                ? t('backup.creating', 'Creating...')
-                                : t('backup.createNew', 'Create New Backup')
-                            }
-                        </button>
+                        {googleDriveStatus.isConnected ? (
+                            <button
+                                className="primary-button google-drive-btn"
+                                onClick={() => handleCreateBackup(true)}
+                                disabled={isCreatingBackup || isRestoring}
+                            >
+                                {isCreatingBackup
+                                    ? t('backup.uploading', 'Uploading...')
+                                    : t('backup.createAndUpload', 'Create & Upload to Drive')
+                                }
+                            </button>
+                        ) : (
+                            <div className="backup-notice">
+                                <p>Connect to Google Drive to create backups</p>
+                            </div>
+                        )}
                     </div>
 
                     {backupStatus && (
@@ -122,31 +474,62 @@ const BackupSyncPage = () => {
                     <div className="backup-history">
                         <h3>{t('backup.recentBackups', 'Recent Backups')}</h3>
                         {recentBackups.length > 0 ? (
-                            <div className="backup-list">
-                                {recentBackups.map((backup) => (
-                                    <div key={backup.id} className="backup-item">
-                                        <div className="backup-info">
-                                            <span className="backup-date">
-                                                {formatDate(backup.createdAt)}
-                                            </span>
-                                            <span className="backup-size">
-                                                {formatSize(backup.size)}
-                                            </span>
-                                            <span className="backup-collections">
-                                                {backup.collections?.length || 0} collections
+                            <div className="backup-list-container">
+                                <div className="backup-list">
+                                    {recentBackups.map((backup) => (
+                                        <div key={backup.id} className="backup-item">
+                                            <div className="backup-info">
+                                                <span className="backup-date">
+                                                    {formatDate(backup.createdAt)}
+                                                    {backup.isAutomated && <span className="auto-badge">AUTO</span>}
+                                                </span>
+                                                <span className="backup-size">
+                                                    {formatSize(backup.size)}
+                                                </span>
+                                                <span className="backup-collections">
+                                                    {backup.collections?.length || 0} collections
+                                                </span>
+                                            </div>
+                                            <span className={`backup-status-badge ${backup.status}`}>
+                                                {backup.status}
                                             </span>
                                         </div>
-                                        <span className={`backup-status-badge ${backup.status}`}>
-                                            {backup.status}
-                                        </span>
-                                    </div>
-                                ))}
+                                    ))}
+                                </div>
                             </div>
                         ) : (
                             <div className="empty-state">
-                                <p>{t('backup.noBackups', 'No backups created yet. Click "Create New Backup" to get started.')}</p>
+                                <p>{t('backup.noBackups', 'No backups created yet. Connect to Google Drive and create your first backup!')}</p>
                             </div>
                         )}
+                    </div>
+                </div>
+
+                <div className="content-section">
+                    <h2>{t('backup.restore', 'Restore from Backup')}</h2>
+                    <p>{t('backup.restoreDescription', 'Restore your application data from a backup file.')}</p>
+
+                    <div className="restore-section">
+                        <div className="file-upload">
+                            <input
+                                type="file"
+                                id="backup-file-input"
+                                accept=".json"
+                                onChange={handleFileSelect}
+                                disabled={isRestoring || isCreatingBackup}
+                            />
+                            <label htmlFor="backup-file-input" className="file-input-label">
+                                {selectedFile ? selectedFile.name : 'Choose backup file...'}
+                            </label>
+                        </div>
+
+                        <button
+                            className="secondary-button restore-btn"
+                            onClick={handleRestoreFromFile}
+                            disabled={!selectedFile || isRestoring || isCreatingBackup}
+                        >
+                            {isRestoring ? 'Restoring...' : 'Restore from File'}
+                        </button>
                     </div>
                 </div>
 
@@ -157,10 +540,92 @@ const BackupSyncPage = () => {
                     <div className="sync-options">
                         <div className="sync-option">
                             <h3>{t('backup.googleDrive', 'Google Drive')}</h3>
-                            <p>{t('backup.status', 'Status')}: {t('backup.notConnected', 'Not Connected')}</p>
-                            <button className="secondary-button">{t('backup.connect', 'Connect')}</button>
+                            <div className="connection-status">
+                                <p>
+                                    <span className="status-label">{t('backup.status', 'Status')}:</span>
+                                    <span className={`status-indicator ${googleDriveStatus.isConnected ? 'connected' : 'disconnected'}`}>
+                                        {googleDriveStatus.isConnected
+                                            ? t('backup.connected', 'Connected')
+                                            : t('backup.notConnected', 'Not Connected')
+                                        }
+                                    </span>
+                                </p>
+                                {googleDriveStatus.userEmail && (
+                                    <p className="user-email">{googleDriveStatus.userEmail}</p>
+                                )}
+                                {storageInfo && (
+                                    <div className="storage-info">
+                                        <p>Storage: {formatSize(storageInfo.usage)} / {formatSize(storageInfo.limit)}</p>
+                                        <div className="storage-bar">
+                                            <div
+                                                className="storage-fill"
+                                                style={{ width: `${(storageInfo.usage / storageInfo.limit) * 100}%` }}
+                                            ></div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {googleDriveStatus.isConnected ? (
+                                <button
+                                    className="secondary-button disconnect-btn"
+                                    onClick={handleDisconnectGoogleDrive}
+                                    disabled={googleDriveStatus.isConnecting || isCreatingBackup || isRestoring}
+                                >
+                                    {t('backup.disconnect', 'Disconnect')}
+                                </button>
+                            ) : (
+                                <button
+                                    className="secondary-button connect-btn"
+                                    onClick={handleConnectGoogleDrive}
+                                    disabled={googleDriveStatus.isConnecting || isCreatingBackup || isRestoring}
+                                >
+                                    {googleDriveStatus.isConnecting
+                                        ? t('backup.connecting', 'Connecting...')
+                                        : t('backup.connect', 'Connect')
+                                    }
+                                </button>
+                            )}
                         </div>
                     </div>
+
+                    {googleDriveStatus.isConnected && driveBackups.length > 0 && (
+                        <div className="google-drive-backups">
+                            <h3>{t('backup.googleDriveBackups', 'Google Drive Backups')}</h3>
+                            <div className="backup-list">
+                                {driveBackups.map((backup) => (
+                                    <div key={backup.id} className="backup-item google-drive">
+                                        <div className="backup-info">
+                                            <span className="backup-name">{backup.name}</span>
+                                            <span className="backup-date">
+                                                {backup.createdAt.toLocaleDateString()}
+                                            </span>
+                                            <span className="backup-size">
+                                                {formatSize(backup.size)}
+                                            </span>
+                                        </div>
+                                        <div className="backup-actions">
+                                            <button
+                                                className="restore-button"
+                                                onClick={() => handleRestoreFromDrive(backup.id, backup.name)}
+                                                disabled={isRestoring || isCreatingBackup}
+                                            >
+                                                {isRestoring ? 'Restoring...' : 'Restore'}
+                                            </button>
+                                            <a
+                                                href={backup.webViewLink}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="view-button"
+                                            >
+                                                {t('backup.view', 'View')}
+                                            </a>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 <div className="content-section">
@@ -169,27 +634,71 @@ const BackupSyncPage = () => {
 
                     <div className="schedule-options">
                         <div className="schedule-option">
-                            <input type="radio" id="daily" name="schedule" />
+                            <input
+                                type="radio"
+                                id="daily"
+                                name="schedule"
+                                checked={automatedBackup.frequency === 'daily'}
+                                onChange={() => handleAutomatedBackupChange('frequency', 'daily')}
+                                disabled={!googleDriveStatus.isConnected}
+                            />
                             <label htmlFor="daily">{t('backup.daily', 'Daily')}</label>
                         </div>
 
                         <div className="schedule-option">
-                            <input type="radio" id="weekly" name="schedule" />
+                            <input
+                                type="radio"
+                                id="weekly"
+                                name="schedule"
+                                checked={automatedBackup.frequency === 'weekly'}
+                                onChange={() => handleAutomatedBackupChange('frequency', 'weekly')}
+                                disabled={!googleDriveStatus.isConnected}
+                            />
                             <label htmlFor="weekly">{t('backup.weekly', 'Weekly')}</label>
                         </div>
 
                         <div className="schedule-option">
-                            <input type="radio" id="monthly" name="schedule" />
+                            <input
+                                type="radio"
+                                id="monthly"
+                                name="schedule"
+                                checked={automatedBackup.frequency === 'monthly'}
+                                onChange={() => handleAutomatedBackupChange('frequency', 'monthly')}
+                                disabled={!googleDriveStatus.isConnected}
+                            />
                             <label htmlFor="monthly">{t('backup.monthly', 'Monthly')}</label>
-                        </div>
-
-                        <div className="schedule-option">
-                            <input type="radio" id="custom" name="schedule" />
-                            <label htmlFor="custom">{t('backup.custom', 'Custom')}</label>
                         </div>
                     </div>
 
-                    <button className="primary-button">{t('backup.saveSettings', 'Save Settings')}</button>
+                    <div className="automated-backup-controls">
+                        <div className="backup-toggle">
+                            <input
+                                type="checkbox"
+                                id="enable-automated"
+                                checked={automatedBackup.enabled}
+                                onChange={(e) => handleAutomatedBackupChange('enabled', e.target.checked)}
+                                disabled={!googleDriveStatus.isConnected}
+                            />
+                            <label htmlFor="enable-automated">
+                                {t('backup.enableAutomated', 'Enable Automated Backups')}
+                            </label>
+                        </div>
+
+                        {automatedBackup.enabled && (
+                            <div className="backup-schedule-info">
+                                {automatedBackup.nextBackup && (
+                                    <p>Next backup: {new Date(automatedBackup.nextBackup).toLocaleString()}</p>
+                                )}
+                                {automatedBackup.lastBackup && (
+                                    <p>Last backup: {new Date(automatedBackup.lastBackup).toLocaleString()}</p>
+                                )}
+                            </div>
+                        )}
+
+                        {!googleDriveStatus.isConnected && (
+                            <p className="warning-text">Connect to Google Drive to enable automated backups</p>
+                        )}
+                    </div>
                 </div>
             </div>
         </Dashboard>

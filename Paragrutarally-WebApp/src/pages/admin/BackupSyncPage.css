@@ -1,4 +1,4 @@
-/* src/pages/admin/BackupSyncPage.css - Updated Version */
+/* src/pages/admin/BackupSyncPage.css - Clean Production Version */
 
 /* Base layout */
 .backup-sync-page {
@@ -91,9 +91,39 @@
     font-size: 14px;
 }
 
-.secondary-button:hover {
+.secondary-button:hover:not(:disabled) {
     background-color: var(--bg-quaternary);
     border-color: var(--accent-color);
+}
+
+/* Google Drive specific buttons */
+.google-drive-btn {
+    background: linear-gradient(135deg, #4285f4, #34a853);
+    color: white;
+}
+
+.google-drive-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #3367d6, #2d8e47);
+}
+
+.connect-btn {
+    background-color: #4285f4;
+    color: white;
+    border: none;
+}
+
+.connect-btn:hover:not(:disabled) {
+    background-color: #3367d6;
+}
+
+.disconnect-btn {
+    background-color: #ea4335;
+    color: white;
+    border: none;
+}
+
+.disconnect-btn:hover:not(:disabled) {
+    background-color: #d33b2c;
 }
 
 /* Backup status */
@@ -117,15 +147,37 @@
     border: 1px solid #f5c6cb;
 }
 
+/* Backup notice */
+.backup-notice {
+    padding: 15px;
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    text-align: center;
+}
+
+.backup-notice p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
 /* Backup history */
 .backup-history {
     margin-top: 20px;
 }
 
+.backup-list-container {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background-color: var(--bg-tertiary);
+}
+
 .backup-list {
     display: flex;
     flex-direction: column;
-    gap: 10px;
 }
 
 .backup-item {
@@ -133,15 +185,16 @@
     justify-content: space-between;
     align-items: center;
     padding: 15px;
-    background-color: var(--bg-tertiary);
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
+    border-bottom: 1px solid var(--border-color);
     transition: all 0.3s ease;
+}
+
+.backup-item:last-child {
+    border-bottom: none;
 }
 
 .backup-item:hover {
     background-color: var(--bg-quaternary);
-    border-color: var(--accent-color);
 }
 
 .backup-info {
@@ -154,11 +207,116 @@
     font-weight: 500;
     color: var(--text-primary);
     font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.auto-badge {
+    background-color: #17a2b8;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 600;
 }
 
 .backup-size, .backup-collections {
     font-size: 12px;
     color: var(--text-secondary);
+}
+
+/* Automated backup controls */
+.automated-backup-controls {
+    margin-top: 20px;
+    padding: 20px;
+    background-color: var(--bg-tertiary);
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+}
+
+.backup-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.backup-toggle input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--accent-color);
+}
+
+.backup-toggle label {
+    font-weight: 500;
+    color: var(--text-primary);
+    cursor: pointer;
+}
+
+.backup-schedule-info {
+    padding: 10px;
+    background-color: var(--bg-secondary);
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+}
+
+.backup-schedule-info p {
+    margin: 5px 0;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.warning-text {
+    color: #856404;
+    font-size: 12px;
+    font-style: italic;
+    margin-top: 10px;
+}
+
+/* Schedule options */
+.schedule-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.schedule-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+    cursor: pointer;
+}
+
+.schedule-option:hover:not(:has(input:disabled)) {
+    background-color: var(--bg-quaternary);
+    border-color: var(--accent-color);
+}
+
+.schedule-option:has(input:disabled) {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.schedule-option input[type="radio"] {
+    accent-color: var(--accent-color);
+    width: 16px;
+    height: 16px;
+}
+
+.schedule-option label {
+    color: var(--text-primary);
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 14px;
+    transition: color 0.3s ease;
+    user-select: none;
 }
 
 .backup-status-badge {
@@ -199,6 +357,147 @@
     margin: 0;
 }
 
+/* Connection status */
+.connection-status {
+    margin: 15px 0;
+}
+
+.connection-status p {
+    display: flex;
+    align-items: center;
+    margin: 8px 0;
+}
+
+.status-label {
+    margin-right: 8px;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.status-indicator {
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.status-indicator.connected {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status-indicator.disconnected {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.user-email {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin: 5px 0;
+    font-style: italic;
+}
+
+/* Storage info */
+.storage-info {
+    margin-top: 10px;
+}
+
+.storage-info p {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin: 5px 0;
+}
+
+.storage-bar {
+    width: 100%;
+    height: 6px;
+    background-color: var(--bg-quaternary);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 5px;
+}
+
+.storage-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #34a853, #fbbc04, #ea4335);
+    transition: width 0.3s ease;
+}
+
+/* Restore section */
+.restore-section {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    margin: 20px 0;
+    flex-wrap: wrap;
+}
+
+.file-upload {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+#backup-file-input {
+    display: none;
+}
+
+.file-input-label {
+    padding: 10px 16px;
+    background-color: var(--bg-tertiary);
+    border: 2px dashed var(--border-color);
+    border-radius: 6px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    font-size: 14px;
+    transition: all 0.3s ease;
+    min-width: 200px;
+    text-align: center;
+}
+
+.file-input-label:hover {
+    border-color: var(--accent-color);
+    background-color: var(--bg-quaternary);
+}
+
+.restore-btn {
+    background-color: #28a745;
+    color: white;
+    border: none;
+}
+
+.restore-btn:hover:not(:disabled) {
+    background-color: #218838;
+}
+
+.restore-btn:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+}
+
+.restore-button {
+    padding: 6px 12px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.restore-button:hover:not(:disabled) {
+    background-color: #218838;
+}
+
+.restore-button:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+}
+
 /* Sync options */
 .sync-options {
     display: grid;
@@ -231,6 +530,54 @@
     margin-bottom: 15px;
     color: var(--text-secondary);
     font-size: 14px;
+}
+
+/* Google Drive backups section */
+.google-drive-backups {
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+.backup-item.google-drive {
+    background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-quaternary));
+    border-left: 4px solid #4285f4;
+}
+
+.backup-item.google-drive:hover {
+    border-left-color: #3367d6;
+    transform: translateX(2px);
+}
+
+.backup-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 14px;
+    display: block;
+    margin-bottom: 2px;
+}
+
+.backup-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.view-button {
+    padding: 6px 12px;
+    background-color: #4285f4;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+}
+
+.view-button:hover {
+    background-color: #3367d6;
+    text-decoration: none;
+    color: white;
 }
 
 /* Schedule options */
@@ -301,6 +648,16 @@
     color: #d4a7aa;
 }
 
+.backup-sync-page.dark-mode .status-indicator.connected {
+    background-color: #1e4d2b;
+    color: #a7d4aa;
+}
+
+.backup-sync-page.dark-mode .status-indicator.disconnected {
+    background-color: #4d1e24;
+    color: #d4a7aa;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
     .backup-sync-page {
@@ -335,6 +692,11 @@
 
     .backup-info {
         width: 100%;
+    }
+
+    .restore-section {
+        flex-direction: column;
+        align-items: stretch;
     }
 }
 
