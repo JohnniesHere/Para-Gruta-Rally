@@ -1,4 +1,4 @@
-// src/components/auth/Login.jsx - Enhanced with Role-Based Redirects
+// src/components/auth/Login.jsx - SIMPLIFIED VERSION with Single Redirect Logic
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -35,14 +35,16 @@ const Login = () => {
     // Get the intended destination (from protected route redirect)
     const from = location.state?.from?.pathname || null;
 
-    // Handle redirect for already authenticated users
+    // SIMPLIFIED: Single redirect logic - only redirect authenticated users away from login
     useEffect(() => {
         if (authInitialized && currentUser && userRole) {
             const targetPath = from || getDashboardForRole(userRole);
-            console.log(`User already authenticated, redirecting to: ${targetPath}`);
-            navigate(targetPath, { replace: true });
+            console.log(`User authenticated, redirecting to: ${targetPath}`);
+
+            // Use window.location.href for a clean redirect with reload
+            window.location.href = targetPath;
         }
-    }, [currentUser, userRole, authInitialized, navigate, from, getDashboardForRole]);
+    }, [authInitialized, currentUser, userRole, from, getDashboardForRole]);
 
     // Handle form submission
     const handleSubmit = async (e) => {
@@ -54,8 +56,7 @@ const Login = () => {
             const userCredential = await signIn(email, password);
             console.log('Sign in successful:', userCredential.user.email);
 
-            // Note: Navigation will be handled by the AuthContext redirect logic
-            // or the useEffect above once the user role is determined
+            // Let the useEffect above handle the redirect after auth state updates
 
         } catch (err) {
             console.error('Login error:', err);
@@ -98,8 +99,7 @@ const Login = () => {
             const userCredential = await signInWithGoogle();
             console.log('Google sign in successful:', userCredential.user.email);
 
-            // Note: Navigation will be handled by the AuthContext redirect logic
-            // or the useEffect above once the user role is determined
+            // Let the useEffect above handle the redirect after auth state updates
 
         } catch (err) {
             console.error('Google sign-in error:', err);
@@ -275,8 +275,10 @@ const Login = () => {
                             color: '#666'
                         }}>
                             <strong>Development Info:</strong><br />
-                            Available roles: admin, instructor, parent, host, guest<br />
-                            {from && `Redirect target: ${from}`}
+                            Current Role: {userRole || 'None'}<br />
+                            Auth Initialized: {authInitialized ? 'Yes' : 'No'}<br />
+                            Current User: {currentUser?.email || 'None'}<br />
+                            {from && `Original Target: ${from}`}
                         </div>
                     )}
                 </div>
