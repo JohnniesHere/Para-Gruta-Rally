@@ -941,8 +941,17 @@ const translations = {
         'login.forgotPassword': 'Forgot Password?',
         'login.mobileSignIn': 'Sign In With Mobile Number',
         'login.googleSignIn': 'Sign In With Google',
+        'login.googleSigningIn': 'Signing In With Google...',
         'login.contactUs': 'Contact Us',
         'login.error': 'Failed to sign in. Please check your credentials.',
+
+        // Login error messages
+        'login.invalidCredential': 'Invalid email or password. Please check your credentials and try again.',
+        'login.userNotFound': 'No account found with this email address.',
+        'login.wrongPassword': 'Incorrect password. Please try again.',
+        'login.invalidEmail': 'Please enter a valid email address.',
+        'login.userDisabled': 'This account has been disabled. Please contact support.',
+        'login.tooManyAttempts': 'Too many failed attempts. Please try again later.',
 
         // Status badges
         'status.active': 'Active',
@@ -1917,6 +1926,10 @@ const translations = {
         'parentKidEdit.loadingTeams': 'Loading team names...',
         'parentEventModal.loadingTeams': 'Loading team names...',
         'parentEventModal.teamsRegistered': '{count} teams registered',
+
+        'validation.pleaseFilThisField': 'Please fill out this field.',
+        'validation.emailRequired': 'Please enter a valid email address.',
+        'validation.passwordRequired': 'Please enter your password.',
     },
 
 
@@ -3153,9 +3166,18 @@ const translations = {
         'login.forgotPassword': 'שכחת סיסמה?',
         'login.mobileSignIn': 'התחבר עם מספר נייד',
         'login.googleSignIn': 'התחבר עם גוגל',
+        'login.googleSigningIn': 'מתחבר עם גוגל...',
         'login.contactUs': 'צור קשר',
         'login.error': 'כשל בהתחברות. אנא בדוק את פרטי ההתחברות שלך.',
         'login.or': 'או',
+
+        // Login error messages
+        'login.invalidCredential': 'אימייל או סיסמה שגויים. אנא בדוק את הפרטים ונסה שוב.',
+        'login.userNotFound': 'לא נמצא חשבון עם כתובת אימייל זו.',
+        'login.wrongPassword': 'סיסמה שגויה. אנא נסה שוב.',
+        'login.invalidEmail': 'אנא הכנס כתובת אימייל תקינה.',
+        'login.userDisabled': 'החשבון הזה הושבת. אנא פנה לתמיכה.',
+        'login.tooManyAttempts': 'יותר מדי ניסיונות כושלים. אנא נסה שוב מאוחר יותר.',
 
          // Edit Kid Page (Hebrew)
         'editKid.title': 'עדכן את המידע של {firstName}!',
@@ -3902,6 +3924,10 @@ const translations = {
         'parentKidEdit.loadingTeams': 'טוען שמות קבוצות...',
         'parentEventModal.loadingTeams': 'טוען שמות קבוצות...',
         'parentEventModal.teamsRegistered': '{count} קבוצות רשומות',
+
+        'validation.pleaseFilThisField': 'אנא מלא שדה זה.',
+        'validation.emailRequired': 'אנא הכנס כתובת אימייל תקינה.',
+        'validation.passwordRequired': 'אנא הכנס את הסיסמה שלך.',
             }
         };
 

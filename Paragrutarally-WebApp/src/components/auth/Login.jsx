@@ -106,6 +106,9 @@ const Login = () => {
                 case 'auth/wrong-password':
                     errorMessage = t('login.wrongPassword', 'Incorrect password. Please try again.');
                     break;
+                case 'auth/invalid-credential':  // Add this case
+                    errorMessage = t('login.invalidCredential', 'Invalid email or password. Please check your credentials and try again.');
+                    break;
                 case 'auth/invalid-email':
                     errorMessage = t('login.invalidEmail', 'Please enter a valid email address.');
                     break;
@@ -298,6 +301,12 @@ const Login = () => {
                                 required
                                 placeholder={t('login.emailPlaceholder', 'Enter your email')}
                                 disabled={loading || googleLoading}
+                                onInvalid={(e) => {
+                                    e.target.setCustomValidity(t('validation.emailRequired'));
+                                }}
+                                onInput={(e) => {
+                                    e.target.setCustomValidity('');
+                                }}
                             />
                         </div>
 
@@ -312,6 +321,12 @@ const Login = () => {
                                     required
                                     placeholder={t('login.passwordPlaceholder', 'Enter your password')}
                                     disabled={loading || googleLoading}
+                                    onInvalid={(e) => {
+                                        e.target.setCustomValidity(t('validation.passwordRequired'));
+                                    }}
+                                    onInput={(e) => {
+                                        e.target.setCustomValidity('');
+                                    }}
                                 />
                                 <button
                                     type="button"
