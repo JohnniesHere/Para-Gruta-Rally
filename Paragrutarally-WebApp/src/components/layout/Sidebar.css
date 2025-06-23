@@ -7,12 +7,17 @@
     color: var(--text-primary);
     overflow-y: auto;
     transition: background-color 0.3s ease, color 0.3s ease;
+    position: relative;
+    display: flex;
+    flex-direction: column;
 }
 
 .sidebar-links {
     display: flex;
     flex-direction: column;
     padding: 0 15px;
+    flex: 1;
+    padding-bottom: 4rem;
 }
 
 .sidebar-links a {
@@ -70,6 +75,72 @@
     filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
 }
 
+/* Sidebar Legal Trigger Positioning - At Bottom of Screen */
+.sidebar-legal-trigger {
+    position: absolute;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    width: calc(100% - 2rem);
+    display: flex;
+    justify-content: center;
+}
+
+/* Style the legal trigger for sidebar context */
+.sidebar .legal-trigger-minimal {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-radius: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.7);
+    transition: all 0.2s ease;
+    font-size: 0.75rem;
+    font-weight: 500;
+    width: 100%;
+    max-width: 200px;
+    justify-content: center;
+}
+
+.sidebar .legal-trigger-minimal:hover {
+    background-color: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.9);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.sidebar .legal-trigger-minimal svg {
+    color: rgba(255, 255, 255, 0.6);
+    transition: color 0.2s ease;
+}
+
+.sidebar .legal-trigger-minimal:hover svg {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* Light theme adjustments for sidebar (if you have light mode) */
+.sidebar.light-theme .legal-trigger-minimal {
+    background-color: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.1);
+    color: var(--text-secondary);
+}
+
+.sidebar.light-theme .legal-trigger-minimal:hover {
+    background-color: rgba(0, 0, 0, 0.08);
+    border-color: rgba(0, 0, 0, 0.15);
+    color: var(--text-primary);
+}
+
+.sidebar.light-theme .legal-trigger-minimal svg {
+    color: var(--text-secondary);
+}
+
+.sidebar.light-theme .legal-trigger-minimal:hover svg {
+    color: var(--text-primary);
+}
+
 /* Add subtle animation for links */
 .sidebar-links a {
     animation: slideInLeft 0.3s ease-out;
@@ -111,6 +182,25 @@
         width: 18px;
         height: 18px;
     }
+
+    /* Responsive adjustments for sidebar legal trigger */
+    .sidebar-legal-trigger {
+        bottom: 0.75rem;
+        left: 1rem;
+        right: 1rem;
+        transform: none;
+        width: calc(100% - 2rem);
+    }
+
+    .sidebar .legal-trigger-minimal {
+        padding: 0.375rem 0.5rem;
+        font-size: 0.7rem;
+        max-width: none;
+    }
+
+    .sidebar-links {
+        padding-bottom: 3.5rem;
+    }
 }
 
 @media (max-width: 480px) {
@@ -120,6 +210,7 @@
 
     .sidebar-links {
         padding: 0 10px;
+        padding-bottom: 3rem;
     }
 
     .sidebar-links a {
@@ -131,6 +222,23 @@
     .sidebar-icon {
         width: 16px;
         height: 16px;
+    }
+
+    .sidebar-legal-trigger {
+        bottom: 0.5rem;
+        left: 0.75rem;
+        right: 0.75rem;
+        width: calc(100% - 1.5rem);
+    }
+
+    .sidebar .legal-trigger-minimal {
+        padding: 0.375rem 0.5rem;
+        font-size: 0.65rem;
+    }
+
+    .sidebar .legal-trigger-minimal svg {
+        width: 12px;
+        height: 12px;
     }
 }
 

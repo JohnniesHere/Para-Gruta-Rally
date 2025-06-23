@@ -75,7 +75,7 @@
     max-width: 400px;
     background-color: var(--card-bg);
     border-radius: 12px;
-    padding: 40px;
+    padding: 30px;
     margin-bottom: 20px;
     box-shadow: 0 10px 25px var(--shadow-color);
     transition: background-color 0.3s ease, box-shadow 0.3s ease;
@@ -211,7 +211,8 @@
 }
 
 .contact-container {
-    margin-top: 20px;
+    margin-top: 15px;
+    margin-bottom: 15px;
     text-align: center;
 }
 
@@ -281,8 +282,8 @@
 
 /* Language selector container at bottom of login page */
 .login-language-selector {
-    margin-top: 30px;
-    padding-top: 20px;
+    margin-top: 15px;
+    padding-top: 15px;
     border-top: 1px solid var(--border-color);
     display: flex;
     justify-content: center;
@@ -310,6 +311,79 @@
     border-color: var(--accent-color);
     transform: translateY(-1px);
     box-shadow: 0 2px 8px var(--shadow-color);
+}
+
+/* Legal Trigger Positioning for Login Page - Under Google Button (Green Square) */
+.login-legal-trigger {
+    margin-top: 0.75rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Style the legal trigger specifically for login page */
+.login-page .legal-trigger-minimal {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 0.75rem;
+    padding: 0.5rem 1rem;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.8);
+    transition: all 0.2s ease;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.login-page .legal-trigger-minimal:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.25);
+    color: rgba(255, 255, 255, 1);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.login-page .legal-trigger-minimal svg {
+    color: rgba(255, 255, 255, 0.6);
+    transition: color 0.2s ease;
+}
+
+.login-page .legal-trigger-minimal:hover svg {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* Dark mode adjustments for login legal trigger */
+.login-page.dark-mode .legal-trigger-minimal {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.login-page.dark-mode .legal-trigger-minimal:hover {
+    background-color: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* Light mode adjustments for login legal trigger */
+.login-page.light-mode .legal-trigger-minimal {
+    background-color: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.1);
+    color: var(--text-secondary);
+}
+
+.login-page.light-mode .legal-trigger-minimal:hover {
+    background-color: rgba(0, 0, 0, 0.08);
+    border-color: rgba(0, 0, 0, 0.15);
+    color: var(--text-primary);
+}
+
+.login-page.light-mode .legal-trigger-minimal svg {
+    color: var(--text-secondary);
+}
+
+.login-page.light-mode .legal-trigger-minimal:hover svg {
+    color: var(--text-primary);
 }
 
 /* Adjust positioning in light/dark modes */
@@ -357,6 +431,16 @@ html, body {
         min-width: 100px;
         font-size: 13px;
     }
+
+    /* Responsive adjustments for login legal trigger */
+    .login-legal-trigger {
+        margin-top: 0.75rem;
+    }
+
+    .login-page .legal-trigger-minimal {
+        padding: 0.375rem 0.75rem;
+        font-size: 0.7rem;
+    }
 }
 
 @media (max-width: 480px) {
@@ -369,6 +453,20 @@ html, body {
         padding: 6px 10px;
         min-width: 80px;
         font-size: 12px;
+    }
+
+    .login-legal-trigger {
+        margin-top: 0.5rem;
+    }
+
+    .login-page .legal-trigger-minimal {
+        padding: 0.375rem 0.625rem;
+        font-size: 0.65rem;
+    }
+
+    .login-page .legal-trigger-minimal svg {
+        width: 12px;
+        height: 12px;
     }
 }
 

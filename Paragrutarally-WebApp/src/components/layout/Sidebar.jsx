@@ -1,4 +1,4 @@
-// src/components/layout/Sidebar.jsx - Beautiful Tabler Icons with Vehicles Added + Translations
+// src/components/layout/Sidebar.jsx - UPDATED with Legal Modal Trigger
 import React from 'react';
 import {NavLink} from 'react-router-dom';
 import {
@@ -15,6 +15,7 @@ import {
     IconChartBar as Analytics
 } from '@tabler/icons-react';
 import {useLanguage} from '../../contexts/LanguageContext';
+import LegalTrigger from '../ui/LegalTrigger';
 import './Sidebar.css';
 
 const Sidebar = ({userRole}) => {
@@ -208,6 +209,11 @@ const Sidebar = ({userRole}) => {
                         </NavLink>
                     </>
                 )}
+            </div>
+
+            {/* Legal Modal Trigger - positioned in the red square area at bottom */}
+            <div className="sidebar-legal-trigger">
+                <LegalTrigger variant="minimal" size="small" />
             </div>
         </div>
     );

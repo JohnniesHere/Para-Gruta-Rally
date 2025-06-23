@@ -1,0 +1,190 @@
+.legal-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    font-family: inherit;
+}
+
+/* Button variant */
+.legal-trigger-button {
+    background-color: var(--bg-secondary, #f3f4f6);
+    color: var(--text-primary, #374151);
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    border: 1px solid var(--border-color, #d1d5db);
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.legal-trigger-button:hover {
+    background-color: var(--bg-hover, #e5e7eb);
+    border-color: var(--border-hover, #9ca3af);
+}
+
+.legal-trigger-button.small {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.75rem;
+}
+
+.legal-trigger-button.large {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+}
+
+/* Link variant */
+.legal-trigger-link {
+    background: none;
+    color: var(--accent-color, #3b82f6);
+    padding: 0.25rem 0;
+    font-size: 0.875rem;
+    text-decoration: underline;
+    text-decoration-color: transparent;
+}
+
+.legal-trigger-link:hover {
+    text-decoration-color: currentColor;
+}
+
+.legal-trigger-link.small {
+    font-size: 0.75rem;
+}
+
+.legal-trigger-link.large {
+    font-size: 1rem;
+}
+
+/* Icon variant */
+.legal-trigger-icon {
+    background-color: var(--bg-secondary, #f3f4f6);
+    color: var(--text-secondary, #6b7280);
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+    border: 1px solid var(--border-color, #d1d5db);
+}
+
+.legal-trigger-icon:hover {
+    background-color: var(--bg-hover, #e5e7eb);
+    color: var(--text-primary, #374151);
+}
+
+.legal-trigger-icon.small {
+    padding: 0.375rem;
+}
+
+.legal-trigger-icon.small svg {
+    width: 14px;
+    height: 14px;
+}
+
+.legal-trigger-icon.large {
+    padding: 0.75rem;
+}
+
+.legal-trigger-icon.large svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* Minimal variant */
+.legal-trigger-minimal {
+    background: none;
+    color: var(--text-tertiary, #9ca3af);
+    padding: 0.25rem;
+    font-size: 0.75rem;
+    opacity: 0.7;
+}
+
+.legal-trigger-minimal:hover {
+    color: var(--text-secondary, #6b7280);
+    opacity: 1;
+}
+
+.legal-trigger-minimal.small {
+    font-size: 0.7rem;
+}
+
+.legal-trigger-minimal.small svg {
+    width: 12px;
+    height: 12px;
+}
+
+.legal-trigger-minimal.large {
+    font-size: 0.875rem;
+    padding: 0.375rem;
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+    .legal-trigger-button {
+        --bg-secondary: #374151;
+        --bg-hover: #4b5563;
+        --text-primary: #f9fafb;
+        --border-color: #4b5563;
+        --border-hover: #6b7280;
+    }
+
+    .legal-trigger-icon {
+        --bg-secondary: #374151;
+        --bg-hover: #4b5563;
+        --text-secondary: #d1d5db;
+        --text-primary: #f9fafb;
+        --border-color: #4b5563;
+    }
+
+    .legal-trigger-link {
+        --accent-color: #60a5fa;
+    }
+
+    .legal-trigger-minimal {
+        --text-tertiary: #6b7280;
+        --text-secondary: #9ca3af;
+    }
+}
+
+/* Special styling for login page (dark background) */
+.login-page .legal-trigger {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.login-page .legal-trigger-button {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.login-page .legal-trigger-button:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.login-page .legal-trigger-link {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.login-page .legal-trigger-link:hover {
+    color: rgba(255, 255, 255, 1);
+}
+
+.login-page .legal-trigger-minimal {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.login-page .legal-trigger-minimal:hover {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* Special styling for sidebar (dark background) */
+.sidebar .legal-trigger {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.sidebar .legal-trigger-minimal {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.sidebar .legal-trigger-minimal:hover {
+    color: rgba(255, 255, 255, 0.8);
+}

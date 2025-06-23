@@ -1,4 +1,4 @@
-// src/components/auth/Login.jsx - FIXED VERSION with proper loading and redirect logic
+// src/components/auth/Login.jsx - UPDATED with Legal Modal Trigger
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -7,6 +7,7 @@ import { useLanguage } from '../../contexts/LanguageContext.jsx';
 import DarkModeToggle from '../common/DarkModeToggle.jsx';
 import LanguageSelector from '../common/LanguageSelector.jsx';
 import ContactUsModal from '../layout/ContactUsModal';
+import LegalTrigger from '../ui/LegalTrigger';
 import './Login.css';
 
 const Login = () => {
@@ -359,6 +360,11 @@ const Login = () => {
                                 : t('login.googleSignIn', 'Sign In With Google')
                             }
                         </button>
+
+                        {/* Legal Modal Trigger - positioned under Google button */}
+                        <div className="login-legal-trigger">
+                            <LegalTrigger variant="minimal" size="small" />
+                        </div>
                     </div>
                 </div>
 
