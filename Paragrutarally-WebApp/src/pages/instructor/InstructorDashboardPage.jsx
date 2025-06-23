@@ -9,11 +9,13 @@ import {
     orderBy,
     limit
 } from 'firebase/firestore';
+import { doc, updateDoc, arrayRemove } from 'firebase/firestore';
 import { db } from '../../firebase/config';
 import { useAuth } from '../../contexts/AuthContext';
 import { usePermissions } from '../../hooks/usePermissions';
 import { useLanguage } from '../../contexts/LanguageContext';
 import Dashboard from '../../components/layout/Dashboard';
+import InstructorCommentModal from '../../components/modals/InstructorCommentModal';
 import {
     IconDashboard as DashboardIcon,
     IconUsers as Users,
@@ -26,7 +28,16 @@ import {
     IconActivity as Activity,
     IconClock as Clock,
     IconAlertTriangle as Alert,
-    IconDatabase as Database
+    IconDatabase as Database,
+    IconChevronDown as ChevronDown,
+    IconChevronUp as ChevronUp,
+    IconMessageCircle as MessageCircle,
+    IconFileText as FileText,
+    IconMapPin as MapPin,
+    IconSchool as School,
+    IconPhone as Phone,
+    IconUser as User,
+    IconTrash as Trash
 } from '@tabler/icons-react';
 
 const InstructorDashboardPage = () => {
@@ -44,6 +55,9 @@ const InstructorDashboardPage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [dataLoaded, setDataLoaded] = useState(false);
+    const [expandedKid, setExpandedKid] = useState(null);
+    const [commentModalKid, setCommentModalKid] = useState(null);
+    const [showCommentModal, setShowCommentModal] = useState(false);
 
     useEffect(() => {
         const loadDashboardData = async () => {
@@ -58,16 +72,16 @@ const InstructorDashboardPage = () => {
                 const instructorId = currentUser.uid;
                 console.log('Loading data for instructor:', instructorId);
 
-                // Load teams for this instructor
+                // Load teams for this instructor - FIXED: Use instructorIds array
                 const teamsQuery = query(
                     collection(db, 'teams'),
-                    where('instructorId', '==', instructorId)
+                    where('instructorIds', 'array-contains', instructorId)
                 );
                 const teamsSnapshot = await getDocs(teamsQuery);
                 const teams = teamsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 console.log('Found teams:', teams);
 
-                // Load kids for this instructor
+                // Load kids for this instructor - FIXED: Use instructorId
                 const kidsQuery = query(
                     collection(db, 'kids'),
                     where('instructorId', '==', instructorId)
@@ -126,14 +140,8 @@ const InstructorDashboardPage = () => {
     }, [currentUser, isInstructor, t]);
 
     // Helper functions
-    const getFieldValue = (item, fieldPath, defaultValue = '-') => {
-        const context = { kidData: item, userData, user: currentUser };
-
-        if (!permissions.canViewField(fieldPath, context)) {
-            return '***';
-        }
-
-        const value = fieldPath.split('.').reduce((obj, key) => obj?.[key], item);
+    const getFieldValue = (kid, fieldPath, defaultValue = '-') => {
+        const value = fieldPath.split('.').reduce((obj, key) => obj?.[key], kid);
         return value || defaultValue;
     };
 
@@ -151,6 +159,89 @@ const InstructorDashboardPage = () => {
         return dashboardData.kids.filter(kid =>
             kid.signedFormStatus !== 'completed' || !kid.signedDeclaration
         );
+    };
+
+    const toggleKidExpansion = (kidId) => {
+        setExpandedKid(expandedKid === kidId ? null : kidId);
+    };
+
+    const handleAddComment = (kid) => {
+        setCommentModalKid(kid);
+        setShowCommentModal(true);
+    };
+
+    const handleCommentSuccess = async (message) => {
+        alert(message);
+        // Refresh dashboard data to show new comment
+        try {
+            const instructorId = currentUser.uid;
+            const kidsQuery = query(
+                collection(db, 'kids'),
+                where('instructorId', '==', instructorId)
+            );
+            const kidsSnapshot = await getDocs(kidsQuery);
+            const updatedKids = kidsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+            setDashboardData(prev => ({
+                ...prev,
+                kids: updatedKids
+            }));
+        } catch (error) {
+            console.error('Error refreshing kids data:', error);
+        }
+    };
+
+    const handleCommentModalClose = () => {
+        setShowCommentModal(false);
+        setCommentModalKid(null);
+    };
+
+    const formatDate = (dateString) => {
+        if (!dateString) return '-';
+        try {
+            return new Date(dateString).toLocaleDateString();
+        } catch {
+            return dateString;
+        }
+    };
+
+    const handleDeleteComment = async (kidId, commentToDelete) => {
+        // Only allow deletion of own comments - FIXED: use currentUser instead of user
+        if (commentToDelete.instructorId !== currentUser?.uid) {
+            alert(t('instructor.canOnlyDeleteOwnComments', 'You can only delete your own comments'));
+            return;
+        }
+
+        if (!window.confirm(t('instructor.confirmDeleteComment', 'Are you sure you want to delete this comment?'))) {
+            return;
+        }
+
+        try {
+            // Remove comment from the instructorsComments array
+            await updateDoc(doc(db, 'kids', kidId), {
+                instructorsComments: arrayRemove(commentToDelete)
+            });
+
+            // Refresh kids data to show updated comments
+            const instructorId = currentUser.uid;
+            const kidsQuery = query(
+                collection(db, 'kids'),
+                where('instructorId', '==', instructorId)
+            );
+            const kidsSnapshot = await getDocs(kidsQuery);
+            const updatedKids = kidsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+            setDashboardData(prev => ({
+                ...prev,
+                kids: updatedKids
+            }));
+
+            alert(t('instructor.commentDeleted', 'Comment deleted successfully!'));
+
+        } catch (error) {
+            console.error('Error deleting comment:', error);
+            alert(t('instructor.deleteCommentError', 'Failed to delete comment. Please try again.'));
+        }
     };
 
     if (loading) {
@@ -361,8 +452,366 @@ const InstructorDashboardPage = () => {
                         </div>
                     </div>
 
-                    {/* Rest of your dashboard content... */}
-                    {/* (The rest remains the same as your original component) */}
+                    {/* My Kids Section */}
+                    {dashboardData.kids.length > 0 && (
+                        <div className="dashboard-section" style={{ marginTop: '30px' }}>
+                            <div className="section-header" style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '12px',
+                                marginBottom: '20px',
+                                paddingBottom: '10px',
+                                borderBottom: '2px solid var(--racing-purple)'
+                            }}>
+                                <Users size={24} style={{ color: 'var(--racing-purple)' }} />
+                                <h2 style={{ margin: 0, color: 'var(--text-primary)' }}>
+                                    {t('instructor.myKids', 'My Kids')} ({dashboardData.kids.length})
+                                </h2>
+                            </div>
+
+                            <div className="kids-list" style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                                {dashboardData.kids.map(kid => {
+                                    const isExpanded = expandedKid === kid.id;
+                                    const kidName = `${getFieldValue(kid, 'personalInfo.firstName')} ${getFieldValue(kid, 'personalInfo.lastName')}`.trim();
+
+                                    return (
+                                        <div key={kid.id} className="card kid-card" style={{ padding: '20px' }}>
+                                            {/* Kid Header */}
+                                            <div
+                                                className="kid-header"
+                                                style={{
+                                                    display: 'flex',
+                                                    justifyContent: 'space-between',
+                                                    alignItems: 'center',
+                                                    cursor: 'pointer',
+                                                    marginBottom: isExpanded ? '20px' : '0'
+                                                }}
+                                                onClick={() => toggleKidExpansion(kid.id)}
+                                            >
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                                                    <User size={24} style={{ color: 'var(--racing-purple)' }} />
+                                                    <div>
+                                                        <h3 style={{ margin: 0, color: 'var(--text-primary)' }}>
+                                                            {kidName || 'Unknown Kid'}
+                                                        </h3>
+                                                        <p style={{ margin: 0, fontSize: '14px', color: 'var(--text-muted)' }}>
+                                                            {t('kids.participantNumber', 'Participant #')}: {getFieldValue(kid, 'participantNumber')}
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                                    {/* Add Comment Button */}
+                                                    <button
+                                                        className="btn btn-primary btn-sm"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleAddComment(kid);
+                                                        }}
+                                                        style={{
+                                                            padding: '6px 12px',
+                                                            fontSize: '12px',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: '4px'
+                                                        }}
+                                                    >
+                                                        <MessageCircle size={14} />
+                                                        {t('instructor.addComment', 'Add Comment')}
+                                                    </button>
+
+                                                    {/* Status Badge */}
+                                                    <span className={`status-badge ${
+                                                        getFieldValue(kid, 'signedFormStatus') === 'completed' && getFieldValue(kid, 'signedDeclaration')
+                                                            ? 'ready' : 'pending'
+                                                    }`}>
+                                    {getFieldValue(kid, 'signedFormStatus') === 'completed' && getFieldValue(kid, 'signedDeclaration')
+                                        ? t('status.complete', 'Complete')
+                                        : t('status.pending', 'Pending')
+                                    }
+                                </span>
+
+                                                    {/* Expand/Collapse Icon */}
+                                                    {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                                                </div>
+                                            </div>
+
+                                            {/* Expanded Kid Details */}
+                                            {isExpanded && (
+                                                <div className="kid-details" style={{
+                                                    paddingTop: '20px',
+                                                    borderTop: '1px solid var(--border-color)'
+                                                }}>
+                                                    {/* Personal Information */}
+                                                    <div className="detail-section" style={{ marginBottom: '25px' }}>
+                                                        <h4 style={{
+                                                            margin: '0 0 15px 0',
+                                                            color: 'var(--text-primary)',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: '8px'
+                                                        }}>
+                                                            <User size={18} />
+                                                            {t('instructor.personalInfo', 'Personal Information')}
+                                                        </h4>
+                                                        <div style={{
+                                                            display: 'grid',
+                                                            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+                                                            gap: '15px'
+                                                        }}>
+                                                            <div>
+                                                                <label style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>
+                                                                    {t('common.dateOfBirth', 'Date of Birth')}
+                                                                </label>
+                                                                <div style={{ color: 'var(--text-primary)' }}>
+                                                                    {formatDate(getFieldValue(kid, 'personalInfo.dateOfBirth'))}
+                                                                </div>
+                                                            </div>
+                                                            <div>
+                                                                <label style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>
+                                                                    {t('common.address', 'Address')}
+                                                                </label>
+                                                                <div style={{ color: 'var(--text-primary)' }}>
+                                                                    {getFieldValue(kid, 'personalInfo.address')}
+                                                                </div>
+                                                            </div>
+                                                            <div>
+                                                                <label style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>
+                                                                    {t('common.capabilities', 'Capabilities')}
+                                                                </label>
+                                                                <div style={{ color: 'var(--text-primary)' }}>
+                                                                    {getFieldValue(kid, 'personalInfo.capabilities') || t('common.none', 'None')}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Parent Information */}
+                                                    <div className="detail-section" style={{ marginBottom: '25px' }}>
+                                                        <h4 style={{
+                                                            margin: '0 0 15px 0',
+                                                            color: 'var(--text-primary)',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: '8px'
+                                                        }}>
+                                                            <Phone size={18} />
+                                                            {t('instructor.parentInfo', 'Parent Information')}
+                                                        </h4>
+                                                        <div style={{
+                                                            display: 'grid',
+                                                            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+                                                            gap: '15px'
+                                                        }}>
+                                                            <div>
+                                                                <label style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>
+                                                                    {t('common.parentName', 'Parent Name')}
+                                                                </label>
+                                                                <div style={{ color: 'var(--text-primary)' }}>
+                                                                    {getFieldValue(kid, 'parentInfo.name')}
+                                                                </div>
+                                                            </div>
+                                                            <div>
+                                                                <label style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>
+                                                                    {t('users.email', 'Email')}
+                                                                </label>
+                                                                <div style={{ color: 'var(--text-primary)', fontFamily: 'monospace' }}>
+                                                                    {getFieldValue(kid, 'parentInfo.email')}
+                                                                </div>
+                                                            </div>
+                                                            <div>
+                                                                <label style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>
+                                                                    {t('users.phone', 'Phone')}
+                                                                </label>
+                                                                <div style={{ color: 'var(--text-primary)', fontFamily: 'monospace' }}>
+                                                                    {getFieldValue(kid, 'parentInfo.phone')}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Forms Status */}
+                                                    <div className="detail-section" style={{ marginBottom: '25px' }}>
+                                                        <h4 style={{
+                                                            margin: '0 0 15px 0',
+                                                            color: 'var(--text-primary)',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: '8px'
+                                                        }}>
+                                                            <FileText size={18} />
+                                                            {t('instructor.formsStatus', 'Forms & Status')}
+                                                        </h4>
+                                                        <div style={{
+                                                            display: 'grid',
+                                                            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                                                            gap: '15px'
+                                                        }}>
+                                                            <div>
+                                                                <label style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>
+                                                                    {t('common.signedFormStatus', 'Form Status')}
+                                                                </label>
+                                                                <div>
+                                                <span className={`status-badge ${
+                                                    getFieldValue(kid, 'signedFormStatus') === 'completed' ? 'ready' : 'pending'
+                                                }`}>
+                                                    {t(`common.${getFieldValue(kid, 'signedFormStatus', 'pending')}`,
+                                                        getFieldValue(kid, 'signedFormStatus', 'pending'))}
+                                                </span>
+                                                                </div>
+                                                            </div>
+                                                            <div>
+                                                                <label style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>
+                                                                    {t('common.declaration', 'Declaration')}
+                                                                </label>
+                                                                <div>
+                                                <span className={`status-badge ${
+                                                    getFieldValue(kid, 'signedDeclaration') ? 'ready' : 'pending'
+                                                }`}>
+                                                    {getFieldValue(kid, 'signedDeclaration')
+                                                        ? t('viewKid.signed', 'Signed')
+                                                        : t('viewKid.pending', 'Pending')
+                                                    }
+                                                </span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Comments & Additional Info */}
+                                                    <div className="detail-section">
+                                                        <h4 style={{
+                                                            margin: '0 0 15px 0',
+                                                            color: 'var(--text-primary)',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: '8px'
+                                                        }}>
+                                                            <MessageCircle size={18} />
+                                                            {t('instructor.commentsAndNotes', 'Comments & Notes')}
+                                                        </h4>
+
+                                                        {/* Additional Comments */}
+                                                        {getFieldValue(kid, 'additionalComments') && (
+                                                            <div style={{ marginBottom: '15px' }}>
+                                                                <label style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>
+                                                                    {t('instructor.additionalComments', 'Additional Comments')}
+                                                                </label>
+                                                                <div style={{
+                                                                    color: 'var(--text-primary)',
+                                                                    background: 'var(--bg-tertiary)',
+                                                                    padding: '10px',
+                                                                    borderRadius: '6px',
+                                                                    border: '1px solid var(--border-color)'
+                                                                }}>
+                                                                    {getFieldValue(kid, 'additionalComments')}
+                                                                </div>
+                                                            </div>
+                                                        )}
+
+                                                        {/* Instructor Comments */}
+                                                        {kid.instructorsComments && kid.instructorsComments.length > 0 && (
+                                                            <div>
+                                                                <label style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>
+                                                                    {t('instructor.instructorComments', 'Instructor Comments')} ({kid.instructorsComments.length})
+                                                                </label>
+                                                                <div style={{ marginTop: '8px' }}>
+                                                                    {/* Sort comments by timestamp (most recent first) */}
+                                                                    {[...(kid.instructorsComments || [])].sort((a, b) => {
+                                                                        const timeA = a.timestamp?.seconds || 0;
+                                                                        const timeB = b.timestamp?.seconds || 0;
+                                                                        return timeB - timeA; // Descending order (newest first)
+                                                                    }).map((comment, index) => {
+                                                                        const isOwnComment = comment.instructorId === currentUser?.uid; // FIXED: use currentUser
+
+                                                                        return (
+                                                                            <div key={comment.id || index} style={{
+                                                                                background: isOwnComment ? 'rgba(139, 69, 255, 0.05)' : 'var(--bg-tertiary)',
+                                                                                padding: '12px',
+                                                                                borderRadius: '6px',
+                                                                                border: isOwnComment ? '1px solid var(--racing-purple)' : '1px solid var(--border-color)',
+                                                                                borderLeft: isOwnComment ? '4px solid var(--racing-purple)' : '1px solid var(--border-color)',
+                                                                                marginBottom: '8px'
+                                                                            }}>
+                                                                                <div style={{
+                                                                                    fontSize: '13px',
+                                                                                    color: 'var(--text-secondary)',
+                                                                                    marginBottom: '6px',
+                                                                                    display: 'flex',
+                                                                                    justifyContent: 'space-between',
+                                                                                    alignItems: 'center'
+                                                                                }}>
+                            <span>
+                                {comment.instructorName || 'Instructor'}
+                                {isOwnComment && (
+                                    <span style={{ color: 'var(--racing-purple)', fontWeight: '500', marginLeft: '4px' }}>
+                                        ({t('instructor.you', 'You')})
+                                    </span>
+                                )}
+                            </span>
+                                                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <span>
+                                    {comment.timestamp?.toDate ?
+                                        comment.timestamp.toDate().toLocaleDateString() :
+                                        'Unknown date'
+                                    }
+                                </span>
+                                                                                        {isOwnComment && (
+                                                                                            <button
+                                                                                                style={{
+                                                                                                    background: 'none',
+                                                                                                    border: 'none',
+                                                                                                    color: 'var(--error-color)',
+                                                                                                    cursor: 'pointer',
+                                                                                                    padding: '4px',
+                                                                                                    borderRadius: '3px',
+                                                                                                    display: 'flex',
+                                                                                                    alignItems: 'center',
+                                                                                                    transition: 'background-color 0.2s ease'
+                                                                                                }}
+                                                                                                onClick={(e) => {
+                                                                                                    e.stopPropagation();
+                                                                                                    handleDeleteComment(kid.id, comment);
+                                                                                                }}
+                                                                                                onMouseEnter={(e) => {
+                                                                                                    e.target.style.backgroundColor = 'var(--error-light)';
+                                                                                                }}
+                                                                                                onMouseLeave={(e) => {
+                                                                                                    e.target.style.backgroundColor = 'transparent';
+                                                                                                }}
+                                                                                                title={t('instructor.deleteComment', 'Delete Comment')}
+                                                                                            >
+                                                                                                <Trash size={12} />
+                                                                                            </button>
+                                                                                        )}
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div style={{ color: 'var(--text-primary)' }}>
+                                                                                    {comment.comment}
+                                                                                </div>
+                                                                            </div>
+                                                                        );
+                                                                    })}
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Comment Modal */}
+                    <InstructorCommentModal
+                        kid={commentModalKid}
+                        isOpen={showCommentModal}
+                        onClose={handleCommentModalClose}
+                        onSuccess={handleCommentSuccess}
+                    />
                 </div>
             </div>
         </Dashboard>

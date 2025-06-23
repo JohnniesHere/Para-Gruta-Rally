@@ -2048,7 +2048,49 @@ const translations = {
         'fields.vehicleModel': 'Vehicle Model',
         'fields.eventName': 'Event Name',
         'fields.eventDate': 'Event Date',
-        'fields.dateOfBirth': 'Date of Birth'
+        'fields.dateOfBirth': 'Date of Birth',
+
+        // Modal titles and labels
+        'instructor.addComment': 'Add Instructor Comment',
+        'instructor.yourComment': 'Your Comment',
+        'instructor.addingComment': 'Adding...',
+
+    // Placeholders and messages
+        'instructor.commentPlaceholder': 'Add your observations, notes, or feedback about this participant...',
+        'instructor.commentRequired': 'Comment is required',
+        'instructor.commentAdded': 'Comment added successfully!',
+        'instructor.commentError': 'Failed to add comment. Please try again.',
+
+        // Section headers
+        'instructor.personalInfo': 'Personal Information',
+        'instructor.parentInfo': 'Parent Information',
+        'instructor.formsStatus': 'Forms & Status',
+        'instructor.commentsAndNotes': 'Comments & Notes',
+        'instructor.additionalComments': 'Additional Comments',
+        'instructor.instructorComments': 'Instructor Comments',
+
+        // Status and messages
+        'instructor.noCommentsYet': 'No comments added yet',
+        'status.complete': 'Complete',
+
+        // New filter options
+        'instructor.eventsWithMyTeams': 'Events with My Teams',
+        'instructor.eventsWithoutMyTeams': 'Other Events',
+        'instructor.teamFilter': 'Team Filter',
+        'instructor.myTeamsParticipating': 'My teams are participating',
+        'instructor.noTeamsInEvent': 'None',
+
+        // Stats updates
+        'stats.allAvailableEvents': 'All Available Events',
+        'stats.myTeamEvents': 'My Team Events',
+        'stats.eventsWithMyTeams': 'Events with My Teams',
+
+        'instructor.you': 'You',
+        'instructor.deleteComment': 'Delete Comment',
+        'instructor.confirmDeleteComment': 'Are you sure you want to delete this comment?',
+        'instructor.commentDeleted': 'Comment deleted successfully!',
+        'instructor.deleteCommentError': 'Failed to delete comment. Please try again.',
+        'instructor.canOnlyDeleteOwnComments': 'You can only delete your own comments'
 
     },
 
@@ -4224,6 +4266,49 @@ const translations = {
         'validation.pleaseFilThisField': 'אנא מלא שדה זה.',
         'validation.emailRequired': 'אנא הכנס כתובת אימייל תקינה.',
         'validation.passwordRequired': 'אנא הכנס את הסיסמה שלך.',
+
+        // Modal titles and labels
+        'instructor.addComment': 'הוספת הערת מדריך',
+        'instructor.yourComment': 'ההערה שלך',
+        'instructor.addingComment': 'מוסיף...',
+
+        // Placeholders and messages
+        'instructor.commentPlaceholder': 'הוסף את התצפיות, ההערות או המשוב שלך על המשתתף הזה...',
+        'instructor.commentRequired': 'הערה נדרשת',
+        'instructor.commentAdded': 'הערה נוספה בהצלחה!',
+        'instructor.commentError': 'נכשל בהוספת הערה. אנא נסה שוב.',
+
+        // Section headers
+        'instructor.personalInfo': 'מידע אישי',
+        'instructor.parentInfo': 'מידע הורים',
+        'instructor.formsStatus': 'טפסים וסטטוס',
+        'instructor.commentsAndNotes': 'הערות והוראות',
+        'instructor.additionalComments': 'הערות נוספות',
+        'instructor.instructorComments': 'הערות מדריך',
+
+        // Status and messages
+        'instructor.noCommentsYet': 'עדיין לא נוספו הערות',
+        'status.complete': 'הושלם',
+
+        // New filter options
+        'instructor.eventsWithMyTeams': 'אירועים עם הקבוצות שלי',
+        'instructor.eventsWithoutMyTeams': 'אירועים אחרים',
+        'instructor.teamFilter': 'מסנן קבוצות',
+        'instructor.myTeamsParticipating': 'הקבוצות שלי משתתפות',
+        'instructor.noTeamsInEvent': 'אין',
+
+        // Stats updates
+        'stats.allAvailableEvents': 'כל האירועים הזמינים',
+        'stats.myTeamEvents': 'אירועי הקבוצות שלי',
+        'stats.eventsWithMyTeams': 'אירועים עם הקבוצות שלי',
+
+        'instructor.you': 'את/ה',
+        'instructor.deleteComment': 'מחק/י הערה',
+        'instructor.confirmDeleteComment': 'האם את/ה בטוח/ה שאת/ה רוצה למחוק את ההערה הזו?',
+        'instructor.commentDeleted': 'הערה נמחקה בהצלחה!',
+        'instructor.deleteCommentError': 'נכשלה מחיקת ההערה. אנא נסו שוב.',
+        'instructor.canOnlyDeleteOwnComments': 'ניתן למחוק רק הערות שלך'
+
             }
         };
 

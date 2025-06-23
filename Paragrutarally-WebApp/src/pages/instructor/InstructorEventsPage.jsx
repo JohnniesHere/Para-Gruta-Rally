@@ -1,6 +1,6 @@
-// src/pages/instructor/InstructorEventsPage.jsx
+// src/pages/instructor/InstructorEventsPage.jsx - FIXED TO MATCH ParentEventPage
 import React, { useState, useEffect, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
     collection,
     query,
@@ -11,7 +11,9 @@ import {
 import { db } from '../../firebase/config';
 import { usePermissions } from '../../hooks/usePermissions';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import Dashboard from '../../components/layout/Dashboard';
+import ParentEventModal from '../../components/modals/ParentEventModal';
 import {
     IconCalendar as Calendar,
     IconEye as Eye,
@@ -21,102 +23,162 @@ import {
     IconClock as Clock,
     IconUsers as Users,
     IconUsersGroup as Team,
-    IconActivity as Activity
+    IconActivity as Activity,
+    IconRefresh as RefreshCw,
+    IconEraser as Eraser,
+    IconFile as FileSpreadsheet,
+    IconX as X,
+    IconPhoto as Photo
 } from '@tabler/icons-react';
 
 const InstructorEventsPage = () => {
     const { permissions, userRole, userData, user } = usePermissions();
     const { t } = useLanguage();
+    const { isDarkMode, appliedTheme } = useTheme();
+    const navigate = useNavigate();
 
     const [events, setEvents] = useState([]);
     const [teams, setTeams] = useState([]);
+    const [filteredEvents, setFilteredEvents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
-    const [statusFilter, setStatusFilter] = useState('');
-    const [dateFilter, setDateFilter] = useState('');
+    const [statusFilter, setStatusFilter] = useState('all');
+    const [dateFilter, setDateFilter] = useState('all');
+    const [myTeamFilter, setMyTeamFilter] = useState('all');
+    const [selectedEvent, setSelectedEvent] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     // Load instructor's events and teams
+    const fetchEvents = async () => {
+        const instructorId = user?.uid || userData?.id;
+
+        if (!instructorId || userRole !== 'instructor') {
+            console.log('Access check failed:', { instructorId, userRole, userData, user });
+            setError('Access denied: Instructor credentials required');
+            setLoading(false);
+            return;
+        }
+
+        try {
+            setError('');
+            setLoading(true);
+            console.log('Loading events for instructor:', instructorId);
+
+            // Load instructor's teams using the correct field name
+            const teamsQuery = query(
+                collection(db, 'teams'),
+                where('instructorIds', 'array-contains', instructorId)
+            );
+
+            const teamsSnapshot = await getDocs(teamsQuery);
+            const teamsData = teamsSnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+
+            console.log('Found teams for instructor:', teamsData.length, teamsData);
+
+            // Load all events (using same structure as ParentEventPage)
+            const eventsQuery = query(
+                collection(db, 'events'),
+                orderBy('createdAt', 'desc')
+            );
+            const eventsSnapshot = await getDocs(eventsQuery);
+            const allEvents = [];
+
+            eventsSnapshot.forEach((doc) => {
+                const data = doc.data();
+                allEvents.push({
+                    id: doc.id,
+                    name: data.name || t('events.unnamedEvent', 'Unnamed Event'),
+                    description: data.description || t('events.noDescription', 'No description available'),
+                    location: data.location || t('events.locationTBD', 'Location TBD'),
+                    address: data.address || '',
+                    date: data.date || data.eventDate || t('events.dateTBD', 'Date TBD'), // Support both field names
+                    time: data.time || '',
+                    status: data.status || 'upcoming',
+                    notes: data.notes || '',
+                    organizer: data.organizer || '',
+                    type: data.type || 'race',
+                    participatingTeams: data.participatingTeams || [],
+                    hasGalleryFolder: data.hasGalleryFolder || false,
+                    galleryFolderPath: data.galleryFolderPath || null,
+                    price: data.price || null,
+                    currency: data.currency || null,
+                    registrationOpen: data.registrationOpen || false,
+                    registrationDeadline: data.registrationDeadline || null,
+                    contactEmail: data.contactEmail || '',
+                    contactPhone: data.contactPhone || '',
+                    requirements: data.requirements || '',
+                    weatherDependent: data.weatherDependent || false,
+                    backupPlan: data.backupPlan || '',
+                    createdAt: data.createdAt,
+                    updatedAt: data.updatedAt,
+                    image: data.image || 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400',
+                    // Additional fields for compatibility
+                    eventDate: data.eventDate || data.date,
+                    maxParticipants: data.maxParticipants,
+                    currentParticipants: data.currentParticipants
+                });
+            });
+
+            console.log('Total events found:', allEvents.length);
+
+            // Don't filter events - show ALL events but mark which ones have instructor's teams
+            console.log('Showing all events:', allEvents.length);
+            console.log('Instructor teams:', teamsData.map(t => t.name));
+
+            setEvents(allEvents);
+            setFilteredEvents(allEvents);
+            setTeams(teamsData);
+        } catch (err) {
+            console.error('Error loading instructor events:', err);
+            setError('Failed to load events. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const loadInstructorEvents = async () => {
-            if (!userData?.instructorId || userRole !== 'instructor') {
-                setError('Access denied: Instructor credentials required');
-                setLoading(false);
-                return;
-            }
+        fetchEvents();
+    }, [userData, userRole, user]);
 
-            try {
-                setError('');
+    // Filter events based on search and filters (same as ParentEventPage)
+    useEffect(() => {
+        const results = events.filter(event => {
+            const matchesSearch =
+                event.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                event.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                (event.organizer || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                (event.description || '').toLowerCase().includes(searchTerm.toLowerCase());
 
-                // Load instructor's teams first
-                const teamsQuery = query(
-                    collection(db, 'teams'),
-                    where('instructorId', '==', userData.instructorId),
-                    orderBy('name', 'asc')
-                );
-                const teamsSnapshot = await getDocs(teamsQuery);
-                const teamsData = teamsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-                // Load all events and filter for those involving instructor's teams
-                const eventsQuery = query(
-                    collection(db, 'events'),
-                    orderBy('eventDate', 'desc')
-                );
-                const eventsSnapshot = await getDocs(eventsQuery);
-                const allEvents = eventsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-                // Filter events that include instructor's teams
-                const instructorEvents = allEvents.filter(event =>
-                    teamsData.some(team => event.participatingTeams?.includes(team.id))
-                );
-
-                setEvents(instructorEvents);
-                setTeams(teamsData);
-            } catch (err) {
-                console.error('Error loading instructor events:', err);
-                setError('Failed to load events. Please try again.');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        loadInstructorEvents();
-    }, [userData, userRole]);
-
-    // Filter events based on search and filters
-    const filteredEvents = useMemo(() => {
-        return events.filter(event => {
-            const matchesSearch = searchTerm === '' ||
-                event.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                event.location?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                event.description?.toLowerCase().includes(searchTerm.toLowerCase());
-
-            const matchesStatus = statusFilter === '' || event.status === statusFilter;
+            const matchesStatus =
+                statusFilter === 'all' ||
+                (statusFilter === 'upcoming' && event.status === 'upcoming') ||
+                (statusFilter === 'completed' && event.status === 'completed') ||
+                (statusFilter === 'ongoing' && event.status === 'ongoing');
 
             const now = new Date();
-            const eventDate = new Date(event.eventDate);
+            const eventDate = new Date(event.date || event.eventDate);
             let matchesDate = true;
 
             if (dateFilter === 'upcoming') {
                 matchesDate = eventDate > now;
             } else if (dateFilter === 'past') {
                 matchesDate = eventDate < now;
-            } else if (dateFilter === 'today') {
-                const today = new Date();
-                matchesDate = eventDate.toDateString() === today.toDateString();
             }
 
-            return matchesSearch && matchesStatus && matchesDate;
-        });
-    }, [events, searchTerm, statusFilter, dateFilter]);
+            // New: Filter by my team participation
+            const matchesMyTeam = myTeamFilter === 'all' ||
+                (myTeamFilter === 'myteams' && hasMyTeamsInEvent(event)) ||
+                (myTeamFilter === 'other' && !hasMyTeamsInEvent(event));
 
-    // Get team names for an event
-    const getEventTeamNames = (event) => {
-        if (!event.participatingTeams) return [];
-        return event.participatingTeams
-            .map(teamId => teams.find(t => t.id === teamId)?.name)
-            .filter(Boolean);
-    };
+            return matchesSearch && matchesStatus && matchesDate && matchesMyTeam;
+        });
+
+        setFilteredEvents(results);
+    }, [searchTerm, statusFilter, dateFilter, myTeamFilter, events, teams]);
 
     // Get instructor's teams in this event
     const getMyTeamsInEvent = (event) => {
@@ -124,18 +186,112 @@ const InstructorEventsPage = () => {
         return teams.filter(team => event.participatingTeams.includes(team.id));
     };
 
-    // Get event status
+    // Handle viewing gallery for an event
+    const handleViewGallery = (event) => {
+        if (event.hasGalleryFolder) {
+            navigate(`/gallery/${event.id}`);
+        } else {
+            alert(t('events.noGalleryFolder', 'This event does not have a gallery folder.'));
+        }
+    };
+
+    // Check if instructor has teams in this event
+    const hasMyTeamsInEvent = (event) => {
+        if (!event.participatingTeams || teams.length === 0) return false;
+        return teams.some(team => event.participatingTeams.includes(team.id));
+    };
+
+    // Get event status based on date
     const getEventStatus = (event) => {
         const now = new Date();
-        const eventDate = new Date(event.eventDate);
+        const eventDate = new Date(event.date || event.eventDate);
 
         if (eventDate < now) return 'past';
         if (eventDate.toDateString() === now.toDateString()) return 'today';
         return 'upcoming';
     };
 
-    // Get unique statuses for filter
-    const eventStatuses = [...new Set(events.map(e => e.status).filter(Boolean))];
+    // Format date for display (same as ParentEventPage)
+    const formatDate = (dateString) => {
+        if (!dateString || dateString === t('events.dateTBD', 'Date TBD')) return dateString;
+
+        try {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        } catch (error) {
+            return dateString;
+        }
+    };
+
+    // Format time for display
+    const formatTime = (timeString) => {
+        if (!timeString) return '';
+        return timeString;
+    };
+
+    // Get event type display name
+    const getEventTypeDisplay = (type) => {
+        switch (type) {
+            case 'race':
+                return t('events.typeRace', 'Race');
+            case 'newcomers':
+                return t('events.typeNewcomers', 'Newcomers');
+            case 'social':
+                return t('events.typeSocial', 'Social');
+            default:
+                return type;
+        }
+    };
+
+    // Clear all filters
+    const handleClearFilters = () => {
+        setSearchTerm('');
+        setStatusFilter('all');
+        setDateFilter('all');
+        setMyTeamFilter('all');
+    };
+
+    // Calculate stats
+    const stats = {
+        totalEvents: events.length,
+        upcomingEvents: events.filter(e => getEventStatus(e) === 'upcoming').length,
+        pastEvents: events.filter(e => getEventStatus(e) === 'past').length,
+        myTeams: teams.length,
+        myTeamEvents: events.filter(e => hasMyTeamsInEvent(e)).length
+    };
+
+    // Handle stat card clicks to filter events
+    const handleStatCardClick = (filterType) => {
+        switch (filterType) {
+            case 'total':
+                setStatusFilter('all');
+                setDateFilter('all');
+                setMyTeamFilter('all');
+                break;
+            case 'upcoming':
+                setDateFilter('upcoming');
+                setStatusFilter('all');
+                setMyTeamFilter('all');
+                break;
+            case 'past':
+                setDateFilter('past');
+                setStatusFilter('all');
+                setMyTeamFilter('all');
+                break;
+            case 'myteams':
+                setMyTeamFilter('myteams');
+                setStatusFilter('all');
+                setDateFilter('all');
+                break;
+            default:
+                break;
+        }
+        setSearchTerm('');
+    };
 
     if (loading) {
         return (
@@ -157,325 +313,284 @@ const InstructorEventsPage = () => {
                     <div className="error-container">
                         <h3>{t('common.error', 'Error')}</h3>
                         <p>{error}</p>
+                        <button onClick={fetchEvents} className="btn-primary">
+                            <RefreshCw className="btn-icon" size={18} />
+                            {t('common.tryAgain', 'Try Again')}
+                        </button>
                     </div>
                 </div>
             </Dashboard>
         );
     }
 
-    // Count events by status
-    const upcomingEvents = events.filter(e => getEventStatus(e) === 'upcoming').length;
-    const pastEvents = events.filter(e => getEventStatus(e) === 'past').length;
-    const todayEvents = events.filter(e => getEventStatus(e) === 'today').length;
-
     return (
         <Dashboard userRole={userRole}>
-            <div className="admin-page">
+            <div className={`parent-event-page ${appliedTheme}-mode`}>
                 <h1>
                     <Calendar className="page-title-icon" size={48} />
                     {t('instructor.events', 'My Events')}
                 </h1>
 
-                <div className="admin-container">
-                    {/* Racing Header */}
-                    <div className="racing-header">
-                        <div className="header-content">
-                            <div className="title-section">
-                                <h1>
-                                    <Calendar size={40} />
-                                    {t('instructor.eventsManagement', 'Events Management')}
-                                </h1>
-                                <p className="subtitle">
-                                    {t('instructor.manageTeamEvents', 'View and track events involving your teams')}
-                                </p>
-                            </div>
+                <div className="parent-event-container">
+                    {/* Header with Actions */}
+                    <div className="page-header">
+                        <div className="header-info">
+                            <h2>{t('instructor.eventsManagement', 'Events Management')}</h2>
+                            <p className="header-subtitle">
+                                {t('instructor.manageTeamEvents', 'View and track events involving your teams')}
+                            </p>
+                        </div>
+
+                        <div className="header-actions">
+                            <button className="btn-secondary" onClick={fetchEvents}>
+                                <RefreshCw className="btn-icon" size={18} />
+                                {t('common.refresh', 'Refresh')}
+                            </button>
                         </div>
                     </div>
 
-                    {/* Stats Section */}
+                    {/* Stats Cards */}
                     <div className="stats-grid">
-                        <div className="stat-card total">
-                            <div className="stat-icon">
-                                <Calendar size={40} />
-                            </div>
+                        <div
+                            className={`stat-card total clickable ${statusFilter === 'all' && dateFilter === 'all' && myTeamFilter === 'all' ? 'active' : ''}`}
+                            onClick={() => handleStatCardClick('total')}
+                        >
+                            <Calendar className="stat-icon" size={40} />
                             <div className="stat-content">
                                 <h3>{t('stats.totalEvents', 'Total Events')}</h3>
-                                <div className="stat-value">{events.length}</div>
-                                <div className="stat-subtitle">{t('stats.involvingYourTeams', 'Involving Your Teams')}</div>
+                                <div className="stat-value">{stats.totalEvents}</div>
+                                <div className="stat-subtitle">{t('stats.allAvailableEvents', 'All Available Events')}</div>
                             </div>
                         </div>
 
-                        <div className="stat-card instructors">
-                            <div className="stat-icon">
-                                <Activity size={40} />
-                            </div>
+                        <div
+                            className={`stat-card upcoming clickable ${dateFilter === 'upcoming' ? 'active' : ''}`}
+                            onClick={() => handleStatCardClick('upcoming')}
+                        >
+                            <Activity className="stat-icon" size={40} />
                             <div className="stat-content">
                                 <h3>{t('stats.upcoming', 'Upcoming')}</h3>
-                                <div className="stat-value">{upcomingEvents}</div>
+                                <div className="stat-value">{stats.upcomingEvents}</div>
                                 <div className="stat-subtitle">{t('stats.futureEvents', 'Future Events')}</div>
                             </div>
                         </div>
 
-                        <div className="stat-card parents">
-                            <div className="stat-icon">
-                                <Clock size={40} />
-                            </div>
+                        <div
+                            className={`stat-card teams clickable ${myTeamFilter === 'myteams' ? 'active' : ''}`}
+                            onClick={() => handleStatCardClick('myteams')}
+                        >
+                            <Team className="stat-icon" size={40} />
                             <div className="stat-content">
-                                <h3>{t('stats.today', 'Today')}</h3>
-                                <div className="stat-value">{todayEvents}</div>
-                                <div className="stat-subtitle">{t('stats.todaysEvents', 'Today\'s Events')}</div>
-                            </div>
-                        </div>
-
-                        <div className="stat-card teams">
-                            <div className="stat-icon">
-                                <Team size={40} />
-                            </div>
-                            <div className="stat-content">
-                                <h3>{t('stats.myTeams', 'My Teams')}</h3>
-                                <div className="stat-value">{teams.length}</div>
-                                <div className="stat-subtitle">{t('stats.participating', 'Participating')}</div>
+                                <h3>{t('stats.myTeamEvents', 'My Team Events')}</h3>
+                                <div className="stat-value">{stats.myTeamEvents}</div>
+                                <div className="stat-subtitle">{t('stats.eventsWithMyTeams', 'Events with My Teams')}</div>
                             </div>
                         </div>
                     </div>
 
-                    {/* Search and Filter Section */}
-                    <div className="search-filter-section">
+                    {/* Search and Filters (same as ParentEventPage) */}
+                    <div className="search-filter-section-row">
                         <div className="search-container">
-                            <label className="search-label">
-                                <Search size={16} />
-                                {t('common.search', 'Search')}
-                            </label>
                             <div className="search-input-wrapper">
                                 <Search className="search-icon" size={18} />
                                 <input
                                     type="text"
+                                    placeholder={t('events.searchPlaceholder', 'Search by event name, location, or organizer...')}
                                     className="search-input"
-                                    placeholder={t('events.searchPlaceholder', 'Search by name, location, or description...')}
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                 />
                                 {searchTerm && (
-                                    <button
-                                        className="clear-search"
-                                        onClick={() => setSearchTerm('')}
-                                    >
-                                        ✕
+                                    <button className="clear-search" onClick={() => setSearchTerm('')}>
+                                        <X size={14} />
                                     </button>
                                 )}
                             </div>
                         </div>
 
                         <div className="filter-container">
-                            <label className="filter-label">
-                                <Filter size={16} />
-                                {t('common.status', 'Status')}
-                            </label>
                             <select
                                 className="filter-select"
-                                value={statusFilter}
-                                onChange={(e) => setStatusFilter(e.target.value)}
+                                value={myTeamFilter}
+                                onChange={(e) => setMyTeamFilter(e.target.value)}
                             >
-                                <option value="">{t('common.allStatuses', 'All Statuses')}</option>
-                                {eventStatuses.map(status => (
-                                    <option key={status} value={status}>
-                                        {status}
-                                    </option>
-                                ))}
+                                <option value="all">{t('events.allEvents', 'All Events')}</option>
+                                <option value="myteams">{t('instructor.eventsWithMyTeams', 'Events with My Teams')}</option>
+                                <option value="other">{t('instructor.eventsWithoutMyTeams', 'Other Events')}</option>
                             </select>
                         </div>
 
                         <div className="filter-container">
-                            <label className="filter-label">
-                                <Calendar size={16} />
-                                {t('common.timeframe', 'Timeframe')}
-                            </label>
                             <select
                                 className="filter-select"
                                 value={dateFilter}
                                 onChange={(e) => setDateFilter(e.target.value)}
                             >
-                                <option value="">{t('common.allDates', 'All Dates')}</option>
+                                <option value="all">{t('common.allDates', 'All Dates')}</option>
                                 <option value="upcoming">{t('events.upcoming', 'Upcoming')}</option>
-                                <option value="today">{t('events.today', 'Today')}</option>
                                 <option value="past">{t('events.past', 'Past')}</option>
                             </select>
                         </div>
+
+                        <button className="btn-clear" onClick={handleClearFilters}>
+                            <Eraser className="btn-icon" size={18} />
+                            {t('common.clearAll', 'Clear All')}
+                        </button>
                     </div>
 
-                    {/* Results Summary */}
-                    {(searchTerm || statusFilter || dateFilter) && (
-                        <div className="results-summary">
-                            <span>{t('common.showing', 'Showing')} {filteredEvents.length} {t('common.results', 'results')}</span>
-                            {searchTerm && <span className="search-applied">for "{searchTerm}"</span>}
-                            {statusFilter && <span className="filter-applied">status: {statusFilter}</span>}
-                            {dateFilter && <span className="filter-applied">timeframe: {dateFilter}</span>}
-                        </div>
-                    )}
+                    {/* Results Info */}
+                    <div className="results-info">
+                        <FileSpreadsheet className="results-icon" size={18} />
+                        {t('events.showing', 'Showing')} {filteredEvents.length} {t('events.of', 'of')} {events.length} {t('events.eventsLowercase', 'events')}
+                        {statusFilter !== 'all' && <span className="filter-applied"> • {t('events.status', 'Status')}: {statusFilter}</span>}
+                        {dateFilter !== 'all' && <span className="filter-applied"> • {t('common.timeframe', 'Timeframe')}: {dateFilter}</span>}
+                        {myTeamFilter !== 'all' && <span className="filter-applied"> • {t('instructor.teamFilter', 'Team Filter')}: {myTeamFilter === 'myteams' ? 'My Teams' : 'Other Events'}</span>}
+                        {searchTerm && <span className="search-applied"> • {t('common.search', 'Search')}: "{searchTerm}"</span>}
+                    </div>
 
-                    {/* Events Display */}
-                    {filteredEvents.length === 0 ? (
-                        <div className="empty-state">
-                            <div className="empty-icon">
-                                <Calendar size={80} />
-                            </div>
-                            <h3>{t('instructor.noEventsFound', 'No Events Found')}</h3>
-                            <p>
-                                {searchTerm || statusFilter || dateFilter
-                                    ? t('instructor.noEventsMatchFilter', 'No events match your current filter')
-                                    : t('instructor.noEventsForTeams', 'Your teams are not participating in any events yet')
-                                }
-                            </p>
-                        </div>
-                    ) : (
-                        <div className="events-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))', gap: '20px' }}>
-                            {filteredEvents.map(event => {
-                                const eventStatus = getEventStatus(event);
-                                const myTeams = getMyTeamsInEvent(event);
-                                const eventDate = new Date(event.eventDate);
-
-                                return (
-                                    <div key={event.id} className="card event-card" style={{ padding: '25px' }}>
-                                        <div className="card-header">
-                                            <Calendar className="card-icon" size={24} />
-                                            <h3 className="card-title">{event.name}</h3>
-                                            <span className={`status-badge ${
-                                                eventStatus === 'upcoming' ? 'pending' :
-                                                    eventStatus === 'today' ? 'ready' : 'inactive'
-                                            }`}>
-                                                {eventStatus}
-                                            </span>
+                    {/* Events Table (same structure as ParentEventPage) */}
+                    <div className="table-container">
+                        <table className="data-table">
+                            <thead>
+                            <tr>
+                                <th><Calendar className="table-header-icon" size={16} />{t('events.eventInfo', 'Event Info')}</th>
+                                <th className="date-time-header">📅 {t('events.dateTime', 'Date & Time')}</th>
+                                <th><MapPin className="table-header-icon" size={16} />{t('common.location', 'Location')}</th>
+                                <th><Team className="table-header-icon" size={16} />{t('instructor.myTeams', 'My Teams')}</th>
+                                <th className="status-header">📊 {t('events.status', 'Status')}</th>
+                                <th className="actions-header">⚡ {t('events.actions', 'Actions')}</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {filteredEvents.length === 0 ? (
+                                <tr>
+                                    <td colSpan="6">
+                                        <div className="empty-state">
+                                            <Calendar className="empty-icon" size={60} />
+                                            <h3>{t('instructor.noEventsFound', 'No Events Found')}</h3>
+                                            <p>
+                                                {searchTerm || statusFilter !== 'all' || dateFilter !== 'all' || myTeamFilter !== 'all'
+                                                    ? t('instructor.noEventsMatchFilter', 'No events match your current filter')
+                                                    : t('instructor.noEventsAvailable', 'No events are currently available')
+                                                }
+                                            </p>
                                         </div>
+                                    </td>
+                                </tr>
+                            ) : (
+                                filteredEvents.map(event => {
+                                    const myTeams = getMyTeamsInEvent(event);
+                                    const eventStatus = getEventStatus(event);
+                                    const hasMyTeams = hasMyTeamsInEvent(event);
 
-                                        <div className="card-body">
-                                            <div style={{ marginBottom: '15px' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                                                    <Clock size={16} style={{ color: 'var(--info-color)' }} />
-                                                    <span style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-primary)' }}>
-                                                        {eventDate.toLocaleDateString()} at {eventDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                                                    </span>
-                                                </div>
-
-                                                {event.location && (
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                                                        <MapPin size={16} style={{ color: 'var(--success-color)' }} />
-                                                        <span style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>
-                                                            {event.location}
-                                                        </span>
+                                    return (
+                                        <tr key={event.id} className={hasMyTeams ? 'has-my-teams' : ''}>
+                                            <td>
+                                                <div className="event-info">
+                                                    <img src={event.image} alt={event.name} className="event-image" />
+                                                    <div className="event-details">
+                                                        <div className="event-name">
+                                                            {hasMyTeams && (
+                                                                <span className="my-team-indicator" title={t('instructor.myTeamsParticipating', 'My teams are participating')}>
+                                                                    🏁
+                                                                </span>
+                                                            )}
+                                                            {event.name}
+                                                            {event.hasGalleryFolder && (
+                                                                <Photo size={14} className="gallery-indicator" title={t('events.hasGallery', 'Has Gallery')} />
+                                                            )}
+                                                        </div>
+                                                        <div className="event-type">
+                                                            {getEventTypeDisplay(event.type)}
+                                                        </div>
+                                                        <div className="event-description">
+                                                            {event.description.length > 40
+                                                                ? `${event.description.substring(0, 40)}...`
+                                                                : event.description
+                                                            }
+                                                        </div>
                                                     </div>
-                                                )}
-                                            </div>
-
-                                            {event.description && (
-                                                <p style={{
-                                                    fontSize: '14px',
-                                                    color: 'var(--text-secondary)',
-                                                    marginBottom: '15px',
-                                                    lineHeight: '1.4'
-                                                }}>
-                                                    {event.description.length > 100
-                                                        ? `${event.description.substring(0, 100)}...`
-                                                        : event.description
-                                                    }
-                                                </p>
-                                            )}
-
-                                            <div className="my-teams-section" style={{ marginBottom: '15px' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                                                    <Team size={16} style={{ color: 'var(--racing-purple)' }} />
-                                                    <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>
-                                                        {t('instructor.yourTeamsInEvent', 'Your Teams in This Event')}
-                                                    </span>
                                                 </div>
-                                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                                            </td>
+                                            <td>
+                                                <div className="date-time-info">
+                                                    <div className="event-date">{formatDate(event.date)}</div>
+                                                    {event.time && (
+                                                        <div className="event-time">{formatTime(event.time)}</div>
+                                                    )}
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div className="location-info">
+                                                    <div className="location-name">{event.location}</div>
+                                                    {event.address && (
+                                                        <div className="location-address">{event.address}</div>
+                                                    )}
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div className="teams-info">
                                                     {myTeams.length > 0 ? (
                                                         myTeams.map(team => (
-                                                            <span key={team.id} className="badge success" style={{ fontSize: '11px' }}>
+                                                            <span key={team.id} className="badge success team-badge">
                                                                 {team.name}
                                                             </span>
                                                         ))
                                                     ) : (
-                                                        <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontStyle: 'italic' }}>
-                                                            {t('instructor.noTeamsInEvent', 'None of your teams')}
+                                                        <span className="no-teams-text">
+                                                            {t('instructor.noTeamsInEvent', 'None')}
                                                         </span>
                                                     )}
                                                 </div>
-                                            </div>
-
-                                            {event.participatingTeams && event.participatingTeams.length > myTeams.length && (
-                                                <div className="other-teams-section" style={{ marginBottom: '15px' }}>
-                                                    <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                                                        <Users size={12} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
-                                                        {event.participatingTeams.length - myTeams.length} other team(s) participating
-                                                    </div>
-                                                </div>
-                                            )}
-
-                                            {event.maxParticipants && (
-                                                <div className="capacity-info" style={{ marginBottom: '15px' }}>
-                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
-                                                        <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>
-                                                            {t('events.capacity', 'Capacity')}
-                                                        </span>
-                                                        <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                                                            {event.currentParticipants || 0}/{event.maxParticipants}
-                                                        </span>
-                                                    </div>
-                                                    <div style={{
-                                                        width: '100%',
-                                                        height: '6px',
-                                                        backgroundColor: 'var(--border-color)',
-                                                        borderRadius: '3px',
-                                                        overflow: 'hidden'
-                                                    }}>
-                                                        <div style={{
-                                                            width: `${Math.min(((event.currentParticipants || 0) / event.maxParticipants) * 100, 100)}%`,
-                                                            height: '100%',
-                                                            backgroundColor: (event.currentParticipants || 0) >= event.maxParticipants ? 'var(--error-color)' : 'var(--success-color)',
-                                                            transition: 'width 0.3s ease'
-                                                        }} />
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        <div className="card-footer">
-                                            <Link
-                                                to={`/admin/events/view/${event.id}`}
-                                                className="btn btn-info btn-sm"
-                                            >
-                                                <Eye size={14} />
-                                                {t('common.viewDetails', 'View Details')}
-                                            </Link>
-
-                                            {eventStatus === 'upcoming' && myTeams.length > 0 && (
-                                                <span className="badge info" style={{ fontSize: '11px', marginLeft: 'auto' }}>
-                                                    {t('instructor.readyToParticipate', 'Ready to Participate')}
+                                            </td>
+                                            <td>
+                                                <span className={`status-badge status-${event.status || eventStatus}`}>
+                                                    {(event.status || eventStatus) === 'upcoming' && t('events.upcoming', 'Upcoming')}
+                                                    {(event.status || eventStatus) === 'completed' && t('events.completed', 'Completed')}
+                                                    {(event.status || eventStatus) === 'ongoing' && t('events.ongoing', 'Ongoing')}
+                                                    {(event.status || eventStatus) === 'past' && t('events.past', 'Past')}
                                                 </span>
-                                            )}
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    )}
-
-                    {/* Quick Actions */}
-                    <div className="racing-actions" style={{ marginTop: '30px' }}>
-                        <Link to="/instructor/teams" className="btn btn-primary">
-                            <Team size={18} />
-                            {t('instructor.manageTeams', 'Manage Teams')}
-                        </Link>
-                        <Link to="/instructor/kids" className="btn btn-primary">
-                            <Users size={18} />
-                            {t('instructor.manageKids', 'Manage Kids')}
-                        </Link>
-                        <Link to="/instructor/dashboard" className="btn btn-secondary">
-                            <Activity size={18} />
-                            {t('instructor.backToDashboard', 'Back to Dashboard')}
-                        </Link>
+                                            </td>
+                                            <td>
+                                                <div className="action-buttons-enhanced">
+                                                    <button
+                                                        className="btn-action view"
+                                                        onClick={() => {
+                                                            setSelectedEvent(event);
+                                                            setIsModalOpen(true);
+                                                        }}
+                                                        title={t('events.viewDetails', 'View Details')}
+                                                    >
+                                                        <Eye size={16} />
+                                                    </button>
+                                                    {event.hasGalleryFolder && (
+                                                        <button
+                                                            className="btn-action gallery"
+                                                            onClick={() => handleViewGallery(event)}
+                                                            title={t('events.viewGallery', 'View Gallery')}
+                                                        >
+                                                            <Photo size={16} />
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })
+                            )}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
+                {/* Event Details Modal */}
+                <ParentEventModal
+                    event={selectedEvent}
+                    isOpen={isModalOpen}
+                    onClose={() => {
+                        setIsModalOpen(false);
+                        setSelectedEvent(null);
+                    }}
+                />
             </div>
         </Dashboard>
     );
