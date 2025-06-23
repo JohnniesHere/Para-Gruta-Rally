@@ -5,7 +5,7 @@ import Dashboard from '../../components/layout/Dashboard';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { usePermissions } from '../../hooks/usePermissions.jsx';
-import { getTeamById, updateTeam, getAllInstructors } from '@/services/teamService.js';
+import { getTeamById, updateTeam, getAllInstructors, getAllTeams } from '@/services/teamService.js';
 import { getAllKids } from '@/services/kidService.js';
 import { validateTeam } from '@/schemas/teamSchema.js'; // Fixed import path
 import {
@@ -38,6 +38,7 @@ const EditTeamPage = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [instructors, setInstructors] = useState([]);
     const [allKids, setAllKids] = useState([]);
+    const [allTeams, setAllTeams] = useState([]);
     const [originalData, setOriginalData] = useState(null);
     const [formData, setFormData] = useState({
         name: '',
@@ -65,6 +66,22 @@ const EditTeamPage = () => {
         loadTeamData();
     }, [id]);
 
+    const getAvailableInstructors = () => {
+        return instructors.filter(instructor => {
+            // Check if instructor is assigned to any other team
+            const isAssignedToOtherTeam = allTeams.some(team =>
+                team.id !== id && // Exclude current team
+                team.instructorIds &&
+                team.instructorIds.includes(instructor.id)
+            );
+
+            // Include instructor if:
+            // 1. Not assigned to other teams, OR
+            // 2. Already assigned to current team
+            return !isAssignedToOtherTeam || formData.instructorIds.includes(instructor.id);
+        });
+    };
+
     const loadTeamData = async () => {
         try {
             setIsLoading(true);
@@ -79,14 +96,16 @@ const EditTeamPage = () => {
             setOriginalData(teamData);
             setFormData(teamData);
 
-            // Load supporting data
-            const [instructorsData, allKidsData] = await Promise.all([
-                getAllInstructors(), // Use the new service function
-                getAllKids()
+            // Load supporting data including all teams
+            const [instructorsData, allKidsData, allTeamsData] = await Promise.all([
+                getAllInstructors(),
+                getAllKids(),
+                getAllTeams() // Add this import if not already imported
             ]);
 
             setInstructors(instructorsData);
             setAllKids(allKidsData);
+            setAllTeams(allTeamsData); // Store all teams
 
         } catch (error) {
             console.error('❌ Error loading team data:', error);
@@ -399,13 +418,22 @@ const EditTeamPage = () => {
                                 </h2>
                             </div>
                             <div className="instructors-grid">
-                                {instructors.length === 0 ? (
-                                    <div className="empty-state">
-                                        <User className="empty-icon" size={40} />
-                                        <p>{t('teams.noInstructorsAvailable', 'No instructors available. Add some instructors first!')}</p>
-                                    </div>
-                                ) : (
-                                    instructors.map(instructor => (
+                                {(() => {
+                                    const availableInstructors = getAvailableInstructors();
+
+                                    if (availableInstructors.length === 0) {
+                                        return (
+                                            <div className="empty-state">
+                                                <User className="empty-icon" size={40} />
+                                                <p>{t('teams.noInstructorsAvailable', 'No instructors available. All instructors are already assigned to other teams!')}</p>
+                                                {instructors.length > availableInstructors.length && (
+                                                    <small>{t('teams.someInstructorsAssigned', `${instructors.length - availableInstructors.length} instructor(s) are assigned to other teams.`)}</small>
+                                                )}
+                                            </div>
+                                        );
+                                    }
+
+                                    return availableInstructors.map(instructor => (
                                         <div
                                             key={instructor.id}
                                             className={`instructor-card ${formData.instructorIds.includes(instructor.id) ? 'selected' : ''} ${focusInstructor ? 'focus-card' : ''}`}
@@ -425,10 +453,16 @@ const EditTeamPage = () => {
                                                 {instructor.phone && (
                                                     <div>📱 {instructor.phone}</div>
                                                 )}
+                                                {/* Optional: Show if instructor was previously in current team */}
+                                                {originalData?.instructorIds?.includes(instructor.id) && !formData.instructorIds.includes(instructor.id) && (
+                                                    <div className="status-indicator removed">
+                                                        🚫 {t('teams.removedFromTeam', 'Being removed from team')}
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
-                                    ))
-                                )}
+                                    ));
+                                })()}
                             </div>
                         </div>
 
