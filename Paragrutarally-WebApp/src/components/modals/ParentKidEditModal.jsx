@@ -371,7 +371,7 @@ const ParentKidEditModal = ({ kid, isOpen, onClose, onSuccess }) => {
                                             {photoDisplay.hasPhoto ? (
                                                 <img
                                                     src={photoDisplay.url}
-                                                    alt="Kid preview"
+                                                    alt={t('addKid.photoAlt', 'Kid preview')}
                                                     className="kid-photo"
                                                 />
                                             ) : (

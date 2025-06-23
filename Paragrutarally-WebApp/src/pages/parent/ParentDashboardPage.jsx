@@ -400,7 +400,7 @@ const ParentDashboardPage = () => {
 
                                                         <div>
                                                             <label style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>
-                                                                {t('kids.capabilities', 'Capabilities')}
+                                                                {t('common.capabilities', 'Capabilities')}
                                                             </label>
                                                             <div style={{ color: 'var(--text-primary)' }}>
                                                                 {getFieldValue(kid, 'personalInfo.capabilities') || t('common.none', 'None')}
@@ -489,7 +489,7 @@ const ParentDashboardPage = () => {
                                                             </label>
                                                             <div>
                                                                 <span className={`status-badge ${getFieldValue(kid, 'signedFormStatus') === 'completed' ? 'ready' : 'pending'}`}>
-                                                                    {getFieldValue(kid, 'signedFormStatus', 'pending')}
+                                                                    {t(`common.${getFieldValue(kid, 'signedFormStatus', 'pending')}`, getFieldValue(kid, 'signedFormStatus', 'pending'))}
                                                                 </span>
                                                             </div>
                                                         </div>

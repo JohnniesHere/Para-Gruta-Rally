@@ -307,7 +307,7 @@ const ParentEventPage = () => {
                         <div className="header-actions">
                             <button className="btn-secondary" onClick={handleRefresh}>
                                 <RefreshCw className="btn-icon" size={18} />
-                                {t('common.refresh', 'Refresh')}
+                                {t('vehicles.refresh', 'Refresh')}
                             </button>
                         </div>
                     </div>
@@ -377,10 +377,10 @@ const ParentEventPage = () => {
                                 value={statusFilter}
                                 onChange={(e) => setStatusFilter(e.target.value)}
                             >
-                                <option value="all">🌈 {t('parentEvents.allEvents', 'All Events')}</option>
-                                <option value="upcoming">🏁 {t('parentEvents.upcoming', 'Upcoming')}</option>
-                                <option value="completed">✅ {t('parentEvents.completed', 'Completed')}</option>
-                                <option value="ongoing">🔄 {t('parentEvents.ongoing', 'Ongoing')}</option>
+                                <option value="all">{t('parentEvents.allEvents', 'All Events')}</option>
+                                <option value="upcoming">{t('parentEvents.upcoming', 'Upcoming')}</option>
+                                <option value="completed">{t('parentEvents.completed', 'Completed')}</option>
+                                <option value="ongoing">{t('parentEvents.ongoing', 'Ongoing')}</option>
                             </select>
                         </div>
 
@@ -390,7 +390,7 @@ const ParentEventPage = () => {
                                 value={locationFilter}
                                 onChange={(e) => setLocationFilter(e.target.value)}
                             >
-                                <option value="all">📍 {t('parentEvents.allLocations', 'All Locations')}</option>
+                                <option value="all">{t('parentEvents.allLocations', 'All Locations')}</option>
                                 {uniqueLocations.map((location, index) => (
                                     <option key={index} value={location.toLowerCase()}>
                                         📍 {location}
@@ -401,17 +401,17 @@ const ParentEventPage = () => {
 
                         <button className="btn-clear" onClick={handleClearFilters}>
                             <Eraser className="btn-icon" size={18} />
-                            {t('common.clearAll', 'Clear All')}
+                            {t('teams.clearAll', 'Clear All')}
                         </button>
                     </div>
 
                     {/* Results Info */}
                     <div className="results-info">
                         <FileSpreadsheet className="results-icon" size={18} />
-                        {t('parentEvents.showing', 'Showing')} {filteredEvents.length} {t('common.of', 'of')} {events.length} {t('parentEvents.eventsLowercase', 'events')}
+                        {t('parentEvents.showing', 'Showing')} {filteredEvents.length} {t('parentEvents.of', 'of')} {events.length} {t('parentEvents.eventsLowercase', 'events')}
                         {statusFilter !== 'all' && <span className="filter-applied"> • {t('parentEvents.status', 'Status')}: {statusFilter}</span>}
-                        {locationFilter !== 'all' && <span className="filter-applied"> • {t('parentEvents.location', 'Location')}: {locationFilter}</span>}
-                        {searchTerm && <span className="search-applied"> • {t('parentEvents.searchLabel', 'Search')}: "{searchTerm}"</span>}
+                        {locationFilter !== 'all' && <span className="filter-applied"> • {t('common.location', 'Location')}: {locationFilter}</span>}
+                        {searchTerm && <span className="search-applied"> • {t('common.search', 'Search')}: "{searchTerm}"</span>}
                     </div>
 
                     {/* Events Table */}
@@ -421,7 +421,7 @@ const ParentEventPage = () => {
                             <tr>
                                 <th><Calendar size={16} style={{ marginRight: '8px' }} />{t('parentEvents.eventInfo', 'Event Info')}</th>
                                 <th>📅 {t('parentEvents.dateTime', 'Date & Time')}</th>
-                                <th><MapPin size={16} style={{ marginRight: '8px' }} />{t('parentEvents.location', 'Location')}</th>
+                                <th><MapPin size={16} style={{ marginRight: '8px' }} />{t('common.location', 'Location')}</th>
                                 <th>👤 {t('parentEvents.organizer', 'Organizer')}</th>
                                 <th>📊 {t('parentEvents.status', 'Status')}</th>
                                 <th>⚡ {t('parentEvents.actions', 'Actions')}</th>

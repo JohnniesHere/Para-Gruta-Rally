@@ -209,7 +209,7 @@ const ParentEventModal = ({ event, isOpen, onClose }) => {
                         <div className="detail-card">
                             <div className="card-header">
                                 <MapPin size={20} />
-                                <h3>{t('parentEvents.location', 'Location')}</h3>
+                                <h3>{t('common.location', 'Location')}</h3>
                             </div>
                             <div className="card-content">
                                 <div className="info-row">
@@ -265,11 +265,11 @@ const ParentEventModal = ({ event, isOpen, onClose }) => {
                                 <div className="card-content">
                                     <div className="info-row">
                                         <span className="label">{t('parentEvents.teamsCount', 'Teams')}:</span>
-                                        <span className="value">{event.participatingTeams.length} teams registered</span>
+                                        <span className="value">{t('parentEventModal.teamsRegistered', '{count} teams registered', { count: event.participatingTeams.length })}</span>
                                     </div>
                                     <div className="teams-list">
                                         {loadingTeams ? (
-                                            <span className="loading-text">Loading team names...</span>
+                                            <span className="loading-text">{t('parentEventModal.loadingTeams', 'Loading team names...')}</span>
                                         ) : (
                                             teamNames.map((teamName, index) => (
                                                 <span key={index} className="team-tag">{teamName}</span>
@@ -323,7 +323,7 @@ const ParentEventModal = ({ event, isOpen, onClose }) => {
                         </button>
                     )}
                     <button className="action-btn secondary-btn" onClick={onClose}>
-                        {t('common.close', 'Close')}
+                        {t('general.close', 'Close')}
                     </button>
                 </footer>
 
