@@ -14,7 +14,6 @@ import { useAuth } from '../../contexts/AuthContext';
 import { usePermissions } from '../../hooks/usePermissions';
 import { useLanguage } from '../../contexts/LanguageContext';
 import Dashboard from '../../components/layout/Dashboard';
-import FirestoreInstructorDebug from '../../components/debug/FirestoreInstructionDebug'; // Add this
 import {
     IconDashboard as DashboardIcon,
     IconUsers as Users,

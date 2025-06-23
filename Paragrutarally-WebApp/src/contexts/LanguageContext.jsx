@@ -3155,6 +3155,7 @@ const translations = {
         'login.googleSignIn': 'התחבר עם גוגל',
         'login.contactUs': 'צור קשר',
         'login.error': 'כשל בהתחברות. אנא בדוק את פרטי ההתחברות שלך.',
+        'login.or': 'או',
 
          // Edit Kid Page (Hebrew)
         'editKid.title': 'עדכן את המידע של {firstName}!',
