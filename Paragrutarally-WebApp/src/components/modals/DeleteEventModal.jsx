@@ -20,7 +20,7 @@ const DeleteEventModal = ({
                               onConfirm,
                               onCancel
                           }) => {
-    const { t } = useLanguage();
+    const { t, isRTL } = useLanguage();
     const { appliedTheme } = useTheme();
 
     if (!isOpen || !eventToDelete) {
@@ -35,8 +35,7 @@ const DeleteEventModal = ({
 
     return (
         <div className={`delete-modal-overlay ${appliedTheme}-mode`} onClick={handleOverlayClick}>
-            <div className="delete-modal-container" onClick={(e) => e.stopPropagation()}>
-                <div className="delete-modal-header">
+            <div className={`delete-modal-container ${appliedTheme}-mode`} dir={isRTL ? 'rtl' : 'ltr'} onClick={(e) => e.stopPropagation()}>                <div className="delete-modal-header">
                     <h2>{t('events.deleteEvent', 'Delete Event')}</h2>
                     <button className="delete-modal-close" onClick={onCancel}>
                         <X size={20} />
@@ -48,7 +47,9 @@ const DeleteEventModal = ({
                         <AlertTriangle className="warning-icon" size={48} />
                         <h3>{t('events.deleteConfirmTitle', 'Are you sure you want to delete this event?')}</h3>
                         <p>
-                            {t('events.deleteConfirmMessage', 'You are about to delete "{eventName}". This action cannot be undone.', { eventName: eventToDelete.name })}
+                            {t('events.deleteConfirmMessage', 'You are about to delete "{eventName}". This action cannot be undone.', {
+                                eventName: eventToDelete.name || t('events.unnamedEvent', 'Unnamed Event')
+                            })}
                         </p>
 
                         {/* Show what will be deleted */}

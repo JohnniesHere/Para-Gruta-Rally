@@ -1,385 +1,578 @@
-// src/utils/validationUtils.js
+// src/utils/validationUtils.js - ENHANCED VERSION WITH TRANSLATION SUPPORT
 
 /**
- * Validate an email address
+ * Email validation with translation support
  * @param {string} email - Email to validate
- * @returns {boolean} - True if email is valid
+ * @param {function} t - Translation function
+ * @returns {string|null} - Error message or null if valid
  */
-export const isValidEmail = (email) => {
-    if (!email) return false;
+export const validateEmail = (email, t) => {
+    if (!email || !email.trim()) {
+        return t('validation.emailRequired', 'Email is required');
+    }
 
-    // Basic email validation regex
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
+    if (!emailRegex.test(email.trim())) {
+        return t('validation.emailInvalid', 'Please enter a valid email address');
+    }
+
+    return null;
 };
 
 /**
- * Validate a phone number
+ * Israeli phone number validation with translation support
  * @param {string} phone - Phone number to validate
- * @returns {boolean} - True if phone is valid
+ * @param {function} t - Translation function
+ * @param {boolean} isRequired - Whether the field is required
+ * @returns {string|null} - Error message or null if valid
  */
-export const isValidPhone = (phone) => {
-    if (!phone) return false;
+export const validatePhone = (phone, t, isRequired = true) => {
+    if (!phone || !phone.trim()) {
+        return isRequired ? t('validation.phoneRequired', 'Phone number is required') : null;
+    }
 
     // Remove all non-digit characters
-    const cleaned = phone.replace(/\D/g, '');
+    const digitsOnly = phone.replace(/\D/g, '');
 
-    // Check if it has 10 digits (US format) or 11 digits with leading 1
-    return cleaned.length === 10 || (cleaned.length === 11 && cleaned[0] === '1');
+    // Israeli phone number validation
+    // Mobile: 050/051/052/053/054/055/056/057/058/059 followed by 7 digits
+    // Landline: Area code (02/03/04/08/09) followed by 7 digits
+    const israeliMobileRegex = /^05[0-9]\d{7}$/;
+    const israeliLandlineRegex = /^0[2-4,8-9]\d{7}$/;
+
+    if (!israeliMobileRegex.test(digitsOnly) && !israeliLandlineRegex.test(digitsOnly)) {
+        return t('validation.phoneInvalid', 'Please enter a valid Israeli phone number (10 digits)');
+    }
+
+    return null;
 };
 
 /**
- * Validate a password strength
- * @param {string} password - Password to validate
- * @returns {Object} - Validation result { isValid, strength, message }
- *  strength: 0 (very weak) to 4 (very strong)
+ * Name validation with Hebrew character support
+ * @param {string} name - Name to validate
+ * @param {function} t - Translation function
+ * @param {string} fieldName - Name of the field for error messages
+ * @param {number} minLength - Minimum length required
+ * @returns {string|null} - Error message or null if valid
  */
-export const validatePassword = (password) => {
+export const validateName = (name, t, fieldName = 'name', minLength = 2) => {
+    if (!name || !name.trim()) {
+        return t('validation.fieldRequired', `${fieldName} is required`, { field: fieldName });
+    }
+
+    if (name.trim().length < minLength) {
+        return t('validation.minLength', `${fieldName} must be at least {min} characters`, {
+            field: fieldName,
+            min: minLength
+        });
+    }
+
+    // Allow Hebrew, English letters, spaces, hyphens, and apostrophes
+    const validNameRegex = /^[\u0590-\u05FFa-zA-Z\s'-]+$/;
+    if (!validNameRegex.test(name.trim())) {
+        return t('validation.nameInvalidChars', `${fieldName} contains invalid characters`);
+    }
+
+    return null;
+};
+
+/**
+ * Required field validation
+ * @param {any} value - Value to validate
+ * @param {function} t - Translation function
+ * @param {string} fieldName - Name of the field for error messages
+ * @returns {string|null} - Error message or null if valid
+ */
+export const validateRequired = (value, t, fieldName) => {
+    if (!value || (typeof value === 'string' && !value.trim())) {
+        return t('validation.fieldRequired', `${fieldName} is required`, { field: fieldName });
+    }
+    return null;
+};
+
+/**
+ * Date validation with translation support
+ * @param {string|Date} date - Date to validate
+ * @param {function} t - Translation function
+ * @param {Object} options - Validation options
+ * @returns {string|null} - Error message or null if valid
+ */
+export const validateDate = (date, t, options = {}) => {
+    const { fieldName = 'Date', required = false, mustBePast = false, mustBeFuture = false } = options;
+
+    if (!date) {
+        return required ? t('validation.fieldRequired', `${fieldName} is required`, { field: fieldName }) : null;
+    }
+
+    const dateObj = new Date(date);
+    if (isNaN(dateObj.getTime())) {
+        return t('validation.dateInvalid', 'Please enter a valid date');
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (mustBePast && dateObj >= today) {
+        return t('validation.dateMustBePast', 'Date must be in the past');
+    }
+
+    if (mustBeFuture && dateObj <= today) {
+        return t('validation.dateMustBeFuture', 'Date must be in the future');
+    }
+
+    return null;
+};
+
+/**
+ * Password validation with translation support
+ * @param {string} password - Password to validate
+ * @param {function} t - Translation function
+ * @returns {Object} - Validation result with isValid, strength, and message
+ */
+export const validatePassword = (password, t) => {
     if (!password) {
         return {
             isValid: false,
             strength: 0,
-            message: 'Password is required'
+            message: t('validation.passwordRequired', 'Password is required')
         };
     }
 
     let strength = 0;
-    let message = '';
+    const checks = {
+        length: password.length >= 8,
+        lowercase: /[a-z]/.test(password),
+        uppercase: /[A-Z]/.test(password),
+        number: /[0-9]/.test(password),
+        special: /[^A-Za-z0-9]/.test(password)
+    };
 
-    // Length check
-    if (password.length < 8) {
-        message = 'Password must be at least 8 characters long';
-    } else {
-        strength += 1;
-    }
+    Object.values(checks).forEach(check => {
+        if (check) strength++;
+    });
 
-    // Contains lowercase
-    if (/[a-z]/.test(password)) {
-        strength += 1;
-    }
-
-    // Contains uppercase
-    if (/[A-Z]/.test(password)) {
-        strength += 1;
-    }
-
-    // Contains number
-    if (/[0-9]/.test(password)) {
-        strength += 1;
-    }
-
-    // Contains special character
-    if (/[^A-Za-z0-9]/.test(password)) {
-        strength += 1;
-    }
-
-    // Set message based on strength
+    let message;
     if (strength === 0) {
-        message = 'Very weak password';
+        message = t('validation.passwordVeryWeak', 'Very weak password');
     } else if (strength === 1) {
-        message = 'Weak password';
+        message = t('validation.passwordWeak', 'Weak password');
     } else if (strength === 2) {
-        message = 'Fair password';
+        message = t('validation.passwordFair', 'Fair password');
     } else if (strength === 3) {
-        message = 'Good password';
+        message = t('validation.passwordGood', 'Good password');
     } else if (strength === 4) {
-        message = 'Strong password';
+        message = t('validation.passwordStrong', 'Strong password');
     } else {
-        message = 'Very strong password';
+        message = t('validation.passwordVeryStrong', 'Very strong password');
+    }
+
+    if (!checks.length) {
+        message = t('validation.passwordMinLength', 'Password must be at least 8 characters long');
     }
 
     return {
-        isValid: strength >= 3,
+        isValid: strength >= 3 && checks.length,
         strength,
-        message
+        message,
+        checks
     };
 };
 
 /**
- * Validate a date is in the future
- * @param {Date|string} date - Date to validate
- * @returns {boolean} - True if date is valid and in the future
+ * Role validation
+ * @param {string} role - Role to validate
+ * @param {function} t - Translation function
+ * @param {Array} allowedRoles - List of allowed roles
+ * @returns {string|null} - Error message or null if valid
  */
-export const isDateInFuture = (date) => {
-    if (!date) return false;
-
-    let dateObj;
-
-    if (date instanceof Date) {
-        dateObj = date;
-    } else if (typeof date === 'string') {
-        dateObj = new Date(date);
-    } else {
-        return false;
+export const validateRole = (role, t, allowedRoles = ['admin', 'instructor', 'parent', 'host']) => {
+    if (!role) {
+        return t('validation.roleRequired', 'Role is required');
     }
 
-    if (isNaN(dateObj.getTime())) {
-        return false;
+    if (!allowedRoles.includes(role)) {
+        return t('validation.roleInvalid', 'Please select a valid role');
     }
 
-    return dateObj > new Date();
+    return null;
 };
 
 /**
- * Validate a date is in the past
- * @param {Date|string} date - Date to validate
- * @returns {boolean} - True if date is valid and in the past
+ * Comprehensive form validation hook that uses translation
  */
-export const isDateInPast = (date) => {
-    if (!date) return false;
+export const useFormValidation = () => {
+    const validateField = (fieldName, value, rules = {}, t) => {
+        // Handle nested field names (e.g., 'personalInfo.firstName')
+        const displayName = rules.displayName || t(`fields.${fieldName}`, fieldName);
 
-    let dateObj;
+        switch (fieldName) {
+            case 'email':
+                return validateEmail(value, t);
 
-    if (date instanceof Date) {
-        dateObj = date;
-    } else if (typeof date === 'string') {
-        dateObj = new Date(date);
-    } else {
-        return false;
-    }
+            case 'phone':
+                return validatePhone(value, t, rules.required);
 
-    if (isNaN(dateObj.getTime())) {
-        return false;
-    }
+            case 'firstName':
+            case 'lastName':
+            case 'displayName':
+            case 'name':
+            case 'parentName':
+                return validateName(value, t, displayName, rules.minLength || 2);
 
-    return dateObj < new Date();
-};
+            case 'password':
+                { const result = validatePassword(value, t);
+                return result.isValid ? null : result.message; }
 
-/**
- * Validate a string is not empty
- * @param {string} value - String to validate
- * @returns {boolean} - True if string is not empty
- */
-export const isNotEmpty = (value) => {
-    return value !== null && value !== undefined && value.trim() !== '';
-};
-
-/**
- * Validate a number is within a range
- * @param {number} value - Number to validate
- * @param {number} min - Minimum value
- * @param {number} max - Maximum value
- * @returns {boolean} - True if number is within range
- */
-export const isNumberInRange = (value, min, max) => {
-    if (value === null || value === undefined || isNaN(parseFloat(value))) {
-        return false;
-    }
-
-    const num = parseFloat(value);
-
-    if (min !== undefined && max !== undefined) {
-        return num >= min && num <= max;
-    } else if (min !== undefined) {
-        return num >= min;
-    } else if (max !== undefined) {
-        return num <= max;
-    }
-
-    return true; // If no range specified
-};
-
-/**
- * Validate a URL
- * @param {string} url - URL to validate
- * @returns {boolean} - True if URL is valid
- */
-export const isValidUrl = (url) => {
-    if (!url) return false;
-
-    try {
-        new URL(url);
-        return true;
-    } catch (error) {
-        return false;
-    }
-};
-
-/**
- * Validate form fields against a schema
- * @param {Object} values - Form values to validate
- * @param {Object} schema - Validation schema with field rules
- * @returns {Object} - Object with field errors
- */
-export const validateForm = (values, schema) => {
-    const errors = {};
-
-    if (!values || !schema) return errors;
-
-    Object.keys(schema).forEach(field => {
-        const rules = schema[field];
-        const value = values[field];
-
-        // Required check
-        if (rules.required && !isNotEmpty(value)) {
-            errors[field] = rules.requiredMessage || 'This field is required';
-            return; // Skip other validations if empty
-        }
-
-        // Skip other validations if empty and not required
-        if (value === null || value === undefined || value === '') {
-            return;
-        }
-
-        // Minimum length check
-        if (rules.minLength && value.length < rules.minLength) {
-            errors[field] = rules.minLengthMessage || `Minimum length is ${rules.minLength} characters`;
-            return;
-        }
-
-        // Maximum length check
-        if (rules.maxLength && value.length > rules.maxLength) {
-            errors[field] = rules.maxLengthMessage || `Maximum length is ${rules.maxLength} characters`;
-            return;
-        }
-
-        // Pattern check
-        if (rules.pattern && !rules.pattern.test(value)) {
-            errors[field] = rules.patternMessage || 'Invalid format';
-            return;
-        }
-
-        // Email check
-        if (rules.email && !isValidEmail(value)) {
-            errors[field] = rules.emailMessage || 'Invalid email address';
-            return;
-        }
-
-        // Number range check
-        if (rules.min !== undefined || rules.max !== undefined) {
-            if (!isNumberInRange(value, rules.min, rules.max)) {
-                if (rules.min !== undefined && rules.max !== undefined) {
-                    errors[field] = rules.rangeMessage || `Value must be between ${rules.min} and ${rules.max}`;
-                } else if (rules.min !== undefined) {
-                    errors[field] = rules.minMessage || `Value must be at least ${rules.min}`;
-                } else {
-                    errors[field] = rules.maxMessage || `Value must be at most ${rules.max}`;
+            case 'confirmPassword':
+                if (rules.matchField && value !== rules.matchValue) {
+                    return t('validation.passwordsDoNotMatch', 'Passwords do not match');
                 }
-                return;
+                return null;
+
+            case 'role':
+                return validateRole(value, t, rules.allowedValues);
+
+            case 'dateOfBirth':
+                return validateDate(value, t, {
+                    fieldName: displayName,
+                    required: rules.required,
+                    mustBePast: true
+                });
+
+            case 'eventDate':
+                return validateDate(value, t, {
+                    fieldName: displayName,
+                    required: rules.required,
+                    mustBeFuture: true
+                });
+
+            default:
+                // Generic required validation
+                if (rules.required) {
+                    return validateRequired(value, t, displayName);
+                }
+                return null;
+        }
+    };
+
+    const validateForm = (formData, validationRules, t) => {
+        const errors = {};
+
+        for (const [fieldName, rules] of Object.entries(validationRules)) {
+            // Handle nested field paths (e.g., 'personalInfo.firstName')
+            const value = fieldName.includes('.')
+                ? fieldName.split('.').reduce((obj, key) => obj?.[key], formData)
+                : formData[fieldName];
+
+            const error = validateField(fieldName, value, rules, t);
+            if (error) {
+                errors[fieldName] = error;
             }
         }
 
-        // Custom validation
-        if (rules.validate && typeof rules.validate === 'function') {
-            const validationResult = rules.validate(value, values);
-            if (validationResult !== true) {
-                errors[field] = validationResult || 'Invalid value';
-            }
-        }
-    });
+        return {
+            isValid: Object.keys(errors).length === 0,
+            errors
+        };
+    };
 
-    return errors;
+    return { validateField, validateForm };
 };
 
 /**
- * Common validation schemas
+ * Common validation rules for different forms
  */
-export const validationSchemas = {
-    // Login form validation
-    login: {
-        email: {
-            required: true,
-            requiredMessage: 'Email is required',
-            email: true,
-            emailMessage: 'Please enter a valid email address'
-        },
-        password: {
-            required: true,
-            requiredMessage: 'Password is required'
-        }
-    },
-
-    // Register form validation
-    register: {
-        email: {
-            required: true,
-            requiredMessage: 'Email is required',
-            email: true,
-            emailMessage: 'Please enter a valid email address'
-        },
-        password: {
-            required: true,
-            requiredMessage: 'Password is required',
-            minLength: 8,
-            minLengthMessage: 'Password must be at least 8 characters long',
-            validate: (value) => {
-                const result = validatePassword(value);
-                return result.isValid || result.message;
-            }
-        },
-        confirmPassword: {
-            required: true,
-            requiredMessage: 'Please confirm your password',
-            validate: (value, values) => {
-                return values.password === value || 'Passwords do not match';
-            }
-        },
+export const validationRules = {
+    // User creation/editing
+    user: {
         displayName: {
             required: true,
-            requiredMessage: 'Display name is required'
-        }
-    },
-
-    // Kid form validation
-    kid: {
-        firstName: {
-            required: true,
-            requiredMessage: 'First name is required'
-        },
-        lastName: {
-            required: true,
-            requiredMessage: 'Last name is required'
-        },
-        age: {
-            required: true,
-            requiredMessage: 'Age is required',
-            min: 0,
-            max: 100,
-            rangeMessage: 'Age must be between 0 and 100'
+            minLength: 2,
+            displayName: 'Display Name'
         },
         email: {
-            email: true,
-            emailMessage: 'Please enter a valid email address'
+            required: true,
+            displayName: 'Email'
+        },
+        name: {
+            required: true,
+            minLength: 2,
+            displayName: 'Full Name'
         },
         phone: {
-            validate: (value) => {
-                if (!value) return true;
-                return isValidPhone(value) || 'Please enter a valid phone number';
-            }
+            required: true,
+            displayName: 'Phone Number'
+        },
+        role: {
+            required: true,
+            allowedValues: ['admin', 'instructor', 'parent', 'host'],
+            displayName: 'Role'
         }
     },
 
-    // Team form validation
+    // Kid registration/editing
+    kid: {
+        participantNumber: {
+            required: true,
+            displayName: 'Participant Number'
+        },
+        'personalInfo.firstName': {
+            required: true,
+            minLength: 2,
+            displayName: 'First Name'
+        },
+        'personalInfo.lastName': {
+            required: true,
+            minLength: 2,
+            displayName: 'Last Name'
+        },
+        'personalInfo.dateOfBirth': {
+            required: true,
+            displayName: 'Date of Birth'
+        },
+        'parentInfo.email': {
+            required: true,
+            displayName: 'Parent Email'
+        },
+        'parentInfo.phone': {
+            required: true,
+            displayName: 'Parent Phone'
+        },
+        'parentInfo.name': {
+            required: true,
+            minLength: 2,
+            displayName: 'Parent Name'
+        }
+    },
+
+    // Team creation/editing
     team: {
         name: {
             required: true,
-            requiredMessage: 'Team name is required'
+            minLength: 2,
+            displayName: 'Team Name'
         },
         maxCapacity: {
-            min: 1,
-            minMessage: 'Maximum capacity must be at least 1'
+            required: true,
+            displayName: 'Maximum Capacity'
+        },
+        description: {
+            required: false,
+            maxLength: 500,
+            displayName: 'Team Description'
+        }
+    },
+    // Vehicle creation/editing
+    vehicle: {
+        make: {
+            required: true,
+            minLength: 2,
+            displayName: 'Vehicle Make'
+        },
+        model: {
+            required: true,
+            minLength: 2,
+            displayName: 'Vehicle Model'
+        },
+        licensePlate: {
+            required: true,
+            minLength: 2,
+            displayName: 'License Plate'
+        },
+        batteryType: {
+            required: false,
+            displayName: 'Battery Type'
+        },
+        driveType: {
+            required: false,
+            displayName: 'Drive Type'
+        },
+        steeringType: {
+            required: false,
+            displayName: 'Steering Type'
+        }
+    },
+    // Event creation/editing
+    event: {
+        name: {
+            required: true,
+            minLength: 3,
+            displayName: 'Event Name'
+        },
+        description: {
+            required: false,
+            maxLength: 1000,
+            displayName: 'Event Description'
+        },
+        date: {
+            required: true,
+            displayName: 'Event Date'
+        },
+        time: {
+            required: false,
+            displayName: 'Event Time'
+        },
+        location: {
+            required: true,
+            minLength: 3,
+            displayName: 'Event Location'
+        },
+        address: {
+            required: false,
+            displayName: 'Event Address'
+        },
+        organizer: {
+            required: false,
+            displayName: 'Event Organizer'
+        },
+        eventType: {
+            required: true,
+            allowedValues: ['race', 'newcomers', 'social'],
+            displayName: 'Event Type'
+        }
+    },
+
+    // Login form
+    login: {
+        email: {
+            required: true,
+            displayName: 'Email'
+        },
+        password: {
+            required: true,
+            displayName: 'Password'
+        }
+    },
+    // Parent kid editing (limited fields)
+    parentKidEdit: {
+        'personalInfo.firstName': {
+            required: true,
+            minLength: 2,
+            displayName: 'First Name'
+        },
+        'personalInfo.lastName': {
+            required: true,
+            minLength: 2,
+            displayName: 'Last Name'
+        },
+        'personalInfo.address': {
+            required: false,
+            displayName: 'Address'
+        },
+        'personalInfo.announcersNotes': {
+            required: false,
+            maxLength: 500,
+            displayName: 'Announcer Notes'
+        },
+        'parentInfo.name': {
+            required: true,
+            minLength: 2,
+            displayName: 'Parent Name'
+        },
+        'parentInfo.phone': {
+            required: true,
+            displayName: 'Parent Phone'
+        },
+        'parentInfo.grandparentsInfo.names': {
+            required: false,
+            displayName: 'Grandparents Names'
+        },
+        'parentInfo.grandparentsInfo.phone': {
+            required: false,
+            displayName: 'Grandparents Phone'
+        }
+    },
+    // Export forms validation
+    export: {
+        statusFilter: {
+            required: true,
+            allowedValues: ['all', 'active', 'inactive', 'pending', 'completed', 'cancelled'],
+            displayName: 'Status Filter'
+        },
+        teamFilter: {
+            required: false,
+            displayName: 'Team Filter'
+        },
+        includeTimestamps: {
+            required: false,
+            displayName: 'Include Timestamps'
+        }
+    },
+
+    // Team assignment validation
+    teamAssignment: {
+        teamId: {
+            required: true,
+            displayName: 'Team'
+        },
+        kidIds: {
+            required: false,
+            displayName: 'Selected Kids'
+        }
+    },
+
+    // Contact/Legal forms
+    contact: {
+        name: {
+            required: true,
+            minLength: 2,
+            displayName: 'Name'
+        },
+        email: {
+            required: true,
+            displayName: 'Email'
+        },
+        subject: {
+            required: true,
+            minLength: 5,
+            displayName: 'Subject'
+        },
+        message: {
+            required: true,
+            minLength: 10,
+            maxLength: 1000,
+            displayName: 'Message'
         }
     }
 };
 
 /**
- * Format validation errors as a string
- * @param {Object} errors - Validation errors object
- * @returns {string} - Formatted error message
+ * Utility to clean phone number input (remove non-digits)
+ * @param {string} phone - Phone number to clean
+ * @returns {string} - Cleaned phone number
  */
-export const formatValidationErrors = (errors) => {
-    if (!errors || Object.keys(errors).length === 0) {
-        return '';
-    }
-
-    return Object.values(errors).join(', ');
+export const cleanPhoneNumber = (phone) => {
+    return phone ? phone.replace(/\D/g, '') : '';
 };
 
 /**
- * Check if a form has validation errors
- * @param {Object} errors - Validation errors object
- * @returns {boolean} - True if form has errors
+ * Utility to format phone number for display
+ * @param {string} phone - Phone number to format
+ * @returns {string} - Formatted phone number
+ */
+export const formatPhoneNumber = (phone) => {
+    const cleaned = cleanPhoneNumber(phone);
+    if (cleaned.length === 10) {
+        return `${cleaned.slice(0, 3)}-${cleaned.slice(3, 6)}-${cleaned.slice(6)}`;
+    }
+    return cleaned;
+};
+
+/**
+ * Check if form has any errors
+ * @param {Object} errors - Errors object
+ * @returns {boolean} - True if there are errors
  */
 export const hasErrors = (errors) => {
     return errors && Object.keys(errors).length > 0;
+};
+
+/**
+ * Get first error message from errors object
+ * @param {Object} errors - Errors object
+ * @returns {string|null} - First error message or null
+ */
+export const getFirstError = (errors) => {
+    if (!hasErrors(errors)) return null;
+    return Object.values(errors)[0];
 };

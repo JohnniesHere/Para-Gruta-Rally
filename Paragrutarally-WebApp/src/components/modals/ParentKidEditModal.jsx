@@ -15,9 +15,9 @@ import {
     IconUser as User,
     IconUsers as Users
 } from '@tabler/icons-react';
-import { updateKid } from '../../services/kidService';
-import { uploadKidPhoto, deleteKidPhoto, getKidPhotoInfo } from '../../services/kidPhotoService';
-import { validateKid } from '../../schemas/kidSchema';
+import { updateKid } from '@/services/kidService.js';
+import { uploadKidPhoto, deleteKidPhoto, getKidPhotoInfo } from '@/services/kidPhotoService.js';
+import { validateKid } from '@/schemas/kidSchema.js';
 import './ParentKidEditModal.css';
 
 const ParentKidEditModal = ({ kid, isOpen, onClose, onSuccess }) => {

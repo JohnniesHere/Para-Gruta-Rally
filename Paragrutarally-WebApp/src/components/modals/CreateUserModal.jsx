@@ -1,14 +1,22 @@
-// src/components/modals/CreateUserModal.jsx - FIXED VERSION
+// src/components/modals/CreateUserModal.jsx - IMPROVED VERSION
 import React, { useState } from 'react';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import {doc, setDoc, serverTimestamp, getDoc} from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp, getDoc } from 'firebase/firestore';
 import { initializeApp, deleteApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { db} from '@/firebase/config.js';
+import { db } from '@/firebase/config.js';
 import { useLanguage } from '../../contexts/LanguageContext';
+import {
+    useFormValidation,
+    validationRules,
+    cleanPhoneNumber,
+    hasErrors
+} from '../../utils/validationUtils';
 
 const CreateUserModal = ({ isOpen, onClose, onUserCreated }) => {
     const { t, isRTL } = useLanguage();
+    const { validateForm } = useFormValidation();
+
     const [formData, setFormData] = useState({
         displayName: '',
         email: '',
@@ -16,100 +24,68 @@ const CreateUserModal = ({ isOpen, onClose, onUserCreated }) => {
         phone: '',
         role: 'parent'
     });
+
     const [errors, setErrors] = useState({});
     const [isLoading, setIsLoading] = useState(false);
 
-    const validateForm = () => {
-        const newErrors = {};
+    // Real-time field validation
+    const validateSingleField = (fieldName, value) => {
+        const rules = validationRules.user;
+        const fieldRules = rules[fieldName];
 
-        // Display name validation
-        if (!formData.displayName.trim()) {
-            newErrors.displayName = t('users.displayNameRequired', 'Display name is required');
-        } else if (formData.displayName.trim().length < 2) {
-            newErrors.displayName = t('users.displayNameMinLength', 'Display name must be at least 2 characters');
-        }
+        if (!fieldRules) return null;
 
-        // Email validation
-        if (!formData.email.trim()) {
-            newErrors.email = t('users.emailRequired', 'Email is required');
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-            newErrors.email = t('users.emailInvalid', 'Please enter a valid email address');
-        }
+        // Use the validation from utils
+        const singleFieldData = { [fieldName]: value };
+        const singleFieldRules = { [fieldName]: fieldRules };
+        const result = validateForm(singleFieldData, singleFieldRules, t);
 
-        // Full name validation
-        if (!formData.name.trim()) {
-            newErrors.name = t('users.nameRequired', 'Name is required');
-        } else if (formData.name.trim().length < 2) {
-            newErrors.name = t('users.nameMinLength', 'Full name must be at least 2 characters');
-        }
-
-        // Phone validation - exactly 10 digits
-        if (!formData.phone.trim()) {
-            newErrors.phone = t('users.phoneRequired', 'Phone number is required');
-        } else if (!/^\d+$/.test(formData.phone.trim())) {
-            newErrors.phone = t('users.phoneOnlyNumbers', 'Phone number must contain only numbers');
-        } else if (formData.phone.trim().length !== 10) {
-            newErrors.phone = t('users.phoneInvalid', 'Phone number must be exactly 10 digits');
-        }
-
-        // Role validation
-        if (!formData.role) {
-            newErrors.role = t('users.roleRequired', 'Role is required');
-        }
-
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
+        return result.errors[fieldName] || null;
     };
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
+        let processedValue = value;
 
         // Special handling for phone number - only allow digits
         if (name === 'phone') {
-            const numbersOnly = value.replace(/[^\d]/g, '');
-            setFormData(prev => ({
-                ...prev,
-                [name]: numbersOnly
-            }));
-
-            // Real-time validation for phone
-            if (numbersOnly.length > 0 && numbersOnly.length !== 10) {
-                setErrors(prev => ({
-                    ...prev,
-                    phone: t('users.phoneInvalid', 'Phone number must be exactly 10 digits')
-                }));
-            } else {
-                // Clear phone error if it's valid
-                setErrors(prev => {
-                    const newErrors = { ...prev };
-                    delete newErrors.phone;
-                    return newErrors;
-                });
+            processedValue = cleanPhoneNumber(value);
+            // Limit to 10 digits
+            if (processedValue.length > 10) {
+                processedValue = processedValue.slice(0, 10);
             }
-        } else {
-            setFormData(prev => ({
-                ...prev,
-                [name]: value
-            }));
         }
 
-        // Clear error when user starts typing (for non-phone fields)
-        if (errors[name] && name !== 'phone') {
-            setErrors(prev => ({
-                ...prev,
-                [name]: ''
-            }));
-        }
+        setFormData(prev => ({
+            ...prev,
+            [name]: processedValue
+        }));
+
+        // Real-time validation
+        const fieldError = validateSingleField(name, processedValue);
+        setErrors(prev => ({
+            ...prev,
+            [name]: fieldError
+        }));
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!validateForm()) {
+        // Validate entire form
+        const validation = validateForm(formData, validationRules.user, t);
+
+        if (!validation.isValid) {
+            setErrors(validation.errors);
+
+            // Show alert with first error for better UX
+            const firstError = Object.values(validation.errors)[0];
+            alert(t('validation.pleaseFixErrors', 'Please fix the following errors:') + '\n' + firstError);
             return;
         }
 
         setIsLoading(true);
+        setErrors({}); // Clear any previous errors
 
         try {
             console.log('Creating user with data:', formData);
@@ -134,7 +110,7 @@ const CreateUserModal = ({ isOpen, onClose, onUserCreated }) => {
                 const userCredential = await createUserWithEmailAndPassword(
                     secondaryAuth,
                     formData.email,
-                    '123456' // Default password
+                    '123456' // Default password - consider making this configurable
                 );
 
                 const uid = userCredential.user.uid;
@@ -142,7 +118,7 @@ const CreateUserModal = ({ isOpen, onClose, onUserCreated }) => {
 
                 console.log('User created in auth, UID:', uid);
 
-                // FIXED: Create comprehensive user document
+                // Create comprehensive user document
                 const userDoc = {
                     createdAt: now,
                     displayName: formData.displayName.trim(),
@@ -150,10 +126,9 @@ const CreateUserModal = ({ isOpen, onClose, onUserCreated }) => {
                     lastLogin: now,
                     name: formData.name.trim(),
                     phone: formData.phone.trim(),
-                    role: formData.role, // Make sure this is set correctly
+                    role: formData.role,
                     updatedAt: now,
-                    // Add any other fields that might be expected
-                    authProvider: 'email' // Track how user was created
+                    authProvider: 'email'
                 };
 
                 console.log('Creating user document with data:', userDoc);
@@ -162,12 +137,11 @@ const CreateUserModal = ({ isOpen, onClose, onUserCreated }) => {
                 await setDoc(doc(db, 'users', uid), userDoc);
                 console.log('User document created in Firestore with UID:', uid);
 
-                // VERIFICATION: Read back the document to confirm it was created correctly
+                // Verification: Read back the document
                 const verificationDoc = await getDoc(doc(db, 'users', uid));
                 if (verificationDoc.exists()) {
                     const verificationData = verificationDoc.data();
                     console.log('✅ VERIFICATION: Document created successfully:', verificationData);
-                    console.log('✅ VERIFICATION: Role in document:', verificationData.role);
                 } else {
                     console.error('❌ VERIFICATION: Document was not created properly');
                     throw new Error('User document verification failed');
@@ -186,7 +160,7 @@ const CreateUserModal = ({ isOpen, onClose, onUserCreated }) => {
                 });
                 setErrors({});
 
-                // Show success message
+                // Show success message with translations
                 alert(
                     `✅ ${t('users.createSuccess', 'SUCCESS!')}\n\n` +
                     `${t('users.userCreated', 'User has been created successfully!')}\n\n` +
@@ -196,7 +170,7 @@ const CreateUserModal = ({ isOpen, onClose, onUserCreated }) => {
                     `${t('users.defaultPassword', 'Default password')}: 123456`
                 );
 
-                // Notify parent and close
+                // Notify parent component
                 if (onUserCreated) {
                     onUserCreated();
                 }
@@ -215,7 +189,7 @@ const CreateUserModal = ({ isOpen, onClose, onUserCreated }) => {
         } catch (error) {
             console.error('Error creating user:', error);
 
-            // Handle specific Firebase errors
+            // Handle specific Firebase errors with proper translations
             if (error.code === 'auth/email-already-in-use') {
                 setErrors({ email: t('users.emailInUse', 'This email is already registered') });
             } else if (error.code === 'auth/invalid-email') {
@@ -224,7 +198,7 @@ const CreateUserModal = ({ isOpen, onClose, onUserCreated }) => {
                 setErrors({ general: t('users.weakPassword', 'Password is too weak') });
             } else if (error.code === 'app/duplicate-app') {
                 setErrors({
-                    general: t('users.tryAgain', 'Please wait a moment and try again. (App instance conflict)')
+                    general: t('users.tryAgain', 'Please wait a moment and try again.')
                 });
             } else {
                 setErrors({
@@ -262,6 +236,7 @@ const CreateUserModal = ({ isOpen, onClose, onUserCreated }) => {
                         onClick={handleClose}
                         disabled={isLoading}
                         type="button"
+                        aria-label={t('common.close', 'Close')}
                     >
                         ×
                     </button>
@@ -270,13 +245,15 @@ const CreateUserModal = ({ isOpen, onClose, onUserCreated }) => {
                 <div className="modal-body">
                     <form onSubmit={handleSubmit} className={isLoading ? 'loading' : ''}>
                         {errors.general && (
-                            <div className="error-message" style={{ marginBottom: '20px', textAlign: 'center' }}>
+                            <div className="error-message general-error" role="alert">
                                 {errors.general}
                             </div>
                         )}
 
                         <div className={`form-group ${errors.displayName ? 'error' : ''}`}>
-                            <label htmlFor="displayName">{t('users.displayName', 'Display Name')} *</label>
+                            <label htmlFor="displayName">
+                                {t('users.displayName', 'Display Name')} *
+                            </label>
                             <input
                                 type="text"
                                 id="displayName"
@@ -285,14 +262,20 @@ const CreateUserModal = ({ isOpen, onClose, onUserCreated }) => {
                                 onChange={handleInputChange}
                                 disabled={isLoading}
                                 placeholder={t('users.displayNamePlaceholder', 'Enter display name')}
+                                aria-describedby={errors.displayName ? 'displayName-error' : undefined}
+                                aria-invalid={!!errors.displayName}
                             />
                             {errors.displayName && (
-                                <div className="error-message">{errors.displayName}</div>
+                                <div id="displayName-error" className="error-message" role="alert">
+                                    {errors.displayName}
+                                </div>
                             )}
                         </div>
 
                         <div className={`form-group ${errors.email ? 'error' : ''}`}>
-                            <label htmlFor="email">{t('users.emailAddress', 'Email Address')} *</label>
+                            <label htmlFor="email">
+                                {t('users.emailAddress', 'Email Address')} *
+                            </label>
                             <input
                                 type="email"
                                 id="email"
@@ -301,20 +284,20 @@ const CreateUserModal = ({ isOpen, onClose, onUserCreated }) => {
                                 onChange={handleInputChange}
                                 disabled={isLoading}
                                 placeholder={t('users.emailPlaceholder', 'Enter email address')}
-                                onInvalid={(e) => {
-                                    e.target.setCustomValidity(t('users.emailInvalid'));
-                                }}
-                                onInput={(e) => {
-                                    e.target.setCustomValidity('');
-                                }}
+                                aria-describedby={errors.email ? 'email-error' : undefined}
+                                aria-invalid={!!errors.email}
                             />
                             {errors.email && (
-                                <div className="error-message">{errors.email}</div>
+                                <div id="email-error" className="error-message" role="alert">
+                                    {errors.email}
+                                </div>
                             )}
                         </div>
 
                         <div className={`form-group ${errors.name ? 'error' : ''}`}>
-                            <label htmlFor="name">{t('users.fullName', 'Full Name')} *</label>
+                            <label htmlFor="name">
+                                {t('users.fullName', 'Full Name')} *
+                            </label>
                             <input
                                 type="text"
                                 id="name"
@@ -323,14 +306,20 @@ const CreateUserModal = ({ isOpen, onClose, onUserCreated }) => {
                                 onChange={handleInputChange}
                                 disabled={isLoading}
                                 placeholder={t('users.fullNamePlaceholder', 'Enter full name')}
+                                aria-describedby={errors.name ? 'name-error' : undefined}
+                                aria-invalid={!!errors.name}
                             />
                             {errors.name && (
-                                <div className="error-message">{errors.name}</div>
+                                <div id="name-error" className="error-message" role="alert">
+                                    {errors.name}
+                                </div>
                             )}
                         </div>
 
                         <div className={`form-group ${errors.phone ? 'error' : ''}`}>
-                            <label htmlFor="phone">{t('users.phoneNumber', 'Phone Number')} *</label>
+                            <label htmlFor="phone">
+                                {t('users.phoneNumber', 'Phone Number')} *
+                            </label>
                             <input
                                 type="tel"
                                 id="phone"
@@ -340,27 +329,31 @@ const CreateUserModal = ({ isOpen, onClose, onUserCreated }) => {
                                 disabled={isLoading}
                                 placeholder={t('users.phoneNumberPlaceholder', 'Enter phone number')}
                                 maxLength="10"
-                                pattern="[0-9]{10}"
-                                onInvalid={(e) => {
-                                    e.target.setCustomValidity(t('users.phoneInvalid'));
-                                }}
-                                onInput={(e) => {
-                                    e.target.setCustomValidity('');
-                                }}
+                                aria-describedby={errors.phone ? 'phone-error' : undefined}
+                                aria-invalid={!!errors.phone}
                             />
                             {errors.phone && (
-                                <div className="error-message">{errors.phone}</div>
+                                <div id="phone-error" className="error-message" role="alert">
+                                    {errors.phone}
+                                </div>
                             )}
+                            <small className="field-hint">
+                                {t('users.phoneHint', 'Israeli phone number (10 digits)')}
+                            </small>
                         </div>
 
                         <div className={`form-group ${errors.role ? 'error' : ''}`}>
-                            <label htmlFor="role">{t('users.role', 'Role')} *</label>
+                            <label htmlFor="role">
+                                {t('users.role', 'Role')} *
+                            </label>
                             <select
                                 id="role"
                                 name="role"
                                 value={formData.role}
                                 onChange={handleInputChange}
                                 disabled={isLoading}
+                                aria-describedby={errors.role ? 'role-error' : undefined}
+                                aria-invalid={!!errors.role}
                             >
                                 <option value="parent">{t('users.parent', 'Parent')}</option>
                                 <option value="instructor">{t('users.instructor', 'Instructor')}</option>
@@ -368,7 +361,9 @@ const CreateUserModal = ({ isOpen, onClose, onUserCreated }) => {
                                 <option value="host">{t('users.host', 'Host')}</option>
                             </select>
                             {errors.role && (
-                                <div className="error-message">{errors.role}</div>
+                                <div id="role-error" className="error-message" role="alert">
+                                    {errors.role}
+                                </div>
                             )}
                         </div>
                     </form>
@@ -387,9 +382,16 @@ const CreateUserModal = ({ isOpen, onClose, onUserCreated }) => {
                         type="submit"
                         className="btn-primary"
                         onClick={handleSubmit}
-                        disabled={isLoading}
+                        disabled={isLoading || hasErrors(errors)}
                     >
-                        {isLoading ? t('users.creating', 'Creating...') : t('users.createUser', 'Create User')}
+                        {isLoading ? (
+                            <>
+                                <span className="loading-spinner" aria-hidden="true"></span>
+                                {t('users.creating', 'Creating...')}
+                            </>
+                        ) : (
+                            t('users.createUser', 'Create User')
+                        )}
                     </button>
                 </div>
             </div>

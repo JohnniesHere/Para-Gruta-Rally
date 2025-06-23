@@ -10,7 +10,28 @@ export const LANGUAGES = {
 // Translations object - COMPLETE WITH ALL YOUR EXISTING and NEW TRANSLATIONS
 const translations = {
     en: {
-           // Common user terms
+        'common.createdAt': 'Created At',
+        'common.updatedAt': 'Updated At',
+        'common.exporting': 'Exporting...',
+        'common.exportToCsv': 'Export to CSV',
+        'common.close': 'Close',
+
+        'exportEvents.includeAdditionalData': 'Include Additional Data',
+        'exportEvents.exportFormat': 'Data will be exported as a CSV file with UTF-8 encoding.',
+        'exportEvents.exportSuccess': 'Successfully exported {count} events!',
+        'exportEvents.noEventsFound': 'No events found matching your criteria.',
+        'exportEvents.validation.selectAtLeastOneOption': 'Please select at least one additional data option to export.',
+
+        'validation.fieldRequired': '{field} is required',
+        'validation.emailInvalid': 'Please enter a valid email address',
+        'validation.phoneInvalid': 'Please enter a valid phone number',
+        'validation.minLength': '{field} must be at least {min} characters',
+        'validation.maxLength': '{field} must be no more than {max} characters',
+        'validation.dateInvalid': 'Please enter a valid date',
+        'validation.dateMustBePast': 'Date must be in the past',
+        'validation.dateMustBeFuture': 'Date must be in the future',
+
+        // Common user terms
         'common.user': 'User',
 
         // Additional account/auth related
@@ -1950,10 +1971,244 @@ const translations = {
         // User validation messages (add these)
         'users.updateSuccess': 'User "{displayName}" updated successfully!',
         'users.noUserSelected': 'No user selected for update',
+
+        // Edit Kid Modal
+        'editKidModal.title': 'Edit Racing Star: {kidName}',
+        'editKidModal.racerProfile': 'Racer Profile',
+        'editKidModal.raceNumber': 'Race Number',
+        'editKidModal.birthday': 'Birthday',
+        'editKidModal.homeBaseLocation': 'Home Base Location',
+        'editKidModal.homeBasePlaceholder': 'Where our racer calls home',
+        'editKidModal.racingFamily': 'Racing Family',
+        'editKidModal.parentName': 'Parent/Guardian Name',
+        'editKidModal.parentNamePlaceholder': 'Racing coach\'s name',
+        'editKidModal.emailAddress': 'Email Address',
+        'editKidModal.emailPlaceholder': 'parent@racingfamily.com',
+        'editKidModal.phoneNumber': 'Phone Number',
+        'editKidModal.phonePlaceholder': 'Racing hotline',
+        'editKidModal.parentAccount': 'Parent Account',
+        'editKidModal.chooseParentAccount': 'Choose Parent Account (Optional)',
+        'editKidModal.racingTeam': 'Racing Team',
+        'editKidModal.noTeamAssigned': 'No Team Assigned',
+        'editKidModal.racingInstructor': 'Racing Instructor',
+        'editKidModal.noInstructorAssigned': 'No Instructor Assigned',
+        'editKidModal.racingStatus': 'Racing Status',
+        'editKidModal.formStatus': 'Form Status',
+        'editKidModal.statusPending': 'Pending - Getting Ready',
+        'editKidModal.statusCompleted': 'Completed - Ready to Race!',
+        'editKidModal.statusNeedsReview': 'Needs Review',
+        'editKidModal.statusCancelled': 'Cancelled',
+        'editKidModal.safetyDeclaration': 'Safety Declaration Signed',
+        'editKidModal.skillsNotes': 'Skills & Notes',
+        'editKidModal.amazingAbilities': 'Amazing Abilities',
+        'editKidModal.abilitiesPlaceholder': 'Tell us about this racer\'s awesome skills!',
+        'editKidModal.announcerNotes': 'Announcer Notes',
+        'editKidModal.announcerPlaceholder': 'Fun facts for race day!',
+        'editKidModal.additionalNotes': 'Additional Notes',
+        'editKidModal.additionalPlaceholder': 'Any special notes about this racing star!',
+        'editKidModal.loadingFormData': 'Loading form data...',
+        'editKidModal.saveChanges': 'Save Changes',
+        'editKidModal.saving': 'Saving...',
+        'editKidModal.cancel': 'Cancel',
+
+// Validation messages
+        'editKidModal.participantNumberRequired': 'Race number is required',
+        'editKidModal.dateOfBirthRequired': 'Date of birth is required',
+        'editKidModal.dateOfBirthInvalid': 'Date of birth must be in the past',
+        'editKidModal.parentNameRequired': 'Parent name is required',
+        'editKidModal.parentEmailRequired': 'Parent email is required',
+        'editKidModal.parentEmailInvalid': 'Please enter a valid email address',
+        'editKidModal.parentPhoneRequired': 'Parent phone is required',
+        'editKidModal.parentPhoneInvalid': 'Phone number must be exactly 10 digits',
+        'editKidModal.updateFailed': 'Failed to update kid. Please try again.',
+
+        // English
+        'editKidModal.unknownKid': 'Unknown Kid',
+        'editKidModal.racers': 'racers',
+        'editKidModal.grandparentsNames': 'Grandparents Names',
+        'editKidModal.grandparentsPlaceholder': 'Racing legends in the family',
+        'editKidModal.grandparentsPhone': 'Grandparents Phone',
+        'editKidModal.grandparentsPhonePlaceholder': 'Backup racing support',
+
+        'validation.phoneHint': 'Israeli phone number (10 digits)',
+        'validation.pleaseFixErrors': 'Please fix the following errors:',
+        'validation.roleRequired': 'Role is required',
+        'validation.roleInvalid': 'Please select a valid role',
+        'validation.passwordsDoNotMatch': 'Passwords do not match',
+
+    // Field names for better error messages:
+        'fields.displayName': 'Display Name',
+        'fields.email': 'Email',
+        'fields.phone': 'Phone',
+        'fields.firstName': 'First Name',
+        'fields.lastName': 'Last Name',
+        'fields.parentName': 'Parent Name',
+        'fields.teamName': 'Team Name',
+        'fields.vehicleMake': 'Vehicle Make',
+        'fields.vehicleModel': 'Vehicle Model',
+        'fields.eventName': 'Event Name',
+        'fields.eventDate': 'Event Date',
+        'fields.dateOfBirth': 'Date of Birth'
+
     },
 
 
     he: {
+        'validation.PhoneHint': 'מספר טלפון ישראלי (10 ספרות)',
+        'validation.pleaseFixErrors': 'אנא תקן את השגיאות הבאות:',
+        'validation.roleRequired': 'יש לבחור תפקיד',
+        'validation.roleInvalid': 'אנא בחר תפקיד תקין',
+        'validation.passwordsDoNotMatch': 'הסיסמאות אינן תואמות',
+
+        // Field names for better error messages:
+        'fields.displayName': 'שם תצוגה',
+        'fields.email': 'אימייל',
+        'fields.phone': 'טלפון',
+        'fields.firstName': 'שם פרטי',
+        'fields.lastName': 'שם משפחה',
+        'fields.parentName': 'שם הורה',
+        'fields.teamName': 'שם צוות',
+        'fields.vehicleMake': 'יצרן רכב',
+        'fields.vehicleModel': 'דגם רכב',
+        'fields.eventName': 'שם אירוע',
+        'fields.eventDate': 'תאריך אירוע',
+        'fields.dateOfBirth': 'תאריך לידה',
+
+        'exportEvents.validation.selectAtLeastOneOption': 'אנא בחר לפחות אפשרות נתונים נוספת אחת לייצוא.',
+        'validation.emailInvalid': 'אנא הכנס כתובת אימייל תקינה',
+        'validation.phoneInvalid': 'אנא הכנס מספר טלפון תקין',
+        'validation.minLength': '{field} חייב להיות לפחות {min} תווים',
+        'validation.maxLength': '{field} חייב להיות לא יותר מ-{max} תווים',
+        'validation.dateInvalid': 'אנא הכנס תאריך תקין',
+        'validation.dateMustBePast': 'התאריך חייב להיות בעבר',
+        'validation.dateMustBeFuture': 'התאריך חייב להיות בעתיד',
+
+        // Common terms
+        'common.createdAt': 'נוצר ב',
+        'common.updatedAt': 'עודכן ב',
+        'common.exporting': 'מייצא...',
+        'common.exportToCsv': 'ייצא ל-CSV',
+        'common.close': 'סגור',
+
+// Export Events Modal - Missing keys
+        'exportEvents.includeAdditionalData': 'כלול נתונים נוספים',
+        'exportEvents.exportFormat': 'הנתונים יוצאו כקובץ CSV עם קידוד UTF-8.',
+        'exportEvents.exportSuccess': 'יוצאו בהצלחה {count} אירועים!',
+        'exportEvents.noEventsFound': 'לא נמצאו אירועים התואמים לקריטריונים שלך.',
+        'exportEvents.validation': {
+            'selectAtLeastOneOption': 'אנא בחר לפחות אפשרות נתונים נוספת אחת לייצוא.'
+        },
+
+// Events
+        'events.teamsCount': 'מספר צוותים',
+
+// Status terms
+        'status.unknown': 'לא ידוע',
+
+// Validation messages
+        'validation.fieldRequired': 'שדה חובה',
+        'validation.invalidFormat': 'פורמט לא תקין',
+        'validation.tooShort': 'קצר מדי',
+        'validation.tooLong': 'ארוך מדי',
+
+// Form validation
+        'forms.validation': {
+            'required': 'שדה חובה',
+            'email': 'כתובת אימייל לא תקינה',
+            'phone': 'מספר טלפון לא תקין',
+            'minLength': 'מינימום {min} תווים',
+            'maxLength': 'מקסימום {max} תווים',
+            'numeric': 'רק מספרים מותרים',
+            'alphanumeric': 'רק אותיות ומספרים מותרים'
+        },
+
+// Error messages
+        'errors.networkError': 'שגיאת רשת. אנא בדוק את החיבור לאינטרנט.',
+        'errors.serverError': 'שגיאת שרת. אנא נסה שוב מאוחר יותר.',
+        'errors.unauthorized': 'אין הרשאה לבצע פעולה זו.',
+        'errors.forbidden': 'גישה אסורה.',
+        'errors.notFound': 'המשאב לא נמצא.',
+        'errors.timeout': 'הבקשה פג תוקפה. אנא נסה שוב.',
+
+// Success messages
+        'success.saved': 'נשמר בהצלחה',
+        'success.updated': 'עודכן בהצלחה',
+        'success.deleted': 'נמחק בהצלחה',
+        'success.created': 'נוצר בהצלחה',
+        'success.uploaded': 'הועלה בהצלחה',
+
+// Loading states
+        'loading.data': 'טוען נתונים...',
+        'loading.saving': 'שומר...',
+        'loading.uploading': 'מעלה...',
+        'loading.processing': 'מעבד...',
+        'loading.searching': 'מחפש...',
+
+// Accessibility
+        'a11y.loading': 'תוכן בטעינה',
+        'a11y.error': 'שגיאה',
+        'a11y.success': 'הצלחה',
+        'a11y.warning': 'אזהרה',
+        'a11y.info': 'מידע',
+
+        // Hebrew
+        'editKidModal.unknownKid': 'ילד לא ידוע',
+        'editKidModal.racers': 'רוכבים',
+        'editKidModal.grandparentsNames': 'שמות סבא וסבתא',
+        'editKidModal.grandparentsPlaceholder': 'אגדות מירוצים במשפחה',
+        'editKidModal.grandparentsPhone': 'טלפון סבא וסבתא',
+        'editKidModal.grandparentsPhonePlaceholder': 'תמיכת מירוצים גיבוי',
+
+        // Edit Kid Modal
+        'editKidModal.title': 'ערוך כוכב מירוצים: {kidName}',
+        'editKidModal.racerProfile': 'פרופיל רוכב',
+        'editKidModal.raceNumber': 'מספר מירוץ',
+        'editKidModal.birthday': 'יום הולדת',
+        'editKidModal.homeBaseLocation': 'מיקום בית',
+        'editKidModal.homeBasePlaceholder': 'איפה הרוכב שלנו גר',
+        'editKidModal.racingFamily': 'משפחת מירוצים',
+        'editKidModal.parentName': 'שם הורה/אפוטרופוס',
+        'editKidModal.parentNamePlaceholder': 'שם מאמן המירוצים',
+        'editKidModal.emailAddress': 'כתובת אימייל',
+        'editKidModal.emailPlaceholder': 'parent@racingfamily.com',
+        'editKidModal.phoneNumber': 'מספר טלפון',
+        'editKidModal.phonePlaceholder': 'קו חם למירוצים',
+        'editKidModal.parentAccount': 'חשבון הורה',
+        'editKidModal.chooseParentAccount': 'בחר חשבון הורה (אופציונלי)',
+        'editKidModal.racingTeam': 'צוות מירוצים',
+        'editKidModal.noTeamAssigned': 'לא הוקצה צוות',
+        'editKidModal.racingInstructor': 'מדריך מירוצים',
+        'editKidModal.noInstructorAssigned': 'לא הוקצה מדריך',
+        'editKidModal.racingStatus': 'סטטוס מירוצים',
+        'editKidModal.formStatus': 'סטטוס טופס',
+        'editKidModal.statusPending': 'ממתין - מתכונן',
+        'editKidModal.statusCompleted': 'הושלם - מוכן למירוץ!',
+        'editKidModal.statusNeedsReview': 'דורש בדיקה',
+        'editKidModal.statusCancelled': 'בוטל',
+        'editKidModal.safetyDeclaration': 'הצהרת בטיחות חתומה',
+        'editKidModal.skillsNotes': 'כישורים והערות',
+        'editKidModal.amazingAbilities': 'יכולות מדהימות',
+        'editKidModal.abilitiesPlaceholder': 'ספרו לנו על הכישורים המדהימים של הרוכב!',
+        'editKidModal.announcerNotes': 'הערות קריין',
+        'editKidModal.announcerPlaceholder': 'עובדות כיפיות ליום המירוץ!',
+        'editKidModal.additionalNotes': 'הערות נוספות',
+        'editKidModal.additionalPlaceholder': 'הערות מיוחדות על כוכב המירוצים!',
+        'editKidModal.loadingFormData': 'טוען נתוני טופס...',
+        'editKidModal.saveChanges': 'שמור שינויים',
+        'editKidModal.saving': 'שומר...',
+        'editKidModal.cancel': 'בטל',
+
+// Validation messages
+        'editKidModal.participantNumberRequired': 'מספר מירוץ הוא שדה חובה',
+        'editKidModal.dateOfBirthRequired': 'תאריך לידה הוא שדה חובה',
+        'editKidModal.dateOfBirthInvalid': 'תאריך לידה חייב להיות בעבר',
+        'editKidModal.parentNameRequired': 'שם הורה הוא שדה חובה',
+        'editKidModal.parentEmailRequired': 'אימייל הורה הוא שדה חובה',
+        'editKidModal.parentEmailInvalid': 'אנא הכנס כתובת אימייל תקינה',
+        'editKidModal.parentPhoneRequired': 'טלפון הורה הוא שדה חובה',
+        'editKidModal.parentPhoneInvalid': 'מספר טלפון חייב להיות בדיוק 10 ספרות',
+        'editKidModal.updateFailed': 'כשל בעדכון הילד. אנא נסה שוב.',
+
         // User validation messages
         'users.emailRequired': 'אימייל הוא שדה חובה',
         'users.emailInvalid': 'אנא הכנס כתובת אימייל תקינה',
@@ -2709,6 +2964,7 @@ const translations = {
         'events.create.successWithGalleryError': 'האירוע נוצר בהצלחה, אך יצירת תיקיית הגלריה נכשלה: {error}',
         'events.create.success': 'האירוע נוצר בהצלחה!',
         'events.create.error': 'שגיאה ביצירת אירוע: {error}',
+
 
 
 
@@ -3971,6 +4227,27 @@ const translations = {
             }
         };
 
+// Helper functions (OUTSIDE the component)
+const getNestedTranslation = (obj, path) => {
+    return path.split('.').reduce((current, segment) => {
+        return current && current[segment] !== undefined ? current[segment] : undefined;
+    }, obj);
+};
+
+// Email validation function
+export const isValidEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+};
+
+// Phone validation function (Israeli numbers)
+export const isValidPhone = (phone) => {
+    const digitsOnly = phone.replace(/\D/g, '');
+    const israeliMobileRegex = /^05[0-9]\d{7}$/;
+    const israeliLandlineRegex = /^0[2-4,8-9]\d{7}$/;
+    return israeliMobileRegex.test(digitsOnly) || israeliLandlineRegex.test(digitsOnly);
+};
+
 // Create the context
 const LanguageContext = createContext();
 
@@ -4018,10 +4295,7 @@ export const LanguageProvider = ({ children }) => {
 
     // Effect to handle language changes
     useEffect(() => {
-        // Apply direction
         applyDirection(currentLanguage);
-
-        // Save language preference to localStorage
         if (typeof window !== 'undefined') {
             localStorage.setItem('charity-app-language', currentLanguage);
         }
@@ -4034,19 +4308,75 @@ export const LanguageProvider = ({ children }) => {
         }
     };
 
-    // Function to get translation with interpolation support
-const t = (key, defaultValue = '', interpolations = {}) => {
-    let translation = translations[currentLanguage]?.[key] || defaultValue || key;
+    // KEEP YOUR ORIGINAL t FUNCTION - just enhance it slightly
+    const t = (key, defaultValue = '', interpolations = {}) => {
+        // Input validation
+        if (typeof key !== 'string' || !key.trim()) {
+            console.warn('Translation key must be a non-empty string:', key);
+            return defaultValue || key;
+        }
 
-    // Handle interpolations like {teamName}, {kidName}, etc.
-    if (interpolations && Object.keys(interpolations).length > 0) {
-        translation = translation.replace(/{(\w+)}/g, (match, placeholder) => {
-            return interpolations[placeholder] !== undefined ? interpolations[placeholder] : match;
-        });
-    }
+        // Try nested key support first
+        let translation = getNestedTranslation(translations[currentLanguage], key);
 
-    return translation;
-};
+        // Fallback to your original simple key lookup if nested fails
+        if (translation === undefined) {
+            translation = translations[currentLanguage]?.[key];
+        }
+
+        // Fallback to English if not found and current language is not English
+        if (translation === undefined && currentLanguage !== LANGUAGES.ENGLISH) {
+            translation = getNestedTranslation(translations[LANGUAGES.ENGLISH], key) ||
+                translations[LANGUAGES.ENGLISH]?.[key];
+
+            // Log missing translation for development
+            if (process.env.NODE_ENV === 'development') {
+                console.warn(`Missing ${currentLanguage} translation for key: ${key}`);
+            }
+        }
+
+        // Final fallback
+        if (translation === undefined) {
+            translation = defaultValue || key;
+        }
+
+        // Handle interpolations exactly as you had before
+        if (interpolations && Object.keys(interpolations).length > 0) {
+            translation = translation.replace(/{(\w+)}/g, (match, placeholder) => {
+                const replacement = interpolations[placeholder];
+                return replacement !== undefined ? String(replacement) : match;
+            });
+        }
+
+        return translation;
+    };
+
+    // Additional helper functions for the context
+    const hasTranslation = (key, language = currentLanguage) => {
+        return getNestedTranslation(translations[language], key) !== undefined ||
+            translations[language]?.[key] !== undefined;
+    };
+
+    const getMissingTranslations = (targetLanguage, baseLanguage = LANGUAGES.ENGLISH) => {
+        const missing = [];
+
+        const checkKeys = (baseObj, targetObj, prefix = '') => {
+            for (const key in baseObj) {
+                const fullKey = prefix ? `${prefix}.${key}` : key;
+
+                if (typeof baseObj[key] === 'object' && baseObj[key] !== null) {
+                    checkKeys(baseObj[key], targetObj?.[key] || {}, fullKey);
+                } else {
+                    if (!targetObj || targetObj[key] === undefined) {
+                        missing.push(fullKey);
+                    }
+                }
+            }
+        };
+
+        checkKeys(translations[baseLanguage], translations[targetLanguage]);
+        return missing;
+    };
 
     // Computed values
     const isRTL = currentLanguage === LANGUAGES.HEBREW;
@@ -4064,6 +4394,8 @@ const t = (key, defaultValue = '', interpolations = {}) => {
         // Functions
         changeLanguage,
         t,
+        hasTranslation,
+        getMissingTranslations,
 
         // Constants
         LANGUAGES

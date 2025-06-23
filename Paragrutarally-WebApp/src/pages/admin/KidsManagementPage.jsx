@@ -7,7 +7,6 @@ import EditKidModal from '../../components/modals/EditKidModal.jsx';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { usePermissions, canUserAccessKid } from '../../hooks/usePermissions.jsx';
-import { db } from '../../firebase/config';
 import ExportKidsModal from '../../components/modals/ExportKidsModal';
 
 import {
@@ -91,16 +90,16 @@ const KidsManagementPage = () => {
     const getKidDisplayName = (kid) => {
         switch (userRole) {
             case 'admin':
-                const firstName = kid.personalInfo?.firstName || '';
+                { const firstName = kid.personalInfo?.firstName || '';
                 const lastName = kid.personalInfo?.lastName || '';
                 const fullName = `${firstName} ${lastName}`.trim();
-                return fullName || `${t('kids.participantNumber', 'Participant #')}${kid.participantNumber}`;
+                return fullName || `${t('kids.participantNumber', 'Participant #')}${kid.participantNumber}`; }
             case 'instructor':
             case 'parent':
-                const instFirstName = kid.personalInfo?.firstName || '';
+                { const instFirstName = kid.personalInfo?.firstName || '';
                 const instLastName = kid.personalInfo?.lastName || '';
                 const instFullName = `${instFirstName} ${instLastName}`.trim();
-                return instFullName || `${t('kids.participantNumber', 'Participant #')}${kid.participantNumber}`;
+                return instFullName || `${t('kids.participantNumber', 'Participant #')}${kid.participantNumber}`; }
             default:
                 return 'Restricted';
         }
