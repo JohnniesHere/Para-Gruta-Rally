@@ -8,6 +8,8 @@ import DarkModeToggle from '../common/DarkModeToggle.jsx';
 import LanguageSelector from '../common/LanguageSelector.jsx';
 import ContactUsModal from '../layout/ContactUsModal';
 import LegalTrigger from '../ui/LegalTrigger';
+import GoogleIconLight from '../../assets/icons/GoogleIconLight';
+import GoogleIconDark from '../../assets/icons/GoogleIconDark';
 import './Login.css';
 
 const Login = () => {
@@ -355,6 +357,10 @@ const Login = () => {
                             onClick={handleGoogleSignIn}
                             disabled={loading || googleLoading}
                         >
+                            {isDarkMode ?
+                                <GoogleIconDark className="google-icon" /> :
+                                <GoogleIconLight className="google-icon" />
+                            }
                             {googleLoading
                                 ? t('login.googleSigningIn', 'Signing in with Google...')
                                 : t('login.googleSignIn', 'Sign In With Google')
