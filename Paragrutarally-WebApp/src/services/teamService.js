@@ -444,49 +444,64 @@ export const removeKidFromTeam = async (teamId, kidId) => {
 };
 
 /**
- * Update a kid's team assignment (for the TeamChangeModal)
- * This function handles both team assignment and removal
+ * Update a kid's team assignment (for the TeamChangeModal and EditKidPage)
+ * This function ONLY handles team array management, NOT the kid document
+ * The kid document should be updated separately
  * @param {string} kidId - The kid's document ID
  * @param {string|null} newTeamId - The new team ID, or null to remove from team
+ * @param {string|null} currentTeamId - The current team ID (to avoid extra database reads)
  * @returns {Promise<void>}
  */
-export const updateKidTeam = async (kidId, newTeamId) => {
+export const updateKidTeam = async (kidId, newTeamId, currentTeamId = null) => {
     try {
         console.log(`🔄 Updating kid ${kidId} team assignment to:`, newTeamId || 'No Team');
 
-        // First, get the kid's current team
-        const kidDoc = await getDoc(doc(db, 'kids', kidId));
-        if (!kidDoc.exists()) {
-            throw new Error('Kid not found');
+        // If we don't know the current team, get it from the kid document
+        let oldTeamId = currentTeamId;
+        if (oldTeamId === null) {
+            const kidDoc = await getDoc(doc(db, 'kids', kidId));
+            if (kidDoc.exists()) {
+                oldTeamId = kidDoc.data().teamId || null;
+            }
         }
 
-        const kidData = kidDoc.data();
-        const currentTeamId = kidData.teamId;
+        console.log(`📊 Current team: ${oldTeamId || 'none'} → New team: ${newTeamId || 'none'}`);
+
+        // Skip if no change
+        if (oldTeamId === newTeamId) {
+            console.log('✅ No team change needed');
+            return;
+        }
 
         // Remove kid from current team if they have one
-        if (currentTeamId) {
-            console.log('📤 Removing kid from current team:', currentTeamId);
-            await removeKidFromTeam(currentTeamId, kidId);
+        if (oldTeamId) {
+            console.log('📤 Removing kid from current team:', oldTeamId);
+            try {
+                await removeKidFromTeam(oldTeamId, kidId);
+                console.log('✅ Successfully removed from old team');
+            } catch (removeError) {
+                console.warn('⚠️ Failed to remove from old team:', removeError.message);
+                // Continue anyway - the add operation might still work
+            }
         }
 
         // Add kid to new team if specified
         if (newTeamId) {
             console.log('📥 Adding kid to new team:', newTeamId);
-            await addKidToTeam(newTeamId, kidId);
+            try {
+                await addKidToTeam(newTeamId, kidId);
+                console.log('✅ Successfully added to new team');
+            } catch (addError) {
+                console.error('❌ Failed to add to new team:', addError.message);
+                throw addError; // This is more critical - throw the error
+            }
         }
 
-        // Update the kid's teamId field
-        const kidRef = doc(db, 'kids', kidId);
-        await updateDoc(kidRef, {
-            teamId: newTeamId || null,
-            updatedAt: serverTimestamp()
-        });
-
-        console.log('✅ Kid team assignment updated successfully');
+        console.log('✅ Team assignment updated successfully');
 
     } catch (error) {
-        console.error('❌ Error updating kid team:', error);
-        throw new Error(`Failed to update kid team: ${error.message}`);
+        console.error('❌ Error updating kid team assignments:', error);
+        throw new Error(`Failed to update team assignments: ${error.message}`);
     }
 };
 

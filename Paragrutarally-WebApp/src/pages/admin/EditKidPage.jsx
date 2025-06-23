@@ -6,14 +6,14 @@ import CreateUserModal from '../../components/modals/CreateUserModal';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { usePermissions } from '../../hooks/usePermissions.jsx';
-import { getKidById, updateKid } from '../../services/kidService';
-import { uploadKidPhoto, deleteKidPhoto, getKidPhotoInfo } from '../../services/kidPhotoService';
-import { getAllTeams, getAllInstructors } from '../../services/teamService'; // Updated import
-import { getAllVehicles, updateVehicle, getVehicleById } from '../../services/vehicleService';
-import { getVehiclePhotoInfo } from '../../services/vehiclePhotoService';
-import {validateKid, getFormStatusInfo, getFormStatusOptions} from '../../schemas/kidSchema';
+import { getKidById, updateKid } from '@/services/kidService.js';
+import { uploadKidPhoto, deleteKidPhoto, getKidPhotoInfo } from '@/services/kidPhotoService.js';
+import { getAllTeams, getAllInstructors, updateKidTeam } from '@/services/teamService.js'; // Updated import
+import { getAllVehicles, updateVehicle, getVehicleById } from '@/services/vehicleService.js';
+import { getVehiclePhotoInfo } from '@/services/vehiclePhotoService.js';
+import {validateKid, getFormStatusInfo, getFormStatusOptions} from '@/schemas/kidSchema.js';
 import { getDocs, collection, query, where } from 'firebase/firestore';
-import { db } from '../../firebase/config';
+import { db } from '@/firebase/config.js';
 import {
     IconUserCircle as Baby,
     IconDeviceFloppy as Save,
@@ -436,6 +436,25 @@ const EditKidPage = () => {
                 }
             }
 
+            // Handle team assignment changes
+            const oldTeamId = originalData?.teamId || null;
+            const newTeamId = finalFormData.teamId || null;
+
+            if (oldTeamId !== newTeamId) {
+                console.log('👥 Team assignment changed - updating team memberships...');
+                console.log(`📤 Old team: ${oldTeamId || 'none'}`);
+                console.log(`📥 New team: ${newTeamId || 'none'}`);
+
+                try {
+                    await updateKidTeam(id, newTeamId);
+                    console.log('✅ Team assignment updated successfully');
+                } catch (teamError) {
+                    console.error('❌ Team assignment failed:', teamError);
+                    // Don't fail the whole operation, but warn the user
+                    alert(t('editKid.teamAssignmentWarning', 'Warning: Team assignment may not have updated correctly. Please check the team page to verify.'));
+                }
+            }
+
             // Update vehicle assignments
             const oldVehicleIds = originalData?.vehicleIds || [];
             const newVehicleIds = finalFormData.vehicleIds || [];
@@ -446,7 +465,7 @@ const EditKidPage = () => {
                 console.log('✅ Vehicle assignments updated successfully');
             }
 
-            // Update the kid
+            // Update the kid (this will update the kid's teamId field)
             await updateKid(id, finalFormData);
 
             // Navigate with success message

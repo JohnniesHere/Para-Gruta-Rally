@@ -190,6 +190,68 @@ export const updateKid = async (kidId, updates) => {
 };
 
 /**
+ * Update a kid's team assignment with team membership management
+ * This function handles BOTH the kid document AND team arrays
+ * Use this when you only want to change the team (not other kid data)
+ * @param {string} kidId - The kid's document ID
+ * @param {string|null} newTeamId - The new team ID (null to remove team)
+ * @returns {Promise<void>}
+ */
+export const updateKidTeamAssignment = async (kidId, newTeamId) => {
+    try {
+        console.log(`🔄 Updating kid ${kidId} team assignment...`);
+        console.log(`📝 New team ID: ${newTeamId || 'null (remove from team)'}`);
+
+        // First, get the current kid data to find the old team
+        const kidDoc = await getDoc(doc(db, 'kids', kidId));
+        if (!kidDoc.exists()) {
+            throw new Error('Kid not found');
+        }
+
+        const currentKidData = kidDoc.data();
+        const oldTeamId = currentKidData.teamId;
+
+        console.log(`📊 Current team ID: ${oldTeamId || 'none'}`);
+
+        // Update the team arrays first
+        try {
+            const { updateKidTeam } = await import('./teamService');
+            await updateKidTeam(kidId, newTeamId, oldTeamId);
+            console.log('✅ Team arrays updated successfully');
+        } catch (teamError) {
+            console.error('❌ Team array update failed:', teamError);
+            throw new Error(`Failed to update team assignments: ${teamError.message}`);
+        }
+
+        // Then update the kid document
+        const updateData = {
+            teamId: newTeamId || null,
+            updatedAt: Timestamp.now()
+        };
+
+        console.log('💾 Updating kid document...');
+        await updateDoc(doc(db, 'kids', kidId), updateData);
+        console.log('✅ Kid document updated successfully');
+
+        console.log('🎉 Team assignment update completed successfully');
+
+    } catch (error) {
+        console.error('❌ Error updating kid team:', error);
+
+        // Provide more specific error messages
+        if (error.code === 'permission-denied') {
+            throw new Error('Permission denied. You do not have access to update this kid.');
+        } else if (error.code === 'not-found') {
+            throw new Error('Kid not found. It may have been deleted.');
+        } else if (error.message === 'Kid not found') {
+            throw error;
+        } else {
+            throw new Error(`Failed to update team assignment: ${error.message}`);
+        }
+    }
+};
+
+/**
  * Delete a kid
  * @param {string} kidId - The kid's document ID
  * @returns {Promise<void>}
