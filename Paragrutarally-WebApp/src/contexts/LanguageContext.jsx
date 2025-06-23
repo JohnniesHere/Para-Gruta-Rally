@@ -612,6 +612,30 @@ const translations = {
         'users.exportError': 'Failed to export users. Please try again.',
         'users.exporting': 'Exporting...',
         'users.exportToCsv': 'Export to CSV',
+        'users.hosts': 'Hosts',
+
+
+        // UserSchema validation error messages
+        // Field requirements
+        'users.fieldRequired': '{field} is required',
+        'users.pleaseFixErrors': 'Please fix the following errors:',
+
+        // Name validation
+        'users.displayNameInvalidChars': 'Display name can only contain letters, numbers, and spaces',
+        'users.nameInvalidChars': 'Full name can only contain letters, spaces, hyphens, and apostrophes',
+
+        // Length validation
+        'users.minLength': '{field} must be at least {min} characters',
+        'users.maxLength': '{field} must be {max} characters or less',
+
+        // Phone validation
+        'users.phoneInvalidFormat': 'Please enter a valid Israeli phone number',
+
+        // Role validation
+        'users.roleInvalid': 'Please select a valid role',
+
+        //Users update hints
+        'users.phoneHint': 'Israeli phone number format required (0501234567)',
 
         // My Account
         'account.title': 'My Account',
@@ -3087,6 +3111,29 @@ const translations = {
         'users.exportToCsv':'ייצא ל-CSV',
         'users.exporting': 'מייצא משתמשים ל-CSV...',
         'users.exportError': 'ייצוא המשתמשים נכשל. אנא נסה שוב.',
+        'users.hosts': 'מארחים',
+
+        //UserSchema validation error messages
+        // Field requirements
+        'users.fieldRequired': '{field} נדרש',
+        'users.pleaseFixErrors': 'אנא תקן את השגיאות הבאות:',
+
+        // Name validation
+        'users.displayNameInvalidChars': 'שם תצוגה יכול להכיל רק אותיות, מספרים ורווחים',
+        'users.nameInvalidChars': 'שם מלא יכול להכיל רק אותיות, רווחים, מקפים וגרשיים',
+
+        // Length validation
+        'users.minLength': '{field} חייב להיות לפחות {min} תווים',
+        'users.maxLength': '{field} חייב להיות {max} תווים או פחות',
+
+        // Phone validation
+        'users.phoneInvalidFormat': 'אנא הזן מספר טלפון ישראלי תקין',
+
+        // Role validation
+        'users.roleInvalid': 'אנא בחר תפקיד תקין',
+
+        //Users update hints
+        'users.phoneHint': 'מספר הטלפון חייב להיות בפורמט ישראלי תקין (0501234567)',
 
 
         // My Account

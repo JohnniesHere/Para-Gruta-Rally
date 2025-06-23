@@ -1,4 +1,4 @@
-// src/pages/admin/UserManagementPage.jsx 
+// src/pages/admin/UserManagementPage.jsx - FIXED VERSION with optimized stats cards
 import React, {useState, useEffect, useCallback} from 'react';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import Dashboard from '../../components/layout/Dashboard';
@@ -16,6 +16,7 @@ import {
     IconCrown as Crown,
     IconCar as Car,
     IconUserCheck as UserCheck,
+    IconHome as Home,
     IconSearch as Search,
     IconTag as Tag,
     IconEraser as Eraser,
@@ -57,7 +58,8 @@ const UserManagementPage = () => {
                 });
             });
 
-            console.log(`✅ Fetched ${usersData.length} users`);
+            console.log(`✅ Fetched ${usersData.length} users from Firestore`);
+            console.log('User data sample:', usersData.slice(0, 2)); // Debug log
             setUsers(usersData);
             setFilteredUsers(usersData);
         } catch (error) {
@@ -114,6 +116,9 @@ const UserManagementPage = () => {
                 break;
             case 'instructor':
                 setRoleFilter('instructor');
+                break;
+            case 'host':
+                setRoleFilter('host');
                 break;
             case 'parent':
                 setRoleFilter('parent');
@@ -186,14 +191,19 @@ const UserManagementPage = () => {
         filterUsers();
     }, [filterUsers]);
 
-    // Calculate stats
+    // Calculate stats - FIXED: Removed +1 since all users should be showing
     const stats = {
         totalUsers: users.length,
         admins: users.filter(u => u.role === 'admin').length,
         instructors: users.filter(u => u.role === 'instructor').length,
-        parents: users.filter(u => u.role === 'parent').length,
-        hosts: users.filter(u => u.role === 'host').length
+        hosts: users.filter(u => u.role === 'host').length,
+        parents: users.filter(u => u.role === 'parent').length
     };
+
+    // Debug log for stats
+    console.log('📊 Current stats:', stats);
+    console.log('📋 Total users loaded:', users.length);
+    console.log('🔍 Filtered users showing:', filteredUsers.length);
 
     // Get translated role names
     const getRoleName = (role) => {
@@ -202,10 +212,10 @@ const UserManagementPage = () => {
                 return t('users.admin', 'Admin');
             case 'instructor':
                 return t('users.instructor', 'Instructor');
-            case 'parent':
-                return t('users.parent', 'Parent');
             case 'host':
                 return t('users.host', 'Host');
+            case 'parent':
+                return t('users.parent', 'Parent');
             default:
                 return role;
         }
@@ -236,8 +246,8 @@ const UserManagementPage = () => {
                         </button>
                     </div>
 
-                    {/* Clickable Stats Cards */}
-                    <div className="stats-grid">
+                    {/* OPTIMIZED Stats Cards - Single Row Layout */}
+                    <div className="stats-grid-optimized">
                         <div
                             className={`stat-card total ${roleFilter === 'all' ? 'active' : ''}`}
                             onClick={() => handleStatCardClick('total')}
@@ -246,7 +256,7 @@ const UserManagementPage = () => {
                             <Users className="stat-icon" size={40} />
                             <div className="stat-content">
                                 <h3>{t('users.totalUsers', 'Total Users')}</h3>
-                                <div className="stat-value">{stats.totalUsers + 1}</div>
+                                <div className="stat-value">{stats.totalUsers}</div>
                             </div>
                         </div>
 
@@ -271,6 +281,18 @@ const UserManagementPage = () => {
                             <div className="stat-content">
                                 <h3>{t('users.instructors', 'Instructors')}</h3>
                                 <div className="stat-value">{stats.instructors}</div>
+                            </div>
+                        </div>
+
+                        <div
+                            className={`stat-card hosts ${roleFilter === 'host' ? 'active' : ''}`}
+                            onClick={() => handleStatCardClick('host')}
+                            style={{ cursor: 'pointer' }}
+                        >
+                            <Home className="stat-icon" size={40} />
+                            <div className="stat-content">
+                                <h3>{t('users.hosts', 'Hosts')}</h3>
+                                <div className="stat-value">{stats.hosts}</div>
                             </div>
                         </div>
 
@@ -320,8 +342,8 @@ const UserManagementPage = () => {
                                 <option value="all">⭐ {t('users.allRoles', 'All Roles')}</option>
                                 <option value="admin">👑 {t('users.admin', 'Admin')}</option>
                                 <option value="instructor">🏎️ {t('users.instructor', 'Instructor')}</option>
-                                <option value="parent">👨‍👩‍👧‍👦 {t('users.parent', 'Parent')}</option>
                                 <option value="host">🏠 {t('users.host', 'Host')}</option>
+                                <option value="parent">👨‍👩‍👧‍👦 {t('users.parent', 'Parent')}</option>
                             </select>
                         </div>
 
