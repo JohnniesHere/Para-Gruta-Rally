@@ -5,12 +5,13 @@ import Dashboard from '../../components/layout/Dashboard';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { usePermissions } from '../../hooks/usePermissions.jsx';
-import { getTeamWithDetails, deleteTeam } from '../../services/teamService';
+import { getTeamWithDetails, deleteTeam } from '@/services/teamService.js';
 import {
     IconUsers as UsersGroup,
     IconEdit as Edit,
     IconTrash as Trash2,
     IconArrowLeft as ArrowLeft,
+    IconArrowRight as ArrowRight,
     IconCheck as Check,
     IconUser as User,
     IconUsers as Users,
@@ -30,7 +31,7 @@ const ViewTeamPage = () => {
     const { id } = useParams();
     const location = useLocation();
     const { appliedTheme } = useTheme();
-    const { t } = useLanguage();
+    const { t, isHebrew, isRTL } = useLanguage();
     const { userRole } = usePermissions();
 
     const [teamData, setTeamData] = useState(null);
@@ -159,9 +160,18 @@ const ViewTeamPage = () => {
                     <div className="error-container">
                         <h3>{t('common.error', 'Error')}</h3>
                         <p>{error}</p>
-                        <button onClick={handleBack} className="btn-primary">
-                            <ArrowLeft className="btn-icon" size={18} />
-                            {t('teams.backToTeams', 'Back to Teams')}
+                        <button onClick={handleBack} className={`btn-primary ${isRTL ? 'rtl' : ''}`}>
+                            {isHebrew ? (
+                                <>
+                                    {t('teams.backToTeams', 'Back to Teams')}
+                                    <ArrowRight className="btn-icon" size={18} />
+                                </>
+                            ) : (
+                                <>
+                                    <ArrowLeft className="btn-icon" size={18} />
+                                    {t('teams.backToTeams', 'Back to Teams')}
+                                </>
+                            )}
                         </button>
                     </div>
                 </div>
@@ -177,9 +187,18 @@ const ViewTeamPage = () => {
                 {/* Racing Theme Header */}
                 <button
                     onClick={handleBack}
-                    className={`back-button ${appliedTheme}-back-button`}>
-                    <ArrowLeft className="btn-icon" size={20} />
-                    {t('teams.backToTeams', 'Back to Teams')}
+                    className={`back-button ${appliedTheme}-back-button ${isRTL ? 'rtl' : ''}`}>
+                    {isHebrew ? (
+                        <>
+                            {t('teams.backToTeams', 'Back to Teams')}
+                            <ArrowRight className="btn-icon" size={20} />
+                        </>
+                    ) : (
+                        <>
+                            <ArrowLeft className="btn-icon" size={20} />
+                            {t('teams.backToTeams', 'Back to Teams')}
+                        </>
+                    )}
                 </button>
                 <div className="racing-header">
                     <div className="header-content">
@@ -219,6 +238,7 @@ const ViewTeamPage = () => {
                 <div className="view-team-container">
                     {/* Team Hero Section */}
                     <div className="hero-section">
+                        <h1 className="team-name-display">{teamData.name}</h1>
                         <div className="hero-content">
                             <div className="team-avatar">
                                 <UsersGroup size={60} className="avatar-icon" />
@@ -229,7 +249,6 @@ const ViewTeamPage = () => {
                                 </div>
                             </div>
                             <div className="hero-info">
-                                <h2 className="team-name">{teamData.name}</h2>
                                 <p className="team-description">
                                     {teamData.description || t('teams.readyToRaceAndConquer', 'Ready to race and conquer the track!')}
                                 </p>
@@ -270,11 +289,11 @@ const ViewTeamPage = () => {
 
                                 <div className="info-item">
                                     <label>{t('teams.statusLabel', '📊 Status')}</label>
-                                    <div className="info-value">
-                                        <span className={`status-badge ${getStatusColor(teamData.active)}`}>
+                                    {/*<div className="info-value">*/}
+                                        <span className={`status-badge info-value ${getStatusColor(teamData.active)}` }>
                                             {teamData.active ? t('teams.activeAndRacing', '✅ Active & Racing') : t('teams.inactiveTeam', '⏸️ Inactive')}
                                         </span>
-                                    </div>
+                                    {/*</div>*/}
                                 </div>
 
                                 <div className="info-item">

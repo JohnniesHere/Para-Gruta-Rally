@@ -5,13 +5,14 @@ import Dashboard from '../../components/layout/Dashboard';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { usePermissions } from '../../hooks/usePermissions.jsx';
-import { getTeamById, updateTeam, getAllInstructors } from '../../services/teamService';
-import { getAllKids } from '../../services/kidService';
-import { validateTeam } from '../../schemas/teamSchema'; // Fixed import path
+import { getTeamById, updateTeam, getAllInstructors } from '@/services/teamService.js';
+import { getAllKids } from '@/services/kidService.js';
+import { validateTeam } from '@/schemas/teamSchema.js'; // Fixed import path
 import {
     IconUsers as UsersGroup,
     IconDeviceFloppy as Save,
     IconArrowLeft as ArrowLeft,
+    IconArrowRight as ArrowRight,
     IconCheck as Check,
     IconAlertTriangle as AlertTriangle,
     IconUser as User,
@@ -31,7 +32,7 @@ const EditTeamPage = () => {
     const { id } = useParams();
     const location = useLocation();
     const { isDarkMode, appliedTheme } = useTheme();
-    const { t } = useLanguage();
+    const { t, isHebrew, isRTL } = useLanguage();
     const { permissions, userRole } = usePermissions();
 
     const [isLoading, setIsLoading] = useState(true);
@@ -237,9 +238,18 @@ const EditTeamPage = () => {
                     <div className="error-container">
                         <h3>{t('common.error', 'Error')}</h3>
                         <p>{errors.general}</p>
-                        <button onClick={() => navigate('/admin/teams')} className="btn-primary">
-                            <ArrowLeft className="btn-icon" size={18} />
-                            {t('teams.backToTeams', 'Back to Teams')}
+                        <button onClick={() => navigate('/admin/teams')} className={`btn-primary ${isRTL ? 'rtl' : ''}`}>
+                            {isHebrew ? (
+                                <>
+                                    {t('teams.backToTeams', 'Back to Teams')}
+                                    <ArrowRight className="btn-icon" size={18} />
+                                </>
+                            ) : (
+                                <>
+                                    <ArrowLeft className="btn-icon" size={18} />
+                                    {t('teams.backToTeams', 'Back to Teams')}
+                                </>
+                            )}
                         </button>
                     </div>
                 </div>
@@ -262,9 +272,18 @@ const EditTeamPage = () => {
                 {/* Racing Theme Header */}
                 <button
                     onClick={handleCancel}
-                    className={`back-button ${appliedTheme}-back-button`}>
-                    <ArrowLeft className="btn-icon" size={20} />
-                    {t('teams.backToTeams', 'Back to Teams')}
+                    className={`back-button ${appliedTheme}-back-button ${isRTL ? 'rtl' : ''}`}>
+                    {isHebrew ? (
+                        <>
+                            {t('teams.backToTeams', 'Back to Teams')}
+                            <ArrowRight className="btn-icon" size={20} />
+                        </>
+                    ) : (
+                        <>
+                            <ArrowLeft className="btn-icon" size={20} />
+                            {t('teams.backToTeams', 'Back to Teams')}
+                        </>
+                    )}
                 </button>
                 <div className="header-content">
                     <div className="title-section">

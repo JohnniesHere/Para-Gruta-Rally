@@ -5,13 +5,14 @@ import Dashboard from '../../components/layout/Dashboard';
 import {useTheme} from '../../contexts/ThemeContext';
 import {usePermissions} from '../../hooks/usePermissions.jsx';
 import {useLanguage} from '../../contexts/LanguageContext';
-import {addTeam, getAllInstructors} from '../../services/teamService';
-import {getAllKids} from '../../services/kidService';
-import {createEmptyTeam, validateTeam} from '../../schemas/teamSchema'; // Fixed import path
+import {addTeam, getAllInstructors} from '@/services/teamService.js';
+import {getAllKids} from '@/services/kidService.js';
+import {createEmptyTeam, validateTeam} from '@/schemas/teamSchema.js'; // Fixed import path
 import {
     IconUsers as UsersGroup,
     IconPlus as Plus,
     IconArrowLeft as ArrowLeft,
+    IconArrowRight as ArrowRight,
     IconCheck as Check,
     IconAlertTriangle as AlertTriangle,
     IconUser as User,
@@ -29,7 +30,7 @@ const AddTeamPage = () => {
     const navigate = useNavigate();
     const {isDarkMode, appliedTheme} = useTheme();
     const {permissions, userRole} = usePermissions();
-    const {t} = useLanguage();
+    const { t, isHebrew, isRTL } = useLanguage();
 
     const [isLoading, setIsLoading] = useState(false);
     const [instructors, setInstructors] = useState([]);
@@ -199,9 +200,18 @@ const AddTeamPage = () => {
                 {/* Page Title - Outside container */}
                 <button
                     onClick={handleCancel}
-                    className={`back-button ${appliedTheme}-back-button`}>
-                    <ArrowLeft className="btn-icon" size={20}/>
-                    {t('addTeam.backToTeams', 'Back to Teams')}
+                    className={`back-button ${appliedTheme}-back-button ${isRTL ? 'rtl' : ''}`}>
+                    {isHebrew ? (
+                        <>
+                            {t('teams.backToTeams', 'Back to Teams')}
+                            <ArrowRight className="btn-icon" size={20} />
+                        </>
+                    ) : (
+                        <>
+                            <ArrowLeft className="btn-icon" size={20} />
+                            {t('teams.backToTeams', 'Back to Teams')}
+                        </>
+                    )}
                 </button>
                 <div className="page-header">
                     <div className="title-section">

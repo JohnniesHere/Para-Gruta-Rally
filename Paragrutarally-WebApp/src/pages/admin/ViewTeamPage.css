@@ -187,8 +187,21 @@
     letter-spacing: 1px;
 }
 
+.team-name-display {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    font-size: 2.5rem !important;
+    font-weight: 700 !important;
+    color: var(--text-primary) !important;
+    text-align: center !important;
+    justify-content: center !important;
+    min-height: auto !important;
+    margin-top: 8px;
+}
+
 .info-value {
-    background: white;
+    background: white !important;
     padding: 12px 16px;
     border-radius: 12px;
     border: 1px solid var(--border-color);
@@ -449,7 +462,7 @@
 }
 
 .racer-name {
-    color: var(--text-primary);
+    color: #454343;
     margin: 0 0 10px 0;
     font-size: 16px;
     font-weight: 600;
@@ -495,6 +508,19 @@
 .assign-kids-button:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+}
+
+/* RTL button styling */
+.back-button.rtl,
+.btn-primary.rtl {
+    flex-direction: row-reverse;
+}
+
+/* Ensure proper spacing */
+.back-button.rtl .btn-icon,
+.btn-primary.rtl .btn-icon {
+    margin-left: 8px;
+    margin-right: 0;
 }
 
 /* ========================================

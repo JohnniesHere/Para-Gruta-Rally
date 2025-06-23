@@ -118,6 +118,23 @@
 }
 
 /* ========================================
+   BUTTONS
+   ======================================== */
+
+/* RTL button styling */
+.back-button.rtl,
+.btn-primary.rtl {
+    flex-direction: row-reverse;
+}
+
+/* Ensure proper spacing */
+.back-button.rtl .btn-icon,
+.btn-primary.rtl .btn-icon {
+    margin-left: 8px;
+    margin-right: 0;
+}
+
+/* ========================================
    EDIT-SPECIFIC FORM FEATURES
    ======================================== */
 
