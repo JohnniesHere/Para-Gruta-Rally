@@ -1,22 +1,20 @@
-// src/pages/admin/KidsManagementPage.jsx - COMPLETE FIX with Vehicle Pattern for Cards
+// src/pages/admin/KidsManagementPage.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
 import TeamChangeModal from '../../components/modals/TeamChangeModal.jsx';
-import EditKidModal from '../../components/modals/EditKidModal.jsx';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { usePermissions, canUserAccessKid } from '../../hooks/usePermissions.jsx';
 import ExportKidsModal from '../../components/modals/ExportKidsModal';
-
 import {
     getAllKids,
     getKidsByInstructor,
     getKidsByParent,
     deleteKid
-} from '../../services/kidService';
-import { getAllTeams } from '../../services/teamService';
-import { getKidPhotoInfo } from '../../services/kidPhotoService';
+} from '@/services/kidService.js';
+import { getAllTeams } from '@/services/teamService.js';
+import { getKidPhotoInfo } from '@/services/kidPhotoService.js';
 import {
     IconUserCircle as Baby,
     IconPlus as Plus,
@@ -62,10 +60,6 @@ const KidsManagementPage = () => {
     // TEAM CHANGE MODAL STATE
     const [teamModalOpen, setTeamModalOpen] = useState(false);
     const [selectedKidForTeamChange, setSelectedKidForTeamChange] = useState(null);
-
-    // EDIT KID MODAL STATE
-    const [editModalOpen, setEditModalOpen] = useState(false);
-    const [selectedKidForEdit, setSelectedKidForEdit] = useState(null);
 
     // Load teams and kids
     useEffect(() => {
@@ -811,17 +805,6 @@ const KidsManagementPage = () => {
                         onTeamChanged={handleTeamChanged}
                     />
                 )}
-
-                {/* EDIT KID MODAL */}
-                <EditKidModal
-                    kid={selectedKidForEdit}
-                    isOpen={editModalOpen}
-                    onClose={() => {
-                        setEditModalOpen(false);
-                        setSelectedKidForEdit(null);
-                    }}
-                    onKidUpdated={handleKidUpdated}
-                />
 
                 {/* Export Kids Modal Component */}
                 <ExportKidsModal

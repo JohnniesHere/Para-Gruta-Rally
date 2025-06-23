@@ -1,4 +1,4 @@
-// src/pages/admin/UserManagementPage.jsx - Updated with Delete Functionality
+// src/pages/admin/UserManagementPage.jsx 
 import React, {useState, useEffect, useCallback} from 'react';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import Dashboard from '../../components/layout/Dashboard';
@@ -8,7 +8,7 @@ import CreateUserModal from '../../components/modals/CreateUserModal';
 import ExportUsersModal from '../../components/modals/ExportUsersModal';
 import UpdateUserModal from '../../components/modals/UpdateUserModal';
 import UsersTable from '../../components/tables/UsersTable';
-import { db } from '../../firebase/config';
+import { db } from '@/firebase/config.js';
 import {
     IconUsers as Users,
     IconUserPlus as UserPlus,

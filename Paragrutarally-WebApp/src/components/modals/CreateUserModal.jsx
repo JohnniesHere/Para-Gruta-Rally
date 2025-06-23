@@ -1,4 +1,4 @@
-// src/components/modals/CreateUserModal.jsx - IMPROVED VERSION
+// src/components/modals/CreateUserModal.jsx - UPDATED VERSION WITH USER SCHEMA
 import React, { useState } from 'react';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp, getDoc } from 'firebase/firestore';
@@ -7,42 +7,22 @@ import { getAuth } from 'firebase/auth';
 import { db } from '@/firebase/config.js';
 import { useLanguage } from '../../contexts/LanguageContext';
 import {
-    useFormValidation,
-    validationRules,
-    cleanPhoneNumber,
-    hasErrors
-} from '../../utils/validationUtils';
+    createEmptyUser,
+    validateUser,
+    validateUserField,
+    prepareUserForFirestore,
+    USER_ROLES,
+    cleanPhoneNumber
+} from '@/schemas/userSchema.js';
 
 const CreateUserModal = ({ isOpen, onClose, onUserCreated }) => {
     const { t, isRTL } = useLanguage();
-    const { validateForm } = useFormValidation();
 
-    const [formData, setFormData] = useState({
-        displayName: '',
-        email: '',
-        name: '',
-        phone: '',
-        role: 'parent'
-    });
-
+    const [formData, setFormData] = useState(createEmptyUser());
     const [errors, setErrors] = useState({});
     const [isLoading, setIsLoading] = useState(false);
 
-    // Real-time field validation
-    const validateSingleField = (fieldName, value) => {
-        const rules = validationRules.user;
-        const fieldRules = rules[fieldName];
-
-        if (!fieldRules) return null;
-
-        // Use the validation from utils
-        const singleFieldData = { [fieldName]: value };
-        const singleFieldRules = { [fieldName]: fieldRules };
-        const result = validateForm(singleFieldData, singleFieldRules, t);
-
-        return result.errors[fieldName] || null;
-    };
-
+    // Real-time field validation using schema
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         let processedValue = value;
@@ -61,8 +41,8 @@ const CreateUserModal = ({ isOpen, onClose, onUserCreated }) => {
             [name]: processedValue
         }));
 
-        // Real-time validation
-        const fieldError = validateSingleField(name, processedValue);
+        // Real-time validation using schema
+        const fieldError = validateUserField(name, processedValue, { isUpdate: false }, t);
         setErrors(prev => ({
             ...prev,
             [name]: fieldError
@@ -72,15 +52,15 @@ const CreateUserModal = ({ isOpen, onClose, onUserCreated }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Validate entire form
-        const validation = validateForm(formData, validationRules.user, t);
+        // Validate entire form using schema
+        const validation = validateUser(formData, { isUpdate: false }, t);
 
         if (!validation.isValid) {
             setErrors(validation.errors);
 
             // Show alert with first error for better UX
             const firstError = Object.values(validation.errors)[0];
-            alert(t('validation.pleaseFixErrors', 'Please fix the following errors:') + '\n' + firstError);
+            alert(t('users.pleaseFixErrors', 'Please fix the following errors:') + '\n' + firstError);
             return;
         }
 
@@ -114,23 +94,10 @@ const CreateUserModal = ({ isOpen, onClose, onUserCreated }) => {
                 );
 
                 const uid = userCredential.user.uid;
-                const now = serverTimestamp();
-
                 console.log('User created in auth, UID:', uid);
 
-                // Create comprehensive user document
-                const userDoc = {
-                    createdAt: now,
-                    displayName: formData.displayName.trim(),
-                    email: formData.email.trim(),
-                    lastLogin: now,
-                    name: formData.name.trim(),
-                    phone: formData.phone.trim(),
-                    role: formData.role,
-                    updatedAt: now,
-                    authProvider: 'email'
-                };
-
+                // Prepare user data for Firestore using schema
+                const userDoc = prepareUserForFirestore(formData, false);
                 console.log('Creating user document with data:', userDoc);
 
                 // Create the document using the UID from Firebase Auth
@@ -151,13 +118,7 @@ const CreateUserModal = ({ isOpen, onClose, onUserCreated }) => {
                 await deleteApp(secondaryApp);
 
                 // Reset form
-                setFormData({
-                    displayName: '',
-                    email: '',
-                    name: '',
-                    phone: '',
-                    role: 'parent'
-                });
+                setFormData(createEmptyUser());
                 setErrors({});
 
                 // Show success message with translations
@@ -212,17 +173,14 @@ const CreateUserModal = ({ isOpen, onClose, onUserCreated }) => {
 
     const handleClose = () => {
         if (!isLoading) {
-            setFormData({
-                displayName: '',
-                email: '',
-                name: '',
-                phone: '',
-                role: 'parent'
-            });
+            setFormData(createEmptyUser());
             setErrors({});
             onClose();
         }
     };
+
+    // Check if form has errors
+    const hasFormErrors = Object.keys(errors).some(key => errors[key]);
 
     if (!isOpen) return null;
 
@@ -355,10 +313,10 @@ const CreateUserModal = ({ isOpen, onClose, onUserCreated }) => {
                                 aria-describedby={errors.role ? 'role-error' : undefined}
                                 aria-invalid={!!errors.role}
                             >
-                                <option value="parent">{t('users.parent', 'Parent')}</option>
-                                <option value="instructor">{t('users.instructor', 'Instructor')}</option>
-                                <option value="admin">{t('users.admin', 'Admin')}</option>
-                                <option value="host">{t('users.host', 'Host')}</option>
+                                <option value={USER_ROLES.PARENT}>{t('users.parent', 'Parent')}</option>
+                                <option value={USER_ROLES.INSTRUCTOR}>{t('users.instructor', 'Instructor')}</option>
+                                <option value={USER_ROLES.ADMIN}>{t('users.admin', 'Admin')}</option>
+                                <option value={USER_ROLES.HOST}>{t('users.host', 'Host')}</option>
                             </select>
                             {errors.role && (
                                 <div id="role-error" className="error-message" role="alert">
@@ -382,7 +340,7 @@ const CreateUserModal = ({ isOpen, onClose, onUserCreated }) => {
                         type="submit"
                         className="btn-primary"
                         onClick={handleSubmit}
-                        disabled={isLoading || hasErrors(errors)}
+                        disabled={isLoading || hasFormErrors}
                     >
                         {isLoading ? (
                             <>

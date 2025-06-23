@@ -117,7 +117,6 @@ export const getFormStatusOptions = (t) => [
  * @returns {Object} - { isValid: boolean, errors: {} }
  */
 export const validateKid = (kidData) => {
-    console.log('🔍 Starting validation for:', kidData);
     const errors = {};
 
     // Helper function to get nested value
@@ -128,12 +127,10 @@ export const validateKid = (kidData) => {
     // Check required fields
     kidValidationRules.required.forEach(field => {
         const value = getNestedValue(kidData, field);
-        console.log(`Checking required field ${field}:`, value);
 
         if (!value || (typeof value === 'string' && !value.trim())) {
             const fieldName = field.split('.').pop();
             errors[field] = `${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)} is required`;
-            console.log(`❌ Required field missing: ${field}`);
         }
     });
 
@@ -142,16 +139,14 @@ export const validateKid = (kidData) => {
         const value = getNestedValue(kidData, field);
         if (value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
             errors[field] = 'Please enter a valid email address';
-            console.log(`❌ Invalid email: ${field} = ${value}`);
         }
     });
 
     // Validate phone format (basic)
     kidValidationRules.phone.forEach(field => {
         const value = getNestedValue(kidData, field);
-        if (value && value.length > 0 && !/^[+]?[\d\s\-\(\)]{7,20}$/.test(value)) {
+        if (value && value.length > 0 && !/^[+]?[\d\s\-()]{7,20}$/.test(value)) {
             errors[field] = 'Please enter a valid phone number';
-            console.log(`❌ Invalid phone: ${field} = ${value}`);
         }
     });
 
@@ -162,16 +157,13 @@ export const validateKid = (kidData) => {
 
         if (isNaN(birthDate.getTime())) {
             errors['personalInfo.dateOfBirth'] = 'Please enter a valid date';
-            console.log(`❌ Invalid date format: ${kidData.personalInfo.dateOfBirth}`);
         } else if (birthDate >= today) {
             errors['personalInfo.dateOfBirth'] = 'Date of birth must be in the past';
-            console.log(`❌ Date in future: ${kidData.personalInfo.dateOfBirth}`);
         } else {
             // Check if child is not too old (e.g., under 18)
             const age = today.getFullYear() - birthDate.getFullYear();
-            if (age > 18) {
-                errors['personalInfo.dateOfBirth'] = 'Participant must be under 18 years old';
-                console.log(`❌ Too old: age ${age}`);
+            if (age > 20) {
+                errors['personalInfo.dateOfBirth'] = 'Participants needs to be under 20 years old';
             }
         }
     }
@@ -181,13 +173,10 @@ export const validateKid = (kidData) => {
         const value = getNestedValue(kidData, field);
         if (value && value.length > maxLength) {
             errors[field] = `Must be ${maxLength} characters or less`;
-            console.log(`❌ Too long: ${field} = ${value.length}/${maxLength}`);
         }
     });
 
     const isValid = Object.keys(errors).length === 0;
-    console.log(`🎯 Validation complete. Valid: ${isValid}`, errors);
-
     return {
         isValid,
         errors
@@ -275,7 +264,7 @@ export const convertFirestoreToKid = (doc) => {
 export const getKidFullName = (kid) => {
     const firstName = kid.personalInfo?.firstName || '';
     const lastName = kid.personalInfo?.lastName || '';
-    return `${firstName} ${lastName}`.trim() || 'Unnamed Racer';
+    return `${firstName} ${lastName}`.trim() || 'Unnamed Kid';
 };
 
 /**

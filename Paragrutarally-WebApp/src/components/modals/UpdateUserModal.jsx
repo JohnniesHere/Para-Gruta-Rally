@@ -1,8 +1,15 @@
-// src/components/modals/UpdateUserModal.jsx - FIXED VERSION
+// src/components/modals/UpdateUserModal.jsx - UPDATED VERSION WITH USER SCHEMA
 import React, { useState, useEffect } from 'react';
 import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { db } from '../../firebase/config';
+import {
+    validateUser,
+    validateUserField,
+    prepareUserForFirestore,
+    USER_ROLES,
+    cleanPhoneNumber
+} from '@/schemas/userSchema.js';
 
 const UpdateUserModal = ({ isOpen, onClose, user, onUserUpdated }) => {
     const { t, isRTL } = useLanguage();
@@ -10,7 +17,7 @@ const UpdateUserModal = ({ isOpen, onClose, user, onUserUpdated }) => {
         displayName: '',
         name: '',
         phone: '',
-        role: 'parent'
+        role: USER_ROLES.PARENT
     });
     const [errors, setErrors] = useState({});
     const [isLoading, setIsLoading] = useState(false);
@@ -23,97 +30,55 @@ const UpdateUserModal = ({ isOpen, onClose, user, onUserUpdated }) => {
                 displayName: user.displayName || '',
                 name: user.name || '',
                 phone: user.phone || '',
-                role: user.role || 'parent'
+                role: user.role || USER_ROLES.PARENT
             });
             setErrors({}); // Clear any previous errors
         }
     }, [user, isOpen]);
 
-    const validateForm = () => {
-        const newErrors = {};
-
-        // Display name validation
-        if (!formData.displayName.trim()) {
-            newErrors.displayName = t('users.displayNameRequired', 'Display name is required');
-        } else if (formData.displayName.trim().length < 2) {
-            newErrors.displayName = t('users.displayNameMinLength', 'Display name must be at least 2 characters');
-        }
-
-        // Full name validation
-        if (!formData.name.trim()) {
-            newErrors.name = t('users.nameRequired', 'Name is required');
-        } else if (formData.name.trim().length < 2) {
-            newErrors.name = t('users.nameMinLength', 'Full name must be at least 2 characters');
-        }
-
-        // Phone validation - exactly 10 digits
-        if (!formData.phone.trim()) {
-            newErrors.phone = t('users.phoneRequired', 'Phone number is required');
-        } else if (!/^\d+$/.test(formData.phone.trim())) {
-            newErrors.phone = t('users.phoneOnlyNumbers', 'Phone number must contain only numbers');
-        } else if (formData.phone.trim().length !== 10) {
-            newErrors.phone = t('users.phoneInvalid', 'Phone number must be exactly 10 digits');
-        }
-
-        // Role validation
-        if (!formData.role) {
-            newErrors.role = t('users.roleRequired', 'Role is required');
-        }
-
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-    };
-
     const handleInputChange = (e) => {
         const { name, value } = e.target;
+        let processedValue = value;
 
         // Special handling for phone number - only allow digits
         if (name === 'phone') {
-            const numbersOnly = value.replace(/[^\d]/g, '');
-            setFormData(prev => ({
-                ...prev,
-                [name]: numbersOnly
-            }));
-
-            // Real-time validation for phone
-            if (numbersOnly.length > 0 && numbersOnly.length !== 10) {
-                setErrors(prev => ({
-                    ...prev,
-                    phone: t('users.phoneInvalid', 'Phone number must be exactly 10 digits')
-                }));
-            } else {
-                // Clear phone error if it's valid
-                setErrors(prev => {
-                    const newErrors = { ...prev };
-                    delete newErrors.phone;
-                    return newErrors;
-                });
+            processedValue = cleanPhoneNumber(value);
+            // Limit to 10 digits
+            if (processedValue.length > 10) {
+                processedValue = processedValue.slice(0, 10);
             }
-        } else {
-            setFormData(prev => ({
-                ...prev,
-                [name]: value
-            }));
         }
 
-        // Clear error when user starts typing (for non-phone fields)
-        if (errors[name] && name !== 'phone') {
-            setErrors(prev => ({
-                ...prev,
-                [name]: ''
-            }));
-        }
+        setFormData(prev => ({
+            ...prev,
+            [name]: processedValue
+        }));
+
+        // Real-time validation using schema
+        const fieldError = validateUserField(name, processedValue, { isUpdate: true }, t);
+        setErrors(prev => ({
+            ...prev,
+            [name]: fieldError
+        }));
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!validateForm()) {
+        if (!user?.id) {
+            setErrors({ general: t('users.noUserSelected', 'No user selected for update') });
             return;
         }
 
-        if (!user?.id) {
-            setErrors({ general: t('users.noUserSelected', 'No user selected for update') });
+        // Validate entire form using schema (isUpdate = true to skip email validation)
+        const validation = validateUser(formData, { isUpdate: true }, t);
+
+        if (!validation.isValid) {
+            setErrors(validation.errors);
+
+            // Show alert with first error for better UX
+            const firstError = Object.values(validation.errors)[0];
+            alert(t('users.pleaseFixErrors', 'Please fix the following errors:') + '\n' + firstError);
             return;
         }
 
@@ -122,15 +87,13 @@ const UpdateUserModal = ({ isOpen, onClose, user, onUserUpdated }) => {
         try {
             console.log('Updating user:', user.id, 'with data:', formData);
 
+            // Prepare user data for Firestore using schema
+            const updateData = prepareUserForFirestore(formData, true);
+            console.log('Prepared update data:', updateData);
+
             // Update user document in Firestore
             const userDocRef = doc(db, 'users', user.id);
-            await updateDoc(userDocRef, {
-                displayName: formData.displayName.trim(),
-                name: formData.name.trim(),
-                phone: formData.phone.trim(),
-                role: formData.role,
-                updatedAt: serverTimestamp()
-            });
+            await updateDoc(userDocRef, updateData);
 
             console.log('✅ User updated successfully');
 
@@ -163,6 +126,9 @@ const UpdateUserModal = ({ isOpen, onClose, user, onUserUpdated }) => {
         }
     };
 
+    // Check if form has errors
+    const hasFormErrors = Object.keys(errors).some(key => errors[key]);
+
     if (!isOpen || !user) return null;
 
     return (
@@ -175,6 +141,7 @@ const UpdateUserModal = ({ isOpen, onClose, user, onUserUpdated }) => {
                         onClick={handleClose}
                         disabled={isLoading}
                         type="button"
+                        aria-label={t('common.close', 'Close')}
                     >
                         ×
                     </button>
@@ -183,13 +150,15 @@ const UpdateUserModal = ({ isOpen, onClose, user, onUserUpdated }) => {
                 <div className="modal-body">
                     <form onSubmit={handleSubmit} className={isLoading ? 'loading' : ''}>
                         {errors.general && (
-                            <div className="error-message" style={{ marginBottom: '20px', textAlign: 'center' }}>
+                            <div className="error-message general-error" role="alert">
                                 {errors.general}
                             </div>
                         )}
 
                         <div className={`form-group ${errors.displayName ? 'error' : ''}`}>
-                            <label htmlFor="displayName">{t('users.displayName', 'Display Name')} *</label>
+                            <label htmlFor="displayName">
+                                {t('users.displayName', 'Display Name')} *
+                            </label>
                             <input
                                 type="text"
                                 id="displayName"
@@ -198,14 +167,20 @@ const UpdateUserModal = ({ isOpen, onClose, user, onUserUpdated }) => {
                                 onChange={handleInputChange}
                                 disabled={isLoading}
                                 placeholder={t('users.displayNamePlaceholder', 'Enter display name')}
+                                aria-describedby={errors.displayName ? 'displayName-error' : undefined}
+                                aria-invalid={!!errors.displayName}
                             />
                             {errors.displayName && (
-                                <div className="error-message">{errors.displayName}</div>
+                                <div id="displayName-error" className="error-message" role="alert">
+                                    {errors.displayName}
+                                </div>
                             )}
                         </div>
 
                         <div className="form-group">
-                            <label htmlFor="email">{t('users.emailAddress', 'Email Address')}</label>
+                            <label htmlFor="email">
+                                {t('users.emailAddress', 'Email Address')}
+                            </label>
                             <input
                                 type="email"
                                 id="email"
@@ -225,7 +200,9 @@ const UpdateUserModal = ({ isOpen, onClose, user, onUserUpdated }) => {
                         </div>
 
                         <div className={`form-group ${errors.name ? 'error' : ''}`}>
-                            <label htmlFor="name">{t('users.fullName', 'Full Name')} *</label>
+                            <label htmlFor="name">
+                                {t('users.fullName', 'Full Name')} *
+                            </label>
                             <input
                                 type="text"
                                 id="name"
@@ -234,14 +211,20 @@ const UpdateUserModal = ({ isOpen, onClose, user, onUserUpdated }) => {
                                 onChange={handleInputChange}
                                 disabled={isLoading}
                                 placeholder={t('users.fullNamePlaceholder', 'Enter full name')}
+                                aria-describedby={errors.name ? 'name-error' : undefined}
+                                aria-invalid={!!errors.name}
                             />
                             {errors.name && (
-                                <div className="error-message">{errors.name}</div>
+                                <div id="name-error" className="error-message" role="alert">
+                                    {errors.name}
+                                </div>
                             )}
                         </div>
 
                         <div className={`form-group ${errors.phone ? 'error' : ''}`}>
-                            <label htmlFor="phone">{t('users.phoneNumber', 'Phone Number')} *</label>
+                            <label htmlFor="phone">
+                                {t('users.phoneNumber', 'Phone Number')} *
+                            </label>
                             <input
                                 type="tel"
                                 id="phone"
@@ -251,35 +234,41 @@ const UpdateUserModal = ({ isOpen, onClose, user, onUserUpdated }) => {
                                 disabled={isLoading}
                                 placeholder={t('users.phoneNumberPlaceholder', 'Enter phone number')}
                                 maxLength="10"
-                                pattern="[0-9]{10}"
-                                onInvalid={(e) => {
-                                    e.target.setCustomValidity(t('users.phoneInvalid'));
-                                }}
-                                onInput={(e) => {
-                                    e.target.setCustomValidity('');
-                                }}
+                                aria-describedby={errors.phone ? 'phone-error' : undefined}
+                                aria-invalid={!!errors.phone}
                             />
                             {errors.phone && (
-                                <div className="error-message">{errors.phone}</div>
+                                <div id="phone-error" className="error-message" role="alert">
+                                    {errors.phone}
+                                </div>
                             )}
+                            <small className="field-hint">
+                                {t('users.phoneHint', 'Israeli phone number (10 digits)')}
+                            </small>
                         </div>
 
                         <div className={`form-group ${errors.role ? 'error' : ''}`}>
-                            <label htmlFor="role">{t('users.role', 'Role')} *</label>
+                            <label htmlFor="role">
+                                {t('users.role', 'Role')} *
+                            </label>
                             <select
                                 id="role"
                                 name="role"
                                 value={formData.role}
                                 onChange={handleInputChange}
                                 disabled={isLoading}
+                                aria-describedby={errors.role ? 'role-error' : undefined}
+                                aria-invalid={!!errors.role}
                             >
-                                <option value="parent">{t('users.parent', 'Parent')}</option>
-                                <option value="instructor">{t('users.instructor', 'Instructor')}</option>
-                                <option value="admin">{t('users.admin', 'Admin')}</option>
-                                <option value="host">{t('users.host', 'Host')}</option>
+                                <option value={USER_ROLES.PARENT}>{t('users.parent', 'Parent')}</option>
+                                <option value={USER_ROLES.INSTRUCTOR}>{t('users.instructor', 'Instructor')}</option>
+                                <option value={USER_ROLES.ADMIN}>{t('users.admin', 'Admin')}</option>
+                                <option value={USER_ROLES.HOST}>{t('users.host', 'Host')}</option>
                             </select>
                             {errors.role && (
-                                <div className="error-message">{errors.role}</div>
+                                <div id="role-error" className="error-message" role="alert">
+                                    {errors.role}
+                                </div>
                             )}
                         </div>
                     </form>
@@ -298,9 +287,16 @@ const UpdateUserModal = ({ isOpen, onClose, user, onUserUpdated }) => {
                         type="submit"
                         className="btn-primary"
                         onClick={handleSubmit}
-                        disabled={isLoading}
+                        disabled={isLoading || hasFormErrors}
                     >
-                        {isLoading ? t('users.updating', 'Updating...') : t('users.updateUserButton', 'Update User')}
+                        {isLoading ? (
+                            <>
+                                <span className="loading-spinner" aria-hidden="true"></span>
+                                {t('users.updating', 'Updating...')}
+                            </>
+                        ) : (
+                            t('users.updateUserButton', 'Update User')
+                        )}
                     </button>
                 </div>
             </div>

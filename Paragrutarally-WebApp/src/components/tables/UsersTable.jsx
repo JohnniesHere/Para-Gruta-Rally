@@ -1,7 +1,7 @@
 // src/components/tables/UsersTable.jsx - Updated with Proper User Deletion
 import React, { useState, useMemo } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { deleteUserCompletely } from '../../services/userService';
+import { deleteUserCompletely } from '@/services/userService.js';
 import {
     IconEdit as Edit,
     IconTrash as Trash,
