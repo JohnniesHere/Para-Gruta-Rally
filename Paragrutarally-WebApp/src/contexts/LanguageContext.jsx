@@ -1930,10 +1930,50 @@ const translations = {
         'validation.pleaseFilThisField': 'Please fill out this field.',
         'validation.emailRequired': 'Please enter a valid email address.',
         'validation.passwordRequired': 'Please enter your password.',
+
+        // User validation messages
+        'users.emailRequired': 'Email is required',
+        'users.emailInvalid': 'Please enter a valid email address',
+        'users.phoneInvalid': 'Phone number must be exactly 10 digits',
+        'users.phoneOnlyNumbers': 'Phone number must contain only numbers',
+        'users.displayNameMinLength': 'Display name must be at least 2 characters',
+        'users.nameMinLength': 'Full name must be at least 2 characters',
+        'users.emailInUse': 'This email is already registered',
+        'users.weakPassword': 'Password is too weak',
+        'users.createError': 'Failed to create user. Please try again.',
+        'users.tryAgain': 'Please wait a moment and try again.',
+        'users.createSuccess': 'SUCCESS!',
+        'users.userCreated': 'User has been created successfully!',
+        'users.userId': 'User ID',
+        'users.defaultPassword': 'Default password',
+
+        // User validation messages (add these)
+        'users.updateSuccess': 'User "{displayName}" updated successfully!',
+        'users.noUserSelected': 'No user selected for update',
     },
 
 
     he: {
+        // User validation messages
+        'users.emailRequired': 'אימייל הוא שדה חובה',
+        'users.emailInvalid': 'אנא הכנס כתובת אימייל תקינה',
+        'users.phoneInvalid': 'מספר טלפון חייב להיות בדיוק 10 ספרות',
+        'users.phoneOnlyNumbers': 'מספר טלפון חייב להכיל רק ספרות',
+        'users.displayNameMinLength': 'שם תצוגה חייב להיות לפחות 2 תווים',
+        'users.nameMinLength': 'שם מלא חייב להיות לפחות 2 תווים',
+        'users.emailInUse': 'האימייל הזה כבר רשום במערכת',
+        'users.weakPassword': 'הסיסמה חלשה מדי',
+        'users.createError': 'כשל ביצירת משתמש. אנא נסה שוב.',
+        'users.tryAgain': 'אנא המתן רגע ונסה שוב.',
+        'users.createSuccess': 'הצלחה!',
+        'users.userCreated': 'המשתמש נוצר בהצלחה!',
+        'users.userId': 'מזהה משתמש',
+        'users.defaultPassword': 'סיסמה ברירת מחדל',
+
+        // User validation messages (add these)
+        'users.updateSuccess': 'המשתמש "{displayName}" עודכן בהצלחה!',
+        'users.noUserSelected': 'לא נבחר משתמש לעדכון',
+
         // Backup & Sync
         'backup.connectToEnableAutomated': 'התחבר לגוגל דרייב כדי לאפשר גיבויים אוטומטיים',
         'backup.lastBackup': 'גיבוי אחרון: {date}',

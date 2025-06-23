@@ -32,18 +32,30 @@ const UpdateUserModal = ({ isOpen, onClose, user, onUserUpdated }) => {
     const validateForm = () => {
         const newErrors = {};
 
+        // Display name validation
         if (!formData.displayName.trim()) {
             newErrors.displayName = t('users.displayNameRequired', 'Display name is required');
+        } else if (formData.displayName.trim().length < 2) {
+            newErrors.displayName = t('users.displayNameMinLength', 'Display name must be at least 2 characters');
         }
 
+        // Full name validation
         if (!formData.name.trim()) {
             newErrors.name = t('users.nameRequired', 'Name is required');
+        } else if (formData.name.trim().length < 2) {
+            newErrors.name = t('users.nameMinLength', 'Full name must be at least 2 characters');
         }
 
+        // Phone validation - exactly 10 digits
         if (!formData.phone.trim()) {
             newErrors.phone = t('users.phoneRequired', 'Phone number is required');
+        } else if (!/^\d+$/.test(formData.phone.trim())) {
+            newErrors.phone = t('users.phoneOnlyNumbers', 'Phone number must contain only numbers');
+        } else if (formData.phone.trim().length !== 10) {
+            newErrors.phone = t('users.phoneInvalid', 'Phone number must be exactly 10 digits');
         }
 
+        // Role validation
         if (!formData.role) {
             newErrors.role = t('users.roleRequired', 'Role is required');
         }
@@ -54,13 +66,38 @@ const UpdateUserModal = ({ isOpen, onClose, user, onUserUpdated }) => {
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
 
-        // Clear error when user starts typing
-        if (errors[name]) {
+        // Special handling for phone number - only allow digits
+        if (name === 'phone') {
+            const numbersOnly = value.replace(/[^\d]/g, '');
+            setFormData(prev => ({
+                ...prev,
+                [name]: numbersOnly
+            }));
+
+            // Real-time validation for phone
+            if (numbersOnly.length > 0 && numbersOnly.length !== 10) {
+                setErrors(prev => ({
+                    ...prev,
+                    phone: t('users.phoneInvalid', 'Phone number must be exactly 10 digits')
+                }));
+            } else {
+                // Clear phone error if it's valid
+                setErrors(prev => {
+                    const newErrors = { ...prev };
+                    delete newErrors.phone;
+                    return newErrors;
+                });
+            }
+        } else {
+            setFormData(prev => ({
+                ...prev,
+                [name]: value
+            }));
+        }
+
+        // Clear error when user starts typing (for non-phone fields)
+        if (errors[name] && name !== 'phone') {
             setErrors(prev => ({
                 ...prev,
                 [name]: ''
@@ -101,7 +138,7 @@ const UpdateUserModal = ({ isOpen, onClose, user, onUserUpdated }) => {
             setErrors({});
 
             // Show success message
-            alert(t('users.updateSuccess', `User "${formData.displayName}" updated successfully!`));
+            alert(t('users.updateSuccess', 'User "{displayName}" updated successfully!', { displayName: formData.displayName }));
 
             // Notify parent component
             if (onUserUpdated) {
@@ -213,6 +250,14 @@ const UpdateUserModal = ({ isOpen, onClose, user, onUserUpdated }) => {
                                 onChange={handleInputChange}
                                 disabled={isLoading}
                                 placeholder={t('users.phoneNumberPlaceholder', 'Enter phone number')}
+                                maxLength="10"
+                                pattern="[0-9]{10}"
+                                onInvalid={(e) => {
+                                    e.target.setCustomValidity(t('users.phoneInvalid'));
+                                }}
+                                onInput={(e) => {
+                                    e.target.setCustomValidity('');
+                                }}
                             />
                             {errors.phone && (
                                 <div className="error-message">{errors.phone}</div>
