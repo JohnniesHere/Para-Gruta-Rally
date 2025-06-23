@@ -1,4 +1,4 @@
-// src/pages/admin/TeamsManagementPage.jsx - FIXED VERSION with proper active card logic
+// src/pages/admin/TeamsManagementPage.jsx - OPTIMIZED VERSION with single-row stats
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
@@ -47,6 +47,8 @@ const TeamsManagementPage = () => {
     const [capacityFilter, setCapacityFilter] = useState('all');
     const [showingTeamsWithoutKids, setShowingTeamsWithoutKids] = useState(false);
     const [exportModalOpen, setExportModalOpen] = useState(false);
+    const [activeCardFilter, setActiveCardFilter] = useState('total'); // NEW: Track active card
+
     // Reference data for lookups
     const [instructorsMap, setInstructorsMap] = useState(new Map());
     const [kidsMap, setKidsMap] = useState(new Map());
@@ -159,8 +161,10 @@ const TeamsManagementPage = () => {
         setFilteredTeams(filtered);
     };
 
-    // Handle stat card clicks to filter teams - FIXED LOGIC
+    // Handle stat card clicks to filter teams - UPDATED WITH ACTIVE CARD TRACKING
     const handleStatCardClick = (filterType) => {
+        setActiveCardFilter(filterType); // NEW: Set active card
+
         switch (filterType) {
             case 'total':
                 setStatusFilter('all');
@@ -193,6 +197,7 @@ const TeamsManagementPage = () => {
         setStatusFilter('all');
         setCapacityFilter('all');
         setShowingTeamsWithoutKids(false);
+        setActiveCardFilter('total'); // NEW: Reset to total
     };
 
     const handleDeleteTeam = async (team) => {
@@ -326,10 +331,10 @@ const TeamsManagementPage = () => {
                         </div>
                     </div>
 
-                    {/* Clickable Stats Cards - FIXED ACTIVE LOGIC */}
-                    <div className="stats-grid">
+                    {/* OPTIMIZED Stats Cards - Single Row Layout */}
+                    <div className="stats-grid-optimized">
                         <div
-                            className={`stat-card total ${statusFilter === 'all' && capacityFilter === 'all' && !showingTeamsWithoutKids ? 'active' : ''}`}
+                            className={`stat-card total ${activeCardFilter === 'total' ? 'active' : ''}`}
                             onClick={() => handleStatCardClick('total')}
                             style={{ cursor: 'pointer' }}
                         >
@@ -341,7 +346,7 @@ const TeamsManagementPage = () => {
                         </div>
 
                         <div
-                            className={`stat-card active-teams ${statusFilter === 'active' ? 'active' : ''}`}
+                            className={`stat-card active-teams ${activeCardFilter === 'active' ? 'active' : ''}`}
                             onClick={() => handleStatCardClick('active')}
                             style={{ cursor: 'pointer' }}
                         >
@@ -353,7 +358,7 @@ const TeamsManagementPage = () => {
                         </div>
 
                         <div
-                            className={`stat-card priority-warning clickable ${showingTeamsWithoutKids ? 'active' : ''}`}
+                            className={`stat-card priority-warning clickable ${activeCardFilter === 'without-kids' ? 'active' : ''}`}
                             onClick={() => handleStatCardClick('without-kids')}
                             style={{ cursor: 'pointer' }}
                         >
@@ -361,11 +366,12 @@ const TeamsManagementPage = () => {
                             <div className="stat-content">
                                 <h3>{t('teams.teamsWithoutKids', 'Teams without Kids')}</h3>
                                 <div className="stat-value">{stats.teamsWithoutKids}</div>
+                                <div className="stat-subtitle">{t('teams.clickToView', 'Click to view')}</div>
                             </div>
                         </div>
 
                         <div
-                            className={`stat-card with-teams ${capacityFilter === 'available' ? 'active' : ''}`}
+                            className={`stat-card with-kids ${activeCardFilter === 'with-kids' ? 'active' : ''}`}
                             onClick={() => handleStatCardClick('with-kids')}
                             style={{ cursor: 'pointer' }}
                         >

@@ -1,5 +1,95 @@
-/* src/pages/admin/TeamsManagementPage.css - Page-specific styles with ACTIVE CARD BORDERS */
+/* src/pages/admin/TeamsManagementPage.css - OPTIMIZED VERSION with single-row stats */
 @import url('./../../styles/global.css');
+
+/* ========================================
+   OPTIMIZED STATS GRID - SINGLE ROW LAYOUT (TEAMS PAGE)
+   ======================================== */
+
+/* NEW: Optimized stats grid that uses full row width efficiently */
+.stats-grid-optimized {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 4 equal columns for teams page */
+    gap: 15px;
+    margin-bottom: 40px;
+    width: 100%;
+}
+
+/* Override the default stats-grid for teams management */
+.teams-management-page .stats-grid {
+    display: none; /* Hide the old grid */
+}
+
+/* For teams management, show all 4 cards in single row */
+.teams-management-page .stats-grid-optimized {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+/* Ensure stat cards fill the available space efficiently */
+.stats-grid-optimized .stat-card {
+    background: var(--bg-secondary);
+    border-radius: 15px;
+    padding: 20px 15px; /* Reduced horizontal padding */
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Reduced gap */
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 2px 10px var(--shadow-color);
+    min-width: 0; /* Allow shrinking */
+    flex: 1; /* Fill available space equally */
+}
+
+/* Responsive behavior - allow wrapping only when necessary */
+@media (max-width: 1200px) {
+    .stats-grid-optimized {
+        grid-template-columns: repeat(2, 1fr); /* 2 cards per row */
+        gap: 12px;
+    }
+}
+
+@media (max-width: 768px) {
+    .stats-grid-optimized {
+        grid-template-columns: 1fr; /* Single column on smaller screens */
+        gap: 10px;
+    }
+
+    .stats-grid-optimized .stat-card {
+        padding: 15px 10px;
+        gap: 10px;
+    }
+}
+
+/* Optimize stat content for smaller spaces */
+.stats-grid-optimized .stat-content h3 {
+    font-size: 12px; /* Slightly smaller */
+    margin: 0 0 6px 0;
+    line-height: 1.2;
+}
+
+.stats-grid-optimized .stat-value {
+    font-size: 28px; /* Slightly smaller but still prominent */
+    font-weight: 700;
+    color: var(--card-color);
+    margin: 0;
+    line-height: 1;
+}
+
+.stats-grid-optimized .stat-icon {
+    font-size: 35px; /* Slightly smaller icon */
+    flex-shrink: 0;
+}
+
+.stats-grid-optimized .stat-subtitle {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 2px;
+}
 
 /* ========================================
    CLICKABLE STAT CARDS - TEAMS MANAGEMENT
@@ -59,12 +149,12 @@
     background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%) !important;
 }
 
-.stat-card.active.active {
+.stat-card.active-teams.active {
     border: 2px solid #10b981 !important;
     box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3) !important;
 }
 
-.stat-card.active.active::before {
+.stat-card.active-teams.active::before {
     background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%) !important;
 }
 
@@ -77,12 +167,12 @@
     background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(245, 158, 11, 0.05) 100%) !important;
 }
 
-.stat-card.with-teams.active {
+.stat-card.with-kids.active {
     border: 2px solid #3b82f6 !important;
     box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3) !important;
 }
 
-.stat-card.with-teams.active::before {
+.stat-card.with-kids.active::before {
     background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%) !important;
 }
 

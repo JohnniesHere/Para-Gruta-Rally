@@ -1,4 +1,4 @@
-// src/pages/admin/UserManagementPage.jsx - FIXED VERSION with optimized stats cards
+// src/pages/admin/UserManagementPage.jsx - OPTIMIZED VERSION with single-row stats
 import React, {useState, useEffect, useCallback} from 'react';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import Dashboard from '../../components/layout/Dashboard';
@@ -37,6 +37,7 @@ const UserManagementPage = () => {
     const [selectedUser, setSelectedUser] = useState(null);
     const [roleFilter, setRoleFilter] = useState('all');
     const [searchTerm, setSearchTerm] = useState('');
+    const [activeCardFilter, setActiveCardFilter] = useState('total'); // NEW: Track active card
 
     // Fetch users from the Firestore
     const fetchUsers = async () => {
@@ -94,6 +95,7 @@ const UserManagementPage = () => {
     // Handle filter changes
     const handleRoleFilterChange = (e) => {
         setRoleFilter(e.target.value);
+        setActiveCardFilter(e.target.value); // NEW: Update active card when filter changes
     };
 
     const handleSearchChange = (e) => {
@@ -103,10 +105,13 @@ const UserManagementPage = () => {
     const handleClearFilters = () => {
         setRoleFilter('all');
         setSearchTerm('');
+        setActiveCardFilter('total'); // NEW: Reset to total
     };
 
-    // Handle stat card clicks to filter users
+    // Handle stat card clicks to filter users - UPDATED WITH ACTIVE CARD TRACKING
     const handleStatCardClick = (filterType) => {
+        setActiveCardFilter(filterType); // NEW: Set active card
+
         switch (filterType) {
             case 'total':
                 setRoleFilter('all');
@@ -249,7 +254,7 @@ const UserManagementPage = () => {
                     {/* OPTIMIZED Stats Cards - Single Row Layout */}
                     <div className="stats-grid-optimized">
                         <div
-                            className={`stat-card total ${roleFilter === 'all' ? 'active' : ''}`}
+                            className={`stat-card total ${activeCardFilter === 'total' ? 'active' : ''}`}
                             onClick={() => handleStatCardClick('total')}
                             style={{ cursor: 'pointer' }}
                         >
@@ -261,7 +266,7 @@ const UserManagementPage = () => {
                         </div>
 
                         <div
-                            className={`stat-card admins ${roleFilter === 'admin' ? 'active' : ''}`}
+                            className={`stat-card admins ${activeCardFilter === 'admin' ? 'active' : ''}`}
                             onClick={() => handleStatCardClick('admin')}
                             style={{ cursor: 'pointer' }}
                         >
@@ -273,7 +278,7 @@ const UserManagementPage = () => {
                         </div>
 
                         <div
-                            className={`stat-card instructors ${roleFilter === 'instructor' ? 'active' : ''}`}
+                            className={`stat-card instructors ${activeCardFilter === 'instructor' ? 'active' : ''}`}
                             onClick={() => handleStatCardClick('instructor')}
                             style={{ cursor: 'pointer' }}
                         >
@@ -285,7 +290,7 @@ const UserManagementPage = () => {
                         </div>
 
                         <div
-                            className={`stat-card hosts ${roleFilter === 'host' ? 'active' : ''}`}
+                            className={`stat-card hosts ${activeCardFilter === 'host' ? 'active' : ''}`}
                             onClick={() => handleStatCardClick('host')}
                             style={{ cursor: 'pointer' }}
                         >
@@ -297,7 +302,7 @@ const UserManagementPage = () => {
                         </div>
 
                         <div
-                            className={`stat-card parents ${roleFilter === 'parent' ? 'active' : ''}`}
+                            className={`stat-card parents ${activeCardFilter === 'parent' ? 'active' : ''}`}
                             onClick={() => handleStatCardClick('parent')}
                             style={{ cursor: 'pointer' }}
                         >

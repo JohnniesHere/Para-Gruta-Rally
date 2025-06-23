@@ -1,4 +1,4 @@
-// src/pages/admin/KidsManagementPage.jsx
+// src/pages/admin/KidsManagementPage.jsx - OPTIMIZED VERSION with single-row stats
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
@@ -84,13 +84,13 @@ const KidsManagementPage = () => {
     const getKidDisplayName = (kid) => {
         switch (userRole) {
             case 'admin':
-                { const firstName = kid.personalInfo?.firstName || '';
+            { const firstName = kid.personalInfo?.firstName || '';
                 const lastName = kid.personalInfo?.lastName || '';
                 const fullName = `${firstName} ${lastName}`.trim();
                 return fullName || `${t('kids.participantNumber', 'Participant #')}${kid.participantNumber}`; }
             case 'instructor':
             case 'parent':
-                { const instFirstName = kid.personalInfo?.firstName || '';
+            { const instFirstName = kid.personalInfo?.firstName || '';
                 const instLastName = kid.personalInfo?.lastName || '';
                 const instFullName = `${instFirstName} ${instLastName}`.trim();
                 return instFullName || `${t('kids.participantNumber', 'Participant #')}${kid.participantNumber}`; }
@@ -499,8 +499,8 @@ const KidsManagementPage = () => {
                         </div>
                     </div>
 
-                    {/* Stats Cards with Active States - FIXED TO MATCH VEHICLES PATTERN */}
-                    <div className="stats-grid">
+                    {/* OPTIMIZED Stats Cards - Single Row Layout */}
+                    <div className="stats-grid-optimized">
                         {(userRole === 'admin' || userRole === 'instructor') && (
                             <div
                                 className={`stat-card priority-warning clickable ${activeCardFilter === 'without-teams' ? 'active' : ''}`}
@@ -553,6 +553,7 @@ const KidsManagementPage = () => {
                         </div>
                     </div>
 
+                    {/* Rest of the component remains the same... */}
                     {/* Search and Filters */}
                     <div className="search-filter-section">
                         <div className="search-container">

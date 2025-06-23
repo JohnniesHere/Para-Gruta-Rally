@@ -2,13 +2,13 @@
 @import url('./../../styles/global.css');
 
 /* ========================================
-   OPTIMIZED STATS GRID - SINGLE ROW LAYOUT
+   OPTIMIZED STATS GRID - SINGLE ROW LAYOUT (USER MANAGEMENT PAGE)
    ======================================== */
 
 /* NEW: Optimized stats grid that uses full row width efficiently */
 .stats-grid-optimized {
     display: grid;
-    grid-template-columns: repeat(5, 1fr); /* 5 equal columns */
+    grid-template-columns: repeat(5, 1fr); /* 5 equal columns for user management */
     gap: 15px;
     margin-bottom: 40px;
     width: 100%;
@@ -17,6 +17,11 @@
 /* Override the default stats-grid for user management */
 .user-management-page .stats-grid {
     display: none; /* Hide the old grid */
+}
+
+/* For user management, show all 5 cards in single row */
+.user-management-page .stats-grid-optimized {
+    grid-template-columns: repeat(5, 1fr);
 }
 
 /* Ensure stat cards fill the available space efficiently */
@@ -38,16 +43,16 @@
 }
 
 /* Responsive behavior - allow wrapping only when necessary */
-@media (max-width: 1200px) {
+@media (max-width: 1400px) {
     .stats-grid-optimized {
-        grid-template-columns: repeat(3, 1fr); /* 3 cards per row */
+        grid-template-columns: repeat(3, 1fr); /* 3 cards per row on medium screens */
         gap: 12px;
     }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
     .stats-grid-optimized {
-        grid-template-columns: repeat(2, 1fr); /* 2 cards per row */
+        grid-template-columns: repeat(2, 1fr); /* 2 cards per row on smaller screens */
         gap: 10px;
     }
 

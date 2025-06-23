@@ -1,5 +1,95 @@
-/* src/pages/admin/VehiclePage.css - Enhanced Mobile-First Responsive Design with ACTIVE CARD BORDERS */
+/* src/pages/admin/VehiclePage.css - OPTIMIZED VERSION with single-row stats */
 @import url('./../../styles/global.css');
+
+/* ========================================
+   OPTIMIZED STATS GRID - SINGLE ROW LAYOUT (VEHICLES PAGE)
+   ======================================== */
+
+/* NEW: Optimized stats grid that uses full row width efficiently */
+.stats-grid-optimized {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 4 equal columns for vehicles page */
+    gap: 15px;
+    margin-bottom: 40px;
+    width: 100%;
+}
+
+/* Override the default stats-grid for vehicles page */
+.vehicles-page .stats-grid {
+    display: none; /* Hide the old grid */
+}
+
+/* For vehicles page, show all 4 cards in single row */
+.vehicles-page .stats-grid-optimized {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+/* Ensure stat cards fill the available space efficiently */
+.stats-grid-optimized .stat-card {
+    background: var(--bg-secondary);
+    border-radius: 15px;
+    padding: 20px 15px; /* Reduced horizontal padding */
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Reduced gap */
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 2px 10px var(--shadow-color);
+    min-width: 0; /* Allow shrinking */
+    flex: 1; /* Fill available space equally */
+}
+
+/* Responsive behavior - allow wrapping only when necessary */
+@media (max-width: 1200px) {
+    .stats-grid-optimized {
+        grid-template-columns: repeat(2, 1fr); /* 2 cards per row */
+        gap: 12px;
+    }
+}
+
+@media (max-width: 768px) {
+    .stats-grid-optimized {
+        grid-template-columns: 1fr; /* Single column on smaller screens */
+        gap: 10px;
+    }
+
+    .stats-grid-optimized .stat-card {
+        padding: 15px 10px;
+        gap: 10px;
+    }
+}
+
+/* Optimize stat content for smaller spaces */
+.stats-grid-optimized .stat-content h3 {
+    font-size: 12px; /* Slightly smaller */
+    margin: 0 0 6px 0;
+    line-height: 1.2;
+}
+
+.stats-grid-optimized .stat-value {
+    font-size: 28px; /* Slightly smaller but still prominent */
+    font-weight: 700;
+    color: var(--card-color);
+    margin: 0;
+    line-height: 1;
+}
+
+.stats-grid-optimized .stat-icon {
+    font-size: 35px; /* Slightly smaller icon */
+    flex-shrink: 0;
+}
+
+.stats-grid-optimized .stat-subtitle {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 2px;
+}
 
 /* ========================================
    CLICKABLE STAT CARDS - VEHICLES PAGE
@@ -13,6 +103,79 @@
     border: 2px solid transparent !important; /* Force transparent border by default */
 }
 
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.stat-card:hover::before {
+    opacity: 1;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Active state - only show border when card is active */
+.stat-card.active {
+    transform: translateY(-2px);
+}
+
+.stat-card.active::before {
+    opacity: 1;
+}
+
+/* DISABLE any default borders that might be inherited */
+.stat-card:not(.active) {
+    border: 2px solid transparent !important;
+}
+
+/* Specific active state colors for Vehicles page card types */
+.stat-card.total.active {
+    border: 2px solid #3b82f6 !important;
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3) !important;
+}
+
+.stat-card.total.active::before {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%) !important;
+}
+
+.stat-card.active-vehicles.active {
+    border: 2px solid #10b981 !important;
+    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3) !important;
+}
+
+.stat-card.active-vehicles.active::before {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%) !important;
+}
+
+.stat-card.in-use.active {
+    border: 2px solid #ec4899 !important;
+    box-shadow: 0 8px 25px rgba(236, 72, 153, 0.3) !important;
+}
+
+.stat-card.in-use.active::before {
+    background: linear-gradient(135deg, rgba(236, 72, 153, 0.1) 0%, rgba(236, 72, 153, 0.05) 100%) !important;
+}
+
+.stat-card.available.active {
+    border: 2px solid #f59e0b !important;
+    box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3) !important;
+}
+
+.stat-card.available.active::before {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(245, 158, 11, 0.05) 100%) !important;
+}
+
 /* ========================================
    VEHICLES PAGE SPECIFIC STYLES
    ======================================== */
@@ -20,6 +183,7 @@
 .vehicles-page {
     /* Inherits from .admin-page in global.css */
 }
+
 /* FIX: Use standard action buttons from global.css */
 .vehicles-page .btn-action {
     min-width: 50px !important; /* From global.css */
@@ -75,7 +239,6 @@
     min-width: 100px !important;
     max-width: 110px !important;
 }
-
 
 /* Update total table width to accommodate the change */
 .vehicles-page .data-table {
@@ -605,422 +768,6 @@
 }
 
 /* ========================================
-   VIEW VEHICLE PAGE STYLES - UPDATED: Remove gradients
-   ======================================== */
-
-.view-vehicle-page {
-    /* Inherits from .admin-page */
-}
-
-.vehicle-details-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 25px;
-    align-items: start;
-}
-
-/* Vehicle Photo Section */
-.vehicle-photo-section {
-    grid-column: span 1;
-}
-
-.vehicle-photo-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-}
-
-.vehicle-photo-large {
-    width: 100%;
-    max-width: 300px;
-    height: 200px;
-    object-fit: cover;
-    border-radius: 15px;
-    border: 3px solid var(--racing-lilach);
-    box-shadow: 0 8px 25px rgba(255, 215, 0, 0.3);
-}
-
-.vehicle-photo-placeholder-large {
-    width: 100%;
-    max-width: 300px;
-    height: 200px;
-    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-quaternary) 100%);
-    border: 3px dashed var(--racing-lilach);
-    border-radius: 15px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    color: var(--text-muted);
-    gap: 10px;
-}
-
-.vehicle-photo-placeholder-large p {
-    margin: 0;
-    font-size: 14px;
-    font-weight: 500;
-}
-
-/* Status Information - UPDATED: Remove gradient backgrounds */
-.status-section {
-    grid-column: span 1;
-}
-
-.status-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.status-card {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    padding: 20px;
-    border-radius: 15px;
-    border: 2px solid;
-    transition: all 0.3s ease;
-    background: var(--bg-secondary);
-}
-
-.status-card.status-available {
-    border-color: var(--success-color);
-    color: var(--success-color);
-}
-
-.status-card.status-in-use {
-    border-color: var(--warning-color);
-    color: var(--warning-color);
-}
-
-.status-card.status-inactive {
-    border-color: var(--error-color);
-    color: var(--error-color);
-}
-
-.status-card.battery-good {
-    border-color: var(--success-color);
-    color: var(--success-color);
-}
-
-.status-card.battery-aging {
-    border-color: var(--warning-color);
-    color: var(--warning-color);
-}
-
-.status-card.battery-old,
-.status-card.battery-error {
-    border-color: var(--error-color);
-    color: var(--error-color);
-}
-
-.status-card.battery-unknown {
-    border-color: var(--info-color);
-    color: var(--info-color);
-}
-
-.status-content h3 {
-    margin: 0 0 5px 0;
-    font-size: 16px;
-    font-weight: 700;
-}
-
-.status-content p {
-    margin: 0;
-    font-size: 14px;
-    opacity: 0.9;
-}
-
-/* Information Grids */
-.info-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-}
-
-.info-item {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.info-item.full-width {
-    grid-column: 1 / -1;
-}
-
-.info-item label {
-    font-weight: 600;
-    color: var(--text-secondary);
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.info-item span,
-.info-item p {
-    color: var(--text-primary);
-    font-weight: 500;
-    font-size: 14px;
-    margin: 0;
-    padding: 8px 12px;
-    background: var(--bg-tertiary);
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
-}
-
-/* Assignment Section - UPDATED: Remove gradient backgrounds */
-.assignment-section {
-    grid-column: span 2;
-}
-
-.assignment-content {
-    padding: 20px;
-}
-
-.current-assignment {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    padding: 20px;
-    background: var(--bg-secondary);
-    border: 2px solid var(--success-color);
-    border-radius: 15px;
-    color: var(--success-color);
-}
-
-.kid-info {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    flex: 1;
-}
-
-.kid-details h4 {
-    margin: 0 0 5px 0;
-    color: var(--success-color);
-    font-size: 16px;
-    font-weight: 700;
-}
-
-.kid-details p {
-    margin: 0 0 10px 0;
-    color: var(--success-color);
-    font-size: 14px;
-    opacity: 0.8;
-}
-
-.no-assignment {
-    text-align: center;
-    padding: 40px 20px;
-    color: var(--text-muted);
-}
-
-.no-assignment-icon {
-    margin-bottom: 15px;
-    opacity: 0.6;
-}
-
-.no-assignment h4 {
-    margin: 0 0 10px 0;
-    color: var(--text-primary);
-    font-size: 18px;
-    font-weight: 600;
-}
-
-.no-assignment p {
-    margin: 0;
-    font-size: 14px;
-}
-
-.assignment-error {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    padding: 20px;
-    background: var(--bg-secondary);
-    border: 2px solid var(--error-color);
-    border-radius: 15px;
-    color: var(--error-color);
-}
-
-.assignment-error p {
-    margin: 0;
-    font-size: 14px;
-}
-
-/* Notes and History */
-.notes-section,
-.history-section {
-    grid-column: span 2;
-}
-
-.notes-content,
-.history-content {
-    padding: 20px;
-}
-
-.history-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-top: 15px;
-}
-
-.history-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 12px 16px;
-    background: var(--bg-tertiary);
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
-}
-
-.history-item span {
-    color: var(--text-primary);
-    font-size: 14px;
-    font-weight: 500;
-}
-
-/* Timestamps Section */
-.timestamps-section {
-    grid-column: span 2;
-}
-
-/* ========================================
-   RACING THEME SPECIFIC OVERRIDES
-   ======================================== */
-
-/* Vehicle-specific form sections */
-.vehicle-photo-section {
-    border: 3px solid var(--racing-blue);
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(59, 130, 246, 0.1) 100%);
-}
-
-.status-section {
-    border: 3px solid var(--racing-green);
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(16, 185, 129, 0.1) 100%);
-}
-
-.basic-info-section {
-    border: 3px solid var(--racing-lilach);
-    background: linear-gradient(135deg, rgba(255, 215, 0, 0.05) 0%, rgba(255, 215, 0, 0.1) 100%);
-}
-
-.technical-section {
-    border: 3px solid var(--racing-light-purple);
-    background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(139, 92, 246, 0.1) 100%);
-}
-
-.assignment-section {
-    border: 3px solid var(--racing-purple);
-    background: linear-gradient(135deg, rgba(255, 165, 0, 0.05) 0%, rgba(255, 165, 0, 0.1) 100%);
-}
-
-.notes-section {
-    border: 3px solid var(--racing-pink);
-    background: linear-gradient(135deg, rgba(236, 72, 153, 0.05) 0%, rgba(236, 72, 153, 0.1) 100%);
-}
-
-.history-section {
-    border: 3px solid var(--racing-blurple);
-    background: linear-gradient(135deg, rgba(220, 38, 38, 0.05) 0%, rgba(220, 38, 38, 0.1) 100%);
-}
-
-.timestamps-section {
-    border: 3px solid var(--text-muted);
-    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-quaternary) 100%);
-}
-
-/* Section icons with matching colors */
-.vehicle-photo-section .section-icon {
-    color: var(--racing-blue);
-    background: rgba(59, 130, 246, 0.1);
-    border-color: var(--racing-blue);
-}
-
-.status-section .section-icon {
-    color: var(--racing-green);
-    background: rgba(16, 185, 129, 0.1);
-    border-color: var(--racing-green);
-}
-
-.basic-info-section .section-icon {
-    color: var(--racing-lilach);
-    background: rgba(255, 215, 0, 0.1);
-    border-color: var(--racing-lilach);
-}
-
-.technical-section .section-icon {
-    color: var(--racing-light-purple);
-    background: rgba(139, 92, 246, 0.1);
-    border-color: var(--racing-light-purple);
-}
-
-.assignment-section .section-icon {
-    color: var(--racing-purple);
-    background: rgba(255, 165, 0, 0.1);
-    border-color: var(--racing-purple);
-}
-
-.notes-section .section-icon {
-    color: var(--racing-pink);
-    background: rgba(236, 72, 153, 0.1);
-    border-color: var(--racing-pink);
-}
-
-.history-section .section-icon {
-    color: var(--racing-blurple);
-    background: rgba(220, 38, 38, 0.1);
-    border-color: var(--racing-blurple);
-}
-
-.timestamps-section .section-icon {
-    color: var(--text-muted);
-    background: rgba(107, 114, 128, 0.1);
-    border-color: var(--text-muted);
-}
-
-/* ========================================
-   VEHICLES PAGE BADGE OVERRIDES - Remove gradients from badges
-   ======================================== */
-
-/* Override badge gradients specifically for vehicles page */
-.vehicles-page .badge.success {
-    background: var(--bg-secondary) !important;
-    color: var(--success-color) !important;
-    border-color: var(--success-color) !important;
-}
-
-.vehicles-page .badge.warning {
-    background: var(--bg-secondary) !important;
-    color: var(--warning-color) !important;
-    border-color: var(--warning-color) !important;
-}
-
-.vehicles-page .badge.danger {
-    background: var(--bg-secondary) !important;
-    color: var(--error-color) !important;
-    border-color: var(--error-color) !important;
-}
-
-.vehicles-page .badge.info {
-    background: var(--bg-secondary) !important;
-    color: var(--info-color) !important;
-    border-color: var(--info-color) !important;
-}
-
-.vehicles-page .badge.secondary {
-    background: var(--bg-secondary) !important;
-    color: var(--text-primary) !important;
-    border-color: var(--border-color) !important;
-}
-
-/* ========================================
    RESPONSIVE DESIGN UPDATES - FIXED FOR ALL SCREEN SIZES
    ======================================== */
 
@@ -1159,57 +906,12 @@
         display: grid;
     }
 
-    .vehicle-details-grid {
-        grid-template-columns: 1fr;
-        gap: 20px;
-    }
-
-    .vehicle-photo-section,
-    .status-section,
-    .assignment-section,
-    .notes-section,
-    .history-section,
-    .timestamps-section {
-        grid-column: span 1;
-    }
-
-    .info-grid {
-        grid-template-columns: 1fr;
-        gap: 15px;
-    }
-
-    .vehicle-photo-large,
-    .vehicle-photo-placeholder-large {
-        max-width: 250px;
-        height: 150px;
-    }
-
-    .status-grid {
-        gap: 12px;
-    }
-
-    .status-card {
-        padding: 15px;
-    }
-
-    .current-assignment {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 15px;
-    }
-
-    .kid-info {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-    }
-
     .vehicle-info {
         gap: 10px;
     }
 
     /* Stats cards adjustment for mobile */
-    .stats-grid {
+    .stats-grid-optimized {
         grid-template-columns: repeat(2, 1fr);
         gap: 15px;
     }
@@ -1233,35 +935,6 @@
 
 /* Small phones */
 @media (max-width: 480px) {
-    .vehicle-details-grid {
-        gap: 15px;
-    }
-
-    .vehicle-photo-large,
-    .vehicle-photo-placeholder-large {
-        max-width: 200px;
-        height: 120px;
-    }
-
-    .status-card {
-        padding: 12px;
-        gap: 12px;
-    }
-
-    .status-content h3 {
-        font-size: 14px;
-    }
-
-    .status-content p {
-        font-size: 12px;
-    }
-
-    .info-item span,
-    .info-item p {
-        padding: 6px 10px;
-        font-size: 13px;
-    }
-
     .vehicle-mobile-name {
         font-size: 16px;
     }
@@ -1295,7 +968,7 @@
     }
 
     /* Stack stats in single column on very small screens */
-    .stats-grid {
+    .stats-grid-optimized {
         grid-template-columns: 1fr;
         gap: 12px;
     }
@@ -1310,126 +983,4 @@
         width: 28px;
         height: 28px;
     }
-}
-
-/* FIXED: Better loading states */
-.data-table.loading {
-    opacity: 0.7;
-}
-
-.data-table.loading td {
-    position: relative;
-}
-
-.data-table.loading td::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-    animation: shimmer 1.5s infinite;
-}
-
-@keyframes shimmer {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
-}
-
-/* FIXED: Better print styles */
-@media print {
-    .table-container {
-        overflow: visible;
-        box-shadow: none;
-        border: 1px solid #000;
-    }
-
-    .data-table {
-        min-width: auto;
-        font-size: 10px;
-    }
-
-    .data-table th,
-    .data-table td {
-        padding: 8px 4px;
-        border: 1px solid #000;
-    }
-
-    .action-buttons {
-        display: none;
-    }
-}
-
-.stat-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    pointer-events: none;
-}
-
-.stat-card:hover::before {
-    opacity: 1;
-}
-
-.stat-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-}
-
-/* Active state - only show border when card is active */
-.stat-card.active {
-    transform: translateY(-2px);
-}
-
-.stat-card.active::before {
-    opacity: 1;
-}
-
-/* DISABLE any default borders that might be inherited */
-.stat-card:not(.active) {
-    border: 2px solid transparent !important;
-}
-
-/* Specific active state colors for Vehicles page card types */
-.stat-card.total.active {
-    border: 2px solid #3b82f6 !important;
-    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3) !important;
-}
-
-.stat-card.total.active::before {
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%) !important;
-}
-
-.stat-card.teams.active {
-    border: 2px solid #10b981 !important;
-    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3) !important;
-}
-
-.stat-card.teams.active::before {
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%) !important;
-}
-
-.stat-card.kids.active {
-    border: 2px solid #ec4899 !important;
-    box-shadow: 0 8px 25px rgba(236, 72, 153, 0.3) !important;
-}
-
-.stat-card.kids.active::before {
-    background: linear-gradient(135deg, rgba(236, 72, 153, 0.1) 0%, rgba(236, 72, 153, 0.05) 100%) !important;
-}
-
-.stat-card.open-instructors.active {
-    border: 2px solid #f59e0b !important;
-    box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3) !important;
-}
-
-.stat-card.open-instructors.active::before {
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(245, 158, 11, 0.05) 100%) !important;
 }

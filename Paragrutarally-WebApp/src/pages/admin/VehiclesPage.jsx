@@ -1,4 +1,4 @@
-// src/pages/admin/VehiclesPage.jsx - Enhanced with Mobile-Responsive Card Layout, Delete Function, and Active Card Borders
+// src/pages/admin/VehiclesPage.jsx - OPTIMIZED VERSION with single-row stats
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
@@ -41,6 +41,7 @@ const VehiclesPage = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isDeleting, setIsDeleting] = useState(null); // Track which vehicle is being deleted
+    const [activeCardFilter, setActiveCardFilter] = useState('total'); // NEW: Track active card
 
     // Search and filter states
     const [searchTerm, setSearchTerm] = useState('');
@@ -145,8 +146,10 @@ const VehiclesPage = () => {
         return team ? team.name : t('vehicles.unknownTeam', 'Unknown Team');
     };
 
-    // Handle stat card clicks to filter vehicles - NEW FUNCTIONALITY
+    // Handle stat card clicks to filter vehicles - UPDATED WITH ACTIVE CARD TRACKING
     const handleStatCardClick = (filterType) => {
+        setActiveCardFilter(filterType); // NEW: Set active card
+
         switch (filterType) {
             case 'total':
                 setStatusFilter('');
@@ -168,6 +171,13 @@ const VehiclesPage = () => {
                 break;
         }
         setSearchTerm('');
+    };
+
+    const handleClearFilters = () => {
+        setSearchTerm('');
+        setTeamFilter('');
+        setStatusFilter('');
+        setActiveCardFilter('total'); // NEW: Reset to total
     };
 
     const handleViewVehicle = (vehicleId) => {
@@ -398,65 +408,57 @@ const VehiclesPage = () => {
                     </div>
                 </div>
                 <div className="vehicle-management-container">
-                    {/* Stats Cards with Active States - UPDATED */}
-                    <div className="stats-grid">
+                    {/* OPTIMIZED Stats Cards - Single Row Layout */}
+                    <div className="stats-grid-optimized">
                         <div
-                            className={`stat-card total ${!statusFilter && !teamFilter ? 'active' : ''}`}
+                            className={`stat-card total ${activeCardFilter === 'total' ? 'active' : ''}`}
                             onClick={() => handleStatCardClick('total')}
                             style={{ cursor: 'pointer' }}
                         >
-                            <div className="stat-icon">
-                                <Car size={40} />
-                            </div>
+                            <Car className="stat-icon" size={40} />
                             <div className="stat-content">
                                 <h3>{t('vehicles.totalVehicles', 'Total Vehicles')}</h3>
-                                <p className="stat-value">{stats.total}</p>
-                                <p className="stat-subtitle">{t('vehicles.inFleet', 'In Fleet')}</p>
+                                <div className="stat-value">{stats.total}</div>
+                                <div className="stat-subtitle">{t('vehicles.inFleet', 'In Fleet')}</div>
                             </div>
                         </div>
 
                         <div
-                            className={`stat-card teams ${statusFilter === 'active' ? 'active' : ''}`}
+                            className={`stat-card active-vehicles ${activeCardFilter === 'active' ? 'active' : ''}`}
                             onClick={() => handleStatCardClick('active')}
                             style={{ cursor: 'pointer' }}
                         >
-                            <div className="stat-icon">
-                                <Settings size={40} />
-                            </div>
+                            <Settings className="stat-icon" size={40} />
                             <div className="stat-content">
                                 <h3>{t('vehicles.activeVehicles', 'Active Vehicles')}</h3>
-                                <p className="stat-value">{stats.active}</p>
-                                <p className="stat-subtitle">{t('vehicles.readyToRace', 'Ready to Race')}</p>
+                                <div className="stat-value">{stats.active}</div>
+                                <div className="stat-subtitle">{t('vehicles.readyToRace', 'Ready to Race')}</div>
                             </div>
                         </div>
 
                         <div
-                            className={`stat-card kids ${statusFilter === 'in-use' ? 'active' : ''}`}
+                            className={`stat-card in-use ${activeCardFilter === 'in-use' ? 'active' : ''}`}
                             onClick={() => handleStatCardClick('in-use')}
                             style={{ cursor: 'pointer' }}
                         >
-                            <div className="stat-icon">
-                                <User size={40} />
-                            </div>
+                            <User className="stat-icon" size={40} />
                             <div className="stat-content">
                                 <h3>{t('vehicles.inUse', 'In Use')}</h3>
-                                <p className="stat-value">{stats.inUse}</p>
-                                <p className="stat-subtitle">{t('vehicles.currentlyRacing', 'Currently Racing')}</p>
+                                <div className="stat-value">{stats.inUse}</div>
+                                <div className="stat-subtitle">{t('vehicles.currentlyRacing', 'Currently Racing')}</div>
                             </div>
                         </div>
 
                         <div
-                            className={`stat-card open-instructors ${statusFilter === 'available' ? 'active' : ''}`}
+                            className={`stat-card available ${activeCardFilter === 'available' ? 'active' : ''}`}
                             onClick={() => handleStatCardClick('available')}
                             style={{ cursor: 'pointer' }}
                         >
-                            <div className="stat-icon">
-                                <Battery size={40} />
-                            </div>
+                            <Battery className="stat-icon" size={40} />
                             <div className="stat-content">
                                 <h3>{t('vehicles.available', 'Available')}</h3>
-                                <p className="stat-value">{stats.available}</p>
-                                <p className="stat-subtitle">{t('vehicles.readyForAssignment', 'Ready for Assignment')}</p>
+                                <div className="stat-value">{stats.available}</div>
+                                <div className="stat-subtitle">{t('vehicles.readyForAssignment', 'Ready for Assignment')}</div>
                             </div>
                         </div>
                     </div>
@@ -523,6 +525,11 @@ const VehiclesPage = () => {
                                 <option value="available">{t('vehicles.available', 'Available')}</option>
                             </select>
                         </div>
+
+                        <button className="btn-clear" onClick={handleClearFilters}>
+                            <Settings className="btn-icon" size={18} />
+                            {t('vehicles.clearAll', 'Clear All')}
+                        </button>
                     </div>
 
                     {/* Results Summary - TRANSLATED */}
