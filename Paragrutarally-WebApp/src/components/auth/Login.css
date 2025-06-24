@@ -1,12 +1,108 @@
-/* src/components/auth/Login.css - With Dark Mode Support */
+/* Updated Login.css - Top Controls Container */
+
+/* ========================================
+   TOP CONTROLS CONTAINER - THEME, CONTACT, LANGUAGE
+   ======================================== */
+
+.top-controls-container {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+/* RTL support for top controls */
+.rtl .top-controls-container,
+[dir="rtl"] .top-controls-container {
+    right: auto;
+    left: 20px;
+    flex-direction: row-reverse;
+    justify-content: flex-start;
+}
+
+/* Update existing theme toggle container to remove absolute positioning */
+.theme-toggle-container {
+    position: relative;
+    top: auto;
+    right: auto;
+    z-index: auto;
+}
+
+/* Update contact container for top positioning */
+.contact-container {
+    margin-top: 0;
+    margin-bottom: 0;
+    text-align: center;
+}
+
+.contact-us-btn {
+    padding: 8px 16px;
+    background-color: transparent;
+    border: 1px solid var(--accent-color);
+    border-radius: 8px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.3s;
+    color: var(--accent-color);
+    white-space: nowrap;
+}
+
+.contact-us-btn:hover {
+    background-color: rgba(52, 152, 219, 0.1);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px var(--shadow-color);
+}
+
+/* Update language selector for top positioning */
+.login-language-selector {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: none;
+}
+
+.login-language-selector .language-selector {
+    margin: 0;
+}
+
+.login-language-selector .language-button {
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    padding: 8px 12px;
+    border-radius: 8px;
+    min-width: 80px;
+    font-size: 13px;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.login-language-selector .language-button:hover {
+    background-color: var(--bg-secondary);
+    border-color: var(--accent-color);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px var(--shadow-color);
+}
+
+/* ========================================
+   LOGIN PAGE BASE STYLES (UPDATED)
+   ======================================== */
+
 .login-page {
     display: flex;
     flex-direction: column;
-    height: 100vh; /* Use exact viewport height */
+    height: 100vh;
     width: 100%;
     background-color: var(--bg-primary);
     position: relative;
-    overflow: hidden; /* Prevent scrolling */
+    overflow: hidden;
     margin: 0;
     padding: 0;
     z-index: 0;
@@ -25,10 +121,9 @@
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;
-    opacity: 0.8; /* Slight transparency */
+    opacity: 0.8;
     z-index: -1;
     pointer-events: none;
-    /* Filter for dark mode */
     filter: var(--logo-filter, none);
     transition: filter 0.3s ease;
 }
@@ -42,28 +137,27 @@
     display: none;
 }
 
-/* Center content area */
+/* Center content area - responsive to viewport height */
 .login-content {
     flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
-    padding-top: 20px;
-    padding-left: 20px;
-    padding-right: 20px;
-    overflow-y: auto; /* Allow content scrolling if needed */
+    justify-content: center; /* Changed to center for better distribution */
+    padding: 80px 20px 20px 20px; /* Adjusted padding */
+    overflow-y: auto;
     max-height: 100vh;
+    min-height: calc(100vh - 80px); /* Ensure minimum height */
 }
 
 .app-title-container {
-    margin-top: 20px;
-    margin-bottom: 15px;
+    margin-top: 0; /* Reduced margins */
+    margin-bottom: 10px;
     text-align: center;
 }
 
 .app-title {
-    font-size: 28px;
+    font-size: clamp(20px, 4vw, 28px); /* Responsive font size */
     font-weight: 600;
     color: var(--text-primary);
     margin: 0;
@@ -75,16 +169,19 @@
     max-width: 400px;
     background-color: var(--card-bg);
     border-radius: 12px;
-    padding: 30px;
-    margin-bottom: 20px;
+    padding: clamp(20px, 3vh, 30px); /* Responsive padding */
+    margin-bottom: 10px; /* Reduced margin */
     box-shadow: 0 10px 25px var(--shadow-color);
     transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    /* Ensure form doesn't exceed viewport */
+    max-height: calc(100vh - 160px);
+    overflow-y: auto;
 }
 
 .login-heading {
     font-size: 24px;
     color: var(--text-primary);
-    margin-bottom: 24px;
+    margin-bottom: 5px;
     text-align: center;
     font-weight: 600;
     transition: color 0.3s ease;
@@ -105,13 +202,13 @@
 
 .form-group {
     margin-bottom: 24px;
-    width: 100% !important; /* Force full width */
+    width: 100% !important;
 }
 
 .form-group input {
-    width: 100% !important; /* Force full width */
-    min-width: 0 !important; /* Reset any min-width constraints */
-    max-width: none !important; /* Reset any max-width constraints */
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
     padding: 12px 16px !important;
     border-radius: 8px;
     background-color: var(--input-bg);
@@ -119,8 +216,8 @@
     color: var(--text-primary);
     font-size: 16px;
     transition: border-color 0.3s, box-shadow 0.3s, background-color 0.3s, color 0.3s;
-    box-sizing: border-box !important; /* Force border-box */
-    margin: 0 !important; /* Reset any margins */
+    box-sizing: border-box !important;
+    margin: 0 !important;
 }
 
 .form-group input:focus {
@@ -193,7 +290,7 @@
     height: 20px;
     flex-shrink: 0;
     position: absolute;
-    left: 16px; /* Position icon to the left for LTR */
+    left: 16px;
     transition: left 0.3s ease, right 0.3s ease;
 }
 
@@ -201,7 +298,7 @@
 .rtl .google-icon,
 [dir="rtl"] .google-icon {
     left: auto;
-    right: 16px; /* Position icon to the right for RTL */
+    right: 16px;
 }
 
 /* Ensure text direction is handled properly */
@@ -216,7 +313,6 @@
     margin-right: 10px;
     width: 18px;
     height: 18px;
-    /*background: url('../../assets/images/google-icon.png') no-repeat center center;*/
     background-size: contain;
     filter: var(--icon-filter, none);
 }
@@ -229,7 +325,7 @@
 .forgot-password-link {
     display: block;
     text-align: center;
-    margin-top: 16px;
+    margin-top: -15px;
     color: var(--accent-color);
     text-decoration: none;
     font-size: 14px;
@@ -239,27 +335,6 @@
 .forgot-password-link:hover {
     color: var(--accent-hover);
     text-decoration: underline;
-}
-
-.contact-container {
-    margin-top: 15px;
-    margin-bottom: 15px;
-    text-align: center;
-}
-
-.contact-us-btn {
-    padding: 12px 24px;
-    background-color: transparent;
-    border: 1px solid var(--accent-color);
-    border-radius: 8px;
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.3s;
-    color: var(--accent-color);
-}
-
-.contact-us-btn:hover {
-    background-color: rgba(52, 152, 219, 0.1);
 }
 
 .error-message {
@@ -272,28 +347,27 @@
     text-align: center;
 }
 
-/* Ensure password input container also takes full width */
+/* Password input container */
 .password-input-container {
     position: relative;
     display: flex;
     align-items: center;
-    width: 100% !important; /* Force full width */
+    width: 100% !important;
     box-sizing: border-box !important;
 }
 
 .password-input-container input {
-    width: 100% !important; /* Force full width within container */
+    width: 100% !important;
     min-width: 0 !important;
     max-width: none !important;
-    /* For LTR - padding on right for button */
     padding: 12px 100px 12px 16px !important;
-    box-sizing: border-box !important; /* Force border-box */
+    box-sizing: border-box !important;
     margin: 0 !important;
 }
 
 .toggle-password-btn {
     position: absolute;
-    right: 20px; /* For LTR - position on right */
+    right: 20px;
     top: 0;
     bottom: 0;
     margin: auto 0;
@@ -314,68 +388,24 @@
 /* RTL support for password toggle */
 .rtl .password-input-container input,
 [dir="rtl"] .password-input-container input {
-    /* Reset right padding */
-    /* Add left padding for button space in RTL */
     padding: 12px 16px 12px 100px !important;
 }
 
 .rtl .toggle-password-btn,
 [dir="rtl"] .toggle-password-btn {
-    right: auto; /* Reset right position */
-    left: 20px; /* Position on left for RTL */
+    right: auto;
+    left: 20px;
 }
 
-/* Theme toggle placement */
-.theme-toggle-container {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    z-index: 10;
-}
-
-/* Language selector container at bottom of login page */
-.login-language-selector {
-    margin-top: 15px;
-    padding-top: 15px;
-    border-top: 1px solid var(--border-color);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: border-color 0.3s ease;
-}
-
-/* Style the language selector specifically for login page */
-.login-language-selector .language-selector {
-    margin: 0;
-}
-
-.login-language-selector .language-button {
-    background-color: var(--bg-tertiary);
-    border: 1px solid var(--border-color);
-    padding: 10px 16px;
-    border-radius: 8px;
-    min-width: 120px;
-    font-size: 14px;
-    transition: all 0.3s ease;
-}
-
-.login-language-selector .language-button:hover {
-    background-color: var(--bg-secondary);
-    border-color: var(--accent-color);
-    transform: translateY(-1px);
-    box-shadow: 0 2px 8px var(--shadow-color);
-}
-
-/* Legal Trigger Positioning for Login Page - Under Google Button (Green Square) */
+/* Legal Trigger Positioning for Login Page */
 .login-legal-trigger {
-    margin-top: 0.75rem;
+    margin-top: 0.5rem;
     margin-bottom: 0.5rem;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-/* Style the legal trigger specifically for login page */
 .login-page .legal-trigger-minimal {
     background-color: rgba(255, 255, 255, 0.1);
     border-radius: 0.75rem;
@@ -439,20 +469,6 @@
     color: var(--text-primary);
 }
 
-/* Adjust positioning in light/dark modes */
-.light-mode .login-language-selector {
-    border-top-color: #e0e0e0;
-}
-
-.dark-mode .login-language-selector {
-    border-top-color: #444;
-}
-
-/* Ensure language selector dropdown appears above other elements on login page */
-.login-language-selector .language-dropdown {
-    z-index: 1001;
-}
-
 /* Ensure the body and html have no scrolling */
 html, body {
     margin: 0;
@@ -463,58 +479,186 @@ html, body {
     transition: background-color 0.3s ease;
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
+/* ========================================
+   RESPONSIVE ADJUSTMENTS - ENHANCED FOR VIEWPORT FITTING
+   ======================================== */
+
+@media (max-height: 700px) {
+    /* For shorter screens, make everything more compact */
+    .login-content {
+        padding: 60px 20px 10px 20px;
+        justify-content: flex-start;
+    }
+
+    .app-title {
+        font-size: 22px;
+    }
+
     .login-form-box {
-        padding: 24px;
+        padding: 20px;
+        max-height: calc(100vh - 120px);
     }
 
-    .theme-toggle-container {
-        top: 10px;
-        right: 10px;
+    .login-heading {
+        font-size: 20px;
+        margin-bottom: 16px;
     }
 
-    .login-language-selector {
-        margin-top: 20px;
-        padding-top: 15px;
+    .form-group {
+        margin-bottom: 16px;
     }
 
-    .login-language-selector .language-button {
-        padding: 8px 12px;
-        min-width: 100px;
-        font-size: 13px;
+    .login-button {
+        margin: 16px 0;
     }
 
-    /* Responsive adjustments for login legal trigger */
-    .login-legal-trigger {
-        margin-top: 0.75rem;
-    }
-
-    .login-page .legal-trigger-minimal {
-        padding: 0.375rem 0.75rem;
-        font-size: 0.7rem;
+    .login-options {
+        margin-top: 16px;
+        gap: 8px;
     }
 }
 
-@media (max-width: 480px) {
-    .login-language-selector {
-        margin-top: 15px;
-        padding-top: 12px;
+@media (max-height: 600px) {
+    /* For very short screens */
+    .login-content {
+        padding: 50px 20px 5px 20px;
+    }
+
+    .app-title-container {
+        margin-bottom: 5px;
+    }
+
+    .app-title {
+        font-size: 20px;
+    }
+
+    .login-form-box {
+        padding: 15px;
+        max-height: calc(100vh - 100px);
+    }
+
+    .login-heading {
+        font-size: 18px;
+        margin-bottom: 12px;
+    }
+
+    .form-group {
+        margin-bottom: 12px;
+    }
+
+    .form-group input {
+        padding: 8px 16px !important;
+    }
+
+    .login-button, .google-login-btn {
+        padding: 8px;
+    }
+
+    .login-button {
+        margin: 12px 0;
+    }
+
+    .login-options {
+        margin-top: 12px;
+        gap: 6px;
+    }
+
+    .login-legal-trigger {
+        margin-top: 0.25rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .forgot-password-link {
+        margin-top: 8px;
+    }
+}
+
+@media (max-width: 768px) {
+    .login-form-box {
+        padding: clamp(15px, 2.5vh, 24px);
+        max-height: calc(100vh - 140px);
+    }
+
+    .top-controls-container {
+        top: 10px;
+        right: 10px;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .rtl .top-controls-container,
+    [dir="rtl"] .top-controls-container {
+        left: 10px;
+        right: auto;
+    }
+
+    .contact-us-btn {
+        padding: 6px 12px;
+        font-size: 12px;
     }
 
     .login-language-selector .language-button {
         padding: 6px 10px;
-        min-width: 80px;
+        min-width: 70px;
         font-size: 12px;
     }
 
+    .login-content {
+        padding: clamp(60px, 8vh, 100px) 20px 10px 20px;
+    }
+
     .login-legal-trigger {
-        margin-top: 0.5rem;
+        margin-top: clamp(0.5rem, 1vh, 0.75rem);
     }
 
     .login-page .legal-trigger-minimal {
-        padding: 0.375rem 0.625rem;
-        font-size: 0.65rem;
+        padding: clamp(0.25rem, 0.6vh, 0.375rem) clamp(0.5rem, 0.8vh, 0.75rem);
+        font-size: clamp(0.6rem, 1.1vw, 0.7rem);
+    }
+}
+
+@media (max-width: 480px) {
+    .top-controls-container {
+        top: 8px;
+        right: 8px;
+        gap: 8px;
+        flex-direction: column;
+        align-items: flex-end;
+    }
+
+    .rtl .top-controls-container,
+    [dir="rtl"] .top-controls-container {
+        left: 8px;
+        right: auto;
+        align-items: flex-start;
+    }
+
+    .contact-us-btn {
+        padding: 5px 10px;
+        font-size: 11px;
+    }
+
+    .login-language-selector .language-button {
+        padding: 5px 8px;
+        min-width: 60px;
+        font-size: 11px;
+    }
+
+    .login-content {
+        padding: clamp(80px, 10vh, 120px) 15px 5px 15px;
+    }
+
+    .login-form-box {
+        max-height: calc(100vh - 160px);
+    }
+
+    .login-legal-trigger {
+        margin-top: clamp(0.25rem, 0.8vh, 0.5rem);
+    }
+
+    .login-page .legal-trigger-minimal {
+        padding: clamp(0.25rem, 0.5vh, 0.375rem) clamp(0.4rem, 0.6vh, 0.625rem);
+        font-size: clamp(0.55rem, 1vw, 0.65rem);
     }
 
     .login-page .legal-trigger-minimal svg {
@@ -523,7 +667,17 @@ html, body {
     }
 }
 
-/* RTL adjustments for login page language selector */
+/* Password input responsive adjustments */
+.password-input-container input {
+    padding: clamp(10px, 1.5vh, 12px) clamp(80px, 12vw, 100px) clamp(10px, 1.5vh, 12px) 16px !important;
+}
+
+.rtl .password-input-container input,
+[dir="rtl"] .password-input-container input {
+    padding: clamp(10px, 1.5vh, 12px) 16px clamp(10px, 1.5vh, 12px) clamp(80px, 12vw, 100px) !important;
+}
+
+/* RTL adjustments for login page */
 .rtl .login-language-selector .language-button {
     direction: rtl;
 }

@@ -261,8 +261,25 @@ const Login = () => {
     // Show the login form
     return (
         <div className={`login-page ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
-            <div className="theme-toggle-container">
-                <DarkModeToggle />
+            {/* Top Controls Container - Theme, Contact, Language */}
+            <div className="top-controls-container">
+                <div className="theme-toggle-container">
+                    <DarkModeToggle />
+                </div>
+
+                <div className="contact-container">
+                    <button
+                        className="contact-us-btn"
+                        onClick={() => setIsContactModalOpen(true)}
+                        disabled={loading || googleLoading}
+                    >
+                        {t('login.contactUs', 'Contact Us')}
+                    </button>
+                </div>
+
+                <div className="login-language-selector">
+                    <LanguageSelector />
+                </div>
             </div>
 
             <div className="login-content">
@@ -357,7 +374,7 @@ const Login = () => {
                         <div className="divider" style={{
                             display: 'flex',
                             alignItems: 'center',
-                            margin: '20px 0',
+                            margin: '-5px 0',
                             fontSize: '14px',
                             color: '#666'
                         }}>
@@ -387,21 +404,6 @@ const Login = () => {
                             <LegalTrigger variant="minimal" size="small" />
                         </div>
                     </div>
-                </div>
-
-                <div className="contact-container">
-                    <button
-                        className="contact-us-btn"
-                        onClick={() => setIsContactModalOpen(true)}
-                        disabled={loading || googleLoading}
-                    >
-                        {t('login.contactUs', 'Contact Us')}
-                    </button>
-                </div>
-
-                {/* Language selector at the bottom */}
-                <div className="login-language-selector">
-                    <LanguageSelector />
                 </div>
             </div>
 
