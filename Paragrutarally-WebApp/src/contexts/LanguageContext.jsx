@@ -2466,7 +2466,7 @@ const translations = {
         // CSV Content
         'exportKids.yes': 'כן',
         'exportKids.no': 'לא',
-        'exportKids.signedDeclaration': 'הצהרה חתומה',
+        'exportKids.signedDeclaration': 'הצהרת הורים חתומה',
         'exportKids.additionalComments': 'הערות נוספות',
 
           // Export Teams Modal - NEW KEYS ONLY
@@ -2786,7 +2786,7 @@ const translations = {
         'common.address': 'כתובת',
         'common.parentName': 'שם הורה',
         'common.signedFormStatus': 'סטטוס טופס',
-        'common.declaration': 'הצהרה',
+        'common.declaration': 'הצהרת הורים',
          // Instructor Vehicles Management
         'instructor.vehicles': 'רכבים',
         'instructor.vehicleManagement': 'ניהול רכבים',

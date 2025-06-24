@@ -456,26 +456,52 @@ const ParentEventPage = () => {
                                 currentEvents.map(event => (
                                     <tr key={event.id}>
                                         <td>
-                                            <div className="event-info">
-                                                <img src={event.image} alt={event.name} className="event-image" />
-                                                <div className="event-details">
-                                                    <div className="event-name">
-                                                        {event.name}
-                                                        {event.hasGalleryFolder && (
-                                                            <Photo size={14} className="gallery-indicator" title={t('parentEvents.hasGallery', 'Has Gallery')} />
-                                                        )}
+                                            {/* Conditional rendering based on RTL, similar to ViewTeamPage back button pattern */}
+                                            {isRTL ? (
+                                                // RTL Layout: Photo on right, details on left
+                                                <div className="event-info rtl-layout">
+                                                    <div className="event-details">
+                                                        <div className="event-name">
+                                                            {event.hasGalleryFolder && (
+                                                                <Photo size={14} className="gallery-indicator" title={t('parentEvents.hasGallery', 'Has Gallery')} />
+                                                            )}
+                                                            {event.name}
+                                                        </div>
+                                                        <div className="event-type">
+                                                            {getEventTypeDisplay(event.type)}
+                                                        </div>
+                                                        <div className="event-description">
+                                                            {event.description.length > 40
+                                                                ? `${event.description.substring(0, 40)}...`
+                                                                : event.description
+                                                            }
+                                                        </div>
                                                     </div>
-                                                    <div className="event-type">
-                                                        {getEventTypeDisplay(event.type)}
-                                                    </div>
-                                                    <div className="event-description">
-                                                        {event.description.length > 40
-                                                            ? `${event.description.substring(0, 40)}...`
-                                                            : event.description
-                                                        }
+                                                    <img src={event.image} alt={event.name} className="event-image" />
+                                                </div>
+                                            ) : (
+                                                // LTR Layout: Photo on left, details on right (original)
+                                                <div className="event-info">
+                                                    <img src={event.image} alt={event.name} className="event-image" />
+                                                    <div className="event-details">
+                                                        <div className="event-name">
+                                                            {event.name}
+                                                            {event.hasGalleryFolder && (
+                                                                <Photo size={14} className="gallery-indicator" title={t('parentEvents.hasGallery', 'Has Gallery')} />
+                                                            )}
+                                                        </div>
+                                                        <div className="event-type">
+                                                            {getEventTypeDisplay(event.type)}
+                                                        </div>
+                                                        <div className="event-description">
+                                                            {event.description.length > 40
+                                                                ? `${event.description.substring(0, 40)}...`
+                                                                : event.description
+                                                            }
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
+                                            )}
                                         </td>
                                         <td>
                                             <div className="date-time-info">
