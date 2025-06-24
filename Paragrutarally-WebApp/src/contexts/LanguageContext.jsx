@@ -7,8 +7,8 @@ export const LANGUAGES = {
     HEBREW: 'he'
 };
 
-// Translations object - COMPLETE WITH ALL YOUR EXISTING and NEW TRANSLATIONS
-const translations = {
+    // Translations object - COMPLETE WITH ALL YOUR EXISTING and NEW TRANSLATIONS
+    const translations = {
     en: {
         'common.createdAt': 'Created At',
         'common.updatedAt': 'Updated At',
@@ -195,32 +195,32 @@ const translations = {
         'addKid.healthDeclarationSigned': '🛡️ Racing Safety Declaration Signed',
 
         // Comments
-        'addKid.racingNotesCommunication': '💬 Racing Notes & Comments',
-        'addKid.additionalRacingNotes': '🗒️ Additional Racing Notes',
-        'addKid.additionalRacingNotesPlaceholder': 'Any special notes about our new racing star!',
+            'addKid.racingNotesCommunication': '💬 Racing Notes & Comments',
+            'addKid.additionalRacingNotes': '🗒️ Additional Racing Notes',
+            'addKid.additionalRacingNotesPlaceholder': 'Any special notes about our new racing star!',
 
-        // Actions
-        'addKid.addToRacingTeam': 'Add to Racing Team! 🏁',
-        'addKid.uploadingPhoto': 'Uploading Photo...',
-        'addKid.addingRacer': 'Adding Racer...',
+            // Actions
+            'addKid.addToRacingTeam': 'Add to Racing Team! 🏁',
+            'addKid.uploadingPhoto': 'Uploading Photo...',
+            'addKid.addingRacer': 'Adding Racer...',
 
 
-        dashboard: {
-            title: 'Admin Dashboard',
-            totalUsers: 'Total Users',
-            upcomingEvents: 'Upcoming Events',
-            totalKids: 'Total Kids',
-            activeTeams: 'Active Teams',
-            recentActivities: 'Recent Activities',
-            newUser: 'New user',
-            wasAdded: 'was added',
-            event: 'Event',
-            wasCreated: 'was created',
-            newPhotos: 'new photos',
-            wereAdded: 'were added to the gallery',
-            racingReady: 'Racing Ready',
+            dashboard: {
+                title: 'Admin Dashboard',
+                totalUsers: 'Total Users',
+                upcomingEvents: 'Upcoming Events',
+                totalKids: 'Total Kids',
+                activeTeams: 'Active Teams',
+                recentActivities: 'Recent Activities',
+                newUser: 'New user',
+                wasAdded: 'was added',
+                event: 'Event',
+                wasCreated: 'was created',
+                newPhotos: 'new photos',
+                wereAdded: 'were added to the gallery',
+                racingReady: 'Racing Ready',
             racingVehicles: 'Racing Vehicles',
-            available: 'Available',
+                available: 'Available',
             systemUsers: 'System Users',
             autoRefresh: 'Dashboard updates automatically every 5 minutes',
             teamCreated: 'Team <strong>{teamName}</strong> was created.',
@@ -2202,10 +2202,202 @@ const translations = {
         'legal.limitationOfLiability': 'Limitation of Liability',
         'legal.limitationOfLiabilityDesc': 'The Service is provided "as is" without warranties. Our liability is limited to the amount paid for the Service in the past 12 months. We are not liable for indirect, incidental, or consequential damages.',
         'legal.contactInformationTermsDesc': 'For questions about these Terms, please contact us at:',
+
+        // Parent validation warnings and errors
+        'parent.warning.formIncomplete': 'Registration form is not yet complete',
+        'parent.warning.declarationNotSigned': 'Health declaration is not yet signed',
+        'parent.warning.contactInfoMissing': 'Parent contact information is incomplete',
+        'parent.warning.noTeamAssigned': 'Child is not yet assigned to a team',
+        'parent.warning.tooYoung': 'Child may be too young for this program',
+        'parent.warning.tooOld': 'Child may be too old for this program',
+
+        'parent.validationIssues': 'Data Validation Issues Found',
+        'parent.criticalIssues': 'Critical Issues',
+        'parent.warnings': 'Warnings',
+        'parent.criticalIssuesDescription': 'These issues must be resolved to complete registration.',
+        'parent.warningsDescription': 'These items should be reviewed but may not prevent participation.',
+
+        'parent.dataQuality': 'Data Quality Summary',
+        'parent.dataQualityDescription': 'Please review and correct any issues below to ensure your child\'s information is complete and accurate.',
+
+// ParentKidEdit validation
+        'parentKidEdit.warning.addressEmpty': 'Address helps with logistics and emergency contact',
+        'parentKidEdit.warning.announcerNotesEmpty': 'Fun facts make the race more exciting for everyone!',
+        'parentKidEdit.warning.grandparentsEmpty': 'Grandparents info can be helpful for emergencies',
+        'parentKidEdit.warning.phoneShort': 'Phone number seems short - please verify',
+        'parentKidEdit.warning.grandparentsPhoneShort': 'Grandparents phone seems short - please verify',
+
+        'parentKidEdit.errorsFound': 'Errors Found',
+        'parentKidEdit.errorsDescription': 'Please fix the highlighted fields before saving.',
+        'parentKidEdit.suggestionsAvailable': 'Suggestions Available',
+        'parentKidEdit.suggestionsDescription': 'Consider filling in the suggested fields for a complete profile.',
+        'parentKidEdit.validationValid': 'All fields valid',
+        'parentKidEdit.validationErrors': 'Please fix errors',
+        'parentKidEdit.fixErrorsFirst': 'Please fix errors before saving',
+
+        'parentKidEdit.validationError': 'The information provided is not valid. Please check all fields and try again.',
+        'parentKidEdit.permissionError': 'You do not have permission to update this information.',
+        'parentKidEdit.notFoundError': 'The child\'s record could not be found. Please refresh and try again.',
+
+// Common validation
+        'common.warning': 'Warning',
+        'common.validationErrors': 'Data Issues',
+        'common.yearsOld': 'years old',
+
+        // Phone validation - Israeli format
+        'validation.phoneInvalidIsraeli': 'Please enter a valid Israeli phone number (10 digits, starting with 050/052/053/054/055/057/058/059)',
+        'validation.phoneWrongLength': 'Phone number must be exactly 10 digits',
+        'validation.phoneWrongPrefix': 'Phone number must start with 050, 052, 053, 054, 055, 057, 058, or 059',
+
+// ParentKidEdit phone validation
+        'parentKidEdit.phoneValidation.invalid': 'Please enter a valid Israeli phone number',
+        'parentKidEdit.phoneValidation.wrongLength': 'Phone number must be exactly 10 digits',
+        'parentKidEdit.phoneValidation.wrongFormat': 'Phone number must start with 050, 052, 053, 054, 055, 057, 058, or 059',
+
+// Validation hints
+        'validation.phoneHintIsraeli': 'Israeli mobile number (10 digits: 0521234567)',
+        'parentKidEdit.phoneHint': 'Format: 0521234567 (Israeli mobile)',
+
+        // Phone validation - step by step
+        'validation.phoneMustStartWith05': 'Phone number must start with 05',
+
+// ParentKidEdit specific
+        'parentKidEdit.phoneValidation.mustStartWith05': 'Phone number must start with 05',
+
+        'validation.ageLimit': 'Participants need to be under 20 years old',
+
+        'common.unnamedKid': 'Unnamed Kid',
+        'fields.participantNumber': 'Participant Number',
+        'fields.name': 'Name',
+
+        'teamChange.changeTeamFor': 'Change Team for {kidName}',
+        'teamChange.currentAssignment': 'Current Assignment',
+        'teamChange.currentTeam': 'Current Team',
+        'teamChange.noTeam': 'No Team',
+        'teamChange.selectNewTeam': 'Select New Team',
+        'teamChange.noTeamAssignment': 'No Team Assignment',
+        'teamChange.removeFromAllTeams': 'Remove this kid from all teams',
+        'teamChange.noActiveTeams': 'No Active Teams',
+        'teamChange.noActiveTeamsDescription': 'There are currently no active teams available for assignment.',
+        'teamChange.members': 'members',
+        'teamChange.instructors': 'instructors',
+        'teamChange.instructor': 'instructor',
+        'teamChange.selectedTeamPreview': 'Selected Team Preview',
+        'teamChange.membersLabel': 'Members',
+        'teamChange.descriptionLabel': 'Description',
+        'teamChange.instructorsLabel': 'Instructors',
+        'teamChange.removeFromTeam': 'Remove from Team',
+        'teamChange.saveChanges': 'Save Changes!',
+        'teamChange.removing': 'Removing...',
+        'teamChange.savingChanges': 'Saving Changes...',
+        'teamChange.loadingTeams': 'Loading available teams...',
+        'teamChange.dismiss': 'Dismiss',
+        'teamChange.failedToLoadTeams': 'Failed to load teams: {error}',
+        'teamChange.failedToUpdateTeam': 'Failed to update team: {error}',
+        'teamChange.failedToRemoveFromTeam': 'Failed to remove from team: {error}',
+
+        'fields.address': 'Address',
+        'fields.capabilities': 'Capabilities',
+        'fields.announcersNotes': 'Announcer Notes',
     },
 
 
     he: {
+        'fields.address': 'כתובת',
+        'fields.capabilities': 'יכולות',
+        'fields.announcersNotes': 'הערות קריין',
+
+        'teamChange.changeTeamFor': 'שנה קבוצה עבור {kidName}',
+        'teamChange.currentAssignment': 'הקצאה נוכחית',
+        'teamChange.currentTeam': 'קבוצה נוכחית',
+        'teamChange.noTeam': 'אין קבוצה',
+        'teamChange.selectNewTeam': 'בחר קבוצה חדשה',
+        'teamChange.noTeamAssignment': 'ללא הקצאת קבוצה',
+        'teamChange.removeFromAllTeams': 'הסר את הילד מכל הקבוצות',
+        'teamChange.noActiveTeams': 'אין קבוצות פעילות',
+        'teamChange.noActiveTeamsDescription': 'כרגע אין קבוצות פעילות זמינות להקצאה.',
+        'teamChange.members': 'חברים',
+        'teamChange.instructors': 'מדריכים',
+        'teamChange.instructor': 'מדריך',
+        'teamChange.selectedTeamPreview': 'תצוגה מקדימה של הקבוצה הנבחרת',
+        'teamChange.membersLabel': 'חברים',
+        'teamChange.descriptionLabel': 'תיאור',
+        'teamChange.instructorsLabel': 'מדריכים',
+        'teamChange.removeFromTeam': 'הסר מהקבוצה',
+        'teamChange.saveChanges': 'שמור שינויים!',
+        'teamChange.removing': 'מסיר...',
+        'teamChange.savingChanges': 'שומר שינויים...',
+        'teamChange.loadingTeams': 'טוען קבוצות זמינות...',
+        'teamChange.dismiss': 'התעלם',
+        'teamChange.failedToLoadTeams': 'כשל בטעינת קבוצות: {error}',
+        'teamChange.failedToUpdateTeam': 'כשל בעדכון קבוצה: {error}',
+        'teamChange.failedToRemoveFromTeam': 'כשל בהסרה מהקבוצה: {error}',
+
+        'common.unnamedKid': 'ילד ללא שם',
+        'fields.participantNumber': 'מספר משתתף',
+        'fields.name': 'שם',
+
+// Phone validation - step by step
+        'validation.phoneMustStartWith05': 'מספר הטלפון חייב להתחיל ב-05',
+
+// ParentKidEdit specific
+        'parentKidEdit.phoneValidation.mustStartWith05': 'מספר הטלפון חייב להתחיל ב-05',
+
+        // Phone validation - Israeli format
+        'validation.phoneInvalidIsraeli': 'אנא הכנס מספר טלפון ישראלי תקין (10 ספרות, מתחיל ב-050/052/053/054/055/057/058/059)',
+        'validation.phoneWrongLength': 'מספר הטלפון חייב להיות בדיוק 10 ספרות',
+        'validation.phoneWrongPrefix': 'מספר הטלפון חייב להתחיל ב-050, 052, 053, 054, 055, 057, 058, או 059',
+
+// ParentKidEdit phone validation
+        'parentKidEdit.phoneValidation.invalid': 'אנא הכנס מספר טלפון ישראלי תקין',
+        'parentKidEdit.phoneValidation.wrongLength': 'מספר הטלפון חייב להיות בדיוק 10 ספרות',
+        'parentKidEdit.phoneValidation.wrongFormat': 'מספר הטלפון חייב להתחיל ב-050, 052, 053, 054, 055, 057, 058, או 059',
+
+// Validation hints
+        'validation.phoneHintIsraeli': 'מספר נייד ישראלי (10 ספרות: 0521234567)',
+        'parentKidEdit.phoneHint': 'פורמט: 0521234567 (נייד ישראלי)',
+
+        // Parent validation warnings and errors
+        'parent.warning.formIncomplete': 'טופס הרישום עדיין לא הושלם',
+        'parent.warning.declarationNotSigned': 'הצהרת בריאות עדיין לא נחתמה',
+        'parent.warning.contactInfoMissing': 'פרטי יצירת קשר של ההורה חסרים',
+        'parent.warning.noTeamAssigned': 'הילד עדיין לא הוקצה לקבוצה',
+        'parent.warning.tooYoung': 'הילד אולי צעיר מדי לתוכנית זו',
+        'parent.warning.tooOld': 'הילד אולי מבוגר מדי לתוכנית זו',
+
+        'parent.validationIssues': 'נמצאו בעיות בתוקף הנתונים',
+        'parent.criticalIssues': 'בעיות קריטיות',
+        'parent.warnings': 'אזהרות',
+        'parent.criticalIssuesDescription': 'יש לפתור את הבעיות הללו כדי להשלים את הרישום.',
+        'parent.warningsDescription': 'פריטים אלה צריכים להיבדק אך לא יימנעו מהשתתפות.',
+
+        'parent.dataQuality': 'סיכום איכות נתונים',
+        'parent.dataQualityDescription': 'אנא בדוק ותקן את הבעיות למטה כדי להבטיח שמידע הילד שלך שלם ומדויק.',
+
+// ParentKidEdit validation
+        'parentKidEdit.warning.addressEmpty': 'כתובת עוזרת ללוגיסטיקה ולקשר חירום',
+        'parentKidEdit.warning.announcerNotesEmpty': 'עובדות כיפיות הופכות את המירוץ למרגש יותר לכולם!',
+        'parentKidEdit.warning.grandparentsEmpty': 'מידע סבא וסבתא יכול להיות מועיל למקרי חירום',
+        'parentKidEdit.warning.phoneShort': 'מספר הטלפון נראה קצר - אנא וודא',
+        'parentKidEdit.warning.grandparentsPhoneShort': 'טלפון סבא וסבתא נראה קצר - אנא וודא',
+
+        'parentKidEdit.errorsFound': 'נמצאו שגיאות',
+        'parentKidEdit.errorsDescription': 'אנא תקן את השדות המודגשים לפני השמירה.',
+        'parentKidEdit.suggestionsAvailable': 'הצעות זמינות',
+        'parentKidEdit.suggestionsDescription': 'שקול למלא את השדות המוצעים לפרופיל שלם.',
+        'parentKidEdit.validationValid': 'כל השדות תקינים',
+        'parentKidEdit.validationErrors': 'אנא תקן שגיאות',
+        'parentKidEdit.fixErrorsFirst': 'אנא תקן שגיאות לפני השמירה',
+
+        'parentKidEdit.validationError': 'המידע שסופק אינו תקין. אנא בדוק את כל השדות ונסה שוב.',
+        'parentKidEdit.permissionError': 'אין לך הרשאה לעדכן מידע זה.',
+        'parentKidEdit.notFoundError': 'לא ניתן למצוא את רשומת הילד. אנא רענן ונסה שוב.',
+
+// Common validation
+        'common.warning': 'אזהרה',
+        'common.validationErrors': 'בעיות נתונים',
+        'common.yearsOld': 'שנים',
+
         'validation.PhoneHint': 'מספר טלפון ישראלי (10 ספרות)',
         'validation.pleaseFixErrors': 'אנא תקן את השגיאות הבאות:',
         'validation.roleRequired': 'יש לבחור תפקיד',
@@ -4546,12 +4738,18 @@ export const isValidEmail = (email) => {
     return emailRegex.test(email);
 };
 
-// Phone validation function (Israeli numbers)
+// Israeli phone validation function (replace the existing one)
 export const isValidPhone = (phone) => {
     const digitsOnly = phone.replace(/\D/g, '');
-    const israeliMobileRegex = /^05[0-9]\d{7}$/;
-    const israeliLandlineRegex = /^0[2-4,8-9]\d{7}$/;
-    return israeliMobileRegex.test(digitsOnly) || israeliLandlineRegex.test(digitsOnly);
+
+    // Must be exactly 10 digits
+    if (digitsOnly.length !== 10) {
+        return false;
+    }
+
+    // Must start with 05 followed by valid prefix
+    const validPrefixes = ['050', '052', '053', '054', '055', '057', '058', '059'];
+    return validPrefixes.some(prefix => digitsOnly.startsWith(prefix));
 };
 
 // Create the context

@@ -57,12 +57,13 @@ export const getNextParticipantNumber = async () => {
 /**
  * Add a new kid to the database
  * @param {Object} kidData - Kid data from the form
+ * @param {Function} t - Translation function (optional)
  * @returns {Promise<string>} The ID of the created kid document
  */
-export const addKid = async (kidData) => {
+export const addKid = async (kidData, t = null) => {
     try {
-        // Validate the data first
-        const validation = validateKid(kidData);
+        // Validate the data first with translation support
+        const validation = validateKid(kidData, t);
         if (!validation.isValid) {
             const errorMessages = Object.values(validation.errors).join(', ');
             throw new Error(`Validation failed: ${errorMessages}`);
@@ -126,16 +127,17 @@ export const getKidById = async (kidId) => {
  * Update a kid - ENHANCED VERSION with better error handling
  * @param {string} kidId - The kid's document ID
  * @param {Object} updates - Updated kid data
+ * @param {Function} t - Translation function (optional)
  * @returns {Promise<Object>} Updated kid data
  */
-export const updateKid = async (kidId, updates) => {
+export const updateKid = async (kidId, updates, t = null) => {
     try {
         console.log('🔄 Starting kid update for ID:', kidId);
         console.log('📝 Update data received:', updates);
 
-        // Validate the updated data
+        // Validate the updated data with translation support
         console.log('🔍 Validating update data...');
-        const validation = validateKid(updates);
+        const validation = validateKid(updates, t);
 
         if (!validation.isValid) {
             console.error('❌ Validation failed:', validation.errors);
@@ -344,9 +346,10 @@ export const getKidsByInstructor = async (instructorId) => {
 /**
  * Search kids by name or participant number
  * @param {string} searchTerm - Search term
+ * @param {Function} t - Translation function (optional)
  * @returns {Promise<Array>} Array of matching kids
  */
-export const searchKids = async (searchTerm) => {
+export const searchKids = async (searchTerm, t = null) => {
     try {
         // Get all kids and filter in memory (Firestore has limited text search)
         const allKids = await getAllKids();
@@ -354,7 +357,7 @@ export const searchKids = async (searchTerm) => {
         const searchLower = searchTerm.toLowerCase();
 
         return allKids.filter(kid => {
-            const fullName = getKidFullName(kid).toLowerCase();
+            const fullName = getKidFullName(kid, t).toLowerCase();
             const participantNumber = kid.participantNumber?.toLowerCase() || '';
 
             return fullName.includes(searchLower) ||

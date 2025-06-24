@@ -1,4 +1,4 @@
-// src/pages/parent/ParentKidDetailPage.jsx
+// src/pages/parent/ParentKidDetailPage.jsx - Updated with validation and error fixes
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
@@ -10,6 +10,8 @@ import { db } from '../../firebase/config';
 import { usePermissions } from '../../hooks/usePermissions';
 import { useLanguage } from '../../contexts/LanguageContext';
 import Dashboard from '../../components/layout/Dashboard';
+import { updateKid } from '../../services/kidService';
+import { validateKid, getKidFullName, getKidAge } from '../../schemas/kidSchema';
 import {
     IconUser as User,
     IconArrowLeft as ArrowLeft,
@@ -23,7 +25,8 @@ import {
     IconFileText as FileText,
     IconAlertTriangle as Alert,
     IconCheck as Check,
-    IconCamera as Camera
+    IconCamera as Camera,
+    IconExclamationCircle as Warning
 } from '@tabler/icons-react';
 
 const ParentKidDetailPage = () => {
@@ -37,6 +40,99 @@ const ParentKidDetailPage = () => {
     const [isEditingComment, setIsEditingComment] = useState(false);
     const [commentText, setCommentText] = useState('');
     const [saving, setSaving] = useState(false);
+    const [validationErrors, setValidationErrors] = useState({});
+    const [validationWarnings, setValidationWarnings] = useState({});
+
+    // Validation function
+    const performValidation = (kidData) => {
+        console.log('🔍 Performing validation on kid data:', kidData);
+
+        const validation = validateKid(kidData, t);
+        console.log('📋 Validation result:', validation);
+
+        if (!validation.isValid) {
+            setValidationErrors(validation.errors);
+            console.log('❌ Validation errors found:', validation.errors);
+        } else {
+            setValidationErrors({});
+            console.log('✅ Validation passed');
+        }
+
+        // Check for warnings (non-critical issues)
+        const warnings = {};
+
+        // Check if form is incomplete
+        if (kidData.signedFormStatus !== 'completed') {
+            warnings.formStatus = t('parent.warning.formIncomplete', 'Registration form is not yet complete');
+        }
+
+        // Check if declaration is not signed
+        if (!kidData.signedDeclaration) {
+            warnings.declaration = t('parent.warning.declarationNotSigned', 'Health declaration is not yet signed');
+        }
+
+        // Check if required parent info is missing
+        if (!kidData.parentInfo?.email || !kidData.parentInfo?.phone) {
+            warnings.parentContact = t('parent.warning.contactInfoMissing', 'Parent contact information is incomplete');
+        }
+
+        // Check if kid is not assigned to a team
+        if (!kidData.teamId) {
+            warnings.team = t('parent.warning.noTeamAssigned', 'Child is not yet assigned to a team');
+        }
+
+        // Check age-related warnings
+        const age = getKidAge(kidData);
+        if (age !== null) {
+            if (age < 6) {
+                warnings.age = t('parent.warning.tooYoung', 'Child may be too young for this program');
+            } else if (age > 16) {
+                warnings.age = t('parent.warning.tooOld', 'Child may be too old for this program');
+            }
+        }
+
+        setValidationWarnings(warnings);
+        console.log('⚠️ Validation warnings:', warnings);
+    };
+
+    // Helper functions
+    const hasValidationIssues = () => {
+        return Object.keys(validationErrors).length > 0 || Object.keys(validationWarnings).length > 0;
+    };
+
+    const getFieldError = (fieldPath) => {
+        return validationErrors[fieldPath];
+    };
+
+    const renderFieldWithValidation = (fieldPath, value, label, icon) => {
+        const error = getFieldError(fieldPath);
+
+        return (
+            <div className="form-group">
+                <label className="form-label">
+                    {icon}
+                    {label}
+                    {error && <Warning size={16} style={{ color: '#EF4444', marginLeft: '5px' }} />}
+                </label>
+                <div className={`form-display-value ${error ? 'validation-error' : ''}`}>
+                    {value}
+                </div>
+                {error && (
+                    <div className="field-error" style={{
+                        color: '#EF4444',
+                        fontSize: '12px',
+                        marginTop: '5px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '5px'
+                    }}>
+                        <Warning size={14} />
+                        {error}
+                    </div>
+                )}
+            </div>
+        );
+    };
 
     useEffect(() => {
         const loadKidDetails = async () => {
@@ -82,6 +178,13 @@ const ParentKidDetailPage = () => {
         }
     }, [kidId, user, userRole, t]);
 
+    // Validation effect
+    useEffect(() => {
+        if (kid) {
+            performValidation(kid);
+        }
+    }, [kid, t]);
+
     // Helper function to safely display field data based on permissions
     const getFieldValue = (fieldPath, defaultValue = '-') => {
         if (!kid) return defaultValue;
@@ -106,21 +209,24 @@ const ParentKidDetailPage = () => {
         setSaving(true);
 
         try {
-            const kidRef = doc(db, 'kids', kidId);
-            await updateDoc(kidRef, {
-                'comments.parent': commentText || ''
-            });
-
-            // Update local state
-            setKid({
+            // Update through service for proper validation
+            const updatedKidData = {
                 ...kid,
                 comments: {
                     ...kid.comments,
                     parent: commentText || ''
                 }
-            });
+            };
 
+            console.log('💾 Saving comments through kidService...');
+            const updatedKid = await updateKid(kidId, updatedKidData);
+
+            // Update local state with validated data
+            setKid(updatedKid);
             setIsEditingComment(false);
+
+            console.log('✅ Comments saved successfully');
+
         } catch (err) {
             console.error('Error saving comments:', err);
             setError(t('editKid.commentError', 'Failed to save comments. Please try again.'));
@@ -191,6 +297,7 @@ const ParentKidDetailPage = () => {
     }
 
     const formStatus = getFormStatus();
+    const kidAge = getKidAge(kid);
 
     return (
         <Dashboard userRole={userRole}>
@@ -198,7 +305,7 @@ const ParentKidDetailPage = () => {
                 <div className="page-header">
                     <h1>
                         <User className="page-title-icon" size={48} />
-                        {getFieldValue('personalInfo.firstName')} {getFieldValue('personalInfo.lastName')}
+                        {getKidFullName(kid)}
                     </h1>
                     <Link to="/parent/dashboard" className="back-button">
                         <ArrowLeft size={18} />
@@ -207,19 +314,50 @@ const ParentKidDetailPage = () => {
                 </div>
 
                 <div className="admin-container">
+                    {/* Validation Status Alert */}
+                    {hasValidationIssues() && (
+                        <div className="alert warning-alert" style={{ marginBottom: '20px' }}>
+                            <Alert size={20} />
+                            <div>
+                                <strong>{t('parent.validationIssues', 'Data Validation Issues Found')}</strong>
+                                <ul style={{ margin: '10px 0 0 20px', padding: 0 }}>
+                                    {Object.values(validationErrors).map((error, index) => (
+                                        <li key={`error-${index}`} style={{ color: '#EF4444', marginBottom: '5px' }}>
+                                            <strong>{t('common.error', 'Error')}:</strong> {error}
+                                        </li>
+                                    ))}
+                                    {Object.values(validationWarnings).map((warning, index) => (
+                                        <li key={`warning-${index}`} style={{ color: '#F59E0B', marginBottom: '5px' }}>
+                                            <strong>{t('common.warning', 'Warning')}:</strong> {warning}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        </div>
+                    )}
+
                     {/* Kid Header */}
                     <div className="racing-header">
                         <div className="header-content">
                             <div className="title-section">
                                 <h1>
                                     <User size={40} />
-                                    {getFieldValue('personalInfo.firstName')} {getFieldValue('personalInfo.lastName')}
+                                    {getKidFullName(kid)}
+                                    {kidAge && <span style={{ fontSize: '0.7em', color: 'var(--text-secondary)', marginLeft: '10px' }}>
+                                        ({kidAge} {t('common.yearsOld', 'years old')})
+                                    </span>}
                                 </h1>
                                 <p className="subtitle">
                                     {t('kids.participantNumber', 'Participant #')}: {getFieldValue('participantNumber')} •
                                     <span className={`status-badge ${formStatus.color === 'success' ? 'ready' : formStatus.color === 'warning' ? 'pending' : 'inactive'}`} style={{ marginLeft: '10px' }}>
                                         {formStatus.label}
                                     </span>
+                                    {Object.keys(validationErrors).length > 0 && (
+                                        <span className="status-badge inactive" style={{ marginLeft: '10px' }}>
+                                            <Warning size={14} style={{ marginRight: '5px' }} />
+                                            {t('common.validationErrors', 'Data Issues')}
+                                        </span>
+                                    )}
                                 </p>
                             </div>
                         </div>
@@ -243,37 +381,29 @@ const ParentKidDetailPage = () => {
                         </div>
 
                         <div className="form-grid">
-                            <div className="form-group">
-                                <label className="form-label">
-                                    <User size={16} />
-                                    {t('common.fullName', 'Full Name')}
-                                </label>
-                                <div className="form-display-value">
-                                    {getFieldValue('personalInfo.firstName')} {getFieldValue('personalInfo.lastName')}
-                                </div>
-                            </div>
+                            {renderFieldWithValidation(
+                                'personalInfo.firstName',
+                                `${getFieldValue('personalInfo.firstName')} ${getFieldValue('personalInfo.lastName')}`,
+                                t('common.fullName', 'Full Name'),
+                                <User size={16} />
+                            )}
 
-                            <div className="form-group">
-                                <label className="form-label">
-                                    <Calendar size={16} />
-                                    {t('editKid.birthday', 'Date of Birth')}
-                                </label>
-                                <div className="form-display-value">
-                                    {getFieldValue('personalInfo.dateOfBirth')
-                                        ? new Date(getFieldValue('personalInfo.dateOfBirth')).toLocaleDateString()
-                                        : '-'
-                                    }
-                                </div>
-                            </div>
+                            {renderFieldWithValidation(
+                                'personalInfo.dateOfBirth',
+                                getFieldValue('personalInfo.dateOfBirth')
+                                    ? `${new Date(getFieldValue('personalInfo.dateOfBirth')).toLocaleDateString()}${kidAge ? ` (${kidAge} years old)` : ''}`
+                                    : '-',
+                                t('editKid.birthday', 'Date of Birth'),
+                                <Calendar size={16} />
+                            )}
 
                             <div className="form-group full-width">
-                                <label className="form-label">
+                                {renderFieldWithValidation(
+                                    'personalInfo.address',
+                                    getFieldValue('personalInfo.address'),
+                                    t('editKid.homeBaseLocation', 'Address'),
                                     <MapPin size={16} />
-                                    {t('editKid.homeBaseLocation', 'Address')}
-                                </label>
-                                <div className="form-display-value">
-                                    {getFieldValue('personalInfo.address')}
-                                </div>
+                                )}
                             </div>
 
                             <div className="form-group full-width">
@@ -308,35 +438,26 @@ const ParentKidDetailPage = () => {
                         </div>
 
                         <div className="form-grid">
-                            <div className="form-group">
-                                <label className="form-label">
-                                    <User size={16} />
-                                    {t('editKid.parentGuardianName', 'Parent Name')}
-                                </label>
-                                <div className="form-display-value">
-                                    {getFieldValue('parentInfo.name')}
-                                </div>
-                            </div>
+                            {renderFieldWithValidation(
+                                'parentInfo.name',
+                                getFieldValue('parentInfo.name'),
+                                t('editKid.parentGuardianName', 'Parent Name'),
+                                <User size={16} />
+                            )}
 
-                            <div className="form-group">
-                                <label className="form-label">
-                                    <Mail size={16} />
-                                    {t('editKid.emailAddress', 'Email')}
-                                </label>
-                                <div className="form-display-value" style={{ fontFamily: 'monospace' }}>
-                                    {getFieldValue('parentInfo.email')}
-                                </div>
-                            </div>
+                            {renderFieldWithValidation(
+                                'parentInfo.email',
+                                getFieldValue('parentInfo.email'),
+                                t('editKid.emailAddress', 'Email'),
+                                <Mail size={16} />
+                            )}
 
-                            <div className="form-group">
-                                <label className="form-label">
-                                    <Phone size={16} />
-                                    {t('editKid.phoneNumber', 'Phone')}
-                                </label>
-                                <div className="form-display-value" style={{ fontFamily: 'monospace', direction: 'ltr' }}>
-                                    {getFieldValue('parentInfo.phone')}
-                                </div>
-                            </div>
+                            {renderFieldWithValidation(
+                                'parentInfo.phone',
+                                getFieldValue('parentInfo.phone'),
+                                t('editKid.phoneNumber', 'Phone'),
+                                <Phone size={16} />
+                            )}
 
                             {/* Grandparents Information */}
                             {getFieldValue('parentInfo.grandparentsInfo.names') && (

@@ -1,6 +1,5 @@
-// src/schemas/kidSchema.js
+// src/schemas/kidSchema.js - Final fixes
 import { Timestamp } from 'firebase/firestore';
-
 
 /**
  * Kid Schema Definition
@@ -50,7 +49,7 @@ export const createEmptyKid = () => ({
 
     // Status and Forms
     signedDeclaration: false,
-    signedFormStatus: 'pending', // 'pending', 'completed', 'needs_review', 'cancelled'
+    signedFormStatus: 'pending', // 'pending', 'completed', 'needs_review', 'canceled'
 
     // Additional Information
     additionalComments: '',
@@ -101,22 +100,22 @@ export const kidValidationRules = {
         'parentInfo.grandparentsInfo.phone': 20,
         'additionalComments': 1000
     }
-
 };
 
 export const getFormStatusOptions = (t) => [
-    { value: 'pending', label: t('editKid.formStatusOptions.pending'), color: '#F59E0B' },
-    { value: 'completed', label: t('editKid.formStatusOptions.completed'), color: '#10B981' },
-    { value: 'needs_review', label: t('editKid.formStatusOptions.needs_review'), color: '#EF4444' },
-    { value: 'cancelled', label: t('editKid.formStatusOptions.cancelled'), color: '#6B7280' }
+    { value: 'pending', label: t('editKid.formStatusOptions.pending', 'pending'), color: '#F59E0B' },
+    { value: 'completed', label: t('editKid.formStatusOptions.completed', 'ready'), color: '#10B981' },
+    { value: 'needs_review', label: t('editKid.formStatusOptions.needs_review', 'needs review'), color: '#EF4444' },
+    { value: 'cancelled', label: t('editKid.formStatusOptions.cancelled', 'cancelled'), color: '#6B7280' }
 ];
 
 /**
  * Validate a kid object against the schema
  * @param {Object} kidData - The kid data to validate
+ * @param {Function} t - Translation function (optional, uses LanguageContext t function)
  * @returns {Object} - { isValid: boolean, errors: {} }
  */
-export const validateKid = (kidData) => {
+export const validateKid = (kidData, t = null) => {
     const errors = {};
 
     // Helper function to get nested value
@@ -124,13 +123,31 @@ export const validateKid = (kidData) => {
         return path.split('.').reduce((current, key) => current?.[key], obj);
     };
 
+    // Helper function for translations with fallback - FIXED to match LanguageContext signature
+    const translate = (key, fallback, interpolations = {}) => {
+        if (!t) return fallback;
+        return t(key, fallback, interpolations);
+    };
+
+    // Get field display name with translation support
+    const getFieldDisplayName = (fieldPath) => {
+        const fieldName = fieldPath.split('.').pop();
+        // Try to get translated field name, fallback to capitalized field name
+        const translationKey = `fields.${fieldName}`;
+        const displayName = t ? t(translationKey, fieldName.charAt(0).toUpperCase() + fieldName.slice(1)) : fieldName.charAt(0).toUpperCase() + fieldName.slice(1);
+        return displayName;
+    };
+
     // Check required fields
     kidValidationRules.required.forEach(field => {
         const value = getNestedValue(kidData, field);
-
         if (!value || (typeof value === 'string' && !value.trim())) {
-            const fieldName = field.split('.').pop();
-            errors[field] = `${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)} is required`;
+            const fieldDisplayName = getFieldDisplayName(field);
+            errors[field] = translate(
+                'validation.fieldRequired',
+                `${fieldDisplayName} is required`,
+                { field: fieldDisplayName }
+            );
         }
     });
 
@@ -138,15 +155,33 @@ export const validateKid = (kidData) => {
     kidValidationRules.email.forEach(field => {
         const value = getNestedValue(kidData, field);
         if (value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-            errors[field] = 'Please enter a valid email address';
+            errors[field] = translate('validation.emailInvalid', 'Please enter a valid email address');
         }
     });
 
-    // Validate phone format (basic)
+    // Validate phone format (Israeli) - FIXED VERSION
     kidValidationRules.phone.forEach(field => {
         const value = getNestedValue(kidData, field);
-        if (value && value.length > 0 && !/^[+]?[\d\s\-()]{7,20}$/.test(value)) {
-            errors[field] = 'Please enter a valid phone number';
+        if (value && value.trim().length > 0) {
+            const digitsOnly = value.replace(/\D/g, '');
+
+            // Check if it starts with 05
+            if (!digitsOnly.startsWith('05')) {
+                errors[field] = translate('validation.phoneMustStartWith05', 'Phone number must start with 05');
+            }
+            // Check if first 3 digits match Israeli format
+            else {
+                const validPrefixes = ['050', '052', '053', '054', '055', '057', '058', '059'];
+                const firstThreeDigits = digitsOnly.substring(0, 3);
+
+                if (!validPrefixes.includes(firstThreeDigits)) {
+                    errors[field] = translate('validation.phoneWrongPrefix', 'Phone number must start with 050, 052, 053, 054, 055, 057, 058, or 059');
+                }
+                // Only check length if prefix is valid
+                else if (digitsOnly.length !== 10) {
+                    errors[field] = translate('validation.phoneWrongLength', 'Phone number must be exactly 10 digits');
+                }
+            }
         }
     });
 
@@ -156,23 +191,28 @@ export const validateKid = (kidData) => {
         const today = new Date();
 
         if (isNaN(birthDate.getTime())) {
-            errors['personalInfo.dateOfBirth'] = 'Please enter a valid date';
+            errors['personalInfo.dateOfBirth'] = translate('validation.dateInvalid', 'Please enter a valid date');
         } else if (birthDate >= today) {
-            errors['personalInfo.dateOfBirth'] = 'Date of birth must be in the past';
+            errors['personalInfo.dateOfBirth'] = translate('validation.dateMustBePast', 'Date of birth must be in the past');
         } else {
-            // Check if child is not too old (e.g., under 18)
+            // Check if child is not too old (e.g., under 20)
             const age = today.getFullYear() - birthDate.getFullYear();
             if (age > 20) {
-                errors['personalInfo.dateOfBirth'] = 'Participants needs to be under 20 years old';
+                errors['personalInfo.dateOfBirth'] = translate('validation.ageLimit', 'Participants need to be under 20 years old');
             }
         }
     }
 
-    // Validate max lengths
+    // Validate max lengths - FIXED VERSION
     Object.entries(kidValidationRules.maxLength).forEach(([field, maxLength]) => {
         const value = getNestedValue(kidData, field);
         if (value && value.length > maxLength) {
-            errors[field] = `Must be ${maxLength} characters or less`;
+            const fieldDisplayName = getFieldDisplayName(field);
+            errors[field] = translate(
+                'validation.maxLength',
+                `{field} must be no more than {max} characters`,
+                { max: maxLength, field: fieldDisplayName }
+            );
         }
     });
 
@@ -259,12 +299,25 @@ export const convertFirestoreToKid = (doc) => {
 /**
  * Get kid's full name
  * @param {Object} kid - Kid object
+ * @param {Function} t - Translation function (optional)
  * @returns {string} - Full name
  */
-export const getKidFullName = (kid) => {
+export const getKidFullName = (kid, t = null) => {
     const firstName = kid.personalInfo?.firstName || '';
     const lastName = kid.personalInfo?.lastName || '';
-    return `${firstName} ${lastName}`.trim() || 'Unnamed Kid';
+    const fullName = `${firstName} ${lastName}`.trim();
+
+    if (fullName) {
+        return fullName;
+    }
+
+    // Return translated "Unnamed Kid" if translation function is provided
+    if (t) {
+        return t('common.unnamedKid', 'Unnamed Kid');
+    }
+
+    // Fallback to English if no translation function
+    return 'Unnamed Kid';
 };
 
 /**
@@ -290,6 +343,7 @@ export const getKidAge = (kid) => {
 /**
  * Get form status info
  * @param {string} status - Status value
+ * @param {Function} t - Translation function
  * @returns {Object} - Status info with label and color
  */
 export const getFormStatusInfo = (status, t) => {

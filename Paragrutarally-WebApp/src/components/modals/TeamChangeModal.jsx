@@ -1,5 +1,6 @@
-// src/components/TeamChangeModal.jsx - Standalone with Custom Styles
+// src/components/TeamChangeModal.jsx - Fixed with translations
 import React, { useState, useEffect } from 'react';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { getAllTeams } from '../../services/teamService';
 import { updateKidTeam } from '../../services/kidService';
 import {
@@ -14,22 +15,23 @@ import {
 import './TeamChangeModal.css';
 
 const TeamChangeModal = ({ kid, isOpen, onClose, onTeamChanged }) => {
+    const { t, isRTL } = useLanguage();
     const [teams, setTeams] = useState([]);
     const [selectedTeamId, setSelectedTeamId] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState(null);
 
-    console.log('🔍 TeamChangeModal render:', { kid, isOpen, selectedTeamId });
+    console.log(t('debug.teamChangeModalRender', '🔍 TeamChangeModal render:'), { kid, isOpen, selectedTeamId });
 
     useEffect(() => {
         if (isOpen && kid) {
-            console.log('📂 Loading teams for modal...');
+            console.log(t('debug.loadingTeamsForModal', '📂 Loading teams for modal...'));
             loadTeams();
             setSelectedTeamId(kid?.teamId || '');
             setError(null);
         }
-    }, [isOpen, kid]);
+    }, [isOpen, kid, t]);
 
     const loadTeams = async () => {
         try {
@@ -39,10 +41,10 @@ const TeamChangeModal = ({ kid, isOpen, onClose, onTeamChanged }) => {
             const teamsData = await getAllTeams();
             const activeTeams = teamsData.filter(team => team.active !== false);
             setTeams(activeTeams);
-            console.log('✅ Teams loaded for modal:', activeTeams);
+            console.log(t('debug.teamsLoadedForModal', '✅ Teams loaded for modal:'), activeTeams);
         } catch (err) {
-            console.error('Error loading teams:', err);
-            setError(`Failed to load teams: ${err.message}`);
+            console.error(t('debug.errorLoadingTeams', 'Error loading teams:'), err);
+            setError(t('teamChange.failedToLoadTeams', 'Failed to load teams: {error}', { error: err.message }));
         } finally {
             setIsLoading(false);
         }
@@ -64,8 +66,8 @@ const TeamChangeModal = ({ kid, isOpen, onClose, onTeamChanged }) => {
                 onTeamChanged(kid.id, selectedTeamId || null);
             }
         } catch (err) {
-            console.error('Error updating team:', err);
-            setError(`Failed to update team: ${err.message}`);
+            console.error(t('debug.errorUpdatingTeam', 'Error updating team:'), err);
+            setError(t('teamChange.failedToUpdateTeam', 'Failed to update team: {error}', { error: err.message }));
             setIsSaving(false);
         }
     };
@@ -81,8 +83,8 @@ const TeamChangeModal = ({ kid, isOpen, onClose, onTeamChanged }) => {
                 onTeamChanged(kid.id, null);
             }
         } catch (err) {
-            console.error('Error removing team:', err);
-            setError(`Failed to remove from team: ${err.message}`);
+            console.error(t('debug.errorRemovingTeam', 'Error removing team:'), err);
+            setError(t('teamChange.failedToRemoveFromTeam', 'Failed to remove from team: {error}', { error: err.message }));
             setIsSaving(false);
         }
     };
@@ -96,21 +98,22 @@ const TeamChangeModal = ({ kid, isOpen, onClose, onTeamChanged }) => {
     }
 
     const selectedTeam = teams.find(t => t.id === selectedTeamId);
+    const kidName = kid?.personalInfo?.firstName || kid?.name || t('common.unnamedKid', 'Unnamed Kid');
 
     return (
-        <div className="team-modal-overlay" onClick={onClose}>
+        <div className="team-modal-overlay" onClick={onClose} dir={isRTL ? 'rtl' : 'ltr'}>
             <div className="team-modal-container" onClick={(e) => e.stopPropagation()}>
 
                 {/* Modal Header */}
                 <div className="team-modal-header">
                     <div className="team-modal-title">
                         <Car size={28} className="team-modal-title-icon" />
-                        <h3>Change Team for {kid?.name}</h3>
+                        <h3>{t('teamChange.changeTeamFor', 'Change Team for {kidName}', { kidName })}</h3>
                     </div>
                     <button
                         className="team-modal-close"
                         onClick={onClose}
-                        aria-label="Close modal"
+                        aria-label={t('common.close', 'Close modal')}
                     >
                         <X size={20} />
                     </button>
@@ -124,13 +127,13 @@ const TeamChangeModal = ({ kid, isOpen, onClose, onTeamChanged }) => {
                         <div className="team-modal-error">
                             <AlertTriangle size={20} />
                             <div className="team-modal-error-content">
-                                <strong>Error:</strong> {error}
+                                <strong>{t('common.error', 'Error')}:</strong> {error}
                             </div>
                             <button
                                 onClick={() => setError(null)}
                                 className="team-modal-error-dismiss"
                             >
-                                Dismiss
+                                {t('teamChange.dismiss', 'Dismiss')}
                             </button>
                         </div>
                     )}
@@ -139,11 +142,13 @@ const TeamChangeModal = ({ kid, isOpen, onClose, onTeamChanged }) => {
                     <div className="team-modal-section">
                         <div className="team-modal-section-header">
                             <Users className="team-modal-section-icon" size={20} />
-                            <h4>Current Assignment</h4>
+                            <h4>{t('teamChange.currentAssignment', 'Current Assignment')}</h4>
                         </div>
                         <div className="team-modal-current-team">
                             <Car className="team-modal-current-icon" size={16} />
-                            <span><strong>Current Team:</strong> {kid?.team || 'No Team'}</span>
+                            <span>
+                                <strong>{t('teamChange.currentTeam', 'Current Team')}:</strong> {kid?.team || t('teamChange.noTeam', 'No Team')}
+                            </span>
                         </div>
                     </div>
 
@@ -151,7 +156,7 @@ const TeamChangeModal = ({ kid, isOpen, onClose, onTeamChanged }) => {
                     {isLoading ? (
                         <div className="team-modal-loading">
                             <div className="team-modal-spinner"></div>
-                            <p>Loading available teams...</p>
+                            <p>{t('teamChange.loadingTeams', 'Loading available teams...')}</p>
                         </div>
                     ) : (
                         <>
@@ -159,7 +164,7 @@ const TeamChangeModal = ({ kid, isOpen, onClose, onTeamChanged }) => {
                             <div className="team-modal-section">
                                 <div className="team-modal-section-header">
                                     <Car className="team-modal-section-icon" size={20} />
-                                    <h4>Select New Team</h4>
+                                    <h4>{t('teamChange.selectNewTeam', 'Select New Team')}</h4>
                                 </div>
 
                                 {/* "No Team" Option */}
@@ -169,13 +174,15 @@ const TeamChangeModal = ({ kid, isOpen, onClose, onTeamChanged }) => {
                                 >
                                     <div className="team-modal-team-header">
                                         <X className="team-modal-team-icon" size={18} />
-                                        <span className="team-modal-team-name">🚫 No Team Assignment</span>
+                                        <span className="team-modal-team-name">
+                                            🚫 {t('teamChange.noTeamAssignment', 'No Team Assignment')}
+                                        </span>
                                         {selectedTeamId === '' && (
                                             <Check className="team-modal-selected-icon" size={16} />
                                         )}
                                     </div>
                                     <div className="team-modal-team-description">
-                                        Remove this kid from all teams
+                                        {t('teamChange.removeFromAllTeams', 'Remove this kid from all teams')}
                                     </div>
                                 </div>
 
@@ -183,8 +190,8 @@ const TeamChangeModal = ({ kid, isOpen, onClose, onTeamChanged }) => {
                                 {teams.length === 0 ? (
                                     <div className="team-modal-empty">
                                         <Users className="team-modal-empty-icon" size={40} />
-                                        <h4>No Active Teams</h4>
-                                        <p>There are currently no active teams available for assignment.</p>
+                                        <h4>{t('teamChange.noActiveTeams', 'No Active Teams')}</h4>
+                                        <p>{t('teamChange.noActiveTeamsDescription', 'There are currently no active teams available for assignment.')}</p>
                                     </div>
                                 ) : (
                                     <div className="team-modal-teams-grid">
@@ -204,7 +211,9 @@ const TeamChangeModal = ({ kid, isOpen, onClose, onTeamChanged }) => {
                                                 <div className="team-modal-team-details">
                                                     <div className="team-modal-team-members">
                                                         <Users size={14} />
-                                                        <span>{team.kidIds?.length || 0} / {team.maxCapacity || 15} members</span>
+                                                        <span>
+                                                            {team.kidIds?.length || 0} / {team.maxCapacity || 15} {t('teamChange.members', 'members')}
+                                                        </span>
                                                     </div>
                                                     {team.description && (
                                                         <div className="team-modal-team-description">
@@ -214,7 +223,12 @@ const TeamChangeModal = ({ kid, isOpen, onClose, onTeamChanged }) => {
                                                     {team.instructorIds && team.instructorIds.length > 0 && (
                                                         <div className="team-modal-team-instructors">
                                                             <User size={12} />
-                                                            <span>{team.instructorIds.length} instructor{team.instructorIds.length !== 1 ? 's' : ''}</span>
+                                                            <span>
+                                                                {team.instructorIds.length} {team.instructorIds.length !== 1
+                                                                ? t('teamChange.instructors', 'instructors')
+                                                                : t('teamChange.instructor', 'instructor')
+                                                            }
+                                                            </span>
                                                         </div>
                                                     )}
                                                 </div>
@@ -229,7 +243,7 @@ const TeamChangeModal = ({ kid, isOpen, onClose, onTeamChanged }) => {
                                 <div className="team-modal-section">
                                     <div className="team-modal-section-header">
                                         <Check className="team-modal-section-icon" size={20} />
-                                        <h4>Selected Team Preview</h4>
+                                        <h4>{t('teamChange.selectedTeamPreview', 'Selected Team Preview')}</h4>
                                     </div>
                                     <div className="team-modal-preview">
                                         <div className="team-modal-preview-header">
@@ -239,18 +253,24 @@ const TeamChangeModal = ({ kid, isOpen, onClose, onTeamChanged }) => {
                                         <div className="team-modal-preview-details">
                                             <div>
                                                 <Users size={14} />
-                                                <span><strong>Members:</strong> {selectedTeam.kidIds?.length || 0} / {selectedTeam.maxCapacity || 15}</span>
+                                                <span>
+                                                    <strong>{t('teamChange.membersLabel', 'Members')}:</strong> {selectedTeam.kidIds?.length || 0} / {selectedTeam.maxCapacity || 15}
+                                                </span>
                                             </div>
                                             {selectedTeam.description && (
                                                 <div>
                                                     <Car size={14} />
-                                                    <span><strong>Description:</strong> {selectedTeam.description}</span>
+                                                    <span>
+                                                        <strong>{t('teamChange.descriptionLabel', 'Description')}:</strong> {selectedTeam.description}
+                                                    </span>
                                                 </div>
                                             )}
                                             {selectedTeam.instructorIds && selectedTeam.instructorIds.length > 0 && (
                                                 <div>
                                                     <User size={14} />
-                                                    <span><strong>Instructors:</strong> {selectedTeam.instructorIds.length}</span>
+                                                    <span>
+                                                        <strong>{t('teamChange.instructorsLabel', 'Instructors')}:</strong> {selectedTeam.instructorIds.length}
+                                                    </span>
                                                 </div>
                                             )}
                                         </div>
@@ -273,12 +293,12 @@ const TeamChangeModal = ({ kid, isOpen, onClose, onTeamChanged }) => {
                             {isSaving ? (
                                 <>
                                     <div className="team-modal-spinner-mini"></div>
-                                    Removing...
+                                    {t('teamChange.removing', 'Removing...')}
                                 </>
                             ) : (
                                 <>
                                     <X size={16} />
-                                    Remove from Team
+                                    {t('teamChange.removeFromTeam', 'Remove from Team')}
                                 </>
                             )}
                         </button>
@@ -292,7 +312,7 @@ const TeamChangeModal = ({ kid, isOpen, onClose, onTeamChanged }) => {
                             disabled={isSaving}
                         >
                             <X size={16} />
-                            Cancel
+                            {t('common.cancel', 'Cancel')}
                         </button>
 
                         {/* Save Button */}
@@ -304,12 +324,12 @@ const TeamChangeModal = ({ kid, isOpen, onClose, onTeamChanged }) => {
                             {isSaving ? (
                                 <>
                                     <div className="team-modal-spinner-mini"></div>
-                                    Saving Changes...
+                                    {t('teamChange.savingChanges', 'Saving Changes...')}
                                 </>
                             ) : (
                                 <>
                                     <Check size={16} />
-                                    Save Changes! 🏁
+                                    {t('teamChange.saveChanges', 'Save Changes!')} 🏁
                                 </>
                             )}
                         </button>
