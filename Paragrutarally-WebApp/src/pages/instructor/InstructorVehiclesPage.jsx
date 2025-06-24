@@ -168,6 +168,27 @@ const InstructorVehiclesPage = () => {
     return (
         <Dashboard userRole={userRole}>
             <div className="admin-page">
+                {/* Add styles for highlighting assigned vehicles */}
+                <style>
+                    {`
+                        .vehicle-assigned-to-me {
+                            background-color: rgba(139, 69, 255, 0.05) !important;
+                            border-left: 4px solid var(--racing-purple) !important;
+                        }
+                        .vehicle-assigned-to-me:hover {
+                            background-color: rgba(139, 69, 255, 0.1) !important;
+                        }
+                        .badge.info {
+                            background-color: #3498db;
+                            color: white;
+                            padding: 4px 8px;
+                            border-radius: 4px;
+                            font-size: 12px;
+                            font-weight: 500;
+                        }
+                    `}
+                </style>
+
                 <h1>
                     <Car className="page-title-icon" size={48} />
                     {t('nav.vehicles', 'Vehicles')}
@@ -334,8 +355,9 @@ const InstructorVehiclesPage = () => {
                                     <th>{t('vehicles.name', 'Name')}</th>
                                     <th>{t('vehicles.type', 'Type')}</th>
                                     <th>{t('vehicles.licensePlate', 'License Plate')}</th>
-                                    <th>{t('vehicles.model', 'Model')}</th>
-                                    <th>{t('vehicles.capacity', 'Capacity')}</th>
+                                    <th>{t('vehicles.batteryType', 'Battery Type')}</th>
+                                    <th>{t('vehicles.batteryExpDate', 'Battery Exp.')}</th>
+                                    <th>{t('vehicles.steeringType', 'Steering')}</th>
                                     <th>{t('vehicles.status', 'Status')}</th>
                                     <th>{t('vehicles.assignment', 'Assignment')}</th>
                                     <th>{t('common.actions', 'Actions')}</th>
@@ -345,9 +367,19 @@ const InstructorVehiclesPage = () => {
                                 {filteredVehicles.map(vehicle => {
                                     const assignmentStatus = getVehicleAssignmentStatus(vehicle);
                                     return (
-                                        <tr key={vehicle.id}>
+                                        <tr key={vehicle.id} className={assignmentStatus.status === 'assigned' ? 'vehicle-assigned-to-me' : ''}>
                                             <td>
-                                                <strong>{vehicle.name}</strong>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                    {assignmentStatus.status === 'assigned' && (
+                                                        <span style={{
+                                                            fontSize: '16px',
+                                                            title: t('vehicles.assignedToMyTeams', 'Assigned to my teams')
+                                                        }}>
+                                                            🏁
+                                                        </span>
+                                                    )}
+                                                    <strong>{vehicle.name}</strong>
+                                                </div>
                                             </td>
                                             <td>
                                                     <span className="badge secondary">
@@ -365,13 +397,22 @@ const InstructorVehiclesPage = () => {
                                                 </code>
                                             </td>
                                             <td>
-                                                {vehicle.model || t('common.notSpecified', 'Not Specified')}
+                                                <span className="badge info">
+                                                    {vehicle.batteryType || t('common.notSpecified', 'Not Specified')}
+                                                </span>
                                             </td>
                                             <td>
-                                                <div style={{ textAlign: 'center' }}>
-                                                    <Users size={16} style={{ marginRight: '5px', verticalAlign: 'middle' }} />
-                                                    {vehicle.capacity || t('common.notAvailable', 'N/A')}
+                                                <div style={{ fontSize: '12px', color: vehicle.batteryExpDate ? 'var(--text-primary)' : 'var(--text-muted)' }}>
+                                                    {vehicle.batteryExpDate ?
+                                                        new Date(vehicle.batteryExpDate).toLocaleDateString() :
+                                                        t('common.notSet', 'Not Set')
+                                                    }
                                                 </div>
+                                            </td>
+                                            <td>
+                                                <span className="badge secondary">
+                                                    {vehicle.steeringType || t('common.notSpecified', 'Not Specified')}
+                                                </span>
                                             </td>
                                             <td>
                                                     <span className={`status-badge ${
