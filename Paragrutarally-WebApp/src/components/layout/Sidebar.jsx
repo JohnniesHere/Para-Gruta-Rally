@@ -1,4 +1,4 @@
-// src/components/layout/Sidebar.jsx - UPDATED with Legal Modal Trigger
+// src/components/layout/Sidebar.jsx - FIXED with correct instructor routes
 import React from 'react';
 import {NavLink} from 'react-router-dom';
 import {
@@ -98,17 +98,15 @@ const Sidebar = ({userRole}) => {
                             <Photo className="sidebar-icon" size={20}/>
                             {t('nav.gallery', 'Gallery')}
                         </NavLink>
-                        {userRole === 'admin' && (
-                            <NavLink
-                                to="/admin/analytics"
-                                className={({isActive}) =>
-                                    `sidebar-link ${isActive ? 'active' : ''}`
-                                }
-                            >
-                                <Analytics size={20}/>
-                                <span>{t('nav.analytics', 'Analytics')}</span>
-                            </NavLink>
-                        )}
+                        <NavLink
+                            to="/admin/analytics"
+                            className={({isActive}) =>
+                                `sidebar-link ${isActive ? 'active' : ''}`
+                            }
+                        >
+                            <Analytics size={20}/>
+                            <span>{t('nav.analytics', 'Analytics')}</span>
+                        </NavLink>
                     </>
                 )}
 
@@ -131,6 +129,13 @@ const Sidebar = ({userRole}) => {
                             {t('nav.events', 'Events')}
                         </NavLink>
                         <NavLink
+                            to="/instructor/kids"
+                            className={({isActive}) => isActive ? 'active' : ''}
+                        >
+                            <Baby className="sidebar-icon" size={20}/>
+                            {t('nav.kids', 'Kids')}
+                        </NavLink>
+                        <NavLink
                             to="/instructor/teams"
                             className={({isActive}) => isActive ? 'active' : ''}
                         >
@@ -138,7 +143,7 @@ const Sidebar = ({userRole}) => {
                             {t('nav.teams', 'Teams')}
                         </NavLink>
                         <NavLink
-                            to="/admin/vehicles"
+                            to="/instructor/vehicles"
                             className={({isActive}) => isActive ? 'active' : ''}
                         >
                             <Car className="sidebar-icon" size={20}/>

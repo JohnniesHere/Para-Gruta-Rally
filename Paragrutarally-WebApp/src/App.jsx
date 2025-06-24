@@ -14,7 +14,7 @@ import RoleRedirectHandler from './components/routing/RoleRedirectHandler.jsx';
 import ProtectedRoute, {
     RequireAuth,
     RequireAdmin,
-    RequireInstructor,
+    RequireInstructorOnly,
     RequireParent,
     RequireHost,
     RequireAnyRole
@@ -294,9 +294,9 @@ function App() {
                                             <Route
                                                 path="/instructor/dashboard"
                                                 element={
-                                                    <RequireInstructor>
+                                                    <RequireInstructorOnly>
                                                         <InstructorDashboardPage />
-                                                    </RequireInstructor>
+                                                    </RequireInstructorOnly>
                                                 }
                                             />
 
@@ -304,9 +304,9 @@ function App() {
                                             <Route
                                                 path="/instructor/events"
                                                 element={
-                                                    <RequireInstructor>
+                                                    <RequireInstructorOnly>
                                                         <InstructorEventsPage />
-                                                    </RequireInstructor>
+                                                    </RequireInstructorOnly>
                                                 }
                                             />
 
@@ -314,25 +314,25 @@ function App() {
                                             <Route
                                                 path="/instructor/kids"
                                                 element={
-                                                    <RequireInstructor>
+                                                    <RequireInstructorOnly>
                                                         <InstructorKidsManagementPage />
-                                                    </RequireInstructor>
+                                                    </RequireInstructorOnly>
                                                 }
                                             />
                                             <Route
                                                 path="/instructor/kids/view/:id"
                                                 element={
-                                                    <RequireInstructor>
+                                                    <RequireInstructorOnly>
                                                         <ViewKidPage />
-                                                    </RequireInstructor>
+                                                    </RequireInstructorOnly>
                                                 }
                                             />
                                             <Route
                                                 path="/instructor/kids/edit/:id"
                                                 element={
-                                                    <RequireInstructor>
+                                                    <RequireInstructorOnly>
                                                         <EditKidPage />
-                                                    </RequireInstructor>
+                                                    </RequireInstructorOnly>
                                                 }
                                             />
 
@@ -340,25 +340,25 @@ function App() {
                                             <Route
                                                 path="/instructor/teams"
                                                 element={
-                                                    <RequireInstructor>
+                                                    <RequireInstructorOnly>
                                                         <InstructorTeamsManagementPage />
-                                                    </RequireInstructor>
+                                                    </RequireInstructorOnly>
                                                 }
                                             />
                                             <Route
                                                 path="/instructor/teams/view/:id"
                                                 element={
-                                                    <RequireInstructor>
+                                                    <RequireInstructorOnly>
                                                         <ViewTeamPage />
-                                                    </RequireInstructor>
+                                                    </RequireInstructorOnly>
                                                 }
                                             />
                                             <Route
                                                 path="/instructor/teams/edit/:id"
                                                 element={
-                                                    <RequireInstructor>
+                                                    <RequireInstructorOnly>
                                                         <EditTeamPage />
-                                                    </RequireInstructor>
+                                                    </RequireInstructorOnly>
                                                 }
                                             />
 
@@ -366,25 +366,25 @@ function App() {
                                             <Route
                                                 path="/instructor/vehicles"
                                                 element={
-                                                    <RequireInstructor>
+                                                    <RequireInstructorOnly>
                                                         <InstructorVehiclesPage />
-                                                    </RequireInstructor>
+                                                    </RequireInstructorOnly>
                                                 }
                                             />
                                             <Route
                                                 path="/instructor/vehicles/view/:id"
                                                 element={
-                                                    <RequireInstructor>
+                                                    <RequireInstructorOnly>
                                                         <ViewVehiclePage />
-                                                    </RequireInstructor>
+                                                    </RequireInstructorOnly>
                                                 }
                                             />
                                             <Route
                                                 path="/instructor/vehicles/edit/:id"
                                                 element={
-                                                    <RequireInstructor>
+                                                    <RequireInstructorOnly>
                                                         <EditVehiclePage />
-                                                    </RequireInstructor>
+                                                    </RequireInstructorOnly>
                                                 }
                                             />
 

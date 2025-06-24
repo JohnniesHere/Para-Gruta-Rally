@@ -1,4 +1,4 @@
-// src/pages/instructor/InstructorEventsPage.jsx - FIXED TO MATCH ParentEventPage
+// src/pages/instructor/InstructorEventsPage.jsx - COMPLETE TRANSLATION SUPPORT
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
@@ -55,7 +55,7 @@ const InstructorEventsPage = () => {
 
         if (!instructorId || userRole !== 'instructor') {
             console.log('Access check failed:', { instructorId, userRole, userData, user });
-            setError('Access denied: Instructor credentials required');
+            setError(t('instructor.accessDenied', 'Access denied: Instructor credentials required'));
             setLoading(false);
             return;
         }
@@ -81,8 +81,7 @@ const InstructorEventsPage = () => {
 
             // Load all events (using same structure as ParentEventPage)
             const eventsQuery = query(
-                collection(db, 'events'),
-                orderBy('createdAt', 'desc')
+                collection(db, 'events')
             );
             const eventsSnapshot = await getDocs(eventsQuery);
             const allEvents = [];
@@ -123,6 +122,13 @@ const InstructorEventsPage = () => {
                 });
             });
 
+            // Sort events by date in memory
+            allEvents.sort((a, b) => {
+                const dateA = new Date(a.eventDate || a.date || a.createdAt || 0);
+                const dateB = new Date(b.eventDate || b.date || b.createdAt || 0);
+                return dateB - dateA; // Newest first
+            });
+
             console.log('Total events found:', allEvents.length);
 
             // Don't filter events - show ALL events but mark which ones have instructor's teams
@@ -134,7 +140,7 @@ const InstructorEventsPage = () => {
             setTeams(teamsData);
         } catch (err) {
             console.error('Error loading instructor events:', err);
-            setError('Failed to load events. Please try again.');
+            setError(t('instructor.failedToLoad', 'Failed to load events. Please try again.'));
         } finally {
             setLoading(false);
         }
@@ -328,7 +334,7 @@ const InstructorEventsPage = () => {
             <div className={`parent-event-page ${appliedTheme}-mode`}>
                 <h1>
                     <Calendar className="page-title-icon" size={48} />
-                    {t('instructor.events', 'My Events')}
+                    {t('nav.events', 'My Events')}
                 </h1>
 
                 <div className="parent-event-container">
@@ -344,7 +350,7 @@ const InstructorEventsPage = () => {
                         <div className="header-actions">
                             <button className="btn-secondary" onClick={fetchEvents}>
                                 <RefreshCw className="btn-icon" size={18} />
-                                {t('common.refresh', 'Refresh')}
+                                {t('instructor.refreshPage', 'Refresh')}
                             </button>
                         </div>
                     </div>
@@ -357,9 +363,9 @@ const InstructorEventsPage = () => {
                         >
                             <Calendar className="stat-icon" size={40} />
                             <div className="stat-content">
-                                <h3>{t('stats.totalEvents', 'Total Events')}</h3>
+                                <h3>{t('stats.totalEvents', 'TOTAL EVENTS')}</h3>
                                 <div className="stat-value">{stats.totalEvents}</div>
-                                <div className="stat-subtitle">{t('stats.allAvailableEvents', 'All Available Events')}</div>
+                                <div className="stat-subtitle">{t('instructor.allAvailableEvents', 'All Available Events')}</div>
                             </div>
                         </div>
 
@@ -369,9 +375,9 @@ const InstructorEventsPage = () => {
                         >
                             <Activity className="stat-icon" size={40} />
                             <div className="stat-content">
-                                <h3>{t('stats.upcoming', 'Upcoming')}</h3>
+                                <h3>{t('events.upcoming', 'UPCOMING')}</h3>
                                 <div className="stat-value">{stats.upcomingEvents}</div>
-                                <div className="stat-subtitle">{t('stats.futureEvents', 'Future Events')}</div>
+                                <div className="stat-subtitle">{t('instructor.futureEvents', 'Future Events')}</div>
                             </div>
                         </div>
 
@@ -381,21 +387,21 @@ const InstructorEventsPage = () => {
                         >
                             <Team className="stat-icon" size={40} />
                             <div className="stat-content">
-                                <h3>{t('stats.myTeamEvents', 'My Team Events')}</h3>
+                                <h3>{t('instructor.myTeamEvents', 'MY TEAMS')}</h3>
                                 <div className="stat-value">{stats.myTeamEvents}</div>
-                                <div className="stat-subtitle">{t('stats.eventsWithMyTeams', 'Events with My Teams')}</div>
+                                <div className="stat-subtitle">{t('instructor.eventsWithMyTeams', 'Events with My Teams')}</div>
                             </div>
                         </div>
                     </div>
 
-                    {/* Search and Filters (same as ParentEventPage) */}
+                    {/* Search and Filters */}
                     <div className="search-filter-section-row">
                         <div className="search-container">
                             <div className="search-input-wrapper">
                                 <Search className="search-icon" size={18} />
                                 <input
                                     type="text"
-                                    placeholder={t('events.searchPlaceholder', 'Search by event name, location, or organizer...')}
+                                    placeholder={t('events.searchEvents', 'Search events...')}
                                     className="search-input"
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
@@ -414,9 +420,9 @@ const InstructorEventsPage = () => {
                                 value={myTeamFilter}
                                 onChange={(e) => setMyTeamFilter(e.target.value)}
                             >
-                                <option value="all">{t('events.allEvents', 'All Events')}</option>
+                                <option value="all">{t('instructor.allEvents', 'All Events')}</option>
                                 <option value="myteams">{t('instructor.eventsWithMyTeams', 'Events with My Teams')}</option>
-                                <option value="other">{t('instructor.eventsWithoutMyTeams', 'Other Events')}</option>
+                                <option value="other">{t('instructor.otherEvents', 'Other Events')}</option>
                             </select>
                         </div>
 
@@ -426,7 +432,7 @@ const InstructorEventsPage = () => {
                                 value={dateFilter}
                                 onChange={(e) => setDateFilter(e.target.value)}
                             >
-                                <option value="all">{t('common.allDates', 'All Dates')}</option>
+                                <option value="all">{t('events.allDates', 'All Dates')}</option>
                                 <option value="upcoming">{t('events.upcoming', 'Upcoming')}</option>
                                 <option value="past">{t('events.past', 'Past')}</option>
                             </select>
@@ -441,24 +447,24 @@ const InstructorEventsPage = () => {
                     {/* Results Info */}
                     <div className="results-info">
                         <FileSpreadsheet className="results-icon" size={18} />
-                        {t('events.showing', 'Showing')} {filteredEvents.length} {t('events.of', 'of')} {events.length} {t('events.eventsLowercase', 'events')}
+                        {t('events.showing', 'Showing')} {filteredEvents.length} {t('events.of', 'of')} {events.length} {t('events.events', 'events')}
                         {statusFilter !== 'all' && <span className="filter-applied"> • {t('events.status', 'Status')}: {statusFilter}</span>}
                         {dateFilter !== 'all' && <span className="filter-applied"> • {t('common.timeframe', 'Timeframe')}: {dateFilter}</span>}
-                        {myTeamFilter !== 'all' && <span className="filter-applied"> • {t('instructor.teamFilter', 'Team Filter')}: {myTeamFilter === 'myteams' ? 'My Teams' : 'Other Events'}</span>}
+                        {myTeamFilter !== 'all' && <span className="filter-applied"> • {t('instructor.teamFilter', 'Team Filter')}: {myTeamFilter === 'myteams' ? t('instructor.myTeams', 'My Teams') : t('instructor.otherEvents', 'Other Events')}</span>}
                         {searchTerm && <span className="search-applied"> • {t('common.search', 'Search')}: "{searchTerm}"</span>}
                     </div>
 
-                    {/* Events Table (same structure as ParentEventPage) */}
+                    {/* Events Table */}
                     <div className="table-container">
                         <table className="data-table">
                             <thead>
                             <tr>
                                 <th><Calendar className="table-header-icon" size={16} />{t('events.eventInfo', 'Event Info')}</th>
-                                <th className="date-time-header">📅 {t('events.dateTime', 'Date & Time')}</th>
-                                <th><MapPin className="table-header-icon" size={16} />{t('common.location', 'Location')}</th>
-                                <th><Team className="table-header-icon" size={16} />{t('instructor.myTeams', 'My Teams')}</th>
+                                <th className="date-time-header">📅 {t('events.dateTime', 'DATE & TIME')}</th>
+                                <th><MapPin className="table-header-icon" size={16} />{t('events.location', 'Location')}</th>
+                                <th><Team className="table-header-icon" size={16} />{t('instructor.myTeams', 'MY TEAMS')}</th>
                                 <th className="status-header">📊 {t('events.status', 'Status')}</th>
-                                <th className="actions-header">⚡ {t('events.actions', 'Actions')}</th>
+                                <th className="actions-header">⚡ {t('common.actions', 'Actions')}</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -467,11 +473,11 @@ const InstructorEventsPage = () => {
                                     <td colSpan="6">
                                         <div className="empty-state">
                                             <Calendar className="empty-icon" size={60} />
-                                            <h3>{t('instructor.noEventsFound', 'No Events Found')}</h3>
+                                            <h3>{t('events.noEventsFound', 'No Events Found')}</h3>
                                             <p>
                                                 {searchTerm || statusFilter !== 'all' || dateFilter !== 'all' || myTeamFilter !== 'all'
-                                                    ? t('instructor.noEventsMatchFilter', 'No events match your current filter')
-                                                    : t('instructor.noEventsAvailable', 'No events are currently available')
+                                                    ? t('events.noEventsMatchFilter', 'No events match your current filter')
+                                                    : t('events.noEventsAvailable', 'No events are currently available')
                                                 }
                                             </p>
                                         </div>

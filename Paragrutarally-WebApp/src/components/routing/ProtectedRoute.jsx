@@ -1,4 +1,4 @@
-// src/components/routing/ProtectedRoute.jsx
+// src/components/routing/ProtectedRoute.jsx - ENHANCED with instructor-only routes
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -104,7 +104,8 @@ const ProtectedRoute = ({
                             requiredRole = null,
                             requiredRoles = [],
                             requireAuth = true,
-                            fallbackComponent = null
+                            fallbackComponent = null,
+                            strictRole = false // NEW: for instructor-only routes
                         }) => {
     const { currentUser, userRole, loading: authLoading } = useAuth();
     const { permissions, loading: permissionsLoading, error: permissionsError } = usePermissions();
@@ -140,7 +141,15 @@ const ProtectedRoute = ({
 
     // Check role authorization
     if (allowedRoles.length > 0) {
-        const hasRequiredRole = allowedRoles.includes(userRole);
+        let hasRequiredRole;
+
+        if (strictRole) {
+            // Strict mode: only exact role match
+            hasRequiredRole = allowedRoles.includes(userRole);
+        } else {
+            // Flexible mode: admin can access everything, others need exact match
+            hasRequiredRole = userRole === 'admin' || allowedRoles.includes(userRole);
+        }
 
         if (!hasRequiredRole) {
             const redirectTo = getRoleBasedDashboard(userRole);
@@ -179,6 +188,17 @@ export const RequireInstructor = ({ children, fallbackComponent }) => (
     </ProtectedRoute>
 );
 
+// NEW: Instructor-only routes (admin cannot access)
+export const RequireInstructorOnly = ({ children, fallbackComponent }) => (
+    <ProtectedRoute
+        requiredRole="instructor"
+        strictRole={true}
+        fallbackComponent={fallbackComponent}
+    >
+        {children}
+    </ProtectedRoute>
+);
+
 export const RequireStaff = ({ children, fallbackComponent }) => (
     <ProtectedRoute requiredRoles={['admin', 'instructor']} fallbackComponent={fallbackComponent}>
         {children}
@@ -198,8 +218,12 @@ export const RequireHost = ({ children, fallbackComponent }) => (
 );
 
 // Multi-role component for complex permission requirements
-export const RequireAnyRole = ({ children, roles, fallbackComponent }) => (
-    <ProtectedRoute requiredRoles={roles} fallbackComponent={fallbackComponent}>
+export const RequireAnyRole = ({ children, roles, fallbackComponent, strictRole = false }) => (
+    <ProtectedRoute
+        requiredRoles={roles}
+        strictRole={strictRole}
+        fallbackComponent={fallbackComponent}
+    >
         {children}
     </ProtectedRoute>
 );

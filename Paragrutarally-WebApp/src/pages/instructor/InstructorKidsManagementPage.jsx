@@ -1,4 +1,4 @@
-// src/pages/instructor/InstructorKidsManagementPage.jsx - Full Translation Support
+// src/pages/instructor/InstructorKidsManagementPage.jsx - FIXED instructor ID and translations
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -6,12 +6,8 @@ import {
     query,
     where,
     getDocs,
-    orderBy,
-    limit,
-    doc,
-    getDoc
 } from 'firebase/firestore';
-import { db } from '../../firebase/config';
+import { db } from '@/firebase/config.js';
 import { usePermissions } from '../../hooks/usePermissions';
 import { useLanguage } from '../../contexts/LanguageContext';
 import Dashboard from '../../components/layout/Dashboard';
@@ -39,33 +35,24 @@ const InstructorKidsManagementPage = () => {
     // Load instructor's kids and teams
     useEffect(() => {
         const loadInstructorData = async () => {
-            if (!userData?.instructorId || userRole !== 'instructor') {
-                setError(t('instructor.accessDeniedKids', 'Access denied: Instructor credentials required'));
+            // FIXED: Use same logic as InstructorEventsPage
+            const instructorId = user?.uid || userData?.id;
+
+            if (!instructorId || userRole !== 'instructor') {
+                console.log('Access check failed:', { instructorId, userRole, userData, user });
+                setError(t('instructor.accessDenied', 'Access denied: Instructor credentials required'));
                 setLoading(false);
                 return;
             }
 
             try {
                 setError('');
+                console.log('Loading kids for instructor:', instructorId);
 
-                // Load kids assigned to this instructor
-                const kidsQuery = query(
-                    collection(db, 'kids'),
-                    where('instructorId', '==', userData.instructorId),
-                    orderBy('personalInfo.lastName', 'asc')
-                );
-
-                const kidsSnapshot = await getDocs(kidsQuery);
-                const kidsData = kidsSnapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                }));
-
-                // Load teams for this instructor
+                // FIXED: Use instructorIds array for teams (same as Events page)
                 const teamsQuery = query(
                     collection(db, 'teams'),
-                    where('instructorId', '==', userData.instructorId),
-                    orderBy('name', 'asc')
+                    where('instructorIds', 'array-contains', instructorId)
                 );
 
                 const teamsSnapshot = await getDocs(teamsQuery);
@@ -74,18 +61,50 @@ const InstructorKidsManagementPage = () => {
                     ...doc.data()
                 }));
 
+                // Sort in memory instead
+                teamsData.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+
+                console.log('Found teams for instructor:', teamsData.length, teamsData);
+
+                // Load kids from instructor's teams
+                let kidsData = [];
+                if (teamsData.length > 0) {
+                    const teamIds = teamsData.map(team => team.id);
+
+                    // FIXED: Remove orderBy to avoid index requirement
+                    const kidsQuery = query(
+                        collection(db, 'kids'),
+                        where('teamId', 'in', teamIds)
+                    );
+
+                    const kidsSnapshot = await getDocs(kidsQuery);
+                    kidsData = kidsSnapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+
+                    // Sort in memory instead
+                    kidsData.sort((a, b) => {
+                        const aLastName = a.personalInfo?.lastName || '';
+                        const bLastName = b.personalInfo?.lastName || '';
+                        return aLastName.localeCompare(bLastName);
+                    });
+                }
+
+                console.log('Found kids for instructor:', kidsData.length);
+
                 setKids(kidsData);
                 setTeams(teamsData);
             } catch (err) {
                 console.error('Error loading instructor data:', err);
-                setError(t('instructor.failedToLoadKids', 'Failed to load data. Please try again.'));
+                setError(t('instructor.failedToLoad', 'Failed to load data. Please try again.'));
             } finally {
                 setLoading(false);
             }
         };
 
         loadInstructorData();
-    }, [userData, userRole, t]);
+    }, [userData, userRole, user, t]);
 
     // Filter kids based on search and team filter
     const filteredKids = useMemo(() => {
@@ -106,7 +125,7 @@ const InstructorKidsManagementPage = () => {
         });
     }, [kids, searchTerm, teamFilter, permissions, userData, user]);
 
-    // Get team name by ID - TRANSLATED
+    // Get team name by ID
     const getTeamName = (teamId) => {
         const team = teams.find(t => t.id === teamId);
         return team ? team.name : t('common.unassigned', 'Unassigned');
@@ -130,7 +149,7 @@ const InstructorKidsManagementPage = () => {
         return value || defaultValue;
     };
 
-    // Get translated status - TRANSLATED
+    // Get translated status
     const getStatusLabel = (status) => {
         switch (status) {
             case 'completed':
@@ -175,17 +194,17 @@ const InstructorKidsManagementPage = () => {
             <div className="admin-page">
                 <h1>
                     <Users className="page-title-icon" size={48} />
-                    {t('instructor.myKids', 'My Kids')}
+                    {t('nav.kids', 'Kids')}
                 </h1>
 
                 <div className="admin-container">
-                    {/* Racing Header - TRANSLATED */}
+                    {/* Racing Header */}
                     <div className="racing-header">
                         <div className="header-content">
                             <div className="title-section">
                                 <h1>
                                     <Users size={40} />
-                                    {t('instructor.kidsManagement', 'Kids Management')}
+                                    {t('nav.kids', 'Kids Management')}
                                 </h1>
                                 <p className="subtitle">
                                     {t('instructor.manageAssignedKids', 'Manage kids assigned to your teams')}
@@ -194,7 +213,7 @@ const InstructorKidsManagementPage = () => {
                         </div>
                     </div>
 
-                    {/* Stats Section - TRANSLATED */}
+                    {/* Stats Section */}
                     <div className="stats-grid">
                         <div className="stat-card total">
                             <div className="stat-icon">
@@ -232,7 +251,7 @@ const InstructorKidsManagementPage = () => {
                         </div>
                     </div>
 
-                    {/* Search and Filter Section - TRANSLATED */}
+                    {/* Search and Filter Section */}
                     <div className="search-filter-section">
                         <div className="search-container">
                             <label className="search-label">
@@ -244,7 +263,7 @@ const InstructorKidsManagementPage = () => {
                                 <input
                                     type="text"
                                     className="search-input"
-                                    placeholder={t('instructor.searchKidsPlaceholder', 'Search by name or participant number...')}
+                                    placeholder={t('kids.searchPlaceholder', 'Search by name or participant number...')}
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                 />
@@ -279,7 +298,7 @@ const InstructorKidsManagementPage = () => {
                         </div>
                     </div>
 
-                    {/* Results Summary - TRANSLATED */}
+                    {/* Results Summary */}
                     {(searchTerm || teamFilter) && (
                         <div className="results-summary">
                             <span>{t('common.showing', 'Showing')} {filteredKids.length} {t('common.results', 'results')}</span>
@@ -288,17 +307,17 @@ const InstructorKidsManagementPage = () => {
                         </div>
                     )}
 
-                    {/* Kids Table - TRANSLATED */}
+                    {/* Kids Table */}
                     <div className="table-container">
                         {filteredKids.length === 0 ? (
                             <div className="empty-state">
                                 <div className="empty-icon">
                                     <Users size={80} />
                                 </div>
-                                <h3>{t('instructor.noKidsFound', 'No Kids Found')}</h3>
+                                <h3>{t('kids.noKidsFound', 'No Kids Found')}</h3>
                                 <p>
                                     {searchTerm || teamFilter
-                                        ? t('instructor.noKidsMatchFilter', 'No kids match your current filter')
+                                        ? t('kids.noKidsMatchFilter', 'No kids match your current filter')
                                         : t('instructor.noAssignedKids', 'You have no kids assigned to your teams yet')
                                     }
                                 </p>

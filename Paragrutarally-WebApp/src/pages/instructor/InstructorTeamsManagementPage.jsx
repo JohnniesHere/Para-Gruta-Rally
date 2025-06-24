@@ -1,4 +1,4 @@
-// src/pages/instructor/InstructorTeamsManagementPage.jsx - Full Translation Support
+// src/pages/instructor/InstructorTeamsManagementPage.jsx - FIXED instructor ID and translations
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -39,20 +39,24 @@ const InstructorTeamsManagementPage = () => {
     // Load instructor's teams and related data
     useEffect(() => {
         const loadInstructorTeams = async () => {
-            if (!userData?.instructorId || userRole !== 'instructor') {
-                setError(t('instructor.accessDeniedTeams', 'Access denied: Instructor credentials required'));
+            // FIXED: Use same logic as InstructorEventsPage
+            const instructorId = user?.uid || userData?.id;
+
+            if (!instructorId || userRole !== 'instructor') {
+                console.log('Access check failed:', { instructorId, userRole, userData, user });
+                setError(t('instructor.accessDenied', 'Access denied: Instructor credentials required'));
                 setLoading(false);
                 return;
             }
 
             try {
                 setError('');
+                console.log('Loading teams for instructor:', instructorId);
 
-                // Load teams for this instructor
+                // FIXED: Remove orderBy to avoid index requirement
                 const teamsQuery = query(
                     collection(db, 'teams'),
-                    where('instructorId', '==', userData.instructorId),
-                    orderBy('name', 'asc')
+                    where('instructorIds', 'array-contains', instructorId)
                 );
 
                 const teamsSnapshot = await getDocs(teamsQuery);
@@ -61,23 +65,39 @@ const InstructorTeamsManagementPage = () => {
                     ...doc.data()
                 }));
 
-                // Load kids for these teams
-                const kidsQuery = query(
-                    collection(db, 'kids'),
-                    where('instructorId', '==', userData.instructorId),
-                    orderBy('personalInfo.lastName', 'asc')
-                );
+                // Sort in memory instead
+                teamsData.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
 
-                const kidsSnapshot = await getDocs(kidsQuery);
-                const kidsData = kidsSnapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                }));
+                console.log('Found teams for instructor:', teamsData.length, teamsData);
+
+                // Load kids for these teams
+                let kidsData = [];
+                if (teamsData.length > 0) {
+                    const teamIds = teamsData.map(team => team.id);
+
+                    // FIXED: Remove orderBy to avoid index requirement
+                    const kidsQuery = query(
+                        collection(db, 'kids'),
+                        where('teamId', 'in', teamIds)
+                    );
+
+                    const kidsSnapshot = await getDocs(kidsQuery);
+                    kidsData = kidsSnapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+
+                    // Sort in memory instead
+                    kidsData.sort((a, b) => {
+                        const aLastName = a.personalInfo?.lastName || '';
+                        const bLastName = b.personalInfo?.lastName || '';
+                        return aLastName.localeCompare(bLastName);
+                    });
+                }
 
                 // Load events that include these teams
                 const eventsQuery = query(
-                    collection(db, 'events'),
-                    orderBy('eventDate', 'desc')
+                    collection(db, 'events')
                 );
 
                 const eventsSnapshot = await getDocs(eventsQuery);
@@ -88,19 +108,29 @@ const InstructorTeamsManagementPage = () => {
                     teamsData.some(team => event.participatingTeams?.includes(team.id))
                 );
 
+                // Sort events by date in memory
+                eventsData.sort((a, b) => {
+                    const dateA = new Date(a.eventDate || a.createdAt || 0);
+                    const dateB = new Date(b.eventDate || b.createdAt || 0);
+                    return dateB - dateA; // Newest first
+                });
+
+                console.log('Found kids for teams:', kidsData.length);
+                console.log('Found events for teams:', eventsData.length);
+
                 setTeams(teamsData);
                 setKids(kidsData);
                 setEvents(eventsData);
             } catch (err) {
                 console.error('Error loading instructor teams:', err);
-                setError(t('instructor.failedToLoadTeams', 'Failed to load teams data. Please try again.'));
+                setError(t('instructor.failedToLoad', 'Failed to load teams data. Please try again.'));
             } finally {
                 setLoading(false);
             }
         };
 
         loadInstructorTeams();
-    }, [userData, userRole, t]);
+    }, [userData, userRole, user, t]);
 
     // Filter teams based on search
     const filteredTeams = useMemo(() => {
@@ -131,7 +161,7 @@ const InstructorTeamsManagementPage = () => {
         return permissions.canEditKid(team, userData, user); // Using canEditKid logic for consistency
     };
 
-    // Get translated status label - TRANSLATED
+    // Get translated status label
     const getStatusLabel = (status) => {
         switch (status) {
             case 'active':
@@ -174,17 +204,17 @@ const InstructorTeamsManagementPage = () => {
             <div className="admin-page">
                 <h1>
                     <Team className="page-title-icon" size={48} />
-                    {t('stats.myTeams', 'My Teams')}
+                    {t('nav.teams', 'Teams')}
                 </h1>
 
                 <div className="admin-container">
-                    {/* Racing Header - TRANSLATED */}
+                    {/* Racing Header */}
                     <div className="racing-header">
                         <div className="header-content">
                             <div className="title-section">
                                 <h1>
                                     <Team size={40} />
-                                    {t('instructor.teamsManagement', 'Teams Management')}
+                                    {t('nav.teams', 'Teams Management')}
                                 </h1>
                                 <p className="subtitle">
                                     {t('instructor.manageYourTeams', 'Manage and monitor your assigned teams')}
@@ -193,7 +223,7 @@ const InstructorTeamsManagementPage = () => {
                         </div>
                     </div>
 
-                    {/* Stats Section - TRANSLATED */}
+                    {/* Stats Section */}
                     <div className="stats-grid">
                         <div className="stat-card total">
                             <div className="stat-icon">
@@ -242,7 +272,7 @@ const InstructorTeamsManagementPage = () => {
                         </div>
                     </div>
 
-                    {/* Search Section - TRANSLATED */}
+                    {/* Search Section */}
                     <div className="search-filter-section">
                         <div className="search-container">
                             <label className="search-label">
@@ -254,7 +284,7 @@ const InstructorTeamsManagementPage = () => {
                                 <input
                                     type="text"
                                     className="search-input"
-                                    placeholder={t('instructor.searchTeamsPlaceholder', 'Search teams by name or description...')}
+                                    placeholder={t('teams.searchPlaceholder', 'Search teams by name or description...')}
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                 />
@@ -270,7 +300,7 @@ const InstructorTeamsManagementPage = () => {
                         </div>
                     </div>
 
-                    {/* Results Summary - TRANSLATED */}
+                    {/* Results Summary */}
                     {searchTerm && (
                         <div className="results-summary">
                             <span>{t('common.showing', 'Showing')} {filteredTeams.length} {t('common.results', 'results')}</span>
@@ -278,16 +308,16 @@ const InstructorTeamsManagementPage = () => {
                         </div>
                     )}
 
-                    {/* Teams Display - TRANSLATED */}
+                    {/* Teams Display */}
                     {filteredTeams.length === 0 ? (
                         <div className="empty-state">
                             <div className="empty-icon">
                                 <Team size={80} />
                             </div>
-                            <h3>{t('instructor.noTeamsFound', 'No Teams Found')}</h3>
+                            <h3>{t('teams.noTeamsFound', 'No Teams Found')}</h3>
                             <p>
                                 {searchTerm
-                                    ? t('instructor.noTeamsMatchSearch', 'No teams match your search criteria')
+                                    ? t('teams.noTeamsMatchFilter', 'No teams match your search criteria')
                                     : t('instructor.noAssignedTeams', 'You have no teams assigned yet')
                                 }
                             </p>
@@ -313,18 +343,6 @@ const InstructorTeamsManagementPage = () => {
                                             <div className="stat-item">
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '5px' }}>
                                                     <Users size={16} style={{ color: 'var(--success-color)' }} />
-                                                    <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>
-                                                        {t('common.members', 'Members')}
-                                                    </span>
-                                                </div>
-                                                <div style={{ fontSize: '20px', fontWeight: '700', color: 'var(--success-color)' }}>
-                                                    {getTeamKidsCount(team.id)}
-                                                </div>
-                                            </div>
-
-                                            <div className="stat-item">
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '5px' }}>
-                                                    <Calendar size={16} style={{ color: 'var(--info-color)' }} />
                                                     <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>
                                                         {t('common.events', 'Events')}
                                                     </span>

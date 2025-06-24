@@ -1,4 +1,4 @@
-// src/pages/instructor/InstructorVehiclesPage.jsx
+// src/pages/instructor/InstructorVehiclesPage.jsx - FIXED instructor ID logic
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -38,7 +38,11 @@ const InstructorVehiclesPage = () => {
     // Load vehicles and instructor's teams
     useEffect(() => {
         const loadVehicleData = async () => {
-            if (!userData?.instructorId || userRole !== 'instructor') {
+            // FIXED: Use same logic as InstructorEventsPage
+            const instructorId = user?.uid || userData?.id;
+
+            if (!instructorId || userRole !== 'instructor') {
+                console.log('Access check failed:', { instructorId, userRole, userData, user });
                 setError(t('instructor.accessDenied', 'Access denied: Instructor credentials required'));
                 setLoading(false);
                 return;
@@ -46,6 +50,7 @@ const InstructorVehiclesPage = () => {
 
             try {
                 setError('');
+                console.log('Loading vehicles for instructor:', instructorId);
 
                 // Load ALL vehicles (instructors can see all but edit only assigned ones)
                 const vehiclesQuery = query(
@@ -59,10 +64,10 @@ const InstructorVehiclesPage = () => {
                     ...doc.data()
                 }));
 
-                // Load instructor's teams for context
+                // FIXED: Load instructor's teams using instructorIds array
                 const teamsQuery = query(
                     collection(db, 'teams'),
-                    where('instructorId', '==', userData.instructorId),
+                    where('instructorIds', 'array-contains', instructorId),
                     orderBy('name', 'asc')
                 );
 
@@ -71,6 +76,9 @@ const InstructorVehiclesPage = () => {
                     id: doc.id,
                     ...doc.data()
                 }));
+
+                console.log('Found vehicles:', vehiclesData.length);
+                console.log('Found teams for instructor:', teamsData.length, teamsData);
 
                 setVehicles(vehiclesData);
                 setTeams(teamsData);
@@ -83,7 +91,7 @@ const InstructorVehiclesPage = () => {
         };
 
         loadVehicleData();
-    }, [userData, userRole, t]);
+    }, [userData, userRole, user, t]);
 
     // Filter vehicles based on search and filters
     const filteredVehicles = useMemo(() => {
@@ -162,7 +170,7 @@ const InstructorVehiclesPage = () => {
             <div className="admin-page">
                 <h1>
                     <Car className="page-title-icon" size={48} />
-                    {t('instructor.vehicles', 'Vehicles')}
+                    {t('nav.vehicles', 'Vehicles')}
                 </h1>
 
                 <div className="admin-container">
@@ -172,7 +180,7 @@ const InstructorVehiclesPage = () => {
                             <div className="title-section">
                                 <h1>
                                     <Car size={40} />
-                                    {t('instructor.vehicleManagement', 'Vehicle Management')}
+                                    {t('nav.vehicles', 'Vehicle Management')}
                                 </h1>
                                 <p className="subtitle">
                                     {t('instructor.manageVehicles', 'View all vehicles and manage your assigned ones')}
@@ -325,7 +333,7 @@ const InstructorVehiclesPage = () => {
                                 <tr>
                                     <th>{t('vehicles.name', 'Name')}</th>
                                     <th>{t('vehicles.type', 'Type')}</th>
-                                    <th>{t('vehicles.table.licensePlate', 'License Plate')}</th>
+                                    <th>{t('vehicles.licensePlate', 'License Plate')}</th>
                                     <th>{t('vehicles.model', 'Model')}</th>
                                     <th>{t('vehicles.capacity', 'Capacity')}</th>
                                     <th>{t('vehicles.status', 'Status')}</th>
