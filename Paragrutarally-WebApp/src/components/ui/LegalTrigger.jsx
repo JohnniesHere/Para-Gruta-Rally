@@ -6,10 +6,10 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import './LegalTrigger.css';
 
 const LegalTrigger = ({
-    variant = 'button', // 'button', 'link', 'icon', 'minimal'
-    className = '',
-    size = 'default' // 'small', 'default', 'large'
-}) => {
+                          variant = 'button', // 'button', 'link', 'icon', 'minimal'
+                          className = '',
+                          size = 'default' // 'small', 'default', 'large'
+                      }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const { t } = useLanguage();
 
