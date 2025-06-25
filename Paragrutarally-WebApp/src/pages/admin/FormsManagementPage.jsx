@@ -1,6 +1,20 @@
-// src/pages/admin/FormsManagementPage.jsx - Full Translation Support
-import React, { useState, useEffect } from 'react';
+// src/pages/admin/FormsManagementPage.jsx - Enhanced with Real Functionality
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import {
+    collection,
+    query,
+    where,
+    getDocs,
+    addDoc,
+    updateDoc,
+    deleteDoc,
+    doc,
+    orderBy,
+    serverTimestamp,
+    writeBatch
+} from 'firebase/firestore';
+import { db } from '@/firebase/config.js';
 import Dashboard from '../../components/layout/Dashboard';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -17,7 +31,7 @@ import {
     IconClock as Clock,
     IconAlertTriangle as AlertTriangle,
     IconUsers as Users,
-    IconChartBar  as BarChart3,
+    IconChartBar as BarChart3,
     IconTarget as Target,
     IconSparkles as Sparkles,
     IconTrophy as Trophy,
@@ -25,7 +39,10 @@ import {
     IconSearch as Search,
     IconFilter as Filter,
     IconCopy as Copy,
-    IconSettings as Settings
+    IconSettings as Settings,
+    IconSend as Send,
+    IconX as X,
+    IconDeviceFloppy as Save
 } from '@tabler/icons-react';
 import './FormsManagementPage.css';
 
@@ -33,14 +50,39 @@ const FormsManagementPage = () => {
     const navigate = useNavigate();
     const { isDarkMode, appliedTheme } = useTheme();
     const { t } = useLanguage();
-    const { permissions, userRole } = usePermissions();
+    const { permissions, userRole, userData, user } = usePermissions();
 
+    // State management
     const [forms, setForms] = useState([]);
-    const [templates, setTemplates] = useState([]);
     const [submissions, setSubmissions] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
+    const [showFormBuilder, setShowFormBuilder] = useState(false);
+    const [editingForm, setEditingForm] = useState(null);
+    const [showTargetUsers, setShowTargetUsers] = useState(false);
+    const [selectedForm, setSelectedForm] = useState(null);
+
+    // Form builder state
+    const [formData, setFormData] = useState({
+        title: '',
+        description: '',
+        type: 'event_registration',
+        status: 'draft',
+        isPublic: false,
+        fields: [],
+        targetUsers: []
+    });
+
+    // Target users state with "all users" logic
+    const [targetUsers, setTargetUsers] = useState({
+        parents: false,
+        instructors: false,
+        hosts: false,
+        allUsers: false
+    });
+
+    // Analytics state
     const [analytics, setAnalytics] = useState({
         totalForms: 0,
         totalSubmissions: 0,
@@ -48,7 +90,19 @@ const FormsManagementPage = () => {
         completionRate: 0
     });
 
-    // Mock data - in a real app, this would come from your API
+    // Available field types
+    const fieldTypes = [
+        { value: 'text', label: t('forms.fieldTypes.text', 'Text'), icon: '📝' },
+        { value: 'textarea', label: t('forms.fieldTypes.textarea', 'Textarea'), icon: '📄' },
+        { value: 'number', label: t('forms.fieldTypes.number', 'Number'), icon: '🔢' },
+        { value: 'date', label: t('forms.fieldTypes.date', 'Date'), icon: '📅' },
+        { value: 'select', label: t('forms.fieldTypes.select', 'Dropdown'), icon: '📋' },
+        { value: 'checkbox', label: t('forms.fieldTypes.checkbox', 'Checkboxes'), icon: '☑️' },
+        { value: 'radio', label: t('forms.fieldTypes.radio', 'Radio Buttons'), icon: '⚪' },
+        { value: 'file', label: t('forms.fieldTypes.file', 'File Upload'), icon: '📎' }
+    ];
+
+    // Load forms data
     useEffect(() => {
         loadFormsData();
     }, []);
@@ -56,103 +110,38 @@ const FormsManagementPage = () => {
     const loadFormsData = async () => {
         setIsLoading(true);
         try {
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            // Load forms
+            const formsQuery = query(
+                collection(db, 'forms'),
+                orderBy('createdAt', 'desc')
+            );
+            const formsSnapshot = await getDocs(formsQuery);
+            const formsData = formsSnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
 
-            const mockForms = [
-                {
-                    id: '1',
-                    name: 'Racing Registration Form',
-                    description: 'Complete registration form for racing events',
-                    status: 'active',
-                    submissions: 45,
-                    lastModified: '2025-06-10',
-                    createdBy: 'Admin'
-                },
-                {
-                    id: '2',
-                    name: 'Safety Declaration',
-                    description: 'Safety agreement and liability waiver',
-                    status: 'active',
-                    submissions: 38,
-                    lastModified: '2025-06-08',
-                    createdBy: 'Admin'
-                },
-                {
-                    id: '3',
-                    name: 'Team Formation Request',
-                    description: 'Form for requesting new team creation',
-                    status: 'draft',
-                    submissions: 0,
-                    lastModified: '2025-06-12',
-                    createdBy: 'Admin'
-                }
-            ];
+            // Load submissions
+            const submissionsQuery = query(
+                collection(db, 'form_submissions'),
+                orderBy('submittedAt', 'desc')
+            );
+            const submissionsSnapshot = await getDocs(submissionsQuery);
+            const submissionsData = submissionsSnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
 
-            // Mock templates with translated names and descriptions
-            const mockTemplates = [
-                {
-                    id: 't1',
-                    name: t('formsManagement.eventRegistration', 'Event Registration'),
-                    description: t('formsManagement.eventRegistrationDesc', 'Standard event registration template'),
-                    icon: '📋',
-                    category: t('formsManagement.registration', 'Registration')
-                },
-                {
-                    id: 't2',
-                    name: t('formsManagement.contactInformation', 'Contact Information'),
-                    description: t('formsManagement.contactInformationDesc', 'Basic contact details form'),
-                    icon: '📞',
-                    category: t('formsManagement.contact', 'Contact')
-                },
-                {
-                    id: 't3',
-                    name: t('formsManagement.feedbackSurvey', 'Feedback Survey'),
-                    description: t('formsManagement.feedbackSurveyDesc', 'Post-event feedback collection'),
-                    icon: '⭐',
-                    category: t('formsManagement.feedback', 'Feedback')
-                },
-                {
-                    id: 't4',
-                    name: t('formsManagement.medicalInformation', 'Medical Information'),
-                    description: t('formsManagement.medicalInformationDesc', 'Health and medical details form'),
-                    icon: '🏥',
-                    category: t('formsManagement.medical', 'Medical')
-                }
-            ];
+            setForms(formsData);
+            setSubmissions(submissionsData);
 
-            const mockSubmissions = [
-                {
-                    id: 's1',
-                    formName: 'Racing Registration Form',
-                    submittedBy: 'John Doe',
-                    submittedAt: '2025-06-14 10:30',
-                    status: 'pending'
-                },
-                {
-                    id: 's2',
-                    formName: 'Safety Declaration',
-                    submittedBy: 'Jane Smith',
-                    submittedAt: '2025-06-14 09:15',
-                    status: 'completed'
-                },
-                {
-                    id: 's3',
-                    formName: 'Racing Registration Form',
-                    submittedBy: 'Mike Johnson',
-                    submittedAt: '2025-06-13 16:45',
-                    status: 'review'
-                }
-            ];
-
-            setForms(mockForms);
-            setTemplates(mockTemplates);
-            setSubmissions(mockSubmissions);
+            // Calculate analytics
+            const pendingSubmissions = submissionsData.filter(s => s.status === 'pending').length;
             setAnalytics({
-                totalForms: mockForms.length,
-                totalSubmissions: mockSubmissions.length,
-                pendingReviews: mockSubmissions.filter(s => s.status === 'pending').length,
-                completionRate: 78
+                totalForms: formsData.length,
+                totalSubmissions: submissionsData.length,
+                pendingReviews: pendingSubmissions,
+                completionRate: formsData.length > 0 ? Math.round((submissionsData.length / formsData.length) * 100) : 0
             });
         } catch (error) {
             console.error('Error loading forms data:', error);
@@ -161,63 +150,309 @@ const FormsManagementPage = () => {
         }
     };
 
-    const handleCreateForm = () => {
-        // In a real app, this would navigate to form builder
-        console.log('Creating new form...');
-    };
+    // Handle target users logic
+    const handleTargetUserChange = (userType) => {
+        if (userType === 'allUsers') {
+            if (targetUsers.allUsers) {
+                // Uncheck all
+                setTargetUsers({
+                    parents: false,
+                    instructors: false,
+                    hosts: false,
+                    allUsers: false
+                });
+            } else {
+                // Check all
+                setTargetUsers({
+                    parents: true,
+                    instructors: true,
+                    hosts: true,
+                    allUsers: true
+                });
+            }
+        } else {
+            const newTargetUsers = {
+                ...targetUsers,
+                [userType]: !targetUsers[userType]
+            };
 
-    const handleEditForm = (formId) => {
-        // In a real app, this would navigate to form editor
-        console.log('Editing form:', formId);
-    };
+            // Check if all individual boxes are checked
+            const allIndividualChecked = newTargetUsers.parents &&
+                newTargetUsers.instructors &&
+                newTargetUsers.hosts;
 
-    const handleViewSubmissions = (formId) => {
-        // In a real app, this would show submissions for the form
-        console.log('Viewing submissions for form:', formId);
-    };
-
-    const handleDeleteForm = (formId) => {
-        if (window.confirm(t('formsManagement.deleteConfirm', 'Are you sure you want to delete this form?'))) {
-            setForms(forms.filter(form => form.id !== formId));
+            newTargetUsers.allUsers = allIndividualChecked;
+            setTargetUsers(newTargetUsers);
         }
     };
 
-    const handleUseTemplate = (templateId) => {
-        // In a real app, this would create a new form from template
-        console.log('Using template:', templateId);
+    // Create new field
+    const addField = (type) => {
+        const newField = {
+            id: `field_${Date.now()}`,
+            type,
+            label: '',
+            placeholder: '',
+            required: false,
+            order: formData.fields.length,
+            ...(type === 'select' || type === 'checkbox' || type === 'radio' ? { options: ['Option 1'] } : {})
+        };
+
+        setFormData(prev => ({
+            ...prev,
+            fields: [...prev.fields, newField]
+        }));
     };
 
-    const handleViewSubmission = (submissionId) => {
-        // In a real app, this would show submission details
-        console.log('Viewing submission:', submissionId);
+    // Update field
+    const updateField = (fieldId, updates) => {
+        setFormData(prev => ({
+            ...prev,
+            fields: prev.fields.map(field =>
+                field.id === fieldId ? { ...field, ...updates } : field
+            )
+        }));
     };
 
-    // Get translated status label
+    // Remove field
+    const removeField = (fieldId) => {
+        setFormData(prev => ({
+            ...prev,
+            fields: prev.fields.filter(field => field.id !== fieldId)
+        }));
+    };
+
+    // Move field up/down
+    const moveField = (fieldId, direction) => {
+        const fieldIndex = formData.fields.findIndex(field => field.id === fieldId);
+        if (fieldIndex === -1) return;
+
+        const newIndex = direction === 'up' ? Math.max(0, fieldIndex - 1) : Math.min(formData.fields.length - 1, fieldIndex + 1);
+        if (newIndex === fieldIndex) return;
+
+        const newFields = [...formData.fields];
+        const [movedField] = newFields.splice(fieldIndex, 1);
+        newFields.splice(newIndex, 0, movedField);
+
+        // Update field orders
+        const fieldsWithOrder = newFields.map((field, index) => ({
+            ...field,
+            order: index
+        }));
+
+        setFormData(prev => ({
+            ...prev,
+            fields: fieldsWithOrder
+        }));
+    };
+
+    // Add option to select/checkbox/radio field
+    const addOption = (fieldId) => {
+        setFormData(prev => ({
+            ...prev,
+            fields: prev.fields.map(field => {
+                if (field.id === fieldId) {
+                    return {
+                        ...field,
+                        options: [...field.options, `Option ${field.options.length + 1}`]
+                    };
+                }
+                return field;
+            })
+        }));
+    };
+
+    // Update option
+    const updateOption = (fieldId, optionIndex, newValue) => {
+        setFormData(prev => ({
+            ...prev,
+            fields: prev.fields.map(field => {
+                if (field.id === fieldId) {
+                    const updatedOptions = [...field.options];
+                    updatedOptions[optionIndex] = newValue;
+                    return {
+                        ...field,
+                        options: updatedOptions
+                    };
+                }
+                return field;
+            })
+        }));
+    };
+
+    // Remove option
+    const removeOption = (fieldId, optionIndex) => {
+        setFormData(prev => ({
+            ...prev,
+            fields: prev.fields.map(field => {
+                if (field.id === fieldId && field.options.length > 1) {
+                    const updatedOptions = [...field.options];
+                    updatedOptions.splice(optionIndex, 1);
+                    return {
+                        ...field,
+                        options: updatedOptions
+                    };
+                }
+                return field;
+            })
+        }));
+    };
+
+    // Save form
+    const handleSaveForm = async () => {
+        try {
+            // Prepare target users array
+            const targetUsersArray = [];
+            if (targetUsers.parents) targetUsersArray.push('parent');
+            if (targetUsers.instructors) targetUsersArray.push('instructor');
+            if (targetUsers.hosts) targetUsersArray.push('host');
+
+            const formToSave = {
+                ...formData,
+                targetUsers: targetUsersArray,
+                submissionCount: 0,
+                viewCount: 0,
+                ...(editingForm ? { updatedAt: serverTimestamp() } : {
+                    createdBy: user?.uid,
+                    createdAt: serverTimestamp(),
+                    updatedAt: serverTimestamp()
+                })
+            };
+
+            if (editingForm) {
+                await updateDoc(doc(db, 'forms', editingForm.id), formToSave);
+            } else {
+                await addDoc(collection(db, 'forms'), formToSave);
+            }
+
+            // Reset form
+            setFormData({
+                title: '',
+                description: '',
+                type: 'event_registration',
+                status: 'draft',
+                isPublic: false,
+                fields: [],
+                targetUsers: []
+            });
+            setTargetUsers({
+                parents: false,
+                instructors: false,
+                hosts: false,
+                allUsers: false
+            });
+            setShowFormBuilder(false);
+            setEditingForm(null);
+
+            // Reload data
+            await loadFormsData();
+        } catch (error) {
+            console.error('Error saving form:', error);
+        }
+    };
+
+    // Send form to users
+    const handleSendForm = async (form) => {
+        try {
+            setIsLoading(true);
+
+            // Get users based on target roles
+            const usersQuery = query(collection(db, 'users'));
+            const usersSnapshot = await getDocs(usersQuery);
+            const allUsers = usersSnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+
+            // Filter users by target roles
+            const targetUsers = allUsers.filter(user =>
+                form.targetUsers.includes(user.role)
+            );
+
+            // Create form assignments
+            const batch = writeBatch(db);
+            const assignmentsRef = collection(db, 'form_assignments');
+
+            targetUsers.forEach(user => {
+                const assignmentRef = doc(assignmentsRef);
+                batch.set(assignmentRef, {
+                    formId: form.id,
+                    userId: user.id,
+                    userRole: user.role,
+                    status: 'pending',
+                    assignedAt: serverTimestamp(),
+                    notificationSent: false,
+                    remindersSent: 0
+                });
+            });
+
+            await batch.commit();
+
+            alert(t('forms.formSentSuccess', 'Form sent to {count} users!', { count: targetUsers.length }));
+        } catch (error) {
+            console.error('Error sending form:', error);
+            alert(t('forms.formSendError', 'Error sending form. Please try again.'));
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // Edit form
+    const handleEditForm = (form) => {
+        setFormData(form);
+        setEditingForm(form);
+
+        // Set target users checkboxes
+        const targetUsersState = {
+            parents: form.targetUsers.includes('parent'),
+            instructors: form.targetUsers.includes('instructor'),
+            hosts: form.targetUsers.includes('host'),
+            allUsers: false
+        };
+        targetUsersState.allUsers = targetUsersState.parents &&
+            targetUsersState.instructors &&
+            targetUsersState.hosts;
+        setTargetUsers(targetUsersState);
+
+        setShowFormBuilder(true);
+    };
+
+    // Delete form
+    const handleDeleteForm = async (formId) => {
+        if (window.confirm(t('forms.deleteConfirm', 'Are you sure you want to delete this form?'))) {
+            try {
+                await deleteDoc(doc(db, 'forms', formId));
+                await loadFormsData();
+            } catch (error) {
+                console.error('Error deleting form:', error);
+            }
+        }
+    };
+
+    // Get status label
     const getStatusLabel = (status) => {
         switch (status) {
             case 'active':
-                return t('formsManagement.active', 'Active');
+                return t('forms.status.active', 'Active');
             case 'draft':
-                return t('formsManagement.draft', 'Draft');
+                return t('forms.status.draft', 'Draft');
             case 'archived':
-                return t('formsManagement.archived', 'Archived');
-            case 'pending':
-                return t('formsManagement.pending', 'Pending');
-            case 'completed':
-                return t('formsManagement.completed', 'Completed');
-            case 'review':
-                return t('formsManagement.review', 'Review');
+                return t('forms.status.archived', 'Archived');
             default:
-                return status.charAt(0).toUpperCase() + status.slice(1);
+                return status;
         }
     };
 
-    const filteredForms = forms.filter(form => {
-        const matchesSearch = form.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            form.description.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesStatus = statusFilter === 'all' || form.status === statusFilter;
-        return matchesSearch && matchesStatus;
-    });
+    // Filter forms
+    const filteredForms = useMemo(() => {
+        return forms.filter(form => {
+            const matchesSearch = searchTerm === '' ||
+                form.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                form.description?.toLowerCase().includes(searchTerm.toLowerCase());
+            const matchesStatus = statusFilter === 'all' || form.status === statusFilter;
+            return matchesSearch && matchesStatus;
+        });
+    }, [forms, searchTerm, statusFilter]);
 
     if (!permissions) {
         return (
@@ -225,7 +460,7 @@ const FormsManagementPage = () => {
                 <div className={`forms-management-page ${appliedTheme}-mode`}>
                     <div className="loading-container">
                         <div className="loading-spinner"></div>
-                        <p>{t('formsManagement.loadingPermissions', 'Loading permissions...')}</p>
+                        <p>{t('common.loading', 'Loading...')}</p>
                     </div>
                 </div>
             </Dashboard>
@@ -235,102 +470,498 @@ const FormsManagementPage = () => {
     return (
         <Dashboard requiredRole={userRole}>
             <div className={`forms-management-page ${appliedTheme}-mode`}>
-                {/* Page Title - Outside container - TRANSLATED */}
+                {/* Page Title */}
                 <h1>
                     <FileText size={32} className="page-title-icon" />
-                    {t('formsManagement.title', 'Forms Management')}
+                    {t('forms.title', 'Forms Management')}
                     <Sparkles size={24} className="sparkle-icon" />
                 </h1>
 
                 {/* Main Container */}
                 <div className="admin-container forms-management-container">
-                    {/* Racing Theme Header - TRANSLATED */}
+                    {/* Racing Header */}
                     <div className="racing-header">
                         <div className="header-content">
                             <div className="title-section">
                                 <h2>
                                     <Trophy size={28} className="page-title-icon" />
-                                    {t('formsManagement.racingFormsControlCenter', 'Racing Forms Control Center')}
+                                    {t('forms.racingFormsCenter', 'Racing Forms Control Center')}
                                 </h2>
-                                <p className="subtitle">{t('formsManagement.subtitle', 'Manage registration forms, collect data, and track submissions! 🏁')}</p>
+                                <p className="subtitle">
+                                    {t('forms.subtitle', 'Create, manage and distribute forms to your racing community! 🏁')}
+                                </p>
                             </div>
                         </div>
                     </div>
 
-                    {/* Quick Actions - TRANSLATED */}
+                    {/* Quick Actions */}
                     <div className="quick-actions">
                         <div className="quick-actions-title">
                             <Target className="section-icon" size={20} />
-                            {t('formsManagement.quickActions', 'Quick Actions')}
+                            {t('forms.quickActions', 'Quick Actions')}
                         </div>
                         <div className="quick-actions-grid">
-                            <button className="quick-action-btn" onClick={handleCreateForm}>
+                            <button
+                                className="quick-action-btn"
+                                onClick={() => setShowFormBuilder(true)}
+                            >
                                 <Plus size={16} />
-                                {t('formsManagement.createNewForm', 'Create New Form')}
+                                {t('forms.createNewForm', 'Create New Form')}
                             </button>
-                            <button className="quick-action-btn" onClick={loadFormsData}>
+                            <button
+                                className="quick-action-btn"
+                                onClick={loadFormsData}
+                                disabled={isLoading}
+                            >
                                 <RefreshCw size={16} />
-                                {t('formsManagement.refreshData', 'Refresh Data')}
+                                {t('forms.refreshData', 'Refresh Data')}
                             </button>
                             <button className="quick-action-btn">
                                 <Download size={16} />
-                                {t('formsManagement.exportSubmissions', 'Export Submissions')}
+                                {t('forms.exportSubmissions', 'Export Submissions')}
                             </button>
                             <button className="quick-action-btn">
                                 <Settings size={16} />
-                                {t('formsManagement.formSettings', 'Form Settings')}
+                                {t('forms.formSettings', 'Form Settings')}
                             </button>
                         </div>
                     </div>
 
-                    {/* Analytics Cards - TRANSLATED */}
+                    {/* Analytics Cards */}
                     <div className="analytics-grid">
                         <div className="analytics-card">
                             <FileText className="analytics-icon" size={30} />
                             <div className="analytics-number">{analytics.totalForms}</div>
-                            <div className="analytics-label">{t('formsManagement.totalForms', 'Total Forms')}</div>
+                            <div className="analytics-label">{t('forms.totalForms', 'Total Forms')}</div>
                         </div>
 
                         <div className="analytics-card">
                             <Users className="analytics-icon" size={30} />
                             <div className="analytics-number">{analytics.totalSubmissions}</div>
-                            <div className="analytics-label">{t('formsManagement.submissions', 'Submissions')}</div>
-                            <div className="analytics-trend trend-up">
-                                <span>↗</span> {t('formsManagement.thisWeek', '+12% this week')}
-                            </div>
+                            <div className="analytics-label">{t('forms.submissions', 'Submissions')}</div>
                         </div>
 
                         <div className="analytics-card">
                             <Clock className="analytics-icon" size={30} />
                             <div className="analytics-number">{analytics.pendingReviews}</div>
-                            <div className="analytics-label">{t('formsManagement.pendingReviews', 'Pending Reviews')}</div>
+                            <div className="analytics-label">{t('forms.pendingReviews', 'Pending Reviews')}</div>
                         </div>
 
                         <div className="analytics-card">
                             <BarChart3 className="analytics-icon" size={30} />
                             <div className="analytics-number">{analytics.completionRate}%</div>
-                            <div className="analytics-label">{t('formsManagement.completionRate', 'Completion Rate')}</div>
-                            <div className="analytics-trend trend-up">
-                                <span>↗</span> {t('formsManagement.improvement', '+5% improvement')}
-                            </div>
+                            <div className="analytics-label">{t('forms.completionRate', 'Completion Rate')}</div>
                         </div>
                     </div>
 
-                    {/* Forms Overview - TRANSLATED */}
+                    {/* Form Builder Modal */}
+                    {showFormBuilder && (
+                        <div className="modal-overlay">
+                            <div className="modal-content form-builder-modal">
+                                <div className="modal-header">
+                                    <h3>
+                                        {editingForm ?
+                                            t('forms.editForm', 'Edit Form') :
+                                            t('forms.createNewForm', 'Create New Form')
+                                        }
+                                    </h3>
+                                    <button
+                                        className="modal-close"
+                                        onClick={() => {
+                                            setShowFormBuilder(false);
+                                            setEditingForm(null);
+                                            setFormData({
+                                                title: '',
+                                                description: '',
+                                                type: 'event_registration',
+                                                status: 'draft',
+                                                isPublic: false,
+                                                fields: [],
+                                                targetUsers: []
+                                            });
+                                        }}
+                                    >
+                                        <X size={20} />
+                                    </button>
+                                </div>
+
+                                <div className="modal-body">
+                                    {/* Basic Form Info */}
+                                    <div className="form-section">
+                                        <h4>{t('forms.basicInfo', 'Basic Information')}</h4>
+                                        <div className="form-grid">
+                                            <div className="form-group">
+                                                <label>{t('forms.formTitle', 'Form Title')} *</label>
+                                                <input
+                                                    type="text"
+                                                    value={formData.title}
+                                                    onChange={(e) => setFormData(prev => ({
+                                                        ...prev,
+                                                        title: e.target.value
+                                                    }))}
+                                                    placeholder={t('forms.titlePlaceholder', 'Enter form title...')}
+                                                    className="form-input"
+                                                />
+                                            </div>
+                                            <div className="form-group">
+                                                <label>{t('forms.formType', 'Form Type')}</label>
+                                                <select
+                                                    value={formData.type}
+                                                    onChange={(e) => setFormData(prev => ({
+                                                        ...prev,
+                                                        type: e.target.value
+                                                    }))}
+                                                    className="form-select"
+                                                >
+                                                    <option value="event_registration">
+                                                        {t('forms.types.eventRegistration', 'Event Registration')}
+                                                    </option>
+                                                    <option value="contact_info">
+                                                        {t('forms.types.contactInfo', 'Contact Information')}
+                                                    </option>
+                                                    <option value="feedback">
+                                                        {t('forms.types.feedback', 'Feedback')}
+                                                    </option>
+                                                    <option value="custom">
+                                                        {t('forms.types.custom', 'Custom')}
+                                                    </option>
+                                                </select>
+                                            </div>
+                                            <div className="form-group full-width">
+                                                <label>{t('forms.description', 'Description')}</label>
+                                                <textarea
+                                                    value={formData.description}
+                                                    onChange={(e) => setFormData(prev => ({
+                                                        ...prev,
+                                                        description: e.target.value
+                                                    }))}
+                                                    placeholder={t('forms.descriptionPlaceholder', 'Describe what this form is for...')}
+                                                    className="form-textarea"
+                                                    rows={3}
+                                                />
+                                            </div>
+                                            <div className="form-group">
+                                                <label>{t('forms.status', 'Status')}</label>
+                                                <select
+                                                    value={formData.status}
+                                                    onChange={(e) => setFormData(prev => ({
+                                                        ...prev,
+                                                        status: e.target.value
+                                                    }))}
+                                                    className="form-select"
+                                                >
+                                                    <option value="draft">{t('forms.status.draft', 'Draft')}</option>
+                                                    <option value="active">{t('forms.status.active', 'Active')}</option>
+                                                    <option value="archived">{t('forms.status.archived', 'Archived')}</option>
+                                                </select>
+                                            </div>
+                                            <div className="form-group">
+                                                <label className="checkbox-label">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={formData.isPublic}
+                                                        onChange={(e) => setFormData(prev => ({
+                                                            ...prev,
+                                                            isPublic: e.target.checked
+                                                        }))}
+                                                    />
+                                                    {t('forms.isPublic', 'Public Form')}
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Target Users Section */}
+                                    <div className="form-section">
+                                        <h4>{t('forms.targetUsers', 'Target Users')}</h4>
+                                        <div className="target-users-grid">
+                                            <label className="checkbox-label">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={targetUsers.hosts}
+                                                    onChange={() => handleTargetUserChange('hosts')}
+                                                />
+                                                {t('forms.hosts', 'Hosts')}
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    {/* Form Fields Section */}
+                                    <div className="form-section">
+                                        <div className="section-header">
+                                            <h4>{t('forms.formFields', 'Form Fields')}</h4>
+                                            <div className="field-type-buttons">
+                                                {fieldTypes.map(fieldType => (
+                                                    <button
+                                                        key={fieldType.value}
+                                                        type="button"
+                                                        className="field-type-btn"
+                                                        onClick={() => addField(fieldType.value)}
+                                                        title={fieldType.label}
+                                                    >
+                                                        <span className="field-icon">{fieldType.icon}</span>
+                                                        {fieldType.label}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        {/* Fields List */}
+                                        <div className="fields-list">
+                                            {formData.fields.length === 0 ? (
+                                                <div className="empty-fields">
+                                                    <p>{t('forms.noFields', 'No fields added yet. Click buttons above to add fields.')}</p>
+                                                </div>
+                                            ) : (
+                                                formData.fields
+                                                    .sort((a, b) => a.order - b.order)
+                                                    .map((field, index) => (
+                                                        <div key={field.id} className="field-editor">
+                                                            <div className="field-header">
+                                                                <span className="field-type-label">
+                                                                    {fieldTypes.find(ft => ft.value === field.type)?.icon}
+                                                                    {fieldTypes.find(ft => ft.value === field.type)?.label}
+                                                                </span>
+                                                                <div className="field-actions">
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => moveField(field.id, 'up')}
+                                                                        disabled={index === 0}
+                                                                        className="field-action-btn"
+                                                                        title={t('forms.moveUp', 'Move Up')}
+                                                                    >
+                                                                        ↑
+                                                                    </button>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => moveField(field.id, 'down')}
+                                                                        disabled={index === formData.fields.length - 1}
+                                                                        className="field-action-btn"
+                                                                        title={t('forms.moveDown', 'Move Down')}
+                                                                    >
+                                                                        ↓
+                                                                    </button>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => removeField(field.id)}
+                                                                        className="field-action-btn delete"
+                                                                        title={t('forms.deleteField', 'Delete Field')}
+                                                                    >
+                                                                        <Trash2 size={14} />
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="field-config">
+                                                                <div className="field-config-grid">
+                                                                    <div className="config-group">
+                                                                        <label>{t('forms.fieldLabel', 'Label')} *</label>
+                                                                        <input
+                                                                            type="text"
+                                                                            value={field.label}
+                                                                            onChange={(e) => updateField(field.id, { label: e.target.value })}
+                                                                            placeholder={t('forms.fieldLabelPlaceholder', 'Enter field label...')}
+                                                                            className="config-input"
+                                                                        />
+                                                                    </div>
+
+                                                                    {(field.type === 'text' || field.type === 'textarea' || field.type === 'number') && (
+                                                                        <div className="config-group">
+                                                                            <label>{t('forms.placeholder', 'Placeholder')}</label>
+                                                                            <input
+                                                                                type="text"
+                                                                                value={field.placeholder || ''}
+                                                                                onChange={(e) => updateField(field.id, { placeholder: e.target.value })}
+                                                                                placeholder={t('forms.placeholderPlaceholder', 'Enter placeholder text...')}
+                                                                                className="config-input"
+                                                                            />
+                                                                        </div>
+                                                                    )}
+
+                                                                    <div className="config-group">
+                                                                        <label className="checkbox-label">
+                                                                            <input
+                                                                                type="checkbox"
+                                                                                checked={field.required}
+                                                                                onChange={(e) => updateField(field.id, { required: e.target.checked })}
+                                                                            />
+                                                                            {t('forms.required', 'Required Field')}
+                                                                        </label>
+                                                                    </div>
+                                                                </div>
+
+                                                                {/* Options for select/checkbox/radio fields */}
+                                                                {(field.type === 'select' || field.type === 'checkbox' || field.type === 'radio') && (
+                                                                    <div className="field-options">
+                                                                        <div className="options-header">
+                                                                            <label>{t('forms.options', 'Options')}</label>
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => addOption(field.id)}
+                                                                                className="add-option-btn"
+                                                                            >
+                                                                                <Plus size={14} />
+                                                                                {t('forms.addOption', 'Add Option')}
+                                                                            </button>
+                                                                        </div>
+                                                                        <div className="options-list">
+                                                                            {field.options?.map((option, optionIndex) => (
+                                                                                <div key={optionIndex} className="option-item">
+                                                                                    <input
+                                                                                        type="text"
+                                                                                        value={option}
+                                                                                        onChange={(e) => updateOption(field.id, optionIndex, e.target.value)}
+                                                                                        placeholder={t('forms.optionPlaceholder', 'Option text...')}
+                                                                                        className="option-input"
+                                                                                    />
+                                                                                    <button
+                                                                                        type="button"
+                                                                                        onClick={() => removeOption(field.id, optionIndex)}
+                                                                                        disabled={field.options.length <= 1}
+                                                                                        className="remove-option-btn"
+                                                                                    >
+                                                                                        <X size={14} />
+                                                                                    </button>
+                                                                                </div>
+                                                                            ))}
+                                                                        </div>
+                                                                    </div>
+                                                                )}
+
+                                                                {/* Field Preview */}
+                                                                <div className="field-preview">
+                                                                    <label className="preview-label">
+                                                                        {field.label || t('forms.untitled', 'Untitled Field')}
+                                                                        {field.required && <span className="required-star">*</span>}
+                                                                    </label>
+
+                                                                    {field.type === 'text' && (
+                                                                        <input
+                                                                            type="text"
+                                                                            placeholder={field.placeholder}
+                                                                            className="preview-input"
+                                                                            disabled
+                                                                        />
+                                                                    )}
+
+                                                                    {field.type === 'textarea' && (
+                                                                        <textarea
+                                                                            placeholder={field.placeholder}
+                                                                            className="preview-textarea"
+                                                                            rows={3}
+                                                                            disabled
+                                                                        />
+                                                                    )}
+
+                                                                    {field.type === 'number' && (
+                                                                        <input
+                                                                            type="number"
+                                                                            placeholder={field.placeholder}
+                                                                            className="preview-input"
+                                                                            disabled
+                                                                        />
+                                                                    )}
+
+                                                                    {field.type === 'date' && (
+                                                                        <input
+                                                                            type="date"
+                                                                            className="preview-input"
+                                                                            disabled
+                                                                        />
+                                                                    )}
+
+                                                                    {field.type === 'select' && (
+                                                                        <select className="preview-select" disabled>
+                                                                            <option>{t('forms.selectOption', 'Select an option...')}</option>
+                                                                            {field.options?.map((option, idx) => (
+                                                                                <option key={idx} value={option}>
+                                                                                    {option}
+                                                                                </option>
+                                                                            ))}
+                                                                        </select>
+                                                                    )}
+
+                                                                    {field.type === 'checkbox' && (
+                                                                        <div className="preview-checkboxes">
+                                                                            {field.options?.map((option, idx) => (
+                                                                                <label key={idx} className="preview-checkbox-label">
+                                                                                    <input type="checkbox" disabled />
+                                                                                    {option}
+                                                                                </label>
+                                                                            ))}
+                                                                        </div>
+                                                                    )}
+
+                                                                    {field.type === 'radio' && (
+                                                                        <div className="preview-radios">
+                                                                            {field.options?.map((option, idx) => (
+                                                                                <label key={idx} className="preview-radio-label">
+                                                                                    <input type="radio" name={field.id} disabled />
+                                                                                    {option}
+                                                                                </label>
+                                                                            ))}
+                                                                        </div>
+                                                                    )}
+
+                                                                    {field.type === 'file' && (
+                                                                        <input
+                                                                            type="file"
+                                                                            className="preview-file"
+                                                                            disabled
+                                                                        />
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    ))
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="modal-footer">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setShowFormBuilder(false);
+                                            setEditingForm(null);
+                                        }}
+                                        className="btn btn-cancel"
+                                    >
+                                        {t('common.cancel', 'Cancel')}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={handleSaveForm}
+                                        disabled={!formData.title || formData.fields.length === 0}
+                                        className="btn btn-success"
+                                    >
+                                        <Save size={16} />
+                                        {editingForm ?
+                                            t('forms.updateForm', 'Update Form') :
+                                            t('forms.createForm', 'Create Form')
+                                        }
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Forms Overview Section */}
                     <div className="form-section forms-overview-section">
                         <div className="section-header">
                             <FileText className="section-icon form-icon" size={24} />
-                            <h3>{t('formsManagement.activeForms', '📋 Active Forms')}</h3>
+                            <h3>{t('forms.activeForms', '📋 Active Forms')}</h3>
                         </div>
 
-                        {/* Search and Filters - TRANSLATED */}
+                        {/* Search and Filters */}
                         <div className="search-filter-section">
                             <div className="search-container">
                                 <div className="search-input-wrapper">
                                     <Search className="search-icon" size={18} />
                                     <input
                                         type="text"
-                                        placeholder={t('formsManagement.searchForms', 'Search forms...')}
+                                        placeholder={t('forms.searchForms', 'Search forms...')}
                                         className="search-input"
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
@@ -341,72 +972,100 @@ const FormsManagementPage = () => {
                             <div className="filter-container">
                                 <label className="filter-label">
                                     <Filter className="filter-icon" size={16} />
-                                    {t('formsManagement.status', 'Status')}
+                                    {t('forms.status', 'Status')}
                                 </label>
                                 <select
                                     className="filter-select"
                                     value={statusFilter}
                                     onChange={(e) => setStatusFilter(e.target.value)}
                                 >
-                                    <option value="all">{t('formsManagement.allForms', 'All Forms')}</option>
-                                    <option value="active">{t('formsManagement.active', 'Active')}</option>
-                                    <option value="draft">{t('formsManagement.draft', 'Draft')}</option>
-                                    <option value="archived">{t('formsManagement.archived', 'Archived')}</option>
+                                    <option value="all">{t('forms.allForms', 'All Forms')}</option>
+                                    <option value="active">{t('forms.status.active', 'Active')}</option>
+                                    <option value="draft">{t('forms.status.draft', 'Draft')}</option>
+                                    <option value="archived">{t('forms.status.archived', 'Archived')}</option>
                                 </select>
                             </div>
                         </div>
 
+                        {/* Forms Grid */}
                         {isLoading ? (
                             <div className="loading-state">
                                 <div className="loading-content">
                                     <Clock className="loading-spinner" size={30} />
-                                    <p>{t('formsManagement.loadingForms', 'Loading forms...')}</p>
+                                    <p>{t('forms.loadingForms', 'Loading forms...')}</p>
                                 </div>
                             </div>
-                        ) : (
+                        ) : filteredForms.length > 0 ? (
                             <div className="forms-grid">
                                 {filteredForms.map(form => (
                                     <div key={form.id} className="form-card">
                                         <div className="form-card-header">
                                             <FileText className="form-card-icon" size={20} />
-                                            <h4 className="form-card-title">{form.name}</h4>
+                                            <h4 className="form-card-title">{form.title}</h4>
+                                            <span className={`status-badge ${form.status}`}>
+                                                {getStatusLabel(form.status)}
+                                            </span>
                                         </div>
+
                                         <div className="form-card-body">
-                                            {form.description}
-                                        </div>
-                                        <div className="form-card-stats">
-                                            <div className="form-stat">
-                                                <div className="form-stat-number">{form.submissions}</div>
-                                                <div className="form-stat-label">{t('formsManagement.submissions', 'Submissions')}</div>
-                                            </div>
-                                            <div className="form-stat">
-                                                <div className="form-stat-number">
-                                                    <span className={`status-badge ${form.status}`}>
-                                                        {getStatusLabel(form.status)}
+                                            <p>{form.description || t('forms.noDescription', 'No description available')}</p>
+
+                                            <div className="form-meta">
+                                                <div className="meta-item">
+                                                    <span className="meta-label">{t('forms.fields', 'Fields')}:</span>
+                                                    <span className="meta-value">{form.fields?.length || 0}</span>
+                                                </div>
+                                                <div className="meta-item">
+                                                    <span className="meta-label">{t('forms.targetUsers', 'Target Users')}:</span>
+                                                    <span className="meta-value">
+                                                        {form.targetUsers?.join(', ') || t('forms.none', 'None')}
                                                     </span>
                                                 </div>
-                                                <div className="form-stat-label">{t('formsManagement.status', 'Status')}</div>
                                             </div>
                                         </div>
+
+                                        <div className="form-card-stats">
+                                            <div className="form-stat">
+                                                <div className="form-stat-number">
+                                                    {submissions.filter(s => s.formId === form.id).length}
+                                                </div>
+                                                <div className="form-stat-label">{t('forms.submissions', 'Submissions')}</div>
+                                            </div>
+                                            <div className="form-stat">
+                                                <div className="form-stat-number">{form.viewCount || 0}</div>
+                                                <div className="form-stat-label">{t('forms.views', 'Views')}</div>
+                                            </div>
+                                        </div>
+
                                         <div className="card-footer">
                                             <button
                                                 className="btn-action view"
-                                                onClick={() => handleViewSubmissions(form.id)}
-                                                title={t('formsManagement.viewSubmissions', 'View Submissions')}
+                                                onClick={() => navigate(`/admin/forms/${form.id}/submissions`)}
+                                                title={t('forms.viewSubmissions', 'View Submissions')}
                                             >
                                                 <Eye size={16} />
                                             </button>
                                             <button
                                                 className="btn-action edit"
-                                                onClick={() => handleEditForm(form.id)}
-                                                title={t('formsManagement.editForm', 'Edit Form')}
+                                                onClick={() => handleEditForm(form)}
+                                                title={t('forms.editForm', 'Edit Form')}
                                             >
                                                 <Edit size={16} />
                                             </button>
+                                            {form.status === 'active' && (
+                                                <button
+                                                    className="btn-action send"
+                                                    onClick={() => handleSendForm(form)}
+                                                    title={t('forms.sendForm', 'Send Form')}
+                                                    disabled={isLoading}
+                                                >
+                                                    <Send size={16} />
+                                                </button>
+                                            )}
                                             <button
                                                 className="btn-action delete"
                                                 onClick={() => handleDeleteForm(form.id)}
-                                                title={t('formsManagement.deleteForm', 'Delete Form')}
+                                                title={t('forms.deleteForm', 'Delete Form')}
                                             >
                                                 <Trash2 size={16} />
                                             </button>
@@ -414,88 +1073,29 @@ const FormsManagementPage = () => {
                                     </div>
                                 ))}
                             </div>
-                        )}
-                    </div>
-
-                    {/* Form Templates - TRANSLATED */}
-                    <div className="form-section form-templates-section">
-                        <div className="section-header">
-                            <Copy className="section-icon" size={24} />
-                            <h3>{t('formsManagement.formTemplates', '📚 Form Templates')}</h3>
-                        </div>
-                        <div className="template-gallery">
-                            {templates.map(template => (
-                                <div key={template.id} className="template-card">
-                                    <div className="template-preview">
-                                        <span className="template-preview-icon">{template.icon}</span>
-                                    </div>
-                                    <div className="template-name">{template.name}</div>
-                                    <div className="template-description">{template.description}</div>
-                                    <button
-                                        className="use-template-btn"
-                                        onClick={() => handleUseTemplate(template.id)}
-                                    >
-                                        <Plus size={14} />
-                                        {t('formsManagement.useTemplate', 'Use Template')}
-                                    </button>
+                        ) : (
+                            <div className="empty-state">
+                                <div className="empty-icon">
+                                    <FileText size={80} />
                                 </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Recent Submissions - TRANSLATED */}
-                    <div className="form-section form-submissions-section">
-                        <div className="section-header">
-                            <Users className="section-icon" size={24} />
-                            <h3>{t('formsManagement.recentSubmissions', '📨 Recent Submissions')}</h3>
-                        </div>
-                        <div className="submissions-table-container">
-                            <table className="submissions-table">
-                                <thead>
-                                <tr>
-                                    <th>{t('formsManagement.formName', 'Form Name')}</th>
-                                    <th>{t('formsManagement.submittedBy', 'Submitted By')}</th>
-                                    <th>{t('formsManagement.dateTime', 'Date & Time')}</th>
-                                    <th>{t('formsManagement.status', 'Status')}</th>
-                                    <th>{t('formsManagement.actions', 'Actions')}</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {submissions.map(submission => (
-                                    <tr key={submission.id}>
-                                        <td>{submission.formName}</td>
-                                        <td>{submission.submittedBy}</td>
-                                        <td>{submission.submittedAt}</td>
-                                        <td>
-                                                <span className={`submission-status ${submission.status}`}>
-                                                    {submission.status === 'pending' && <Clock size={12} />}
-                                                    {submission.status === 'completed' && <Check size={12} />}
-                                                    {submission.status === 'review' && <AlertTriangle size={12} />}
-                                                    {getStatusLabel(submission.status)}
-                                                </span>
-                                        </td>
-                                        <td>
-                                            <div className="action-buttons">
-                                                <button
-                                                    className="btn-action view"
-                                                    onClick={() => handleViewSubmission(submission.id)}
-                                                    title={t('formsManagement.viewSubmission', 'View Submission')}
-                                                >
-                                                    <Eye size={14} />
-                                                </button>
-                                                <button
-                                                    className="btn-action download"
-                                                    title={t('formsManagement.download', 'Download')}
-                                                >
-                                                    <Download size={14} />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                                </tbody>
-                            </table>
-                        </div>
+                                <h3>{t('forms.noFormsFound', 'No Forms Found')}</h3>
+                                <p>
+                                    {searchTerm || statusFilter !== 'all'
+                                        ? t('forms.noFormsMatchFilter', 'No forms match your search criteria')
+                                        : t('forms.noFormsYet', 'You haven\'t created any forms yet')
+                                    }
+                                </p>
+                                {!searchTerm && statusFilter === 'all' && (
+                                    <button
+                                        className="btn btn-primary"
+                                        onClick={() => setShowFormBuilder(true)}
+                                    >
+                                        <Plus size={16} />
+                                        {t('forms.createFirstForm', 'Create Your First Form')}
+                                    </button>
+                                )}
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

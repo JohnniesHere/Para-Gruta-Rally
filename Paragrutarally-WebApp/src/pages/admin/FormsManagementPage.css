@@ -291,7 +291,7 @@
     font-size: 12px;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 1px;
 }
 
 .submission-status.pending {
@@ -476,5 +476,663 @@
     .quick-action-btn {
         padding: 12px 16px;
         font-size: 12px;
+    }
+}
+/* Additional CSS to add to your existing FormsManagementPage.css */
+
+/* ========================================
+   FORM BUILDER MODAL
+   ======================================== */
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    background: var(--card-bg);
+    border-radius: 15px;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    border: 2px solid var(--racing-lilach);
+}
+
+.form-builder-modal {
+    width: 1000px;
+    max-width: 90vw;
+}
+
+.modal-header {
+    padding: 24px;
+    border-bottom: 2px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(135deg, var(--racing-lilach) 0%, var(--racing-purple) 100%);
+    color: white;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.modal-close {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    padding: 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.modal-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+}
+
+.modal-body {
+    padding: 24px;
+    overflow-y: auto;
+    flex: 1;
+    background: var(--bg-primary);
+}
+
+.modal-footer {
+    padding: 20px 24px;
+    border-top: 2px solid var(--border-color);
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    background: var(--bg-secondary);
+}
+
+/* ========================================
+   FORM SECTIONS
+   ======================================== */
+
+.form-section {
+    margin-bottom: 32px;
+    padding: 24px;
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 15px;
+    transition: all 0.3s ease;
+}
+
+.form-section:hover {
+    border-color: var(--racing-lilach);
+    box-shadow: 0 8px 25px rgba(191, 148, 255, 0.2);
+}
+
+.form-section h4 {
+    margin: 0 0 20px 0;
+    color: var(--text-primary);
+    font-weight: 700;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 16px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.form-input, .form-select, .form-textarea {
+    padding: 12px 16px;
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    background: var(--input-bg);
+    color: var(--text-primary);
+    font-size: 14px;
+    transition: all 0.3s ease;
+    font-family: inherit;
+}
+
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+    outline: none;
+    border-color: var(--racing-lilach);
+    box-shadow: 0 0 0 3px rgba(191, 148, 255, 0.2);
+    background: var(--card-bg);
+}
+
+.form-textarea {
+    resize: vertical;
+    min-height: 100px;
+    font-family: inherit;
+}
+
+/* ========================================
+   TARGET USERS SELECTION
+   ======================================== */
+
+.target-users-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 16px;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    padding: 16px;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    background: var(--card-bg);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 14px;
+}
+
+.checkbox-label:hover {
+    border-color: var(--racing-lilach);
+    background: rgba(191, 148, 255, 0.1);
+    transform: translateY(-2px);
+}
+
+.checkbox-label input[type="checkbox"] {
+    accent-color: var(--racing-lilach);
+    width: 18px;
+    height: 18px;
+}
+
+/* ========================================
+   FIELD TYPE BUTTONS
+   ======================================== */
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.field-type-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.field-type-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: rgba(191, 148, 255, 0.1);
+    border: 2px solid var(--racing-lilach);
+    border-radius: 25px;
+    color: var(--racing-lilach);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.field-type-btn:hover {
+    background: var(--racing-lilach);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(191, 148, 255, 0.4);
+}
+
+.field-icon {
+    font-size: 16px;
+}
+
+/* ========================================
+   FIELDS LIST & EDITOR
+   ======================================== */
+
+.fields-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.empty-fields {
+    text-align: center;
+    padding: 40px;
+    color: var(--text-muted);
+    background: var(--bg-secondary);
+    border-radius: 15px;
+    border: 2px dashed var(--border-color);
+    font-style: italic;
+}
+
+.field-editor {
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-radius: 15px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.field-editor:hover {
+    border-color: var(--racing-lilach);
+    box-shadow: 0 8px 25px rgba(191, 148, 255, 0.2);
+}
+
+.field-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    background: var(--card-bg);
+    border-bottom: 2px solid var(--border-color);
+}
+
+.field-type-label {
+    font-weight: 700;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.field-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.field-action-btn {
+    padding: 8px 10px;
+    background: transparent;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 35px;
+    height: 35px;
+    font-weight: 600;
+}
+
+.field-action-btn:hover:not(:disabled) {
+    background: rgba(191, 148, 255, 0.1);
+    border-color: var(--racing-lilach);
+    color: var(--racing-lilach);
+    transform: scale(1.05);
+}
+
+.field-action-btn.delete:hover {
+    background: var(--error-color-alpha);
+    border-color: var(--error-color);
+    color: var(--error-color);
+}
+
+.field-action-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* ========================================
+   FIELD CONFIGURATION
+   ======================================== */
+
+.field-config {
+    padding: 20px;
+}
+
+.field-config-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.config-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.config-input {
+    padding: 12px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--input-bg);
+    color: var(--text-primary);
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.config-input:focus {
+    outline: none;
+    border-color: var(--racing-lilach);
+    box-shadow: 0 0 0 3px rgba(191, 148, 255, 0.2);
+}
+
+/* ========================================
+   FIELD OPTIONS
+   ======================================== */
+
+.field-options {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 2px solid var(--border-color);
+}
+
+.options-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.add-option-btn {
+    background: rgba(191, 148, 255, 0.1);
+    border: 2px solid var(--racing-lilach);
+    color: var(--racing-lilach);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.add-option-btn:hover {
+    background: var(--racing-lilach);
+    color: white;
+    transform: translateY(-1px);
+}
+
+.options-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.option-item {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.option-input {
+    flex: 1;
+    padding: 10px 12px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--input-bg);
+    color: var(--text-primary);
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.option-input:focus {
+    outline: none;
+    border-color: var(--racing-lilach);
+    box-shadow: 0 0 0 2px rgba(191, 148, 255, 0.2);
+}
+
+.remove-option-btn {
+    background: var(--error-color-alpha);
+    border: 2px solid var(--error-color);
+    color: var(--error-color);
+    padding: 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.remove-option-btn:hover:not(:disabled) {
+    background: var(--error-color);
+    color: white;
+    transform: scale(1.05);
+}
+
+.remove-option-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* ========================================
+   FIELD PREVIEW
+   ======================================== */
+
+.field-preview {
+    margin-top: 20px;
+    padding: 20px;
+    background: var(--bg-primary);
+    border: 2px dashed var(--border-color);
+    border-radius: 12px;
+}
+
+.preview-label {
+    display: block;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.required-star {
+    color: var(--error-color);
+    margin-left: 4px;
+}
+
+.preview-input, .preview-textarea, .preview-select, .preview-file {
+    width: 100%;
+    padding: 10px 12px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--input-bg);
+    color: var(--text-muted);
+    font-size: 14px;
+    opacity: 0.7;
+}
+
+.preview-textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.preview-checkboxes, .preview-radios {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.preview-checkbox-label, .preview-radio-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-muted);
+    font-size: 14px;
+    opacity: 0.7;
+}
+
+/* ========================================
+   FORM META INFORMATION
+   ======================================== */
+
+.form-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-color);
+}
+
+.meta-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.meta-label {
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.meta-value {
+    color: var(--text-primary);
+    font-weight: 500;
+    font-size: 14px;
+}
+
+/* ========================================
+   ENHANCED CARD ACTIONS
+   ======================================== */
+
+.card-footer {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-color);
+}
+
+.btn-action {
+    padding: 8px 12px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--card-bg);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+}
+
+.btn-action.view:hover {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: #3B82F6;
+    color: #3B82F6;
+}
+
+.btn-action.edit:hover {
+    background: rgba(16, 185, 129, 0.1);
+    border-color: #10B981;
+    color: #10B981;
+}
+
+.btn-action.send:hover {
+    background: rgba(191, 148, 255, 0.1);
+    border-color: var(--racing-lilach);
+    color: var(--racing-lilach);
+}
+
+.btn-action.delete:hover {
+    background: var(--error-color-alpha);
+    border-color: var(--error-color);
+    color: var(--error-color);
+}
+
+.btn-action:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* ========================================
+   RESPONSIVE UPDATES
+   ======================================== */
+
+@media (max-width: 768px) {
+    .form-builder-modal {
+        width: 95vw;
+    }
+
+    .field-type-buttons {
+        justify-content: center;
+    }
+
+    .field-config-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .target-users-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .modal-header {
+        padding: 16px;
+    }
+
+    .modal-body {
+        padding: 16px;
+    }
+
+    .form-section {
+        padding: 16px;
+    }
+
+    .field-type-btn {
+        padding: 8px 12px;
+        font-size: 11px;
     }
 }
