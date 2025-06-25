@@ -1136,3 +1136,83 @@
         font-size: 11px;
     }
 }
+/* Add this to the end of your FormsManagementPage.css file */
+
+/* ========================================
+   MODAL DEBUG & ENSURE VISIBILITY
+   ======================================== */
+
+/* Ensure modals are above everything else */
+.modal-overlay {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    z-index: 9999 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: rgba(0, 0, 0, 0.8) !important;
+    backdrop-filter: blur(5px);
+}
+
+.form-creation-modal {
+    position: relative !important;
+    z-index: 10000 !important;
+    width: 900px !important;
+    max-width: 95vw !important;
+    max-height: 90vh !important;
+    background: white !important;
+    border-radius: 15px !important;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5) !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+/* Debug - temporary red border to see if modal renders */
+.form-creation-modal {
+    border: 3px solid red !important;
+}
+
+/* Ensure modal content is visible */
+.form-creation-modal .modal-header {
+    background: linear-gradient(135deg, #BF94FF 0%, #8B5CF6 100%) !important;
+    color: white !important;
+    padding: 24px !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+}
+
+.form-creation-modal .modal-body {
+    background: white !important;
+    padding: 24px !important;
+    overflow-y: auto !important;
+    flex: 1 !important;
+}
+
+.form-creation-modal .modal-footer {
+    background: #f9fafb !important;
+    padding: 20px 24px !important;
+    border-top: 2px solid #e5e7eb !important;
+    display: flex !important;
+    gap: 12px !important;
+    justify-content: flex-end !important;
+}
+
+/* Dark mode override for debugging */
+[data-theme="dark"] .form-creation-modal .modal-body,
+.dark-mode .form-creation-modal .modal-body,
+.dark .form-creation-modal .modal-body {
+    background: #1f2937 !important;
+    color: white !important;
+}
+
+[data-theme="dark"] .form-creation-modal .modal-footer,
+.dark-mode .form-creation-modal .modal-footer,
+.dark .form-creation-modal .modal-footer {
+    background: #374151 !important;
+    border-color: #4b5563 !important;
+}

@@ -1,4 +1,4 @@
-// src/App.jsx - Updated with Role-Based Redirect Handler
+// src/App.jsx - Updated with Role-Based Redirect Handler and Forms Routes
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
@@ -31,6 +31,7 @@ import ViewEventsPage from './pages/admin/ViewEventsPage';
 import EditEventPage from './pages/admin/EditEventPage';
 import UserManagementPage from './pages/admin/UserManagementPage';
 import FormsManagementPage from './pages/admin/FormsManagementPage';
+import FormSubmissionsPage from './pages/admin/FormSubmissionsPage';
 import BackupSyncPage from './pages/admin/BackupSyncPage';
 import ExportPage from './pages/admin/ExportPage.jsx';
 import AnalyticsDashboardPage from './pages/admin/AnalyticsDashboardPage';
@@ -59,11 +60,13 @@ import InstructorKidsManagementPage from './pages/instructor/InstructorKidsManag
 import InstructorTeamsManagementPage from './pages/instructor/InstructorTeamsManagementPage';
 import InstructorVehiclesPage from './pages/instructor/InstructorVehiclesPage';
 import InstructorEventsPage from './pages/instructor/InstructorEventsPage';
+import InstructorFormsPage from './pages/instructor/InstructorFormsPage';
 
 // Parent pages
 import ParentDashboardPage from './pages/parent/ParentDashboardPage';
 import ParentKidDetailPage from './pages/parent/ParentKidDetailPage';
 import ParentEventPage from './pages/parent/ParentEventPage.jsx';
+import MyFormsPage from './pages/parent/MyFormsPage';
 
 // Host pages
 import HostDashboardPage from './pages/host/HostDashboardPage';
@@ -254,7 +257,9 @@ function App() {
                                                 }
                                             />
 
-                                            {/* Admin Other Management */}
+                                            {/* ========================================
+                                               ADMIN FORMS MANAGEMENT ROUTES
+                                               ======================================== */}
                                             <Route
                                                 path="/admin/forms"
                                                 element={
@@ -263,6 +268,24 @@ function App() {
                                                     </RequireAdmin>
                                                 }
                                             />
+                                            <Route
+                                                path="/admin/forms/submissions"
+                                                element={
+                                                    <RequireAdmin>
+                                                        <FormSubmissionsPage />
+                                                    </RequireAdmin>
+                                                }
+                                            />
+                                            <Route
+                                                path="/admin/forms/:formId/submissions"
+                                                element={
+                                                    <RequireAdmin>
+                                                        <FormSubmissionsPage />
+                                                    </RequireAdmin>
+                                                }
+                                            />
+
+                                            {/* Admin Other Management */}
                                             <Route
                                                 path="/admin/backup"
                                                 element={
@@ -306,6 +329,16 @@ function App() {
                                                 element={
                                                     <RequireInstructorOnly>
                                                         <InstructorEventsPage />
+                                                    </RequireInstructorOnly>
+                                                }
+                                            />
+
+                                            {/* Instructor Forms */}
+                                            <Route
+                                                path="/instructor/forms"
+                                                element={
+                                                    <RequireInstructorOnly>
+                                                        <InstructorFormsPage />
                                                     </RequireInstructorOnly>
                                                 }
                                             />
@@ -412,6 +445,18 @@ function App() {
                                                 element={
                                                     <RequireParent>
                                                         <ParentEventPage />
+                                                    </RequireParent>
+                                                }
+                                            />
+
+                                            {/* ========================================
+                                               PARENT FORMS ROUTES
+                                               ======================================== */}
+                                            <Route
+                                                path="/parent/forms"
+                                                element={
+                                                    <RequireParent>
+                                                        <MyFormsPage />
                                                     </RequireParent>
                                                 }
                                             />

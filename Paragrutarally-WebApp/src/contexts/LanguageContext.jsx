@@ -2250,8 +2250,6 @@ export const LANGUAGES = {
 
         // Phone validation - Israeli format
         'validation.phoneInvalidIsraeli': 'Please enter a valid Israeli phone number (10 digits, starting with 050/052/053/054/055/057/058/059)',
-        'validation.phoneWrongLength': 'Phone number must be exactly 10 digits',
-        'validation.phoneWrongPrefix': 'Phone number must start with 050, 052, 053, 054, 055, 057, 058, or 059',
 
 // ParentKidEdit phone validation
         'parentKidEdit.phoneValidation.invalid': 'Please enter a valid Israeli phone number',
@@ -2262,13 +2260,9 @@ export const LANGUAGES = {
         'validation.phoneHintIsraeli': 'Israeli mobile number (10 digits: 0521234567)',
         'parentKidEdit.phoneHint': 'Format: 0521234567 (Israeli mobile)',
 
-        // Phone validation - step by step
-        'validation.phoneMustStartWith05': 'Phone number must start with 05',
-
 // ParentKidEdit specific
         'parentKidEdit.phoneValidation.mustStartWith05': 'Phone number must start with 05',
 
-        'validation.ageLimit': 'Participants need to be under 20 years old',
 
         'common.unnamedKid': 'Unnamed Kid',
         'fields.participantNumber': 'Participant Number',
@@ -2325,6 +2319,238 @@ export const LANGUAGES = {
         'events.past': 'Past Events',
         'events.typeRace': 'Race',
         'parentEvents.dateTBD': 'Date TBD',
+
+        // ========================================
+        // ENGLISH TRANSLATIONS
+        // ========================================
+
+        // Forms Management
+        "forms.racingFormsCenter": "Racing Forms Control Center",
+        "forms.subtitle": "Create, manage and distribute forms to your racing community! 🏁",
+        "forms.quickActions": "Quick Actions",
+        "forms.refreshData": "Refresh Data",
+        "forms.exportSubmissions": "Export Submissions",
+        "forms.formSettings": "Form Settings",
+        "forms.totalForms": "Total Forms",
+        "forms.submissions": "Submissions",
+        "forms.pendingReviews": "Pending Reviews",
+        "forms.completionRate": "Completion Rate",
+
+// Form Builder
+        "forms.editForm": "Edit Form",
+        "forms.basicInfo": "Basic Information",
+        "forms.formTitle": "Form Title",
+        "forms.titlePlaceholder": "Enter form title...",
+        "forms.formType": "Form Type",
+        "forms.descriptionPlaceholder": "Describe what this form is for...",
+        "forms.status": "Status",
+        "forms.isPublic": "Public Form",
+        "forms.targetUsers": "Target Users",
+        "forms.parents": "Parents",
+        "forms.instructors": "Instructors",
+        "forms.formFields": "Form Fields",
+
+// Form Operations
+        "forms.updateForm": "Update Form",
+        "forms.createForm": "Create Form",
+        "forms.activeForms": "📋 Active Forms",
+        "forms.searchForms": "Search forms...",
+        "forms.allForms": "All Forms",
+        "forms.allStatuses": "All Statuses",
+        "forms.loadingForms": "Loading forms...",
+        "forms.noFormsFound": "No Forms Found",
+        "forms.noFormsMatchFilter": "No forms match your search criteria",
+        "forms.noFormsYet": "You haven't created any forms yet",
+        "forms.createFirstForm": "Create Your First Form",
+
+// Form Details
+        "forms.noDescription": "No description available",
+        "forms.fields": "Fields",
+        "forms.views": "Views",
+        "forms.sendForm": "Send Form",
+        "forms.deleteForm": "Delete Form",
+        "forms.none": "None",
+        "forms.created": "Created",
+
+// Status Types
+        "forms.status.draft": "Draft",
+        "forms.status.active": "Active",
+        "forms.status.archived": "Archived",
+
+// Form Types
+        "forms.types.eventRegistration": "Event Registration",
+        "forms.types.trainingRegistration": "Training Registration",
+        "forms.types.contactInfo": "Contact Information",
+        "forms.types.feedback": "Feedback",
+        "forms.types.custom": "Custom",
+
+// Field Types
+        "forms.fieldTypes.text": "Text",
+        "forms.fieldTypes.textarea": "Textarea",
+        "forms.fieldTypes.number": "Number",
+        "forms.fieldTypes.date": "Date",
+        "forms.fieldTypes.select": "Dropdown",
+        "forms.fieldTypes.checkbox": "Checkboxes",
+        "forms.fieldTypes.radio": "Radio Buttons",
+        "forms.fieldTypes.file": "File Upload",
+
+// Submission Management
+        "forms.submissionsForForm": "Submissions for {title}",
+        "forms.allSubmissions": "All Form Submissions",
+        "forms.searchSubmissions": "Search submissions...",
+        "forms.allTypes": "All Types",
+        "forms.parentForm": "Parent Form",
+        "forms.instructorForm": "Instructor Form",
+        "forms.submittedAt": "Submitted",
+        "forms.submitter": "Submitter",
+        "forms.type": "Type",
+        "forms.attendees": "Attendees",
+        "forms.actions": "Actions",
+        "forms.viewDetails": "View Details",
+
+// Confirmation Status
+        "forms.attending": "Attending",
+        "forms.notAttending": "Not Attending",
+        "forms.needsToDecide": "Needs to Decide",
+
+// User Forms Pages
+        "forms.myForms": "My Forms",
+        "forms.parentFormsDesc": "Manage your event registrations and form submissions",
+        "forms.instructorForms": "Instructor Forms",
+        "forms.instructorFormsDesc": "Manage your training registrations and form submissions",
+        "forms.newEventRegistration": "New Event Registration",
+        "forms.newEventDesc": "Register for upcoming events",
+        "forms.newInstructorRegistration": "New Training Registration",
+        "forms.newInstructorDesc": "Register for training events and workshops",
+        "forms.mySubmissions": "My Submissions",
+        "forms.availableForms": "Available Forms",
+        "forms.availableTrainingEvents": "Available Training Events",
+
+// Event Registration Modal
+        "forms.eventRegistration": "Event Registration",
+        "forms.selectFormType": "Select Registration Type",
+        "forms.parentRegistration": "Parent Registration",
+        "forms.parentRegistrationDesc": "Register yourself and your kids for the event",
+        "forms.instructorRegistration": "Instructor Registration",
+        "forms.instructorRegistrationDesc": "Register as an instructor for the event",
+
+// Event Details
+        "forms.eventDetails": "Event Details",
+        "forms.dayAndDate": "Day and Date",
+        "forms.hours": "Hours",
+        "forms.location": "Location",
+        "forms.notSpecified": "Not specified",
+        "forms.googleMaps": "Google Maps",
+        "forms.waze": "Waze",
+        "forms.notes": "Notes",
+        "forms.bitPayment": "Bit Payment",
+        "forms.contactUs": "Contact Us",
+
+// Registration Form
+        "forms.parentInformation": "Parent Information",
+        "forms.instructorInformation": "Instructor Information",
+        "forms.selectKids": "Select Kids to Attend",
+        "forms.noKidsFound": "No kids found in your account",
+        "forms.attendeesCount": "Total Attendees Count",
+        "forms.howManyPeople": "How many people will be coming?",
+        "forms.firstName": "First Name",
+        "forms.lastName": "Last Name",
+        "forms.extraAttendees": "Extra Attendees",
+        "forms.additionalAttendees": "Additional Attendees",
+
+// Shirt Management
+        "forms.shirtSizes": "Shirt Sizes",
+        "forms.shirtInformation": "Shirt Information",
+        "forms.requiredShirts": "Required Shirts",
+        "forms.extraShirts": "Extra Shirts",
+        "forms.shirtNumber": "Shirt #{number}",
+        "forms.extraShirtNumber": "Extra #{number}",
+        "forms.selectSize": "Select Size",
+
+// Form Submission
+        "forms.confirmationStatus": "Status",
+        "forms.submitRegistration": "Submit Registration",
+        "forms.submitting": "Submitting...",
+        "forms.submissionSuccess": "Form submitted successfully!",
+        "forms.submissionError": "Error submitting form. Please try again.",
+
+// Templates and Creation
+        "forms.formTemplates": "📋 Form Templates",
+        "forms.parentEventTemplate": "Parent Event Registration",
+        "forms.parentEventDesc": "Standard template for parent event registrations with kids selection",
+        "forms.instructorEventTemplate": "Instructor Training Registration",
+        "forms.instructorEventDesc": "Template for instructor training events and workshops",
+        "forms.customFormTemplate": "Custom Form",
+        "forms.customFormDesc": "Create a custom form with your own fields and layout",
+        "forms.useTemplate": "Use Template",
+        "forms.createCustom": "Create Custom",
+
+// Form Creation Modal
+        "forms.titleRequired": "Form title is required",
+        "forms.formCreatedSuccess": "Form created successfully!",
+        "forms.formCreateError": "Error creating form. Please try again.",
+        "forms.googleMapsLink": "Google Maps Link",
+        "forms.wazeLink": "Waze Link",
+        "forms.paymentLink": "Payment Link (Optional)",
+        "forms.additionalInformation": "Additional Information",
+        "forms.closingNotes": "Closing Notes",
+        "forms.contactInformation": "Contact Information",
+        "forms.addContact": "Add Contact Info",
+        "forms.creating": "Creating...",
+
+// Other
+        "forms.kids": "kids",
+        "forms.shirts": "shirts",
+        "forms.mottoShared": "Motto shared",
+        "forms.motoForLife": "Motto for Life",
+        "forms.motoPlaceholder": "Share your motto for life...",
+        "forms.declarationUploaded": "Declaration uploaded",
+        "forms.signedDeclaration": "Signed Declaration",
+        "forms.viewDeclaration": "View Declaration File",
+        "forms.declarationRequired": "Please upload the required parent declaration",
+        "forms.declarationWarning": "Some of your selected kids do not have a signed declaration on file. Please upload the required parent declaration.",
+        "forms.uploadDeclaration": "Upload Declaration File",
+
+// Recent and Analytics
+        "forms.recentSubmissions": "📊 Recent Submissions",
+        "forms.viewAll": "View All",
+        "forms.viewAllSubmissions": "View All Submissions",
+        "forms.unknownForm": "Unknown Form",
+        "forms.pending": "Pending",
+        "forms.unknownUser": "Unknown User",
+        "forms.noSubmissions": "No Submissions Found",
+        "forms.noSubmissionsMatchFilter": "No submissions match your search criteria",
+        "forms.noSubmissionsYet": "No submissions received yet",
+        "forms.noSubmissionsDesc": "You haven't submitted any forms yet. Start by registering for an event!",
+        "forms.noInstructorSubmissionsDesc": "You haven't registered for any training events yet. Start by registering for an upcoming training!",
+
+// Actions and Navigation
+        "forms.register": "Register",
+        "forms.registerForEvent": "Register for Event",
+        "forms.registerForTraining": "Register for Training",
+        "forms.submitted": "Submitted",
+        "forms.viewSubmission": "View Submission",
+        "forms.submissionDetails": "Submission Details",
+        "forms.basicInformation": "Basic Information",
+        "forms.submitterInformation": "Submitter Information",
+        "forms.attendanceInformation": "Attendance Information",
+        "forms.totalAttendees": "Total Attendees",
+        "forms.selectedKids": "Selected Kids",
+        "forms.kid": "Kid",
+        "forms.loadingDetails": "Loading details...",
+
+// Messages and Alerts
+        "forms.selectConfirmationStatus": "Please select your confirmation status",
+        "forms.formSentSuccess": "Form sent to {count} users!",
+        "forms.formSendError": "Error sending form. Please try again.",
+        "forms.deleteConfirm": "Are you sure you want to delete this form?",
+
+// Validation
+        "validation.phoneMustStartWith05": "Phone number must start with 05",
+        "validation.phoneWrongPrefix": "Phone number must start with 050, 052, 053, 054, 055, 057, 058, or 059",
+        "validation.phoneWrongLength": "Phone number must be exactly 10 digits",
+        "validation.ageLimit": "Participants need to be under 20 years old",
+
     },
 
 
@@ -4774,6 +5000,233 @@ export const LANGUAGES = {
         'legal.limitationOfLiabilityDesc': 'השירות מסופק "כמו שהוא" ללא אחריות. האחריות שלנו מוגבלת לסכום ששולם עבור השירות ב-12 החודשים האחרונים. איננו אחראים לנזקים עקיפים, מקריים או תוצאתיים.',
         'legal.contactInformationTermsDesc': 'לשאלות על התנאים הללו, אנא צרו איתנו קשר בכתובת:',
 
+        // ========================================
+        // HEBREW TRANSLATIONS
+        // ========================================
+
+        // Forms Management
+        "forms.racingFormsCenter": "מרכז בקרת טפסי המירוצים",
+        "forms.subtitle": "צור, נהל והפץ טפסים לקהילת המירוצים שלך! 🏁",
+        "forms.quickActions": "פעולות מהירות",
+        "forms.refreshData": "רענן נתונים",
+        "forms.exportSubmissions": "ייצא הגשות",
+        "forms.formSettings": "הגדרות טופס",
+        "forms.totalForms": "סך כל הטפסים",
+        "forms.submissions": "הגשות",
+        "forms.pendingReviews": "ממתין לבדיקה",
+        "forms.completionRate": "אחוז השלמה",
+
+// Form Builder
+        "forms.editForm": "ערוך טופס",
+        "forms.basicInfo": "מידע בסיסי",
+        "forms.formTitle": "כותרת הטופס",
+        "forms.titlePlaceholder": "הכנס כותרת לטופס...",
+        "forms.formType": "סוג טופס",
+        "forms.descriptionPlaceholder": "תאר למה מיועד הטופס הזה...",
+        "forms.status": "סטטוס",
+        "forms.isPublic": "טופס ציבורי",
+        "forms.targetUsers": "משתמשי יעד",
+        "forms.parents": "הורים",
+        "forms.instructors": "מדריכים",
+        "forms.formFields": "שדות טופס",
+
+// Form Operations
+        "forms.updateForm": "עדכן טופס",
+        "forms.createForm": "צור טופס",
+        "forms.activeForms": "📋 טפסים פעילים",
+        "forms.searchForms": "חפש טפסים...",
+        "forms.allForms": "כל הטפסים",
+        "forms.allStatuses": "כל הסטטוסים",
+        "forms.loadingForms": "טוען טפסים...",
+        "forms.noFormsFound": "לא נמצאו טפסים",
+        "forms.noFormsMatchFilter": "אין טפסים התואמים לקריטריוני החיפוש",
+        "forms.noFormsYet": "עדיין לא יצרת טפסים",
+        "forms.createFirstForm": "צור את הטופס הראשון שלך",
+
+// Form Details
+        "forms.noDescription": "אין תיאור זמין",
+        "forms.fields": "שדות",
+        "forms.views": "צפיות",
+        "forms.sendForm": "שלח טופס",
+        "forms.deleteForm": "מחק טופס",
+        "forms.none": "ללא",
+        "forms.created": "נוצר",
+
+// Status Types
+        "forms.status.draft": "טיוטה",
+        "forms.status.active": "פעיל",
+        "forms.status.archived": "מאורכב",
+
+// Form Types
+        "forms.types.eventRegistration": "הרשמה לאירוע",
+        "forms.types.trainingRegistration": "הרשמה להכשרה",
+        "forms.types.contactInfo": "פרטי יצירת קשר",
+        "forms.types.feedback": "משוב",
+        "forms.types.custom": "מותאם אישית",
+
+// Field Types
+        "forms.fieldTypes.text": "טקסט",
+        "forms.fieldTypes.textarea": "אזור טקסט",
+        "forms.fieldTypes.number": "מספר",
+        "forms.fieldTypes.date": "תאריך",
+        "forms.fieldTypes.select": "תפריט נפתח",
+        "forms.fieldTypes.checkbox": "תיבות סימון",
+        "forms.fieldTypes.radio": "כפתורי בחירה",
+        "forms.fieldTypes.file": "העלאת קובץ",
+
+// Submission Management
+        "forms.submissionsForForm": "הגשות עבור {title}",
+        "forms.allSubmissions": "כל הגשות הטפסים",
+        "forms.searchSubmissions": "חפש הגשות...",
+        "forms.allTypes": "כל הסוגים",
+        "forms.parentForm": "טופס הורים",
+        "forms.instructorForm": "טופס מדריכים",
+        "forms.submittedAt": "הוגש",
+        "forms.submitter": "מגיש",
+        "forms.type": "סוג",
+        "forms.attendees": "משתתפים",
+        "forms.actions": "פעולות",
+        "forms.viewDetails": "צפה בפרטים",
+
+// Confirmation Status
+        "forms.attending": "משתתף",
+        "forms.notAttending": "לא משתתף",
+        "forms.needsToDecide": "צריך להחליט",
+
+// User Forms Pages
+        "forms.myForms": "הטפסים שלי",
+        "forms.parentFormsDesc": "נהל את הרשמותיך לאירועים והגשות הטפסים",
+        "forms.instructorForms": "טפסי מדריכים",
+        "forms.instructorFormsDesc": "נהל את הרשמותיך להכשרות והגשות הטפסים",
+        "forms.newEventRegistration": "הרשמה חדשה לאירוע",
+        "forms.newEventDesc": "הירשם לאירועים קרובים",
+        "forms.newInstructorRegistration": "הרשמה חדשה להכשרה",
+        "forms.newInstructorDesc": "הירשם לאירועי הכשרה וסדנאות",
+        "forms.mySubmissions": "ההגשות שלי",
+        "forms.availableForms": "טפסים זמינים",
+        "forms.availableTrainingEvents": "אירועי הכשרה זמינים",
+
+// Event Registration Modal
+        "forms.eventRegistration": "הרשמה לאירוע",
+        "forms.selectFormType": "בחר סוג הרשמה",
+        "forms.parentRegistration": "הרשמת הורים",
+        "forms.parentRegistrationDesc": "הירשם אתה והילדים שלך לאירוע",
+        "forms.instructorRegistration": "הרשמת מדריכים",
+        "forms.instructorRegistrationDesc": "הירשם כמדריך לאירוע",
+
+// Event Details
+        "forms.eventDetails": "פרטי האירוע",
+        "forms.dayAndDate": "יום ותאריך",
+        "forms.hours": "שעות",
+        "forms.location": "מיקום",
+        "forms.notSpecified": "לא צוין",
+        "forms.googleMaps": "גוגל מפות",
+        "forms.waze": "ווייז",
+        "forms.notes": "הערות",
+        "forms.bitPayment": "תשלום ביט",
+        "forms.contactUs": "צור קשר",
+
+// Registration Form
+        "forms.parentInformation": "מידע הורים",
+        "forms.instructorInformation": "מידע מדריך",
+        "forms.selectKids": "בחר ילדים להשתתפות",
+        "forms.noKidsFound": "לא נמצאו ילדים בחשבון שלך",
+        "forms.attendeesCount": "סך כל המשתתפים",
+        "forms.howManyPeople": "כמה אנשים יגיעו?",
+        "forms.firstName": "שם פרטי",
+        "forms.lastName": "שם משפחה",
+        "forms.extraAttendees": "משתתפים נוספים",
+        "forms.additionalAttendees": "משתתפים נוספים",
+
+// Shirt Management
+        "forms.shirtSizes": "מידות חולצה",
+        "forms.shirtInformation": "מידע חולצות",
+        "forms.requiredShirts": "חולצות נדרשות",
+        "forms.extraShirts": "חולצות נוספות",
+        "forms.shirtNumber": "חולצה מס' {number}",
+        "forms.extraShirtNumber": "נוספת מס' {number}",
+        "forms.selectSize": "בחר מידה",
+
+// Form Submission
+        "forms.confirmationStatus": "סטטוס",
+        "forms.submitRegistration": "שלח הרשמה",
+        "forms.submitting": "שולח...",
+        "forms.submissionSuccess": "הטופס נשלח בהצלחה!",
+        "forms.submissionError": "שגיאה בשליחת הטופס. נסה שוב.",
+
+// Templates and Creation
+        "forms.formTemplates": "📋 תבניות טפסים",
+        "forms.parentEventTemplate": "הרשמת הורים לאירוע",
+        "forms.parentEventDesc": "תבנית סטנדרטית להרשמת הורים לאירועים עם בחירת ילדים",
+        "forms.instructorEventTemplate": "הרשמת מדריכים להכשרה",
+        "forms.instructorEventDesc": "תבנית לאירועי הכשרה וסדנאות למדריכים",
+        "forms.customFormTemplate": "טופס מותאם",
+        "forms.customFormDesc": "צור טופס מותאם עם השדות והעיצוב שלך",
+        "forms.useTemplate": "השתמש בתבנית",
+        "forms.createCustom": "צור מותאם",
+
+// Form Creation Modal
+        "forms.titleRequired": "כותרת הטופס נדרשת",
+        "forms.formCreatedSuccess": "הטופס נוצר בהצלחה!",
+        "forms.formCreateError": "שגיאה ביצירת הטופס. נסה שוב.",
+        "forms.googleMapsLink": "קישור גוגל מפות",
+        "forms.wazeLink": "קישור ווייז",
+        "forms.paymentLink": "קישור תשלום (אופציונלי)",
+        "forms.additionalInformation": "מידע נוסף",
+        "forms.closingNotes": "הערות סיום",
+        "forms.contactInformation": "פרטי יצירת קשר",
+        "forms.addContact": "הוסף פרטי קשר",
+        "forms.creating": "יוצר...",
+
+// Other
+        "forms.kids": "ילדים",
+        "forms.shirts": "חולצות",
+        "forms.mottoShared": "מוטו משותף",
+        "forms.motoForLife": "המוטו שלי לחיים",
+        "forms.motoPlaceholder": "שתף את המוטו שלך לחיים...",
+        "forms.declarationUploaded": "הצהרה הועלתה",
+        "forms.signedDeclaration": "הצהרה חתומה",
+        "forms.viewDeclaration": "צפה בקובץ הצהרה",
+        "forms.declarationRequired": "אנא העלה את הצהרת ההורים הנדרשת",
+        "forms.declarationWarning": "לחלק מהילדים שבחרת אין הצהרה חתומה בתיק. אנא העלה את הצהרת ההורים הנדרשת.",
+        "forms.uploadDeclaration": "העלה קובץ הצהרה",
+
+// Recent and Analytics
+        "forms.recentSubmissions": "📊 הגשות אחרונות",
+        "forms.viewAll": "צפה בהכל",
+        "forms.viewAllSubmissions": "צפה בכל ההגשות",
+        "forms.unknownForm": "טופס לא ידוע",
+        "forms.pending": "ממתין",
+        "forms.unknownUser": "משתמש לא ידוע",
+        "forms.noSubmissions": "לא נמצאו הגשות",
+        "forms.noSubmissionsMatchFilter": "אין הגשות התואמות לקריטריוני החיפוש",
+        "forms.noSubmissionsYet": "עדיין לא התקבלו הגשות",
+        "forms.noSubmissionsDesc": "עדיין לא הגשת טפסים. התחל בהרשמה לאירוע!",
+        "forms.noInstructorSubmissionsDesc": "עדיין לא נרשמת לאירועי הכשרה. התחל בהרשמה להכשרה קרובה!",
+
+// Actions and Navigation
+        "forms.register": "הירשם",
+        "forms.registerForEvent": "הירשם לאירוע",
+        "forms.registerForTraining": "הירשם להכשרה",
+        "forms.submitted": "הוגש",
+        "forms.viewSubmission": "צפה בהגשה",
+        "forms.submissionDetails": "פרטי ההגשה",
+        "forms.basicInformation": "מידע בסיסי",
+        "forms.submitterInformation": "מידע מגיש",
+        "forms.attendanceInformation": "מידע השתתפות",
+        "forms.totalAttendees": "סך כל המשתתפים",
+        "forms.selectedKids": "ילדים נבחרים",
+        "forms.kid": "ילד",
+        "forms.loadingDetails": "טוען פרטים...",
+
+// Messages and Alerts
+        "forms.selectConfirmationStatus": "אנא בחר את סטטוס האישור שלך",
+        "forms.formSentSuccess": "הטופס נשלח ל-{count} משתמשים!",
+        "forms.formSendError": "שגיאה בשליחת הטופס. נסה שוב.",
+        "forms.deleteConfirm": "האם אתה בטוח שברצונך למחוק את הטופס הזה?",
+
+// Validation
+        "validation.ageLimit": "המשתתפים צריכים להיות מתחת לגיל 20",
 
             }
         };

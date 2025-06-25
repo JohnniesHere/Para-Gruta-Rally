@@ -1,0 +1,690 @@
+/* src/components/modals/EventRegistrationModal.css */
+@import url('../../styles/global.css');
+
+/* ========================================
+   EVENT REGISTRATION MODAL
+   ======================================== */
+
+.event-registration-overlay {
+    z-index: 1001;
+}
+
+.event-registration-modal {
+    width: 900px;
+    max-width: 95vw;
+    max-height: 90vh;
+}
+
+.event-registration-modal .modal-header {
+    background: linear-gradient(135deg, var(--racing-lilach) 0%, var(--racing-purple) 100%);
+    color: white;
+    padding: 24px;
+    border-bottom: none;
+}
+
+.event-registration-modal .modal-header h3 {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.event-registration-modal .modal-body {
+    padding: 24px;
+    max-height: calc(90vh - 200px);
+    overflow-y: auto;
+}
+
+/* ========================================
+   FORM TYPE SELECTION
+   ======================================== */
+
+.form-type-selection {
+    text-align: center;
+    padding: 20px 0;
+}
+
+.form-type-selection h4 {
+    color: var(--text-primary);
+    font-size: 1.3rem;
+    margin-bottom: 30px;
+    font-weight: 700;
+}
+
+.form-type-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+    margin-top: 20px;
+}
+
+.form-type-option {
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 15px;
+    padding: 32px 24px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    text-align: center;
+    min-height: 200px;
+}
+
+.form-type-option:hover {
+    border-color: var(--racing-lilach);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(191, 148, 255, 0.2);
+    background: rgba(191, 148, 255, 0.05);
+}
+
+.form-type-option svg {
+    color: var(--racing-lilach);
+}
+
+.option-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.option-description {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+/* ========================================
+   REGISTRATION FORM
+   ======================================== */
+
+.registration-form {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.form-section {
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 15px;
+    padding: 24px;
+    transition: all 0.3s ease;
+}
+
+.form-section:hover {
+    border-color: var(--racing-light-purple);
+    box-shadow: 0 4px 15px rgba(191, 148, 255, 0.1);
+}
+
+.form-section h4 {
+    color: var(--text-primary);
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin: 0 0 20px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* ========================================
+   EVENT DETAILS
+   ======================================== */
+
+.event-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 16px;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.detail-item label {
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.detail-item span {
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.map-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--racing-lilach);
+    text-decoration: none;
+    font-weight: 600;
+    padding: 8px 12px;
+    border: 2px solid var(--racing-lilach);
+    border-radius: 20px;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.map-link:hover {
+    background: var(--racing-lilach);
+    color: white;
+    transform: translateY(-1px);
+}
+
+.event-notes, .closing-notes {
+    margin-top: 16px;
+}
+
+.event-notes label {
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.notes-content {
+    background: var(--bg-secondary);
+    padding: 16px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    color: var(--text-primary);
+    line-height: 1.5;
+    white-space: pre-wrap;
+}
+
+.payment-section {
+    margin-top: 16px;
+}
+
+.payment-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    color: #000;
+    text-decoration: none;
+    font-weight: 700;
+    padding: 12px 20px;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+}
+
+.payment-link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+}
+
+.contact-section {
+    margin-top: 16px;
+}
+
+.contact-section label {
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.contact-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.contact-item {
+    background: var(--bg-secondary);
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+}
+
+/* ========================================
+   CONFIRMATION STATUS
+   ======================================== */
+
+.confirmation-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+}
+
+.confirmation-option {
+    cursor: pointer;
+}
+
+.confirmation-option input[type="radio"] {
+    display: none;
+}
+
+.option-text {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 16px 20px;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    background: var(--card-bg);
+    color: var(--text-primary);
+    font-weight: 600;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    text-align: center;
+}
+
+.confirmation-option input[type="radio"]:checked + .option-text.attending {
+    border-color: #10B981;
+    background: rgba(16, 185, 129, 0.1);
+    color: #10B981;
+}
+
+.confirmation-option input[type="radio"]:checked + .option-text.not-attending {
+    border-color: #EF4444;
+    background: rgba(239, 68, 68, 0.1);
+    color: #EF4444;
+}
+
+.confirmation-option input[type="radio"]:checked + .option-text.needs-decide {
+    border-color: #F59E0B;
+    background: rgba(245, 158, 11, 0.1);
+    color: #F59E0B;
+}
+
+.option-text:hover {
+    border-color: var(--racing-lilach);
+    background: rgba(191, 148, 255, 0.1);
+}
+
+/* ========================================
+   USER INFO
+   ======================================== */
+
+.user-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.info-item label {
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.info-item span {
+    color: var(--text-primary);
+    font-weight: 500;
+    font-size: 1rem;
+}
+
+/* ========================================
+   KIDS SELECTION
+   ======================================== */
+
+.kids-selection {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 12px;
+}
+
+.kid-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    background: var(--card-bg);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.kid-option:hover {
+    border-color: var(--racing-lilach);
+    background: rgba(191, 148, 255, 0.05);
+}
+
+.kid-option input[type="checkbox"] {
+    accent-color: var(--racing-lilach);
+    width: 18px;
+    height: 18px;
+}
+
+.kid-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.kid-name {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.kid-number {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.no-kids {
+    text-align: center;
+    color: var(--text-muted);
+    font-style: italic;
+    padding: 20px;
+}
+
+/* ========================================
+   ATTENDEES COUNT
+   ======================================== */
+
+.attendees-count {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.attendees-count label {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 1rem;
+}
+
+.attendees-input {
+    width: 100px;
+    padding: 12px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--input-bg);
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+.attendees-input:focus {
+    outline: none;
+    border-color: var(--racing-lilach);
+    box-shadow: 0 0 0 3px rgba(191, 148, 255, 0.2);
+}
+
+/* ========================================
+   EXTRA ATTENDEES TABLE
+   ======================================== */
+
+.extra-attendees-table {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.table-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    padding: 12px;
+    background: var(--bg-tertiary);
+    border-radius: 8px;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.table-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+}
+
+.table-row input {
+    padding: 12px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--input-bg);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+.table-row input:focus {
+    outline: none;
+    border-color: var(--racing-lilach);
+    box-shadow: 0 0 0 2px rgba(191, 148, 255, 0.2);
+}
+
+/* ========================================
+   SHIRTS SECTION
+   ======================================== */
+
+.shirts-subsection {
+    margin-bottom: 24px;
+}
+
+.shirts-subsection:last-child {
+    margin-bottom: 0;
+}
+
+.shirts-subsection > label {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 1rem;
+    margin-bottom: 16px;
+    display: block;
+}
+
+.shirts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 16px;
+}
+
+.shirt-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.shirt-selector label {
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.shirt-selector select {
+    padding: 12px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--input-bg);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.shirt-selector select:focus {
+    outline: none;
+    border-color: var(--racing-lilach);
+    box-shadow: 0 0 0 2px rgba(191, 148, 255, 0.2);
+}
+
+/* ========================================
+   MOTTO SECTION
+   ======================================== */
+
+.motto-textarea {
+    width: 100%;
+    padding: 16px;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    background: var(--input-bg);
+    color: var(--text-primary);
+    font-size: 1rem;
+    line-height: 1.5;
+    resize: vertical;
+    min-height: 100px;
+    font-family: inherit;
+}
+
+.motto-textarea:focus {
+    outline: none;
+    border-color: var(--racing-lilach);
+    box-shadow: 0 0 0 3px rgba(191, 148, 255, 0.2);
+}
+
+.motto-textarea::placeholder {
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+/* ========================================
+   DECLARATION SECTION
+   ======================================== */
+
+.declaration-section {
+    border-color: #F59E0B !important;
+    background: rgba(245, 158, 11, 0.05);
+}
+
+.warning-header {
+    color: #F59E0B !important;
+}
+
+.declaration-warning {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.declaration-warning p {
+    color: var(--text-primary);
+    line-height: 1.5;
+    margin: 0;
+}
+
+.file-upload {
+    display: flex;
+    justify-content: center;
+}
+
+.file-upload-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    text-align: center;
+    max-width: 300px;
+}
+
+.file-upload-label:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+
+@media (max-width: 768px) {
+    .event-registration-modal {
+        width: 95vw;
+        margin: 10px;
+    }
+
+    .form-type-options {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .form-type-option {
+        padding: 24px 16px;
+        min-height: 160px;
+    }
+
+    .event-details {
+        grid-template-columns: 1fr;
+    }
+
+    .confirmation-options {
+        grid-template-columns: 1fr;
+    }
+
+    .user-info {
+        grid-template-columns: 1fr;
+    }
+
+    .kids-selection {
+        grid-template-columns: 1fr;
+    }
+
+    .table-header,
+    .table-row {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .shirts-grid {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .event-registration-modal .modal-header {
+        padding: 16px;
+    }
+
+    .event-registration-modal .modal-body {
+        padding: 16px;
+    }
+
+    .form-section {
+        padding: 16px;
+    }
+
+    .form-section h4 {
+        font-size: 1rem;
+    }
+
+    .option-title {
+        font-size: 1rem;
+    }
+
+    .option-description {
+        font-size: 0.8rem;
+    }
+}

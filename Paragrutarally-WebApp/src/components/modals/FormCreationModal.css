@@ -1,0 +1,410 @@
+/* src/components/modals/FormCreationModal.css - FIXED VERSION */
+
+/* ========================================
+   FORM CREATION MODAL - SPECIFIC CLASSES
+   ======================================== */
+
+/* Use specific class names to avoid conflicts with global.css */
+.form-creation-modal-overlay {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    background: rgba(0, 0, 0, 0.8) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 9999 !important;
+    padding: 20px !important;
+    backdrop-filter: blur(5px) !important;
+}
+
+.form-creation-modal-content {
+    background: var(--bg-secondary, #ffffff) !important;
+    border-radius: 15px !important;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5) !important;
+    width: 900px !important;
+    max-width: 95vw !important;
+    max-height: 90vh !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    border: 2px solid var(--racing-lilach, #BF94FF) !important;
+    position: relative !important;
+    z-index: 10000 !important;
+}
+
+.form-creation-modal-header {
+    background: linear-gradient(135deg, var(--racing-lilach, #BF94FF) 0%, var(--racing-purple, #8B5CF6) 100%) !important;
+    color: white !important;
+    padding: 24px !important;
+    border-bottom: none !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+}
+
+.form-creation-modal-header h3 {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    margin: 0 !important;
+    font-size: 1.5rem !important;
+    font-weight: 700 !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+    color: white !important;
+}
+
+.form-creation-modal-close {
+    background: rgba(255, 255, 255, 0.2) !important;
+    border: none !important;
+    color: white !important;
+    padding: 8px !important;
+    border-radius: 8px !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.2s ease !important;
+}
+
+.form-creation-modal-close:hover {
+    background: rgba(255, 255, 255, 0.3) !important;
+    transform: scale(1.05) !important;
+}
+
+.form-creation-modal-body {
+    background: var(--bg-primary, #ffffff) !important;
+    padding: 24px !important;
+    overflow-y: auto !important;
+    flex: 1 !important;
+    max-height: calc(90vh - 200px) !important;
+}
+
+.form-creation-modal-footer {
+    background: var(--bg-secondary, #f9fafb) !important;
+    padding: 20px 24px !important;
+    border-top: 2px solid var(--border-color, #e5e7eb) !important;
+    display: flex !important;
+    gap: 12px !important;
+    justify-content: flex-end !important;
+}
+
+/* ========================================
+   FORM SECTIONS INSIDE MODAL
+   ======================================== */
+
+.form-creation-modal .form-section {
+    margin-bottom: 32px !important;
+    padding: 24px !important;
+    background: var(--card-bg, #ffffff) !important;
+    border: 2px solid var(--border-color, #e5e7eb) !important;
+    border-radius: 15px !important;
+    transition: all 0.3s ease !important;
+}
+
+.form-creation-modal .form-section:hover {
+    border-color: var(--racing-lilach, #BF94FF) !important;
+    box-shadow: 0 8px 25px rgba(191, 148, 255, 0.2) !important;
+}
+
+.form-creation-modal .form-section h4 {
+    margin: 0 0 20px 0 !important;
+    color: var(--text-primary, #1f2937) !important;
+    font-weight: 700 !important;
+    font-size: 1.2rem !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+}
+
+.form-creation-modal .form-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important;
+    gap: 16px !important;
+}
+
+.form-creation-modal .form-group {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+}
+
+.form-creation-modal .form-group.full-width {
+    grid-column: 1 / -1 !important;
+}
+
+.form-creation-modal .form-group label {
+    font-weight: 600 !important;
+    color: var(--text-primary, #1f2937) !important;
+    font-size: 14px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+}
+
+.form-creation-modal .form-input,
+.form-creation-modal .form-select,
+.form-creation-modal .form-textarea {
+    padding: 12px 16px !important;
+    border: 2px solid var(--border-color, #e5e7eb) !important;
+    border-radius: 10px !important;
+    background: var(--input-bg, #ffffff) !important;
+    color: var(--text-primary, #1f2937) !important;
+    font-size: 14px !important;
+    transition: all 0.3s ease !important;
+    font-family: inherit !important;
+}
+
+.form-creation-modal .form-input:focus,
+.form-creation-modal .form-select:focus,
+.form-creation-modal .form-textarea:focus {
+    outline: none !important;
+    border-color: var(--racing-lilach, #BF94FF) !important;
+    box-shadow: 0 0 0 3px rgba(191, 148, 255, 0.2) !important;
+    background: var(--card-bg, #ffffff) !important;
+}
+
+.form-creation-modal .form-textarea {
+    resize: vertical !important;
+    min-height: 100px !important;
+    font-family: inherit !important;
+}
+
+/* ========================================
+   TARGET USERS GRID
+   ======================================== */
+
+.form-creation-modal .target-users-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) !important;
+    gap: 16px !important;
+}
+
+.form-creation-modal .checkbox-label {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    cursor: pointer !important;
+    padding: 16px !important;
+    border: 2px solid var(--border-color, #e5e7eb) !important;
+    border-radius: 12px !important;
+    transition: all 0.3s ease !important;
+    background: var(--card-bg, #ffffff) !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+    font-size: 14px !important;
+}
+
+.form-creation-modal .checkbox-label:hover {
+    border-color: var(--racing-lilach, #BF94FF) !important;
+    background: rgba(191, 148, 255, 0.1) !important;
+    transform: translateY(-2px) !important;
+}
+
+.form-creation-modal .checkbox-label input[type="checkbox"] {
+    accent-color: var(--racing-lilach, #BF94FF) !important;
+    width: 18px !important;
+    height: 18px !important;
+}
+
+/* ========================================
+   CONTACT INFORMATION
+   ======================================== */
+
+.form-creation-modal .contact-info-section {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+}
+
+.form-creation-modal .contact-item {
+    display: flex !important;
+    gap: 12px !important;
+    align-items: center !important;
+}
+
+.form-creation-modal .contact-item .form-input {
+    flex: 1 !important;
+}
+
+.form-creation-modal .remove-contact-btn {
+    background: rgba(239, 68, 68, 0.1) !important;
+    border: 2px solid #EF4444 !important;
+    color: #EF4444 !important;
+    padding: 10px !important;
+    border-radius: 8px !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 40px !important;
+    height: 40px !important;
+}
+
+.form-creation-modal .remove-contact-btn:hover {
+    background: #EF4444 !important;
+    color: white !important;
+    transform: scale(1.05) !important;
+}
+
+.form-creation-modal .add-contact-btn {
+    background: rgba(191, 148, 255, 0.1) !important;
+    border: 2px solid var(--racing-lilach, #BF94FF) !important;
+    color: var(--racing-lilach, #BF94FF) !important;
+    padding: 12px 20px !important;
+    border-radius: 25px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    font-size: 14px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+    align-self: flex-start !important;
+}
+
+.form-creation-modal .add-contact-btn:hover {
+    background: var(--racing-lilach, #BF94FF) !important;
+    color: white !important;
+    transform: translateY(-1px) !important;
+}
+
+/* ========================================
+   MODAL BUTTONS
+   ======================================== */
+
+.form-creation-modal .btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 12px 24px !important;
+    border-radius: 25px !important;
+    font-weight: 600 !important;
+    font-size: 14px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    border: 2px solid !important;
+    text-decoration: none !important;
+    background: transparent !important;
+}
+
+.form-creation-modal .btn-secondary {
+    background: var(--bg-secondary, #f9fafb) !important;
+    border-color: var(--border-color, #e5e7eb) !important;
+    color: var(--text-secondary, #6b7280) !important;
+}
+
+.form-creation-modal .btn-secondary:hover {
+    background: var(--bg-tertiary, #f3f4f6) !important;
+    border-color: var(--text-secondary, #6b7280) !important;
+    color: var(--text-primary, #1f2937) !important;
+}
+
+.form-creation-modal .btn-primary {
+    background: linear-gradient(135deg, var(--racing-lilach, #BF94FF) 0%, var(--racing-purple, #8B5CF6) 100%) !important;
+    border-color: var(--racing-lilach, #BF94FF) !important;
+    color: white !important;
+}
+
+.form-creation-modal .btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 15px rgba(191, 148, 255, 0.4) !important;
+}
+
+.form-creation-modal .btn-primary:disabled {
+    opacity: 0.6 !important;
+    cursor: not-allowed !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.form-creation-modal .loading-spinner {
+    animation: spin 1s linear infinite !important;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* ========================================
+   DARK MODE SUPPORT
+   ======================================== */
+
+[data-theme="dark"] .form-creation-modal-content,
+.dark-mode .form-creation-modal-content,
+.dark .form-creation-modal-content {
+    background: var(--bg-primary, #1f2937) !important;
+    border-color: var(--border-color, #374151) !important;
+}
+
+[data-theme="dark"] .form-creation-modal-body,
+.dark-mode .form-creation-modal-body,
+.dark .form-creation-modal-body {
+    background: var(--bg-primary, #1f2937) !important;
+    color: var(--text-primary, #f1f5f9) !important;
+}
+
+[data-theme="dark"] .form-creation-modal .form-section,
+.dark-mode .form-creation-modal .form-section,
+.dark .form-creation-modal .form-section {
+    background: var(--bg-secondary, #374151) !important;
+    border-color: var(--border-color, #4b5563) !important;
+}
+
+[data-theme="dark"] .form-creation-modal-footer,
+.dark-mode .form-creation-modal-footer,
+.dark .form-creation-modal-footer {
+    background: var(--bg-secondary, #374151) !important;
+    border-color: var(--border-color, #4b5563) !important;
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+
+@media (max-width: 768px) {
+    .form-creation-modal-content {
+        width: 95vw !important;
+        margin: 10px !important;
+    }
+
+    .form-creation-modal .form-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .form-creation-modal .target-users-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .form-creation-modal-header {
+        padding: 16px !important;
+    }
+
+    .form-creation-modal-body {
+        padding: 16px !important;
+    }
+
+    .form-creation-modal .form-section {
+        padding: 16px !important;
+    }
+
+    .form-creation-modal .form-section h4 {
+        font-size: 1rem !important;
+    }
+
+    .form-creation-modal-overlay {
+        padding: 10px !important;
+    }
+}
