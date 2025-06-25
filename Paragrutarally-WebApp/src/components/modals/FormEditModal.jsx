@@ -1,28 +1,26 @@
-// src/components/modals/FormCreationModal.jsx - Updated with Templates and Date/Time
+// src/components/modals/FormEditModal.jsx - Form Edit Modal
 import React, { useState, useEffect } from 'react';
-import { createForm } from '@/services/formService.js';
+import { updateForm } from '@/services/formService.js';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { usePermissions } from '../../hooks/usePermissions';
 import {
     IconX as X,
-    IconCheck as Check,
     IconPlus as Plus,
     IconTrash as Trash2,
     IconCalendar as Calendar,
-    IconMapPin as MapPin,
     IconUsers as Users,
     IconFileText as FileText,
     IconClock as Clock,
     IconDeviceFloppy as Save
 } from '@tabler/icons-react';
-import './FormCreationModal.css';
+import './FormCreationModal.css'; // Reuse the same styles
 
-const FormCreationModal = ({
-                               isOpen,
-                               templateType = null,
-                               onClose,
-                               onSuccess
-                           }) => {
+const FormEditModal = ({
+                           isOpen,
+                           form,
+                           onClose,
+                           onSuccess
+                       }) => {
     const { t } = useLanguage();
     const { user } = usePermissions();
 
@@ -34,8 +32,6 @@ const FormCreationModal = ({
         type: 'event_registration',
         status: 'draft',
         targetUsers: ['parent'],
-
-        // Event details - Updated with separate date and time fields
         eventDate: '',
         startTime: '',
         endTime: '',
@@ -48,35 +44,43 @@ const FormCreationModal = ({
         contactInfo: ['']
     });
 
-    // Template configurations
-    const templateConfigs = {
-        parent: {
-            title: 'Parent Event Registration',
-            description: 'Registration form for parents to register their kids for racing events',
-            targetUsers: ['parent'],
-            type: 'event_registration'
-        },
-        instructor: {
-            title: 'Instructor Training Registration',
-            description: 'Registration form for instructor training sessions and workshops',
-            targetUsers: ['instructor'],
-            type: 'training_registration'
-        }
-    };
-
-    // Apply template when templateType changes
+    // Load form data when form prop changes
     useEffect(() => {
-        if (templateType && templateConfigs[templateType]) {
-            const config = templateConfigs[templateType];
-            setFormData(prev => ({
-                ...prev,
-                title: config.title,
-                description: config.description,
-                targetUsers: config.targetUsers,
-                type: config.type
-            }));
+        if (form) {
+            // Parse existing date and time if available
+            let eventDate = '';
+            let startTime = '';
+            let endTime = '';
+
+            if (form.eventDetails?.eventDate) {
+                eventDate = form.eventDetails.eventDate;
+            }
+            if (form.eventDetails?.startTime) {
+                startTime = form.eventDetails.startTime;
+            }
+            if (form.eventDetails?.endTime) {
+                endTime = form.eventDetails.endTime;
+            }
+
+            setFormData({
+                title: form.title || '',
+                description: form.description || '',
+                type: form.type || 'event_registration',
+                status: form.status || 'draft',
+                targetUsers: form.targetUsers || ['parent'],
+                eventDate: eventDate,
+                startTime: startTime,
+                endTime: endTime,
+                location: form.eventDetails?.location || '',
+                googleMapsLink: form.eventDetails?.googleMapsLink || '',
+                wazeLink: form.eventDetails?.wazeLink || '',
+                notes: form.eventDetails?.notes || '',
+                paymentLink: form.eventDetails?.paymentLink || '',
+                closingNotes: form.eventDetails?.closingNotes || '',
+                contactInfo: form.eventDetails?.contactInfo?.length > 0 ? form.eventDetails.contactInfo : ['']
+            });
         }
-    }, [templateType]);
+    }, [form]);
 
     // Handle form data change
     const handleInputChange = (field, value) => {
@@ -158,7 +162,7 @@ const FormCreationModal = ({
             const cleanContactInfo = formData.contactInfo.filter(contact => contact.trim());
 
             // Prepare form data
-            const formToCreate = {
+            const formToUpdate = {
                 title: formData.title,
                 description: formData.description,
                 type: formData.type,
@@ -181,51 +185,26 @@ const FormCreationModal = ({
                 }
             };
 
-            // Create the form
-            const formId = await createForm(formToCreate, user.uid);
+            // Update the form
+            await updateForm(form.id, formToUpdate);
 
             if (onSuccess) {
-                onSuccess(formId);
+                onSuccess();
             }
 
-            alert(t('forms.formCreatedSuccess', 'Form created successfully!'));
+            alert(t('forms.formUpdatedSuccess', 'Form updated successfully!'));
             onClose();
         } catch (error) {
-            console.error('Error creating form:', error);
-            alert(t('forms.formCreateError', 'Error creating form. Please try again.'));
+            console.error('Error updating form:', error);
+            alert(t('forms.formUpdateError', 'Error updating form. Please try again.'));
         } finally {
             setIsSubmitting(false);
         }
     };
 
-    // Reset form when modal closes
-    const handleClose = () => {
-        setFormData({
-            title: '',
-            description: '',
-            type: 'event_registration',
-            status: 'draft',
-            targetUsers: ['parent'],
-            eventDate: '',
-            startTime: '',
-            endTime: '',
-            location: '',
-            googleMapsLink: '',
-            wazeLink: '',
-            notes: '',
-            paymentLink: '',
-            closingNotes: '',
-            contactInfo: ['']
-        });
-        onClose();
-    };
-
-    if (!isOpen) {
-        console.log('🔧 FormCreationModal: isOpen is false, not rendering');
+    if (!isOpen || !form) {
         return null;
     }
-
-    console.log('🔧 FormCreationModal: Rendering modal, isOpen:', isOpen, 'templateType:', templateType);
 
     return (
         <div className="form-creation-modal-overlay">
@@ -233,16 +212,12 @@ const FormCreationModal = ({
                 <div className="form-creation-modal-header">
                     <h3>
                         <FileText size={24} />
-                        {templateType
-                            ? t('forms.createFromTemplate', 'Create Form from Template')
-                            : t('forms.createNewForm', 'Create New Form')
-                        }
+                        {t('forms.editForm', 'Edit Form')}
                     </h3>
-                    <button className="form-creation-modal-close" onClick={handleClose}>
+                    <button className="form-creation-modal-close" onClick={onClose}>
                         <X size={20} />
                     </button>
                 </div>
-
                 <div className="form-creation-modal-body">
                     {/* Basic Form Information */}
                     <div className="form-section">
@@ -302,6 +277,7 @@ const FormCreationModal = ({
                                 >
                                     <option value="draft">{t('forms.status.draft', 'Draft')}</option>
                                     <option value="active">{t('forms.status.active', 'Active')}</option>
+                                    <option value="archived">{t('forms.status.archived', 'Archived')}</option>
                                 </select>
                             </div>
                         </div>
@@ -334,7 +310,7 @@ const FormCreationModal = ({
                         </div>
                     </div>
 
-                    {/* Event Details - Updated with Date and Time Pickers */}
+                    {/* Event Details */}
                     <div className="form-section">
                         <h4>
                             <Calendar size={18} />
@@ -378,7 +354,7 @@ const FormCreationModal = ({
                                     type="text"
                                     value={formData.location}
                                     onChange={(e) => handleInputChange('location', e.target.value)}
-                                    placeholder={t('forms.eventLocation', 'Enter event location...')}
+                                    placeholder="Enter event location"
                                     className="form-input"
                                 />
                             </div>
@@ -437,7 +413,7 @@ const FormCreationModal = ({
                             <textarea
                                 value={formData.notes}
                                 onChange={(e) => handleInputChange('notes', e.target.value)}
-                                placeholder={t('forms.notesPlaceholder', 'Additional information about the event...')}
+                                placeholder="Additional information about the event..."
                                 className="form-textarea"
                                 rows={3}
                             />
@@ -448,7 +424,7 @@ const FormCreationModal = ({
                             <textarea
                                 value={formData.closingNotes}
                                 onChange={(e) => handleInputChange('closingNotes', e.target.value)}
-                                placeholder={t('forms.closingNotesPlaceholder', 'Closing message for the form...')}
+                                placeholder="Closing message for the form..."
                                 className="form-textarea"
                                 rows={2}
                             />
@@ -468,7 +444,7 @@ const FormCreationModal = ({
                                         type="text"
                                         value={contact}
                                         onChange={(e) => updateContactInfo(index, e.target.value)}
-                                        placeholder={t('forms.contactPlaceholder', 'Enter contact information...')}
+                                        placeholder="Enter contact information..."
                                         className="form-input"
                                     />
                                     {formData.contactInfo.length > 1 && (
@@ -497,7 +473,7 @@ const FormCreationModal = ({
                 <div className="form-creation-modal-footer">
                     <button
                         type="button"
-                        onClick={handleClose}
+                        onClick={onClose}
                         className="btn btn-secondary"
                     >
                         {t('common.cancel', 'Cancel')}
@@ -511,12 +487,12 @@ const FormCreationModal = ({
                         {isSubmitting ? (
                             <>
                                 <Clock className="loading-spinner" size={16} />
-                                {t('forms.creating', 'Creating...')}
+                                {t('forms.updating', 'Updating...')}
                             </>
                         ) : (
                             <>
                                 <Save size={16} />
-                                {t('forms.createForm', 'Create Form')}
+                                {t('forms.updateForm', 'Update Form')}
                             </>
                         )}
                     </button>
@@ -526,4 +502,5 @@ const FormCreationModal = ({
     );
 };
 
-export default FormCreationModal;
+export default FormEditModal;
+

@@ -2551,6 +2551,33 @@ export const LANGUAGES = {
         "validation.phoneWrongLength": "Phone number must be exactly 10 digits",
         "validation.ageLimit": "Participants need to be under 20 years old",
 
+
+        "forms.createFromTemplate": "Create Form from Template",
+        "forms.eventDate": "Event Date",
+        "forms.startTime": "Start Time",
+        "forms.endTime": "End Time",
+        "forms.eventDateTime": "Event Date & Time",
+
+        "forms.formUpdatedSuccess": "Form updated successfully!",
+        "forms.formUpdateError": "Error updating form. Please try again.",
+        "forms.updating": "Updating...",
+
+        "forms.viewForm": "View Form",
+        "forms.openInMaps": "Open in Maps",
+        "forms.openInWaze": "Open in Waze",
+        "forms.makePayment": "Make Payment",
+        "forms.formStatistics": "Form Statistics",
+
+        "forms.deleteError": "Error deleting form. Please try again.",
+
+        "forms.loadingSubmissions": "Loading submissions...",
+        "forms.parent": "Parent",
+        "forms.instructor": "Instructor",
+        "forms.name": "Name",
+        "forms.email": "Email",
+        "forms.phone": "Phone",
+        "common.back": "Back",
+
     },
 
 
@@ -5227,6 +5254,36 @@ export const LANGUAGES = {
 
 // Validation
         "validation.ageLimit": "המשתתפים צריכים להיות מתחת לגיל 20",
+
+    "forms.createFromTemplate": "צור טופס מתבנית",
+    "forms.eventDate": "תאריך האירוע",
+    "forms.startTime": "שעת התחלה",
+    "forms.endTime": "שעת סיום",
+    "forms.eventDateTime": "תאריך ושעת האירוע",
+        "forms.notesPlaceholder": "מידע נוסף על האירוע...",
+        "forms.closingNotesPlaceholder": "הודעת סיום לטופס...",
+        "forms.contactPlaceholder": "הכנס פרטי קשר...",
+        "forms.eventLocation": "הכניסו את מיקום האירוע",
+
+    "forms.formUpdatedSuccess": "הטופס עודכן בהצלחה!",
+    "forms.formUpdateError": "שגיאה בעדכון הטופס. אנא נסה שוב.",
+    "forms.updating": "מעדכן...",
+
+    "forms.viewForm": "צפה בטופס",
+    "forms.openInMaps": "פתח במפות",
+    "forms.openInWaze": "פתח בווייז",
+    "forms.makePayment": "בצע תשלום",
+    "forms.formStatistics": "סטטיסטיקות הטופס",
+
+    "forms.deleteError": "שגיאה במחיקת הטופס. אנא נסה שוב.",
+
+    "forms.loadingSubmissions": "טוען הגשות...",
+    "forms.parent": "הורה",
+    "forms.instructor": "מדריך",
+    "forms.name": "שם",
+    "forms.email": "אימייל",
+    "forms.phone": "טלפון",
+    "common.back": "חזור",
 
             }
         };

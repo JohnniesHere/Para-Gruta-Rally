@@ -1,8 +1,10 @@
-// src/pages/admin/FormsManagementPage.jsx - Simplified Forms Management
+// src/pages/admin/FormsManagementPage.jsx - Updated with Improvements
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
 import FormCreationModal from '../../components/modals/FormCreationModal';
+import FormEditModal from '../../components/modals/FormEditModal';
+import FormViewModal from '../../components/modals/FormViewModal';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { usePermissions } from '../../hooks/usePermissions.jsx';
@@ -11,7 +13,7 @@ import {
     getFormSubmissions,
     getFormsAnalytics,
     deleteForm
-} from '../../services/formService';
+} from '@/services/formService.js';
 import {
     IconNotes as FileText,
     IconPlus as Plus,
@@ -49,7 +51,13 @@ const FormsManagementPage = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
+
+    // Modal states
     const [showFormCreationModal, setShowFormCreationModal] = useState(false);
+    const [showFormEditModal, setShowFormEditModal] = useState(false);
+    const [showFormViewModal, setShowFormViewModal] = useState(false);
+    const [selectedForm, setSelectedForm] = useState(null);
+    const [templateType, setTemplateType] = useState(null);
 
     // Analytics state
     const [analytics, setAnalytics] = useState({
@@ -91,12 +99,35 @@ const FormsManagementPage = () => {
         }
     };
 
-    // Handle create new form (now opens the Form Creation Modal)
-    const handleCreateForm = () => {
-        console.log('🔧 Create form button clicked!');
-        console.log('🔧 Current showFormCreationModal state:', showFormCreationModal);
+    // Handle create new form
+    const handleCreateForm = (template = null) => {
+        console.log('🔧 Create form button clicked!', template);
+        setTemplateType(template);
         setShowFormCreationModal(true);
-        console.log('🔧 Set showFormCreationModal to true');
+    };
+
+    // Handle edit form
+    const handleEditForm = (form) => {
+        console.log('🔧 Edit form clicked:', form);
+        setSelectedForm(form);
+        setShowFormEditModal(true);
+    };
+
+    // Handle view form
+    const handleViewForm = (form) => {
+        console.log('🔧 View form clicked:', form);
+        setSelectedForm(form);
+        setShowFormViewModal(true);
+    };
+
+    // Handle form card click (open in view mode)
+    const handleFormCardClick = (form) => {
+        handleViewForm(form);
+    };
+
+    // Handle view submissions
+    const handleViewSubmissions = (formId) => {
+        navigate(`/admin/forms/${formId}/submissions`);
     };
 
     // Delete form
@@ -186,7 +217,7 @@ const FormsManagementPage = () => {
                         <div className="quick-actions-grid">
                             <button
                                 className="quick-action-btn"
-                                onClick={handleCreateForm}
+                                onClick={() => handleCreateForm()}
                             >
                                 <Plus size={16} />
                                 {t('forms.createNewForm', 'Create New Form')}
@@ -291,7 +322,12 @@ const FormsManagementPage = () => {
                         ) : filteredForms.length > 0 ? (
                             <div className="forms-grid">
                                 {filteredForms.map(form => (
-                                    <div key={form.id} className="form-card">
+                                    <div
+                                        key={form.id}
+                                        className="form-card"
+                                        onClick={() => handleFormCardClick(form)}
+                                        style={{ cursor: 'pointer' }}
+                                    >
                                         <div className="form-card-header">
                                             <FileText className="form-card-icon" size={20} />
                                             <h4 className="form-card-title">{form.title}</h4>
@@ -336,24 +372,33 @@ const FormsManagementPage = () => {
                                             </div>
                                         </div>
 
-                                        <div className="card-footer">
+                                        <div className="card-footer" onClick={(e) => e.stopPropagation()}>
                                             <button
                                                 className="btn-action view"
-                                                onClick={() => navigate(`/admin/forms/${form.id}/submissions`)}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleViewSubmissions(form.id);
+                                                }}
                                                 title={t('forms.viewSubmissions', 'View Submissions')}
                                             >
                                                 <Eye size={16} />
                                             </button>
                                             <button
                                                 className="btn-action edit"
-                                                onClick={() => alert(t('forms.editFormComingSoon', 'Edit form functionality coming soon!'))}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleEditForm(form);
+                                                }}
                                                 title={t('forms.editForm', 'Edit Form')}
                                             >
                                                 <Edit size={16} />
                                             </button>
                                             <button
                                                 className="btn-action delete"
-                                                onClick={() => handleDeleteForm(form.id)}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDeleteForm(form.id);
+                                                }}
                                                 title={t('forms.deleteForm', 'Delete Form')}
                                             >
                                                 <Trash2 size={16} />
@@ -377,7 +422,7 @@ const FormsManagementPage = () => {
                                 {!searchTerm && statusFilter === 'all' && (
                                     <button
                                         className="btn btn-primary"
-                                        onClick={handleCreateForm}
+                                        onClick={() => handleCreateForm()}
                                     >
                                         <Plus size={16} />
                                         {t('forms.createFirstForm', 'Create Your First Form')}
@@ -387,7 +432,7 @@ const FormsManagementPage = () => {
                         )}
                     </div>
 
-                    {/* Form Templates Section */}
+                    {/* Form Templates Section - Updated without Custom Template */}
                     <div className="form-section form-templates-section">
                         <div className="section-header">
                             <Copy className="section-icon" size={24} />
@@ -405,7 +450,7 @@ const FormsManagementPage = () => {
                                 </div>
                                 <button
                                     className="use-template-btn"
-                                    onClick={() => setShowFormCreationModal(true)}
+                                    onClick={() => handleCreateForm('parent')}
                                 >
                                     {t('forms.useTemplate', 'Use Template')}
                                 </button>
@@ -421,25 +466,9 @@ const FormsManagementPage = () => {
                                 </div>
                                 <button
                                     className="use-template-btn"
-                                    onClick={() => setShowFormCreationModal(true)}
+                                    onClick={() => handleCreateForm('instructor')}
                                 >
                                     {t('forms.useTemplate', 'Use Template')}
-                                </button>
-                            </div>
-
-                            <div className="template-card">
-                                <div className="template-preview">
-                                    <Settings className="template-preview-icon" size={40} />
-                                </div>
-                                <div className="template-name">{t('forms.customFormTemplate', 'Custom Form')}</div>
-                                <div className="template-description">
-                                    {t('forms.customFormDesc', 'Create a custom form with your own fields and layout')}
-                                </div>
-                                <button
-                                    className="use-template-btn"
-                                    onClick={() => setShowFormCreationModal(true)}
-                                >
-                                    {t('forms.createCustom', 'Create Custom')}
                                 </button>
                             </div>
                         </div>
@@ -495,7 +524,7 @@ const FormsManagementPage = () => {
                                                 <td>
                                                     <button
                                                         className="btn-action view"
-                                                        onClick={() => navigate(`/admin/forms/${submission.formId}/submissions`)}
+                                                        onClick={() => handleViewSubmissions(submission.formId)}
                                                         title={t('forms.viewDetails', 'View Details')}
                                                     >
                                                         <Eye size={14} />
@@ -514,20 +543,51 @@ const FormsManagementPage = () => {
                         )}
                     </div>
 
-                    {/* Form Creation Modal for Admins */}
-                    {console.log('🔧 Rendering FormCreationModal, isOpen:', showFormCreationModal)}
+                    {/* Form Creation Modal */}
                     <FormCreationModal
                         isOpen={showFormCreationModal}
+                        templateType={templateType}
                         onClose={() => {
                             console.log('🔧 Modal close called');
                             setShowFormCreationModal(false);
+                            setTemplateType(null);
                         }}
                         onSuccess={(formId) => {
                             console.log('🔧 Form created with ID:', formId);
                             setShowFormCreationModal(false);
+                            setTemplateType(null);
                             loadFormsData(); // Reload data
                         }}
                     />
+
+                    {/* Form Edit Modal */}
+                    {showFormEditModal && (
+                        <FormEditModal
+                            isOpen={showFormEditModal}
+                            form={selectedForm}
+                            onClose={() => {
+                                setShowFormEditModal(false);
+                                setSelectedForm(null);
+                            }}
+                            onSuccess={() => {
+                                setShowFormEditModal(false);
+                                setSelectedForm(null);
+                                loadFormsData(); // Reload data
+                            }}
+                        />
+                    )}
+
+                    {/* Form View Modal */}
+                    {showFormViewModal && (
+                        <FormViewModal
+                            isOpen={showFormViewModal}
+                            form={selectedForm}
+                            onClose={() => {
+                                setShowFormViewModal(false);
+                                setSelectedForm(null);
+                            }}
+                        />
+                    )}
                 </div>
             </div>
         </Dashboard>
