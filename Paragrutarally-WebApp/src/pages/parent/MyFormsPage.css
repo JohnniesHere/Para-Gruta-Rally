@@ -1,0 +1,653 @@
+/* src/pages/parent/MyFormsPage.css - Parent Forms Page Styling */
+@import url('../../styles/global.css');
+
+/* ========================================
+   PARENT FORMS PAGE STYLES
+   ======================================== */
+
+.parent-forms-page {
+    min-height: 100vh;
+    background: var(--bg-primary);
+}
+
+.page-header {
+    background: linear-gradient(135deg, var(--racing-lilach) 0%, var(--racing-purple) 100%);
+    color: white;
+    padding: 40px 24px;
+    margin-bottom: 32px;
+    border-radius: 0 0 20px 20px;
+    text-align: center;
+}
+
+.page-header h1 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin: 0 0 12px 0;
+    font-size: 2.5rem;
+    font-weight: 700;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.page-title-icon {
+    color: #FFD700;
+}
+
+.page-subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.page-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+/* ========================================
+   QUICK ACTIONS SECTION
+   ======================================== */
+
+.quick-actions-section {
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 15px;
+    padding: 24px;
+    box-shadow: 0 4px 15px var(--shadow-color);
+}
+
+.section-header {
+    margin-bottom: 20px;
+}
+
+.section-header h3 {
+    color: var(--text-primary);
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.quick-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.quick-action-card {
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-radius: 15px;
+    padding: 32px 24px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    text-align: center;
+    min-height: 180px;
+    position: relative;
+    overflow: hidden;
+}
+
+.quick-action-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--racing-lilach), var(--racing-purple), var(--racing-lilach));
+}
+
+.quick-action-card:hover {
+    border-color: var(--racing-lilach);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(191, 148, 255, 0.2);
+    background: rgba(191, 148, 255, 0.05);
+}
+
+.quick-action-card svg {
+    color: var(--racing-lilach);
+}
+
+.action-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.action-desc {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+/* ========================================
+   FORMS SECTIONS
+   ======================================== */
+
+.forms-section {
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 15px;
+    padding: 24px;
+    box-shadow: 0 4px 15px var(--shadow-color);
+}
+
+/* ========================================
+   LOADING AND EMPTY STATES
+   ======================================== */
+
+.loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    text-align: center;
+}
+
+.loading-spinner {
+    color: var(--racing-lilach);
+    animation: spin 1s linear infinite;
+    margin-bottom: 16px;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    text-align: center;
+}
+
+.empty-icon {
+    color: var(--text-muted);
+    margin-bottom: 24px;
+    opacity: 0.5;
+}
+
+.empty-state h3 {
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    margin: 0 0 16px 0;
+}
+
+.empty-state p {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    margin: 0 0 32px 0;
+    max-width: 400px;
+    line-height: 1.5;
+}
+
+/* ========================================
+   SUBMISSIONS GRID
+   ======================================== */
+
+.submissions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 24px;
+}
+
+.submission-card {
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-radius: 15px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.submission-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--racing-lilach), var(--racing-purple), var(--racing-lilach));
+}
+
+.submission-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px var(--shadow-hover);
+    border-color: var(--racing-lilach);
+}
+
+.card-header {
+    padding: 20px 20px 0 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.form-info h4 {
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+}
+
+.submission-date {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border: 2px solid;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(5px);
+}
+
+.card-body {
+    padding: 0 20px;
+}
+
+.submission-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 16px 0;
+}
+
+.summary-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.summary-item svg {
+    color: var(--racing-lilach);
+}
+
+.card-footer {
+    padding: 20px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.btn-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border: 2px solid var(--border-color);
+    border-radius: 20px;
+    background: var(--card-bg);
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-action.view:hover {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: #3B82F6;
+    color: #3B82F6;
+}
+
+.btn-action.register:hover {
+    background: rgba(191, 148, 255, 0.1);
+    border-color: var(--racing-lilach);
+    color: var(--racing-lilach);
+}
+
+/* ========================================
+   AVAILABLE FORMS GRID
+   ======================================== */
+
+.available-forms-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.available-form-card {
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-radius: 15px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.available-form-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px var(--shadow-color);
+    border-color: var(--racing-light-purple);
+}
+
+.available-form-card .card-header {
+    padding: 16px;
+    background: var(--bg-tertiary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.available-form-card .card-header h4 {
+    margin: 0;
+    font-size: 1rem;
+}
+
+.submitted-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    background: rgba(16, 185, 129, 0.1);
+    color: #10B981;
+    border: 1px solid #10B981;
+}
+
+.available-form-card .card-body {
+    padding: 16px;
+}
+
+.available-form-card .card-body p {
+    color: var(--text-secondary);
+    margin: 0 0 12px 0;
+    line-height: 1.4;
+}
+
+.form-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+}
+
+.meta-label {
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.meta-value {
+    color: var(--text-primary);
+}
+
+.available-form-card .card-footer {
+    padding: 12px 16px;
+    border-top: 1px solid var(--border-color);
+}
+
+/* ========================================
+   SUBMISSION DETAILS MODAL
+   ======================================== */
+
+.submission-details-modal {
+    width: 800px;
+    max-width: 95vw;
+    max-height: 90vh;
+}
+
+.submission-details {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.details-section {
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.details-section h4 {
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0 0 16px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.detail-item label {
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.detail-item span {
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.status-value {
+    font-weight: 700;
+}
+
+.kids-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.kid-item {
+    background: var(--bg-primary);
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.kid-info {
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.extra-attendees-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.extra-attendee-item {
+    background: var(--bg-primary);
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+}
+
+.shirts-details {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.shirts-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.shirts-group label {
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.shirts-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.shirt-size {
+    background: var(--racing-lilach);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.shirt-size.extra {
+    background: var(--racing-purple);
+}
+
+.declaration-file {
+    display: flex;
+    justify-content: center;
+}
+
+.file-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--racing-lilach);
+    text-decoration: none;
+    font-weight: 600;
+    padding: 12px 20px;
+    border: 2px solid var(--racing-lilach);
+    border-radius: 25px;
+    transition: all 0.3s ease;
+}
+
+.file-link:hover {
+    background: var(--racing-lilach);
+    color: white;
+    transform: translateY(-1px);
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+
+@media (max-width: 768px) {
+    .page-header {
+        padding: 32px 16px;
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .page-container {
+        padding: 0 16px;
+        gap: 24px;
+    }
+
+    .quick-actions-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .quick-action-card {
+        padding: 24px 16px;
+        min-height: 150px;
+    }
+
+    .submissions-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .available-forms-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .details-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .submission-details-modal {
+        width: 95vw;
+        margin: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .forms-section {
+        padding: 16px;
+    }
+
+    .quick-actions-section {
+        padding: 16px;
+    }
+
+    .action-title {
+        font-size: 1rem;
+    }
+
+    .action-desc {
+        font-size: 0.8rem;
+    }
+
+    .card-header {
+        padding: 16px 16px 0 16px;
+    }
+
+    .card-footer {
+        padding: 16px;
+    }
+
+    .details-section {
+        padding: 16px;
+    }
+}

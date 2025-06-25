@@ -150,6 +150,13 @@ const Sidebar = ({userRole}) => {
                             {t('nav.vehicles', 'Vehicles')}
                         </NavLink>
                         <NavLink
+                            to="/instructor/forms"
+                            className={({isActive}) => isActive ? 'active' : ''}
+                        >
+                            <FileText className="sidebar-icon" size={20}/>
+                            {t('nav.forms', 'Forms')}
+                        </NavLink>
+                        <NavLink
                             to="/gallery"
                             className={({isActive}) => isActive ? 'active' : ''}
                         >
@@ -205,6 +212,14 @@ const Sidebar = ({userRole}) => {
                             <Calendar className="sidebar-icon" size={20}/>
                             {t('nav.events', 'Events')}
                         </NavLink>
+                        <NavLink
+                            to="/parent/forms"
+                            className={({isActive}) => isActive ? 'active' : ''}
+                            >
+                            <FileText className="sidebar-icon" size={20}/>
+                            {t('nav.forms', 'Forms')}
+                        </NavLink>
+
                         <NavLink
                             to="/gallery"
                             className={({isActive}) => isActive ? 'active' : ''}
