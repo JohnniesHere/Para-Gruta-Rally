@@ -311,7 +311,6 @@ const EditTeamPage = () => {
                             {t('teams.updateRacingTeam', 'Update Racing Team!')}
                             <Trophy size={24} className="trophy-icon" />
                         </h1>
-                        <p className="subtitle">{t('teams.viewingCurrentInfo', 'Here you can update the team {teamName} 🏁', { teamName: formData.name })}</p>
                     </div>
                 </div>
 
