@@ -811,9 +811,9 @@
 }
 
 .field-action-btn.delete:hover {
-    background: var(--error-color-alpha);
-    border-color: var(--error-color);
-    color: var(--error-color);
+    background: rgba(239, 68, 68, 0.1);
+    border-color: #EF4444;
+    color: #EF4444;
 }
 
 .field-action-btn:disabled {
@@ -928,9 +928,9 @@
 }
 
 .remove-option-btn {
-    background: var(--error-color-alpha);
-    border: 2px solid var(--error-color);
-    color: var(--error-color);
+    background: rgba(239, 68, 68, 0.1);
+    border: 2px solid #EF4444;
+    color: #EF4444;
     padding: 8px;
     border-radius: 6px;
     cursor: pointer;
@@ -941,7 +941,7 @@
 }
 
 .remove-option-btn:hover:not(:disabled) {
-    background: var(--error-color);
+    background: #EF4444;
     color: white;
     transform: scale(1.05);
 }
@@ -1086,9 +1086,9 @@
 }
 
 .btn-action.delete:hover {
-    background: var(--error-color-alpha);
-    border-color: var(--error-color);
-    color: var(--error-color);
+    background: rgba(239, 68, 68, 0.1);
+    border-color: #EF4444;
+    color: #EF4444;
 }
 
 .btn-action:disabled {
