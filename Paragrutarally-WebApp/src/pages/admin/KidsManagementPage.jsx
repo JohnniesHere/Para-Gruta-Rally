@@ -473,7 +473,9 @@ const KidsManagementPage = () => {
     return (
         <Dashboard requiredRole={userRole}>
             <div className={`kids-management-page ${appliedTheme}-mode`}>
-                <h1><Baby size={32} className="page-title-icon" /> {t('kids.title', 'Kids Management')}</h1>
+                <h1 className="page-title">
+                    <Baby size={32} className="page-title-icon" /> {t('kids.title', 'Kids Management')}
+                </h1>
 
                 <div className="kids-management-container">
                     {/* Header with Actions */}
@@ -511,7 +513,6 @@ const KidsManagementPage = () => {
                                 <div className="stat-content">
                                     <h3>{t('kids.kidsWithoutTeams', 'Kids without Teams')}</h3>
                                     <div className="stat-value">{stats.kidsWithoutTeams}</div>
-                                    <div className="stat-subtitle">{t('kids.clickToView', 'Click to view')}</div>
                                 </div>
                             </div>
                         )}

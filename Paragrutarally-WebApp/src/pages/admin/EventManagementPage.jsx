@@ -473,7 +473,9 @@ const EventManagementPage = () => {
     return (
         <Dashboard requiredRole="admin">
             <div className={`event-management-page ${appliedTheme}-mode`} dir={isRTL ? 'rtl' : 'ltr'}>
-                <h1><Calendar size={32} className="page-title-icon" /> {t('events.title', 'Event Management')}</h1>
+                <h1 className="page-title">
+                    <Calendar size={32} className="page-title-icon" /> {t('events.title', 'Event Management')}
+                </h1>
 
                 <div className="event-management-container">
                     {/* Header with Actions */}

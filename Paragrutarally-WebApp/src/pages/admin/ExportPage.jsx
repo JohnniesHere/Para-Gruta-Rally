@@ -65,11 +65,11 @@ const ExportPage = () => {
         <Dashboard requiredRole="admin">
             <div className={`export-page ${appliedTheme}-mode`}>
                 {/* Page Header */}
+                <h1 className="page-title">
+                    <Download className="page-title-icon" size={40} />
+                    {t('export.title', 'Export Data')}
+                </h1>
                 <div className="page-header">
-                    <h1 className="page-title">
-                        <Download className="page-title-icon" size={40} />
-                        {t('export.title', 'Export Data')}
-                    </h1>
                     <p className="page-subtitle">
                         {t('export.subtitle', 'Download your data in CSV format for backup or analysis')}
                     </p>

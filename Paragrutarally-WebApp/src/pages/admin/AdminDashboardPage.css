@@ -55,7 +55,7 @@
     grid-template-columns: 1fr 2fr 1.5fr;
     gap: 15px;
     padding: 12px 15px;
-    background: var(--bg-tertiary, #f8fafc);
+    background-color: var(--bg-secondary);
     border-radius: 8px;
     margin-bottom: 10px;
     font-weight: 600;
@@ -65,7 +65,7 @@
 }
 
 .dark-mode .event-headers {
-    background: var(--bg-quaternary, #374151);
+    background-color: var(--bg-secondary);
     color: var(--text-secondary);
     border-color: var(--border-color);
 }

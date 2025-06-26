@@ -390,9 +390,9 @@ const VehiclesPage = () => {
 
     return (
         <Dashboard requiredRole={userRole}>
-            <div className={`admin-page vehicles-page ${appliedTheme}-mode`}>
+            <div className={`vehicles-page ${appliedTheme}-mode`}>
                 {/* Page Title - TRANSLATED */}
-                <h1>
+                <h1 className="page-title">
                     <Car size={32} className="page-title-icon" />
                     {t('vehicles.title', 'Racing Vehicles')}
                     <Settings size={24} className="sparkle-icon" />

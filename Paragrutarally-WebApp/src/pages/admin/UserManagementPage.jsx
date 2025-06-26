@@ -229,7 +229,9 @@ const UserManagementPage = () => {
     return (
         <Dashboard requiredRole="admin">
             <div className={`user-management-page ${appliedTheme}-mode`} dir={isRTL ? 'rtl' : 'ltr'}>
-                <h1><Users size={32} className="page-title-icon" /> {t('users.title', 'User Management')}</h1>
+                <h1 className="page-title">
+                    <Users size={32} className="page-title-icon" /> {t('users.title', 'User Management')}
+                </h1>
 
                 <div className="user-management-container">
                     {/* Header with Export in top-right */}

@@ -305,7 +305,9 @@ const TeamsManagementPage = () => {
     return (
         <Dashboard requiredRole={userRole}>
             <div className={`teams-management-page ${appliedTheme}-mode`}>
-                <h1><Team size={32} className="page-title-icon" /> {t('teams.title', 'Teams Management')}</h1>
+                <h1 className="page-title">
+                    <Team size={32} className="page-title-icon" /> {t('teams.title', 'Teams Management')}
+                </h1>
 
                 <div className="teams-management-container">
                     {/* Header with Actions */}
@@ -366,7 +368,6 @@ const TeamsManagementPage = () => {
                             <div className="stat-content">
                                 <h3>{t('teams.teamsWithoutKids', 'Teams without Kids')}</h3>
                                 <div className="stat-value">{stats.teamsWithoutKids}</div>
-                                <div className="stat-subtitle">{t('teams.clickToView', 'Click to view')}</div>
                             </div>
                         </div>
 

@@ -61,7 +61,7 @@
     --bg-primary: #0F172A;
     --bg-secondary: #1E293B;
     --bg-tertiary: #334155;
-    --bg-quaternary: #475569;
+    --bg-quaternary: #a8b0bd;
 
     --text-primary: #F1F5F9;
     --text-secondary: #CBD5E1;
@@ -451,7 +451,6 @@
 }
 
 .stat-card.clickable::after {
-    content: '→';
     position: absolute;
     top: 20px;
     right: 20px;
@@ -781,7 +780,7 @@ body.dark .stat-card.total::before {
    ======================================== */
 
 .form-section {
-    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-quaternary) 100%);
+    background: var(--bg-tertiary);
     border-radius: 20px;
     padding: 25px;
     margin-bottom: 25px;

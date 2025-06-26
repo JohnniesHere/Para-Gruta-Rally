@@ -5,11 +5,11 @@ import Dashboard from '../../components/layout/Dashboard';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext'; // Add this import
 import { usePermissions } from '../../hooks/usePermissions.jsx';
-import { getKidById, deleteKid } from '../../services/kidService';
-import { getTeamById } from '../../services/teamService';
-import { getKidPhotoInfo } from '../../services/kidPhotoService';
-import { getVehicleById } from '../../services/vehicleService';
-import { getVehiclePhotoInfo } from '../../services/vehiclePhotoService';
+import { getKidById, deleteKid } from '@/services/kidService.js';
+import { getTeamById } from '@/services/teamService.js';
+import { getKidPhotoInfo } from '@/services/kidPhotoService.js';
+import { getVehicleById } from '@/services/vehicleService.js';
+import { getVehiclePhotoInfo } from '@/services/vehiclePhotoService.js';
 import {
     IconUserCircle as Baby,
     IconEdit as Edit,

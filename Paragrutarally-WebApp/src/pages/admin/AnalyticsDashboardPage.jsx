@@ -147,13 +147,13 @@ const AnalyticsDashboardPage = () => {
     return (
         <Dashboard requiredRole="admin">
             <div className={`admin-page analytics-page ${appliedTheme}-mode`}>
-                <h1>
+                <h1 className="page-title">
                     <Analytics size={32} className="page-title-icon" />
                     {t('analytics.pageTitle', 'Racing Analytics Dashboard')}
                     <Sparkles size={24} className="sparkle-icon" />
                 </h1>
 
-                <div className="admin-container">
+                <div>
                     <div className="analytics-header">
                         <div className="header-info">
                             <h2>{t('analytics.raceControlTitle', '🏁 Race Control Analytics')}</h2>

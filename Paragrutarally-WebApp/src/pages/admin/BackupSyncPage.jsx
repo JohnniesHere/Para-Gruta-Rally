@@ -447,8 +447,7 @@ const BackupSyncPage = () => {
     return (
         <Dashboard requiredRole="admin">
             <div className={`backup-sync-page ${appliedTheme}-mode`}>
-                <h1>{t('backup.title', 'Backup & Sync')}</h1>
-
+                <h1 className="page-title">{t('backup.title', 'Backup & Sync')}</h1>
                 <div className="content-section">
                     <h2>{t('backup.databaseBackup', 'Database Backup')}</h2>
                     <p>{t('backup.description', 'Create and manage backups of your application data.')}</p>

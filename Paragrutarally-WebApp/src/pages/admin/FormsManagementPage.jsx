@@ -185,28 +185,14 @@ const FormsManagementPage = () => {
         <Dashboard requiredRole={userRole}>
             <div className={`forms-management-page ${appliedTheme}-mode`}>
                 {/* Page Title */}
-                <h1>
+                <h1 className="page-title">
                     <FileText size={32} className="page-title-icon" />
                     {t('forms.title', 'Forms Management')}
                     <Sparkles size={24} className="sparkle-icon" />
                 </h1>
 
                 {/* Main Container */}
-                <div className="admin-container forms-management-container">
-                    {/* Racing Header */}
-                    <div className="racing-header">
-                        <div className="header-content">
-                            <div className="title-section">
-                                <h2>
-                                    <Trophy size={28} className="page-title-icon" />
-                                    {t('forms.racingFormsCenter', 'Racing Forms Control Center')}
-                                </h2>
-                                <p className="subtitle">
-                                    {t('forms.subtitle', 'Create, manage and distribute forms to your racing community! 🏁')}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
+                <div className="forms-management-container">
 
                     {/* Quick Actions */}
                     <div className="quick-actions">

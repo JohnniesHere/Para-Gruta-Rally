@@ -394,12 +394,12 @@ const GalleryPage = () => {
         <Dashboard requiredRole={userRole}>
             <div className={`gallery-page ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
                 {/* Header - TRANSLATED */}
+                <h1 className="page-title">
+                    <Photo size={32} className="page-title-icon" />
+                    {t('gallery.title', 'Photo Gallery')}
+                </h1>
                 <div className="gallery-header">
                     <div className="gallery-title-section">
-                        <h1>
-                            <Photo size={32} className="page-title-icon" />
-                            {t('gallery.title', 'Photo Gallery')}
-                        </h1>
                         {eventId && (
                             <button
                                 onClick={() => navigate('/gallery')}
