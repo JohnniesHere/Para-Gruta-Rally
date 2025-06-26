@@ -2579,10 +2579,33 @@ export const LANGUAGES = {
         "common.back": "Back",
         'dashboard.user': 'User',
 
+        'viewVehicle.status.assignedToKids': 'Assigned to Kids',
+        'viewVehicle.status.notAssigned': 'Not Assigned',
+        'viewVehicle.status.assignedToTeam': 'Assigned to Team',
+        'viewVehicle.status.assignedToInstructor': 'Assigned to Instructor',
+        'viewVehicle.status.assignedToEvent': 'Assigned to Event',
+        'viewVehicle.status.assignedToParent': 'Assigned to Parent',
+
+        'dashboard.newKid': 'New Kid',
+        'teams.clickToView': 'Click to view team',
+        'viewVehicle.status': 'Vehicle Status',
+        'dashboard.newVehicle': 'New Vehicle',
+        'vehicles.clearAll': 'Clear All',
     },
 
 
     he: {
+        'vehicles.clearAll': 'נקה הכל',
+        'dashboard.newVehicle': 'רכב חדש',
+        'dashboard.newKid': 'ילד חדש',
+        'teams.clickToView': 'לחץ כדי לצפות בקבוצה',
+        'viewVehicle.status': 'סטטוס רכב',
+        'viewVehicle.status.assignedToKids': 'מוקצה לילדים',
+        'viewVehicle.status.notAssigned': 'לא מוקצה',
+        'viewVehicle.status.assignedToTeam': 'מוקצה לקבוצה',
+        'viewVehicle.status.assignedToInstructor': 'מוקצה למדריך',
+        'viewVehicle.status.assignedToEvent': 'מוקצה לאירוע',
+        'viewVehicle.status.assignedToParent': 'מוקצה להורה',
         'parentEvents.dateTBD': 'תאריך ייקבע מאוחר יותר',
         'instructor.pastEvents': 'אירועים קודמים',
         'events.past': 'אירועים קודמים',
