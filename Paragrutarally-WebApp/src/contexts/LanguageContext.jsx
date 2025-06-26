@@ -1476,7 +1476,7 @@ export const LANGUAGES = {
         'analytics.teams.members': 'Members',
         'analytics.teams.instructors': 'Instructors',
         'analytics.teams.vehicleDistribution': '🚗 Vehicle Distribution',
-        'analytics.teams.ratio': 'Ratio',
+        'analytics.teams.ratio': ' Ratio',
         'analytics.participation.eventsOverview': '🏁 Events Overview',
         'analytics.participation.totalEvents': 'Total Events',
         'analytics.participation.upcomingEvents': 'Upcoming',
@@ -2577,6 +2577,7 @@ export const LANGUAGES = {
         "forms.email": "Email",
         "forms.phone": "Phone",
         "common.back": "Back",
+        'dashboard.user': 'User',
 
     },
 
@@ -3365,6 +3366,7 @@ export const LANGUAGES = {
 
 
         // Dashboard
+        'dashboard.user': 'משתמש',
         'dashboard.title': 'לוח בקרה ראשי',
         'dashboard.totalUsers': 'כמות המשתמשים במערכת',
         'dashboard.upcomingEvents': 'אירועים קרובים',
@@ -4628,7 +4630,7 @@ export const LANGUAGES = {
         'analytics.teams.members': 'חברים',
         'analytics.teams.instructors': 'מדריכים',
         'analytics.teams.vehicleDistribution': '🚗 חלוקת רכבים',
-        'analytics.teams.ratio': 'יחס',
+        'analytics.teams.ratio': ' יחס',
 
         // Participation analytics
         'analytics.participation.eventsOverview': '🏁 סקירת אירועים',

@@ -69,9 +69,10 @@
 }
 
 .header-info small {
-    color: var(--text-muted);
+    color: var(--text-secondary);
     font-size: 12px;
     font-weight: 500;
+
 }
 
 /* ========================================
@@ -215,6 +216,24 @@
     font-weight: 700;
     transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4);
+}
+/* Ensure tab button text is always visible */
+.tab-button,
+.tab-button .tab-label,
+.tab-button .tab-description {
+    color: var(--text-secondary) !important;
+}
+
+.tab-button:hover,
+.tab-button:hover .tab-label,
+.tab-button:hover .tab-description {
+    color: var(--text-primary) !important;
+}
+
+.tab-button.active,
+.tab-button.active .tab-label,
+.tab-button.active .tab-description {
+    color: var(--text-primary) !important;
 }
 
 .tab-button.active::after {
@@ -375,6 +394,22 @@
     box-shadow: 0 10px 30px rgba(255, 215, 0, 0.3);
     position: relative;
     overflow: hidden;
+}
+
+.kpi-section h3,
+.kpi-section .kpi-header h4,
+.kpi-section .kpi-value,
+.kpi-section .kpi-description {
+    color: var(--text-primary) !important;
+}
+/* Dark mode text fixes */
+[data-theme="dark"] .kpi-section h3,
+[data-theme="dark"] .kpi-section .kpi-header h4,
+[data-theme="dark"] .kpi-section .kpi-value,
+.dark-mode .kpi-section h3,
+.dark-mode .kpi-section .kpi-header h4,
+.dark-mode .kpi-section .kpi-value {
+    color: var(--text-primary) !important;
 }
 
 .kpi-section::before {
@@ -556,10 +591,21 @@
 }
 
 .stat-value {
-    color: var(--racing-lilach);
+    color: var(--text-primary) !important;
     font-size: 18px;
     font-weight: 700;
     text-shadow: 0 1px 2px rgba(255, 215, 0, 0.2);
+}
+
+/* Keep racing color for accent but ensure visibility */
+.summary-stat .stat-value {
+    color: var(--racing-lilach) !important;
+}
+
+/* Dark mode override for better visibility */
+[data-theme="dark"] .summary-stat .stat-value,
+.dark-mode .summary-stat .stat-value {
+    color: var(--racing-light-purple) !important;
 }
 
 /* ========================================
@@ -675,6 +721,17 @@
     margin-bottom: 5px;
     text-transform: uppercase;
     letter-spacing: 1px;
+}
+
+/* Ensure all vehicle item text is visible */
+.vehicle-item .vehicle-name,
+.vehicle-item .vehicle-stats,
+.vehicle-item .vehicle-rank {
+    color: var(--text-primary) !important;
+}
+
+.vehicle-item .vehicle-stats {
+    color: var(--text-secondary) !important;
 }
 
 .vehicle-stats {

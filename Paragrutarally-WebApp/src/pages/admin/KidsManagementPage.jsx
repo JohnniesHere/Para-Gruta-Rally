@@ -620,8 +620,16 @@ const KidsManagementPage = () => {
                             <FileSpreadsheet className="results-icon" size={18} />
                             {t('kids.showing', 'Showing')} {filteredKids.length} {t('kids.of', 'of')} {kids.length} {t('kids.kids', 'kids')}
                             {showingKidsWithoutTeams && <span className="priority-filter"> • 🚨 {t('kids.priorityFilter', 'PRIORITY: Kids without teams')}</span>}
-                            {teamFilter !== 'all' && !showingKidsWithoutTeams && <span className="filter-applied"> • {t('kids.team', 'Team')}: {teamFilter}</span>}
-                            {statusFilter !== 'all' && <span className="filter-applied"> • {t('kids.status', 'Status')}: {statusFilter}</span>}
+                            {teamFilter !== 'all' && !showingKidsWithoutTeams && <span className="filter-applied"> • {t('kids.status', 'Status')}: {teamFilter==='with-team' ? t('kids.withTeam', 'With Team'): teamFilter=== 'no-team' ?t('kids.noTeam', 'No Team'): teamFilter}</span>}
+                            {statusFilter !== 'all' && (
+                                <span className="filter-applied">
+                                    • {t('kids.status', 'Status')}: {
+                                    statusFilter === 'active'
+                                        ? t('kids.active', 'Active')
+                                        : t(`status.${statusFilter}`, statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1))
+                                }
+                         </span>
+                            )}
                             {searchTerm && <span className="search-applied"> • {t('general.search', 'Search')}: "{searchTerm}"</span>}
                         </div>
 

@@ -86,7 +86,7 @@ const EventManagementPage = () => {
                     location: data.location || t('events.locationTBD', 'Location TBD'),
                     date: data.date || t('events.dateTBD', 'Date TBD'),
                     participants: data.attendees || 0,
-                    status: data.status || 'upcoming',
+                    status: data.status || t('events.upcoming','upcoming'),
                     notes: data.notes || '',
                     participatingTeams: data.participatingTeams || [],
                     hasGalleryFolder: data.hasGalleryFolder || false,
@@ -135,8 +135,8 @@ const EventManagementPage = () => {
 
             const matchesStatus =
                 statusFilter === 'all' ||
-                (statusFilter === 'upcoming' && event.status === 'upcoming') ||
-                (statusFilter === 'completed' && event.status === 'completed');
+                (statusFilter === 'upcoming' && event.status === t('events.upcoming', 'upcoming')) ||
+                (statusFilter === 'completed' && event.status === t('events.completed', 'completed'));
 
             const matchesLocation =
                 locationFilter === 'all' ||
@@ -439,6 +439,20 @@ const EventManagementPage = () => {
         setLocationFilter('all');
     };
 
+    // Helper function to get translated status label
+    const getTranslatedStatusLabel = (status) => {
+        switch (status) {
+            case 'upcoming':
+                return t('events.upcoming', 'Upcoming Events');
+            case 'completed':
+                return t('events.completed', 'Completed Events');
+            case 'all':
+                return t('events.allEvents', 'All Events');
+            default:
+                return status;
+        }
+    };
+
     if (error) {
         return (
             <Dashboard requiredRole="admin">
@@ -578,9 +592,15 @@ const EventManagementPage = () => {
                     <div className="results-info">
                         <FileSpreadsheet className="results-icon" size={18} />
                         {t('events.showing', 'Showing')} {filteredEvents.length} {t('teams.of', 'of')} {events.length} {t('events.eventsLowercase', 'events')}
-                        {statusFilter !== 'all' && <span className="filter-applied"> • {t('events.status', 'Status')}: {statusFilter}</span>}
-                        {locationFilter !== 'all' && <span className="filter-applied"> • {t('events.location', 'Location')}: {locationFilter}</span>}
-                        {searchTerm && <span className="search-applied"> • {t('events.searchLabel', 'Search')}: "{searchTerm}"</span>}
+                        {statusFilter !== 'all' && (
+                            <span className="filter-applied"> • {t('events.status', 'Status')}: {getTranslatedStatusLabel(statusFilter)}</span>
+                        )}
+                        {locationFilter !== 'all' && (
+                            <span className="filter-applied"> • {t('events.location', 'Location')}: {locationFilter}</span>
+                        )}
+                        {searchTerm && (
+                            <span className="search-applied"> • {t('events.searchLabel', 'Search')}: "{searchTerm}"</span>
+                        )}
                     </div>
 
                     {/* Events Table */}
