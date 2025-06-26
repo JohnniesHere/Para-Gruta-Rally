@@ -82,6 +82,11 @@ import KidDetailView from './components/kids/KidDetail.jsx';
 import './styles/theme.css';
 import './App.css';
 
+// Import legal pages
+import PrivacyPolicyPage from './pages/legal/PrivacyPolicyPage';
+import TermsOfServicePage from './pages/legal/TermsOfServicePage';
+
+
 function App() {
     return (
         <ErrorBoundary>
@@ -98,6 +103,8 @@ function App() {
                                                ======================================== */}
                                             <Route path="/login" element={<Login />} />
                                             <Route path="/forgot-password" element={<Login />} />
+                                            <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+                                            <Route path="/terms-of-service" element={<TermsOfServicePage />} />
 
                                             {/* ========================================
                                                ADMIN ROUTES
