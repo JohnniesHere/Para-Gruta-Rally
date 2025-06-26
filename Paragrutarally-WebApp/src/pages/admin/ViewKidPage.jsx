@@ -27,7 +27,7 @@ import {
     IconChevronRight as ChevronRight,
     IconCamera as Camera,
     IconSettings as Settings,
-    IconBattery as Battery
+    IconBattery as Battery, IconArrowRight as ArrowRight
 } from '@tabler/icons-react';
 import './ViewKidPage.css';
 
@@ -38,7 +38,7 @@ const ViewKidPage = () => {
     const { appliedTheme } = useTheme();
     const { t } = useLanguage(); // Add this hook
     const { userRole } = usePermissions();
-
+    const {isHebrew, isRTL } = useLanguage();
     const [kidData, setKidData] = useState(null);
     const [teamData, setTeamData] = useState(null);
     const [vehicleData, setVehicleData] = useState(null);
@@ -309,10 +309,21 @@ const ViewKidPage = () => {
                     <div className="error-container">
                         <h3>{t('common.error', 'Error')}</h3>
                         <p>{error}</p>
-                        <button onClick={handleBack} className="btn-primary">
-                            <ArrowLeft className="btn-icon" size={18} />
+                        <button
+                            onClick={handleBack}
+                            className={`back-button ${appliedTheme}-back-button ${isRTL ? 'rtl' : ''}`}>
+                        {isHebrew ? (
+                        <>
                             {t('editKid.backToKids', 'Back to Kids')}
-                        </button>
+                            <ArrowRight className="btn-icon" size={20} />
+                        </>
+                         ) : (
+                        <>
+                            <ArrowLeft className="btn-icon" size={20} />
+                            {t('editKid.backToKids', 'Back to Kids')}
+                        </>
+                    )}
+                </button>
                     </div>
                 </div>
             </Dashboard>
@@ -324,22 +335,33 @@ const ViewKidPage = () => {
     return (
         <Dashboard requiredRole={userRole}>
             <div className={`view-kid-page ${appliedTheme}-mode`}>
-                <button onClick={handleBack} className={`back-button ${appliedTheme}-back-button`}>
-                    <ArrowLeft className="btn-icon" size={20} />
-                    {t('editKid.backToKids', 'Back to Kids')}
+                <button
+                    onClick={handleBack}
+                    className={`back-button ${appliedTheme}-back-button ${isRTL ? 'rtl' : ''}`}>
+                    {isHebrew ? (
+                        <>
+                            {t('editKid.backToKids', 'Back to Kids')}
+                            <ArrowRight className="btn-icon" size={20}/>
+                        </>
+                    ) : (
+                        <>
+                            <ArrowLeft className="btn-icon" size={20}/>
+                            {t('editKid.backToKids', 'Back to Kids')}
+                        </>
+                    )}
                 </button>
                 <div className="racing-header">
                     <div className="header-content">
                         <div className="title-section">
                             <h1>
-                                <Star size={32} className="page-title-icon" />
+                                <Star size={32} className="page-title-icon"/>
                                 {t('viewKid.racingStarProfile', 'Racing Star Profile!')}
-                                <Trophy size={24} className="trophy-icon" />
+                                <Trophy size={24} className="trophy-icon"/>
                             </h1>
                             <p className="subtitle">{t('viewKid.meetOurRacer', 'Meet our amazing racer! 🏁')}</p>
                         </div>
                         <div className="header-actions">
-                            {userRole === 'admin' && (
+                        {userRole === 'admin' && (
                                 <button onClick={handleEdit} className="edit-button">
                                     <Edit className="btn-icon" size={18} />
                                     {t('general.edit', 'Edit')}

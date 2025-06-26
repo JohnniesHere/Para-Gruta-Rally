@@ -28,7 +28,7 @@ import {
     IconTool as Tool,
     IconCircle as CheckCircle,
     IconCircle as XCircle,
-    IconInfoCircle as InfoCircle
+    IconInfoCircle as InfoCircle, IconArrowRight as ArrowRight
 } from '@tabler/icons-react';
 import './ViewVehiclePage.css';
 
@@ -37,7 +37,7 @@ const ViewVehiclePage = () => {
     const { id } = useParams();
     const location = useLocation();
     const { appliedTheme } = useTheme();
-    const { t } = useLanguage();
+    const { t, isRTL, isHebrew } = useLanguage();
     const { permissions, userRole, userData } = usePermissions();
 
     const [vehicle, setVehicle] = useState(null);
@@ -287,9 +287,19 @@ const ViewVehiclePage = () => {
                     <div className="error-container">
                         <h3>{t('viewVehicle.error', 'Error')}</h3>
                         <p>{error || t('viewVehicle.vehicleNotFound', 'Vehicle not found')}</p>
-                        <button onClick={handleBack} className="btn-primary">
-                            <ArrowLeft className="btn-icon" size={18} />
-                            {t('viewVehicle.backToVehicles', 'Back to Vehicles')}
+                        <button onClick={handleBack}
+                                className={`back-button ${appliedTheme}-back-button ${isRTL ? 'rtl' : ''}`}>
+                            {isHebrew ? (
+                                <>
+                                    {t('editVehicle.backToVehicles', 'Back to Vehicles')}
+                                    <ArrowRight className="btn-icon" size={20}/>
+                                </>
+                            ) : (
+                                <>
+                                    <ArrowLeft className="btn-icon" size={20}/>
+                                    {t('editVehicle.backToVehicles', 'Back to Vehicles')}
+                                </>
+                            )}
                         </button>
                     </div>
                 </div>
@@ -304,16 +314,26 @@ const ViewVehiclePage = () => {
         <Dashboard requiredRole={userRole}>
             <div className={`admin-page view-vehicle-page ${appliedTheme}-mode`}>
                 {/* Page Title - TRANSLATED */}
-                <button onClick={handleBack} className={`back-button ${appliedTheme}-back-button`}>
-                    <ArrowLeft className="btn-icon" size={20} />
-                    {t('viewVehicle.backToVehicles', 'Back to Vehicles')}
+                <button onClick={handleBack}
+                        className={`back-button ${appliedTheme}-back-button ${isRTL ? 'rtl' : ''}`}>
+                    {isHebrew ? (
+                        <>
+                            {t('editVehicle.backToVehicles', 'Back to Vehicles')}
+                            <ArrowRight className="btn-icon" size={20}/>
+                        </>
+                    ) : (
+                        <>
+                            <ArrowLeft className="btn-icon" size={20}/>
+                            {t('editVehicle.backToVehicles', 'Back to Vehicles')}
+                        </>
+                    )}
                 </button>
                 <div className="page-header">
                     <div className="title-section">
                         <h1>
-                            <Car size={32} className="page-title-icon" />
-                            {t('viewVehicle.title', '{make} {model}', { make: vehicle.make, model: vehicle.model })}
-                            <Settings size={24} className="sparkle-icon" />
+                            <Car size={32} className="page-title-icon"/>
+                            {t('viewVehicle.title', '{make} {model}', {make: vehicle.make, model: vehicle.model})}
+                            <Settings size={24} className="sparkle-icon"/>
                         </h1>
                     </div>
                 </div>
@@ -323,7 +343,7 @@ const ViewVehiclePage = () => {
                     <div className="racing-header">
                         <div className="header-content">
                             <div className="title-section">
-                                <h1>{vehicle.make} {vehicle.model}</h1>
+                            <h1>{vehicle.make} {vehicle.model}</h1>
                                 <p className="subtitle">{t('viewVehicle.licensePlateLabel', 'License Plate:')} {vehicle.licensePlate}</p>
                             </div>
                             <div className="header-actions">

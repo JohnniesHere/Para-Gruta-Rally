@@ -39,7 +39,7 @@ import {
     IconMessage as MessageCircle,
     IconTrash as Trash2,
     IconSettings as Settings,
-    IconBattery as Battery
+    IconBattery as Battery, IconArrowRight as ArrowRight
 } from '@tabler/icons-react';
 import { updateKidVehicleAssignments } from '../../services/vehicleAssignmentService';
 
@@ -48,7 +48,7 @@ const EditKidPage = () => {
     const { id } = useParams();
     const location = useLocation();
     const { isDarkMode, appliedTheme } = useTheme();
-    const { t } = useLanguage();
+    const { t, isRTL, isHebrew } = useLanguage();
     const formStatusOptions = getFormStatusOptions(t);
     const { permissions, userRole, userData } = usePermissions();
 
@@ -624,10 +624,20 @@ const EditKidPage = () => {
                     <div className="error-container">
                         <h3>{t('editKid.error', 'Error')}</h3>
                         <p>{errors.general}</p>
-                        <button onClick={() => navigate('/admin/kids')} className="btn-primary">
-                            <ArrowLeft className="btn-icon" size={18} />
+                        <button onClick={() => navigate('/admin/kids')}
+                            className={`back-button ${appliedTheme}-back-button ${isRTL ? 'rtl' : ''}`}>
+                        {isHebrew ? (
+                        <>
                             {t('editKid.backToKids', 'Back to Kids')}
-                        </button>
+                            <ArrowRight className="btn-icon" size={20} />
+                        </>
+                         ) : (
+                        <>
+                            <ArrowLeft className="btn-icon" size={20} />
+                            {t('editKid.backToKids', 'Back to Kids')}
+                        </>
+                    )}
+                </button>
                     </div>
                 </div>
             </Dashboard>
@@ -641,19 +651,29 @@ const EditKidPage = () => {
         <Dashboard requiredRole={userRole}>
             <div className={`admin-page add-kid-page ${appliedTheme}-mode`}>
                 {/* Page Title */}
-                <button onClick={handleCancel} className={`back-button ${appliedTheme}-back-button`}>
-                    <ArrowLeft className="btn-icon" size={20} />
-                    {t('editKid.backToProfile', 'Back to Profile')}
+                <button onClick={() => navigate('/admin/kids')}
+                        className={`back-button ${appliedTheme}-back-button ${isRTL ? 'rtl' : ''}`}>
+                    {isHebrew ? (
+                        <>
+                            {t('editKid.backToKids', 'Back to Kids')}
+                            <ArrowRight className="btn-icon" size={20}/>
+                        </>
+                    ) : (
+                        <>
+                            <ArrowLeft className="btn-icon" size={20}/>
+                            {t('editKid.backToKids', 'Back to Kids')}
+                        </>
+                    )}
                 </button>
                 <div className="page-header">
                     <div className="title-section">
                         <h1>
-                            <Edit size={32} className="page-title-icon" />
+                            <Edit size={32} className="page-title-icon"/>
                             {firstName
-                                ? t('editKid.title', 'Update {firstName}\'s Info!', { firstName })
+                                ? t('editKid.title', 'Update {firstName}\'s Info!', {firstName})
                                 : t('editKid.titleGeneric', 'Update Racer\'s Info!')
                             }
-                            <Sparkles size={24} className="sparkle-icon" />
+                            <Sparkles size={24} className="sparkle-icon"/>
                         </h1>
                     </div>
                 </div>
@@ -661,20 +681,20 @@ const EditKidPage = () => {
                 <div className="add-kid-container">
                     {errors.general && (
                         <div className="alert error-alert">
-                            <AlertTriangle size={20} />
+                            <AlertTriangle size={20}/>
                             {errors.general}
                         </div>
                     )}
 
                     {!firstName ? (
                         <div className="alert info-alert">
-                            <Check size={20} />
+                            <Check size={20}/>
                             {t('editKid.editingInfoGeneric', 'You\'re editing this racer\'s information. Make changes below to update! 🏎️')}
                         </div>
                     ) : (
                         <div className="alert info-alert">
-                            <Check size={20} />
-                            {t('editKid.editingInfo', 'You\'re editing {firstName}\'s information. Make changes below to update! 🏎️', { firstName })}
+                            <Check size={20}/>
+                            {t('editKid.editingInfo', 'You\'re editing {firstName}\'s information. Make changes below to update! 🏎️', {firstName})}
                         </div>
                     )}
 
@@ -682,7 +702,7 @@ const EditKidPage = () => {
                         {/* Basic Info Section with Photo */}
                         <div className="form-section racing-section">
                             <div className="section-header">
-                                <Baby className="section-icon" size={24} />
+                                <Baby className="section-icon" size={24}/>
                                 <h2>{t('editKid.racerProfile', '🏎️ Racer Profile')}</h2>
                             </div>
                             <div className="form-grid">
@@ -714,7 +734,7 @@ const EditKidPage = () => {
                                                     onClick={() => document.getElementById('photo-upload').click()}
                                                     title={photoDisplay.hasPhoto ? t('editKid.changePhoto', 'Change Photo') : t('editKid.uploadPhoto', 'Upload Photo')}
                                                 >
-                                                    <Camera size={18} />
+                                                    <Camera size={18}/>
                                                     <span className="btn-text">
                                                         {photoDisplay.hasPhoto ? t('editKid.changePhoto', 'Change') : t('editKid.uploadPhoto', 'Upload')}
                                                     </span>
@@ -727,8 +747,9 @@ const EditKidPage = () => {
                                                         onClick={handleRemovePhoto}
                                                         title={t('editKid.removePhoto', 'Remove Photo')}
                                                     >
-                                                        <Trash2 size={18} />
-                                                        <span className="btn-text">{t('editKid.removePhoto', 'Remove')}</span>
+                                                        <Trash2 size={18}/>
+                                                        <span
+                                                            className="btn-text">{t('editKid.removePhoto', 'Remove')}</span>
                                                     </button>
                                                 )}
                                             </div>
@@ -740,7 +761,7 @@ const EditKidPage = () => {
                                             accept="image/jpeg,image/jpg,image/png,image/webp"
                                             onChange={handlePhotoSelection}
                                             className="photo-upload-input"
-                                            style={{ display: 'none' }}
+                                            style={{display: 'none'}}
                                         />
 
                                         <div className="photo-upload-info">
@@ -753,7 +774,8 @@ const EditKidPage = () => {
                                 </div>
 
                                 <div className="form-group">
-                                    <label className="form-label">{t('editKid.raceNumber', '🏁 Race Number')} {t('editKid.required', '*')}</label>
+                                    <label
+                                        className="form-label">{t('editKid.raceNumber', '🏁 Race Number')} {t('editKid.required', '*')}</label>
                                     <input
                                         type="text"
                                         className={`form-input ${hasFieldError('participantNumber') ? 'error' : ''}`}
@@ -767,7 +789,8 @@ const EditKidPage = () => {
                                 </div>
 
                                 <div className="form-group">
-                                    <label className="form-label">{t('editKid.firstName', '👤 First Name')} {t('editKid.required', '*')}</label>
+                                    <label
+                                        className="form-label">{t('editKid.firstName', '👤 First Name')} {t('editKid.required', '*')}</label>
                                     <input
                                         type="text"
                                         className={`form-input ${hasFieldError('personalInfo.firstName') ? 'error' : ''}`}
@@ -781,7 +804,8 @@ const EditKidPage = () => {
                                 </div>
 
                                 <div className="form-group">
-                                    <label className="form-label">{t('editKid.lastName', '👨‍👩‍👧‍👦 Last Name')} {t('editKid.required', '*')}</label>
+                                    <label
+                                        className="form-label">{t('editKid.lastName', '👨‍👩‍👧‍👦 Last Name')} {t('editKid.required', '*')}</label>
                                     <input
                                         type="text"
                                         className={`form-input ${hasFieldError('personalInfo.lastName') ? 'error' : ''}`}
@@ -795,7 +819,8 @@ const EditKidPage = () => {
                                 </div>
 
                                 <div className="form-group">
-                                    <label className="form-label">{t('editKid.birthday', '🎂 Birthday')} {t('editKid.required', '*')}</label>
+                                    <label
+                                        className="form-label">{t('editKid.birthday', '🎂 Birthday')} {t('editKid.required', '*')}</label>
                                     <input
                                         type="date"
                                         className={`form-input ${hasFieldError('personalInfo.dateOfBirth') ? 'error' : ''}`}
@@ -803,12 +828,14 @@ const EditKidPage = () => {
                                         onChange={(e) => handleInputChange('personalInfo.dateOfBirth', e.target.value)}
                                     />
                                     {getErrorMessage('personalInfo.dateOfBirth') && (
-                                        <span className="error-text">{getErrorMessage('personalInfo.dateOfBirth')}</span>
+                                        <span
+                                            className="error-text">{getErrorMessage('personalInfo.dateOfBirth')}</span>
                                     )}
                                 </div>
 
                                 <div className="form-group full-width">
-                                    <label className="form-label">{t('editKid.homeBaseLocation', '🏠 Home Base Location')}</label>
+                                    <label
+                                        className="form-label">{t('editKid.homeBaseLocation', '🏠 Home Base Location')}</label>
                                     <input
                                         type="text"
                                         className="form-input"
@@ -823,12 +850,13 @@ const EditKidPage = () => {
                         {/* Capabilities Section */}
                         <div className="form-section skills-section">
                             <div className="section-header">
-                                <Sparkles className="section-icon" size={24} />
+                                <Sparkles className="section-icon" size={24}/>
                                 <h2>{t('editKid.superPowersSkills', '💪 Super Powers & Skills')}</h2>
                             </div>
                             <div className="form-grid">
                                 <div className="form-group full-width">
-                                    <label className="form-label">{t('editKid.amazingAbilities', '🌟 Amazing Abilities')}</label>
+                                    <label
+                                        className="form-label">{t('editKid.amazingAbilities', '🌟 Amazing Abilities')}</label>
                                     <textarea
                                         className="form-textarea"
                                         placeholder={t('editKid.amazingAbilitiesPlaceholder', 'Tell us about this racer\'s awesome skills and abilities!')}
@@ -839,7 +867,8 @@ const EditKidPage = () => {
                                 </div>
 
                                 <div className="form-group full-width">
-                                    <label className="form-label">{t('editKid.announcerNotes', '📢 Announcer\'s Special Notes')}</label>
+                                    <label
+                                        className="form-label">{t('editKid.announcerNotes', '📢 Announcer\'s Special Notes')}</label>
                                     <textarea
                                         className="form-textarea"
                                         placeholder={t('editKid.announcerNotesPlaceholder', 'Fun facts to share during the race!')}
@@ -854,14 +883,14 @@ const EditKidPage = () => {
                         {/* Parent Information - LOCKED */}
                         <div className="form-section parent-section">
                             <div className="section-header">
-                                <Heart className="section-icon" size={24} />
+                                <Heart className="section-icon" size={24}/>
                                 <h2>{t('editKid.racingFamilyInfo', '👨‍👩‍👧‍👦 Racing Family Info')}</h2>
                             </div>
                             <div className="form-grid">
                                 <div className="form-group">
                                     <label className="form-label">
                                         {t('editKid.parentGuardianName', '👤 Parent/Guardian Name')} {t('editKid.required', '*')}
-                                        <Lock size={14} className="lock-icon" />
+                                        <Lock size={14} className="lock-icon"/>
                                     </label>
                                     <input
                                         type="text"
@@ -876,7 +905,7 @@ const EditKidPage = () => {
                                 <div className="form-group">
                                     <label className="form-label">
                                         {t('editKid.emailAddress', '📧 Email Address')} {t('editKid.required', '*')}
-                                        <Lock size={14} className="lock-icon" />
+                                        <Lock size={14} className="lock-icon"/>
                                     </label>
                                     <input
                                         type="email"
@@ -891,7 +920,7 @@ const EditKidPage = () => {
                                 <div className="form-group">
                                     <label className="form-label">
                                         {t('editKid.phoneNumber', '📱 Phone Number')} {t('editKid.required', '*')}
-                                        <Lock size={14} className="lock-icon" />
+                                        <Lock size={14} className="lock-icon"/>
                                     </label>
                                     <input
                                         type="tel"
@@ -905,7 +934,8 @@ const EditKidPage = () => {
 
                                 {/* Grandparents Info - EDITABLE */}
                                 <div className="form-group">
-                                    <label className="form-label">{t('editKid.grandparentsNames', '👵👴 Grandparents Names')}</label>
+                                    <label
+                                        className="form-label">{t('editKid.grandparentsNames', '👵👴 Grandparents Names')}</label>
                                     <input
                                         type="text"
                                         className="form-input"
@@ -916,7 +946,8 @@ const EditKidPage = () => {
                                 </div>
 
                                 <div className="form-group">
-                                    <label className="form-label">{t('editKid.grandparentsPhone', '☎️ Grandparents Phone')}</label>
+                                    <label
+                                        className="form-label">{t('editKid.grandparentsPhone', '☎️ Grandparents Phone')}</label>
                                     <input
                                         type="tel"
                                         className="form-input"
@@ -931,17 +962,18 @@ const EditKidPage = () => {
                         {/* Team Assignment with Vehicle Integration */}
                         <div className={`form-section team-section ${focusTeam ? 'highlight-section' : ''}`}>
                             <div className="section-header">
-                                <Car className="section-icon" size={24} />
+                                <Car className="section-icon" size={24}/>
                                 <h2>
                                     {t('editKid.teamVehicleAssignment', '🏎️ Team & Vehicle Assignment')}
-                                    {focusTeam && <span className="focus-indicator">{t('editKid.focusIndicator', '← Update Here!')}</span>}
+                                    {focusTeam && <span
+                                        className="focus-indicator">{t('editKid.focusIndicator', '← Update Here!')}</span>}
                                 </h2>
                             </div>
                             <div className="form-grid">
                                 <div className="form-group">
                                     <div className="field-wrapper">
                                         <label className="form-label">
-                                            <Users className="label-icon" size={16} />
+                                            <Users className="label-icon" size={16}/>
                                             {t('editKid.racingTeam', 'Racing Team')}
                                         </label>
                                         <select
@@ -949,7 +981,8 @@ const EditKidPage = () => {
                                             onChange={(e) => handleInputChange('teamId', e.target.value)}
                                             className={`form-select ${focusTeam ? 'focus-field' : ''}`}
                                         >
-                                            <option value="">{t('editKid.noTeamAssigned', '🚫 No Team Assigned (Yet!)')}</option>
+                                            <option
+                                                value="">{t('editKid.noTeamAssigned', '🚫 No Team Assigned (Yet!)')}</option>
                                             {teams.map(team => (
                                                 <option key={team.id} value={team.id}>
                                                     {t('editKid.teamOption', '🏁 {teamName} ({memberCount} racers)', {
@@ -965,7 +998,7 @@ const EditKidPage = () => {
                                 <div className="form-group">
                                     <div className="field-wrapper">
                                         <label className="form-label">
-                                            <User className="label-icon" size={16} />
+                                            <User className="label-icon" size={16}/>
                                             {t('editKid.racingInstructor', 'Racing Instructor')}
                                         </label>
                                         <select
@@ -973,10 +1006,11 @@ const EditKidPage = () => {
                                             onChange={(e) => handleInputChange('instructorId', e.target.value)}
                                             className="form-select"
                                         >
-                                            <option value="">{t('editKid.noInstructorAssigned', '👨‍🏫 No Instructor Assigned')}</option>
+                                            <option
+                                                value="">{t('editKid.noInstructorAssigned', '👨‍🏫 No Instructor Assigned')}</option>
                                             {instructors.map(instructor => (
                                                 <option key={instructor.id} value={instructor.id}>
-                                                    {t('editKid.instructorOption', '🏎️ {instructorName}', { instructorName: instructor.name })}
+                                                    {t('editKid.instructorOption', '🏎️ {instructorName}', {instructorName: instructor.name})}
                                                 </option>
                                             ))}
                                         </select>
@@ -993,14 +1027,14 @@ const EditKidPage = () => {
                         {/* Racing Status */}
                         <div className="form-section status-section">
                             <div className="section-header">
-                                <Check className="section-icon" size={24} />
+                                <Check className="section-icon" size={24}/>
                                 <h2>{t('editKid.racingStatusForms', '📋 Racing Status & Forms')}</h2>
                             </div>
                             <div className="form-grid">
                                 <div className="form-group">
                                     <div className="field-wrapper">
                                         <label className="form-label">
-                                            <FileText className="label-icon" size={16} />
+                                            <FileText className="label-icon" size={16}/>
                                             {t('editKid.formStatus', 'Form Status')}
                                         </label>
                                         <select
@@ -1033,7 +1067,7 @@ const EditKidPage = () => {
                         {/* Notes Section */}
                         <div className="form-section comments-section">
                             <div className="section-header">
-                                <MessageCircle className="section-icon" size={24} />
+                                <MessageCircle className="section-icon" size={24}/>
                                 <h2>{t('editKid.racingNotesCommunication', '💬 Racing Notes & Team Communication')}</h2>
                             </div>
 
@@ -1043,7 +1077,7 @@ const EditKidPage = () => {
                                     formData.instructorsComments.map((comment, index) => (
                                         <div key={index} className="comment-timeline-item">
                                             <div className="comment-avatar">
-                                                <User size={16} />
+                                                <User size={16}/>
                                             </div>
                                             <div className="comment-content">
                                                 <div className="comment-header">
@@ -1059,7 +1093,7 @@ const EditKidPage = () => {
                                     ))
                                 ) : (
                                     <div className="no-comments">
-                                        <MessageCircle size={40} className="no-comments-icon" />
+                                        <MessageCircle size={40} className="no-comments-icon"/>
                                         <p>{t('editKid.noTeamNotesYet', 'No team notes yet. Be the first to add one!')}</p>
                                     </div>
                                 )}
@@ -1073,7 +1107,7 @@ const EditKidPage = () => {
                                         className="btn-add-comment"
                                         onClick={() => setShowAddComment(true)}
                                     >
-                                        <Plus size={16} />
+                                        <Plus size={16}/>
                                         {t('editKid.addTeamNote', 'Add Team Note')}
                                     </button>
                                 ) : (
@@ -1109,7 +1143,7 @@ const EditKidPage = () => {
                                                     </>
                                                 ) : (
                                                     <>
-                                                        <Send size={16} />
+                                                        <Send size={16}/>
                                                         {t('editKid.addNote', 'Add Note')}
                                                     </>
                                                 )}
@@ -1122,7 +1156,8 @@ const EditKidPage = () => {
                             {/* Additional Comments Field */}
                             <div className="form-grid">
                                 <div className="form-group full-width">
-                                    <label className="form-label">{t('editKid.additionalRacingNotes', '🗒️ Additional Racing Notes')}</label>
+                                    <label
+                                        className="form-label">{t('editKid.additionalRacingNotes', '🗒️ Additional Racing Notes')}</label>
                                     <textarea
                                         className="form-textarea"
                                         placeholder={t('editKid.additionalRacingNotesPlaceholder', 'Any special notes about our racing star!')}
@@ -1137,7 +1172,7 @@ const EditKidPage = () => {
                         {/* Racing Action Buttons */}
                         <div className="racing-actions">
                             <button type="button" onClick={handleCancel} className="btn btn-cancel">
-                                <ArrowLeft className="btn-icon" size={18} />
+                                <ArrowLeft className="btn-icon" size={18}/>
                                 {t('editKid.cancelButton', 'Cancel')}
                             </button>
 
@@ -1156,7 +1191,7 @@ const EditKidPage = () => {
                                     </>
                                 ) : (
                                     <>
-                                        <Save className="btn-icon" size={18} />
+                                        <Save className="btn-icon" size={18}/>
                                         {t('editKid.saveUpdates', 'Save Updates! 🏁')}
                                     </>
                                 )}

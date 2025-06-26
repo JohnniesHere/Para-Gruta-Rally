@@ -25,7 +25,7 @@ import {
     IconSparkles as Sparkles,
     IconSettings as Settings,
     IconEdit as Edit,
-    IconCircle as CheckCircle
+    IconCircle as CheckCircle, IconArrowRight as ArrowRight
 } from '@tabler/icons-react';
 import './EditKidPage.css';
 
@@ -33,7 +33,7 @@ const EditVehiclePage = () => {
     const navigate = useNavigate();
     const { id } = useParams();
     const { appliedTheme } = useTheme();
-    const { t } = useLanguage();
+    const { t, isRTL, isHebrew } = useLanguage();
     const { userRole, userData } = usePermissions();
 
     const [isLoading, setIsLoading] = useState(true);
@@ -380,9 +380,19 @@ const EditVehiclePage = () => {
                     <div className="error-container">
                         <h3>{t('editVehicle.error', 'Error')}</h3>
                         <p>{errors.general}</p>
-                        <button onClick={() => navigate('/admin/vehicles')} className="btn-primary">
-                            <ArrowLeft className="btn-icon" size={18} />
-                            {t('editVehicle.backToVehicles', 'Back to Vehicles')}
+                        <button onClick={() => navigate('/admin/vehicles')}
+                                className={`back-button ${appliedTheme}-back-button ${isRTL ? 'rtl' : ''}`}>
+                            {isHebrew ? (
+                                <>
+                                    {t('editVehicle.backToVehicles', 'Back to Vehicles')}
+                                    <ArrowRight className="btn-icon" size={20}/>
+                                </>
+                            ) : (
+                                <>
+                                    <ArrowLeft className="btn-icon" size={20}/>
+                                    {t('editVehicle.backToVehicles', 'Back to Vehicles')}
+                                </>
+                            )}
                         </button>
                     </div>
                 </div>
@@ -396,16 +406,26 @@ const EditVehiclePage = () => {
         <Dashboard requiredRole={userRole}>
             <div className={`admin-page edit-vehicle-page ${appliedTheme}-mode`}>
                 {/* Page Title - TRANSLATED */}
-                <button onClick={handleCancel} className={`back-button ${appliedTheme}-back-button`}>
-                    <ArrowLeft className="btn-icon" size={20} />
-                    {t('editVehicle.backToVehicle', 'Back to Vehicle')}
+                <button onClick={() => navigate('/admin/vehicles')}
+                        className={`back-button ${appliedTheme}-back-button ${isRTL ? 'rtl' : ''}`}>
+                    {isHebrew ? (
+                        <>
+                            {t('editVehicle.backToVehicles', 'Back to Vehicles')}
+                            <ArrowRight className="btn-icon" size={20}/>
+                        </>
+                    ) : (
+                        <>
+                            <ArrowLeft className="btn-icon" size={20}/>
+                            {t('editVehicle.backToVehicles', 'Back to Vehicles')}
+                        </>
+                    )}
                 </button>
                 <div className="header-content">
                     <div className="title-section">
                         <h1>
-                            <Edit size={32} className="page-title-icon" />
+                            <Edit size={32} className="page-title-icon"/>
                             {t('editVehicle.title', 'Update Racing Vehicle!')}
-                            <Sparkles size={24} className="sparkle-icon" />
+                            <Sparkles size={24} className="sparkle-icon"/>
                         </h1>
                     </div>
                 </div>
@@ -414,7 +434,7 @@ const EditVehiclePage = () => {
                     {/* Error Alert */}
                     {errors.general && (
                         <div className="alert error-alert">
-                            <AlertTriangle size={20} />
+                            <AlertTriangle size={20}/>
                             {errors.general}
                         </div>
                     )}

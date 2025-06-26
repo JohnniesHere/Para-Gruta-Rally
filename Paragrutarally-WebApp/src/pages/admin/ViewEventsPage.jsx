@@ -32,7 +32,7 @@ import {
     IconFolder as Folder,
     IconArrowLeft as ArrowLeft,
     IconCheck as Check,
-    IconFlag as Flag
+    IconFlag as Flag, IconArrowRight as ArrowRight
 } from '@tabler/icons-react';
 import './ViewEventsPage.css';
 
@@ -40,7 +40,7 @@ const ViewEventsPage = () => {
     const navigate = useNavigate();
     const { eventId } = useParams();
     const { isDarkMode, appliedTheme } = useTheme();
-    const { t, isRTL } = useLanguage();
+    const { t, isRTL, isHebrew } = useLanguage();
     const { permissions, userRole } = usePermissions();
 
     const [event, setEvent] = useState(null);
@@ -210,14 +210,26 @@ const ViewEventsPage = () => {
                     <div className="error-container">
                         <h3>{t('common.error', 'Error')}</h3>
                         <p>{error || t('events.eventNotFound', 'Event not found')}</p>
-                        <button onClick={handleBackToEvents} className="btn-primary">
-                            <ArrowLeft className="btn-icon" size={18} />
-                            {t('events.backToEvents', 'Back to Events')}
+                        <button
+                            onClick={handleBackToEvents}
+                            className={`back-button ${appliedTheme}-back-button ${isRTL ? 'rtl' : ''}`}>
+                            {isHebrew ? (
+                                <>
+                                    {t('events.backToEvents', 'Back to Events')}
+                                    <ArrowRight className="btn-icon" size={20}/>
+                                </>
+                            ) : (
+                                <>
+                                    <ArrowLeft className="btn-icon" size={20}/>
+                                    {t('events.backToEvents', 'Back to Events')}
+                                </>
+                            )}
                         </button>
-                    </div>
                 </div>
-            </Dashboard>
-        );
+            </div>
+    </Dashboard>
+    )
+        ;
     }
 
     return (
@@ -226,10 +238,18 @@ const ViewEventsPage = () => {
                 {/* Header */}
                 <button
                     onClick={handleBackToEvents}
-                    className={`back-button ${appliedTheme}-back-button`}
-                >
-                    <ArrowLeft size={20} />
-                    {t('events.backToEvents', 'Back to Events')}
+                    className={`back-button ${appliedTheme}-back-button ${isRTL ? 'rtl' : ''}`}>
+                    {isHebrew ? (
+                        <>
+                            {t('events.backToEvents', 'Back to Events')}
+                            <ArrowRight className="btn-icon" size={20}/>
+                        </>
+                    ) : (
+                        <>
+                            <ArrowLeft className="btn-icon" size={20}/>
+                            {t('events.backToEvents', 'Back to Events')}
+                        </>
+                    )}
                 </button>
 
                 {/* Racing Header */}
@@ -237,9 +257,9 @@ const ViewEventsPage = () => {
                     <div className="header-content">
                         <div className="title-section">
                             <h1>
-                                <Trophy size={32} className="page-title-icon" />
+                                <Trophy size={32} className="page-title-icon"/>
                                 {t('events.racingEventDetails', 'Racing Event Details!')}
-                                <Flag size={24} className="trophy-icon" />
+                                <Flag size={24} className="trophy-icon"/>
                             </h1>
                             <p className="subtitle">{t('events.eventInformationSubtitle', 'Event information and details')} 🏁</p>
                         </div>

@@ -30,7 +30,7 @@ import {
     IconX as X,
     IconFolder as Folder,
     IconUserPlus as UserPlus,
-    IconTrash as Trash
+    IconTrash as Trash, IconArrowRight as ArrowRight
 } from '@tabler/icons-react';
 import './CreateEventPage.css'; // Reuse create event styles
 
@@ -38,7 +38,7 @@ const EditEventPage = () => {
     const navigate = useNavigate();
     const { eventId } = useParams();
     const { isDarkMode, appliedTheme } = useTheme();
-    const { t, isRTL } = useLanguage();
+    const { t, isRTL, isHebrew } = useLanguage();
     const { permissions, userRole, userData, user, loading } = usePermissions();
 
     // Form state
@@ -349,9 +349,20 @@ const EditEventPage = () => {
                     <div className="error-container">
                         <h3>{t('common.error', 'Error')}</h3>
                         <p>{error}</p>
-                        <button onClick={() => navigate('/admin/events')} className="btn-primary">
-                            <ArrowLeft className="btn-icon" size={18} />
-                            {t('events.backToEvents', 'Back to Events')}
+                        <button
+                            onClick={() => navigate('/admin/events')}
+                            className={`back-button ${appliedTheme}-back-button ${isRTL ? 'rtl' : ''}`}>
+                            {isHebrew ? (
+                                <>
+                                    {t('events.backToEvents', 'Back to Events')}
+                                    <ArrowRight className="btn-icon" size={20}/>
+                                </>
+                            ) : (
+                                <>
+                                    <ArrowLeft className="btn-icon" size={20}/>
+                                    {t('events.backToEvents', 'Back to Events')}
+                                </>
+                            )}
                         </button>
                     </div>
                 </div>
@@ -365,15 +376,23 @@ const EditEventPage = () => {
                 {/* Header */}
                 <button
                     onClick={() => navigate('/admin/events')}
-                    className={`back-button ${appliedTheme}-back-button`}
-                >
-                    <ArrowLeft size={20} />
-                    {t('events.backToEvents', 'Back to Events')}
+                    className={`back-button ${appliedTheme}-back-button ${isRTL ? 'rtl' : ''}`}>
+                    {isHebrew ? (
+                        <>
+                            {t('events.backToEvents', 'Back to Events')}
+                            <ArrowRight className="btn-icon" size={20}/>
+                        </>
+                    ) : (
+                        <>
+                            <ArrowLeft className="btn-icon" size={20}/>
+                            {t('events.backToEvents', 'Back to Events')}
+                        </>
+                    )}
                 </button>
                 <div className="page-header">
                     <div className="title-section">
                         <h1 className="page-title">
-                            <Trophy size={32} className="page-title-icon" />
+                            <Trophy size={32} className="page-title-icon"/>
                             {t('events.editRacingEvent', 'Edit Racing Event')}
                         </h1>
                     </div>
