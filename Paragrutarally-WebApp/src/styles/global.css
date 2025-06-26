@@ -8,8 +8,8 @@
     /* Light Mode Colors */
     --bg-primary: #FFF9E6;
     --bg-secondary: #FFFFFF;
-    --bg-tertiary: #F8FAFC;
-    --bg-quaternary: #F1F5F9;
+    --bg-tertiary: rgba(196, 167, 245, 0.79);
+    --bg-quaternary: #b472d2;
 
     --text-primary: #000000;
     --text-secondary: #4B5563;
@@ -60,8 +60,8 @@
 .dark {
     --bg-primary: #0F172A;
     --bg-secondary: #1E293B;
-    --bg-tertiary: #334155;
-    --bg-quaternary: #a8b0bd;
+    --bg-tertiary: #be7fe3;
+    --bg-quaternary: #af85ee;
 
     --text-primary: #F1F5F9;
     --text-secondary: #CBD5E1;
@@ -742,7 +742,7 @@ body.dark .stat-card.total::before {
 }
 
 .data-table th {
-    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-quaternary) 100%);
+    background: linear-gradient(90deg, var(--bg-tertiary) 99%, var(--bg-quaternary) 100%);
     color: var(--text-primary);
     font-weight: 700;
     font-size: 14px;
@@ -767,7 +767,7 @@ body.dark .stat-card.total::before {
 }
 
 .data-table tbody tr:hover {
-    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-quaternary) 100%);
+    background: linear-gradient(135deg, var() 90%, var(--bg-quaternary) 100%);
     transform: scale(1.01);
 }
 
