@@ -49,6 +49,7 @@
     margin-top: 15px;
 }
 
+
 /* ========================================
    HERO SECTION
    ======================================== */
@@ -208,6 +209,98 @@
     gap: 25px;
     flex-wrap: wrap;
 }
+/* ========================================
+   DARK MODE HERO SECTION TEXT VISIBILITY FIX
+   ======================================== */
+
+/* Force white text in hero section stat items for dark mode */
+[data-theme="dark"] .stat-item,
+.dark-mode .stat-item,
+.dark .stat-item {
+    color: white !important;
+}
+
+[data-theme="dark"] .stat-item span,
+.dark-mode .stat-item span,
+.dark .stat-item span {
+    color: white !important;
+}
+
+/* Fix stat icon colors in dark mode */
+[data-theme="dark"] .stat-icon,
+.dark-mode .stat-icon,
+.dark .stat-icon {
+    color: var(--racing-lilach) !important;
+}
+
+/* Ensure status badges are visible in dark mode */
+[data-theme="dark"] .hero-stats .status-badge,
+.dark-mode .hero-stats .status-badge,
+.dark .hero-stats .status-badge {
+    color: #1F2937 !important; /* Dark text on badge background */
+}
+
+/* Fix status badge to have white text and border like other text */
+[data-theme="dark"] .hero-stats .status-badge,
+.dark-mode .hero-stats .status-badge,
+.dark .hero-stats .status-badge {
+    color: white !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Fix racing header visibility in dark mode */
+[data-theme="dark"] .racing-header .edit-button,
+.dark-mode .racing-header .edit-button,
+.dark .racing-header .edit-button {
+    border: 2px solid rgba(255, 255, 255, 0.8) !important;
+    background: rgba(255, 255, 255, 0.15) !important;
+    color: white !important;
+}
+
+[data-theme="dark"] .racing-header .edit-button:hover,
+.dark-mode .racing-header .edit-button:hover,
+.dark .racing-header .edit-button:hover {
+    border: 2px solid white !important;
+    background: rgba(255, 255, 255, 0.25) !important;
+}
+
+/* Force subtitle text to be white in dark mode - more specific targeting */
+[data-theme="dark"] .racing-header .title-section .subtitle,
+.dark-mode .racing-header .title-section .subtitle,
+.dark .racing-header .title-section .subtitle,
+[data-theme="dark"] .racing-header .title-section p,
+.dark-mode .racing-header .title-section p,
+.dark .racing-header .title-section p {
+    color: white !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6) !important;
+}
+
+/* Also target any text inside racing header directly */
+[data-theme="dark"] .racing-header p,
+.dark-mode .racing-header p,
+.dark .racing-header p {
+    color: white !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6) !important;
+}
+
+/* Fix the racer name (kid 1) visibility in dark mode */
+[data-theme="dark"] .racer-name,
+.dark-mode .racer-name,
+.dark .racer-name {
+    color: white !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Also fix any other hero section text */
+[data-theme="dark"] .hero-info h2,
+.dark-mode .hero-info h2,
+.dark .hero-info h2 {
+    color: white !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4) !important;
+}
+
 
 .stat-item {
     display: flex;
