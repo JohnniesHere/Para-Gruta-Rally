@@ -5,7 +5,9 @@ import { getFunctions, httpsCallable } from 'firebase/functions';
 import { db, auth } from '../firebase/config';
 
 // Initialize Firebase Functions
-const functions = getFunctions();
+const functions = getFunctions(undefined, 'us-central1');
+const deleteUserFunction = httpsCallable(functions, 'deleteUser');
+
 
 /**
  * Update user profile information in Firestore
