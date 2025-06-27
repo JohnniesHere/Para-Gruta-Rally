@@ -289,7 +289,7 @@
 [data-theme="dark"] .racer-name,
 .dark-mode .racer-name,
 .dark .racer-name {
-    color: var(--text-primary);
+    color: white !important;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4) !important;
 }
 
@@ -654,7 +654,7 @@
 }
 
 .team-link:hover {
-    /*color: #b9c9ef;*/
+    color: #1D4ED8;
     text-decoration: none;
 }
 

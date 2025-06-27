@@ -278,16 +278,16 @@
 }
 
 .btn-secondary:hover:not(:disabled) {
-    /*background-color: var(--bg-quaternary);*/
+    background-color: var(--bg-quaternary);
 }
 
 .btn-primary {
-    background: var(--bg-primary);
+    background-color: var(--racing-purple);
     color: white;
 }
 
 .btn-primary:hover:not(:disabled) {
-    background-color: var(--racing-purple);
+    background-color: var(--racing-purple-hover);
 }
 
 .loading-spinner-mini {

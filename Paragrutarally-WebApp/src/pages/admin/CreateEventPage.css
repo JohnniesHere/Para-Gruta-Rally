@@ -274,7 +274,7 @@
 
 .dark-mode .status-badge.status-upcoming {
     background: #451a03;
-    color: #92400e;
+    color: #fbbf24;
 }
 
 /* ========================================
@@ -1027,8 +1027,8 @@
     align-items: center;
     padding: 40px 20px;
     text-align: center;
-    color: var(--bg-primary);
-    background: var(--bg-secondary);
+    color: var(--text-muted);
+    background: var(--bg-quaternary);
     border: 2px dashed var(--border-color);
     border-radius: 12px;
 }
@@ -1036,12 +1036,11 @@
 .no-teams-icon {
     margin-bottom: 16px;
     opacity: 0.6;
-    color: var(--text-primary);
 }
 
 .no-teams-assigned p {
     margin: 0 0 8px 0;
-    color: var(--text-primary);
+    color: var(--text-secondary);
 }
 
 .no-teams-hint {

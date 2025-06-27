@@ -304,13 +304,13 @@
 }
 
 .form-creation-modal .btn-secondary:hover {
-    background: var(--bg-secondary);
+    background: var(--bg-tertiary, #f3f4f6) !important;
     border-color: var(--text-secondary, #6b7280) !important;
     color: var(--text-primary, #1f2937) !important;
 }
 
 .form-creation-modal .btn-primary {
-    background: var(--bg-primary);
+    background: linear-gradient(135deg, var(--racing-lilach, #BF94FF) 0%, var(--racing-purple, #8B5CF6) 100%) !important;
     border-color: var(--racing-lilach, #BF94FF) !important;
     color: white !important;
 }
@@ -520,7 +520,7 @@
 .stat-item {
     text-align: center !important;
     padding: 20px !important;
-    background: var(--bg-primary) !important;
+    background: var(--bg-tertiary, #f3f4f6) !important;
     border-radius: 12px !important;
     border: 2px solid var(--border-color, #e5e7eb) !important;
 }

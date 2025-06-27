@@ -264,7 +264,7 @@
 [data-theme="dark"] .status-badge.status-upcoming,
 .dark-mode .status-badge.status-upcoming {
     background: rgba(251, 191, 36, 0.2);
-    color: #92400E;
+    color: #FCD34D;
     border-color: #FBBF24;
 }
 
@@ -397,7 +397,7 @@
     width: 30px;
     height: 30px;
     border: 3px solid var(--border-color);
-    /*border-top: 3px solid var(--racing-lilach);*/
+    border-top: 3px solid var(--racing-lilach);
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
@@ -411,7 +411,7 @@
     text-align: center;
     padding: 60px 20px;
     color: var(--text-muted);
-    background: var(--bg-secondary);
+    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-quaternary) 100%);
     border-radius: 20px;
     border: 2px dashed var(--racing-lilach);
 }

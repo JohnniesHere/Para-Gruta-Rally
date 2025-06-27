@@ -177,7 +177,7 @@
 
 .tabs-nav {
     display: flex;
-    background: var(--bg-secondary);
+    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-quaternary) 100%);
     border-bottom: 3px solid var(--racing-lilach);
     overflow-x: auto;
     position: relative;
@@ -210,8 +210,8 @@
 }
 
 .tab-button.active {
-    background: var(--text-secondary);
-    color: var(--bg-primary);
+    background: linear-gradient(135deg, var(--racing-lilach) 0%, var(--racing-purple) 100%);
+    color: var(--text-primary);
     border-bottom-color: var(--racing-blurple);
     font-weight: 700;
     transform: translateY(-2px);
@@ -233,7 +233,7 @@
 .tab-button.active,
 .tab-button.active .tab-label,
 .tab-button.active .tab-description {
-    color: var(--bg-primary) !important;
+    color: var(--text-primary) !important;
 }
 
 .tab-button.active::after {
@@ -243,7 +243,7 @@
     left: 0;
     right: 0;
     height: 4px;
-    background: var(--bg-secondary);
+    background: linear-gradient(90deg, var(--racing-blurple), var(--racing-lilach), var(--racing-blurple));
 }
 
 .tab-label {
@@ -289,7 +289,7 @@
     width: 50px;
     height: 50px;
     border: 4px solid var(--border-color);
-    /*border-top: 4px solid var(--racing-lilach);*/
+    border-top: 4px solid var(--racing-lilach);
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
@@ -386,7 +386,7 @@
    ======================================== */
 
 .kpi-section {
-    background: var(--bg-secondary);
+    background: linear-gradient(135deg, var(--racing-lilach) 0%, var(--racing-purple) 100%);
     border-radius: 20px;
     padding: 35px;
     margin-bottom: 30px;
@@ -441,7 +441,7 @@
 }
 
 .kpi-card {
-    background: var(--bg-tertiary);
+    background: var(--bg-secondary);
     border-radius: 20px;
     padding: 30px;
     border: 3px solid var(--racing-lilach);

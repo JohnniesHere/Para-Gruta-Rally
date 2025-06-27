@@ -389,7 +389,7 @@
 .stat-label {
     font-size: 12px;
     font-weight: 600;
-    color: var(--text-secondary);
+    color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 1px;
 }
@@ -406,7 +406,7 @@
 }
 
 .racer-card {
-    background: var(--bg-secondary);
+    background: white;
     border: 2px solid var(--border-color);
     border-radius: 15px;
     padding: 20px;
@@ -462,7 +462,7 @@
 }
 
 .racer-name {
-    color: var(--text-primary);
+    color: #454343;
     margin: 0 0 10px 0;
     font-size: 16px;
     font-weight: 600;
@@ -475,7 +475,7 @@
 }
 
 .parent-info {
-    color: var(--text-tertiary);
+    color: var(--text-muted);
     font-size: 14px;
 }
 

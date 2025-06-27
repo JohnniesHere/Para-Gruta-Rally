@@ -279,7 +279,7 @@
 }
 
 .submissions-table tbody tr:hover {
-    background-color: var(--table-row-hover);
+    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-quaternary) 100%);
 }
 
 .submission-status {

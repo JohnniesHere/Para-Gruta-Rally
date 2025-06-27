@@ -235,7 +235,7 @@
 }
 
 .export-info-card {
-    background: var(--text-muted);
+    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-quaternary) 100%);
     border: 2px solid var(--border-color);
     border-radius: 20px;
     padding: 30px;
@@ -273,7 +273,7 @@
 }
 
 .export-info-card li {
-    color: var(--text-primary);
+    color: var(--text-secondary);
     font-size: 14px;
     line-height: 1.6;
     margin-bottom: 12px;

@@ -172,7 +172,7 @@
     font-size: 14px;
     margin: 0;
     padding: 8px 12px;
-    background: var(--text-muted);
+    background: var(--bg-tertiary);
     border-radius: 8px;
     border: 1px solid var(--border-color);
 }
@@ -336,14 +336,14 @@
     align-items: center;
     gap: 12px;
     padding: 15px 18px;
-    background: var(--bg-secondary);
+    background: var(--bg-tertiary);
     border-radius: 10px;
     border: 1px solid var(--border-color);
     transition: all 0.3s ease;
 }
 
 .history-item:hover {
-    background: var(--text-muted);
+    background: var(--bg-quaternary);
     border-color: var(--racing-lilach);
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
