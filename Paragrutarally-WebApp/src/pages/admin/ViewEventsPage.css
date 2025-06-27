@@ -237,7 +237,7 @@
 
 .section-header {
     padding: 20px 30px;
-    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-quaternary) 100%);
+    background: var(--bg-secondary);
     border-bottom: 2px solid var(--border-color);
 }
 
@@ -358,7 +358,7 @@
 [data-theme="dark"] .status-badge.status-upcoming,
 .dark-mode .status-badge.status-upcoming {
     background: rgba(251, 191, 36, 0.2);
-    color: #FCD34D;
+    color: #92400E;
     border-color: #FBBF24;
 }
 
@@ -471,7 +471,7 @@
     width: 30px;
     height: 30px;
     border: 3px solid var(--border-color);
-    border-top: 3px solid var(--racing-lilach);
+    /*border-top: 3px solid var(--racing-lilach);*/
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }

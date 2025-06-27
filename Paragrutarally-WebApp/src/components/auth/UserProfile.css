@@ -10,7 +10,7 @@
 
 .profile-header {
     padding: 25px 30px;
-    background-color: var(--bg-tertiary);
+    background-color: var(--bg-secondary);
     display: flex;
     align-items: center;
     border-bottom: 1px solid var(--border-color);
@@ -72,7 +72,7 @@
 
 .profile-tabs {
     display: flex;
-    background-color: var(--bg-tertiary);
+    background-color: var(--bg-secondary);
     border-bottom: 1px solid var(--border-color);
     transition: background-color 0.3s ease, border-color 0.3s ease;
 }
@@ -95,9 +95,9 @@
 }
 
 .tab-button.active {
-    color: var(--text-primary);
+    color: var(--bg-primary);
     border-bottom-color: var(--accent-color);
-    background-color: var(--bg-secondary);
+    background-color: var(--text-secondary);
 }
 
 .profile-content {
@@ -120,8 +120,8 @@
 }
 
 .edit-button, .secondary-button {
-    background-color: transparent;
-    color: var(--text-secondary);
+    background-color: var(--text-muted);
+    color: var(--text-primary);
     border: 1px solid var(--border-color);
     padding: 8px 15px;
     border-radius: 6px;
@@ -132,7 +132,7 @@
 }
 
 .edit-button:hover, .secondary-button:hover {
-    background-color: var(--bg-tertiary);
+    background-color: var(--bg-secondary);
     color: var(--text-primary);
     border-color: var(--accent-color);
     transform: translateY(-1px);
@@ -232,6 +232,7 @@
     border-bottom: 1px solid var(--border-color);
     display: flex;
     transition: border-color 0.3s ease;
+    color: var(--text-secondary) !important;
 }
 
 .detail-item:last-child {
@@ -564,7 +565,7 @@
 }
 
 .dark-mode .password-change {
-    background-color: var(--bg-tertiary);
+    background-color: var(--bg-secondary);
 }
 
 /* Responsive design */

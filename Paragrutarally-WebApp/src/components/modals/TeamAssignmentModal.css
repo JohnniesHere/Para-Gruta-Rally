@@ -229,7 +229,7 @@
    ======================================== */
 
 .team-assignment-instructions {
-    background: var(--bg-tertiary);
+    background: var(--bg-secondary);
     border: 2px solid var(--border-color);
     border-radius: 12px;
     padding: 20px;
@@ -423,7 +423,7 @@
 }
 
 .team-assignment-description {
-    color: var(--text-muted);
+    color: var(--text-tertiary);
     font-size: 13px;
     line-height: 1.4;
     margin-top: 8px;
@@ -444,7 +444,7 @@
     display: flex;
     gap: 16px;
     justify-content: flex-end;
-    background: var(--bg-tertiary);
+    background: var(--bg-secondary);
     border-radius: 0 0 17px 17px;
 }
 
@@ -676,7 +676,7 @@
 }
 
 .dark-mode .team-assignment-instructions {
-    background: var(--bg-tertiary);
+    background: var(--bg-secondary);
     border-color: var(--border-color);
 }
 
@@ -690,10 +690,10 @@
 }
 
 .dark-mode .teams-assignment-grid {
-    background: var(--bg-tertiary);
+    background: var(--bg-secondary);
     border-color: var(--border-color);
 }
 
 .dark-mode .team-assignment-actions {
-    background: var(--bg-tertiary);
+    background: var(--bg-secondary);
 }

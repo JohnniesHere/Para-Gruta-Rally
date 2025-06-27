@@ -33,7 +33,7 @@
 }
 
 .sidebar-links a:hover {
-    background-color: var(--bg-tertiary);
+    background-color: var(--text-muted);
     color: var(--text-primary);
     transform: translateX(2px);
 }
@@ -88,12 +88,12 @@
 
 /* Style the legal trigger for sidebar context */
 .sidebar .legal-trigger-minimal {
-    background-color: rgba(255, 255, 255, 0.08);
+    background-color: var(--bg-primary);
     border-radius: 0.75rem;
     padding: 0.5rem 0.75rem;
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--text-primary);
     transition: all 0.2s ease;
     font-size: 0.75rem;
     font-weight: 500;
@@ -107,23 +107,23 @@
 .sidebar .legal-trigger-minimal:hover {
     background-color: rgba(255, 255, 255, 0.12);
     border-color: rgba(255, 255, 255, 0.2);
-    color: rgba(255, 255, 255, 0.9);
+    color: var(--text-primary);
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .sidebar .legal-trigger-minimal svg {
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--text-primary);
     transition: color 0.2s ease;
 }
 
 .sidebar .legal-trigger-minimal:hover svg {
-    color: rgba(255, 255, 255, 0.8);
+    background-color: var(--bg-secondary);
 }
 
 /* Light theme adjustments for sidebar (if you have light mode) */
 .sidebar.light-theme .legal-trigger-minimal {
-    background-color: rgba(0, 0, 0, 0.05);
+    background-color: var(--bg-secondary);
     border-color: rgba(0, 0, 0, 0.1);
     color: var(--text-secondary);
 }

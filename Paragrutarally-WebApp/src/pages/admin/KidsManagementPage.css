@@ -200,7 +200,7 @@
 }
 
 .clickable-row:hover {
-    background-color: var(--bg-tertiary) !important;
+    background-color: var(--table-row-hover);
     transform: scale(1.01);
     box-shadow: 0 2px 8px var(--shadow-color);
 }

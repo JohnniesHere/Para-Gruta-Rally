@@ -81,7 +81,7 @@
 .instructor-teams-page .stat-item {
     text-align: center;
     padding: 10px;
-    background: var(--bg-quaternary);
+    background: var(--bg-secondary);
     border-radius: 10px;
     border: 1px solid var(--border-color);
 }
@@ -345,7 +345,7 @@
 }
 
 .instructor-data-table tbody tr:hover {
-    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-quaternary) 100%);
+    background-color: var(--table-row-hover);
     transform: scale(1.01);
 }
 
@@ -564,7 +564,7 @@
     text-align: center;
     padding: 60px 20px;
     color: var(--text-muted);
-    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-quaternary) 100%);
+    background: var(--bg-secondary);
     border-radius: 20px;
     border: 2px dashed var(--racing-purple);
 }

@@ -133,7 +133,7 @@ select {
 /* Firefox scrollbar styling */
 * {
   scrollbar-width: thin;
-  scrollbar-color: var(--border-color) var(--bg-tertiary);
+  scrollbar-color: var(--border-color) var(--bg-secondary);
 }
 
 /* Code and pre formatting */

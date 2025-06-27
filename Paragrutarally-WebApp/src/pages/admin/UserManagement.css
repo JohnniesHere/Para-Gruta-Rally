@@ -595,11 +595,11 @@
     transition: all 0.3s ease;
 }
 
-.btn-secondary:hover:not(:disabled) {
-    background: var(--bg-tertiary);
-    border-color: var(--accent-color);
-    transform: translateY(-1px);
-}
+/*.btn-secondary:hover:not(:disabled) {*/
+/*    background: var(--bg-tertiary);*/
+/*    border-color: var(--accent-color);*/
+/*    transform: translateY(-1px);*/
+/*}*/
 
 .btn-secondary:disabled {
     opacity: 0.7;

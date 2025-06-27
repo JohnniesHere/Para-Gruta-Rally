@@ -34,7 +34,7 @@
     padding: 20px;
     border: 2px dashed var(--border-color);
     border-radius: 12px;
-    background: var(--bg-tertiary);
+    background: var(--bg-secondary);
 }
 
 .photo-display-wrapper {
@@ -299,7 +299,7 @@
     font-family: 'Courier New', monospace;
     font-weight: 700;
     color: var(--text-primary);
-    background: var(--bg-tertiary);
+    background: var(--text-muted);
     padding: 4px 8px;
     border-radius: 6px;
     border: 1px solid var(--border-color);
@@ -353,7 +353,7 @@
 }
 
 .data-table th {
-    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-quaternary) 100%);
+    /*background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-quaternary) 100%);*/
     color: var(--text-primary);
     font-weight: 700;
     font-size: 14px;
@@ -460,7 +460,7 @@
    ======================================== */
 
 .comments-timeline {
-    background: var(--bg-tertiary);
+    background: var(--text-muted);
     border: 1px solid var(--border-color);
     border-radius: 12px;
     padding: 20px;

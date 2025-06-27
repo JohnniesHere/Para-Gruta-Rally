@@ -297,7 +297,7 @@
 
 .vehicle-type {
     font-size: 13px; /* Slightly larger */
-    color: var(--text-muted);
+    color: var(--text-secondary);
     display: flex;
     align-items: center;
     gap: 4px;
@@ -342,7 +342,7 @@
     font-family: 'Courier New', monospace;
     font-weight: 700;
     color: var(--text-primary);
-    background: var(--bg-tertiary);
+    background: var(--bg-secondary);
     padding: 6px 10px; /* Increased padding */
     border-radius: 6px;
     border: 1px solid var(--border-color);
@@ -455,7 +455,7 @@
 
 /* FIXED: Improved header styling */
 .data-table th {
-    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-quaternary) 100%);
+    /*background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-quaternary) 100%);*/
     color: var(--text-primary);
     font-weight: 700;
     font-size: 14px;
@@ -497,7 +497,7 @@
 }
 
 .data-table tbody tr:hover {
-    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-quaternary) 100%);
+    /*background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-quaternary) 100%);*/
     transform: none; /* Removed scale to prevent layout issues */
     box-shadow: 0 2px 8px var(--shadow-color);
 }

@@ -61,7 +61,7 @@
 .instructor-card:hover {
     border-color: #059669;
     box-shadow: 0 8px 25px rgba(5, 150, 105, 0.2);
-    background: rgba(5, 150, 105, 0.05);
+    /*background: rgba(5, 150, 105, 0.05);*/
 }
 
 .instructor-card:hover svg {

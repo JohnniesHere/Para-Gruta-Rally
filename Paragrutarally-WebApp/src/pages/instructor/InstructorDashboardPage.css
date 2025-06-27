@@ -194,7 +194,7 @@
 }
 
 .btn-secondary:hover {
-    background-color: var(--bg-quaternary);
+    /*background-color: var(--bg-quaternary);*/
     border-color: var(--accent-color);
 }
 
