@@ -26,7 +26,7 @@
 /* Card styles */
 .admin-dashboard .stat-card,
 .dashboard-sections > div {
-    background-color: var(--bg-tertiary);
+    background-color: var(--bg-secondary);
     border-radius: 8px;
     box-shadow: 0 4px 6px var(--shadow-color);
     transition: background-color 0.3s ease, box-shadow 0.3s ease;
