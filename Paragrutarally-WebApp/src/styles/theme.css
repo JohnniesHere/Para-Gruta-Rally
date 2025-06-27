@@ -3,10 +3,27 @@
 /* ===== ROOT VARIABLES (Light Theme Default) ===== */
 :root {
     /* Primary Colors */
+    --bg-secondary: #FFFFFF;
+    --hover-bg: rgba(196, 167, 245, 0.2);
+    --border-color-hover: #D1D5DB;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+    --shadow-hover: rgba(0, 0, 0, 0.15);
+
+    /* Racing Theme Colors */
+    --racing-lilach: rgba(190, 163, 243, 0.79);
+    --racing-purple: #c57de1;
+    --racing-blurple: #ad83f2;
+    --racing-light-purple: #cc8bef;
+    --racing-blue: #3B82F6;
+    --racing-green: #10B981;
+    --racing-pink: #EC4899;
+
+    /* Input Colors */
+    --input-bg: #FFFFFF;
+    --input-focus: #aa80e3;
     --bg-primary: #f8f9fa;
-    --bg-secondary: #ffffff;
-    --bg-tertiary: #ae0cee;
-    --bg-quaternary: #e8eaed;
+    --bg-tertiary: rgba(174, 12, 238, 0.1); /* Very subtle purple */
+    --bg-quaternary: rgba(174, 12, 238, 0.05); /* Even more subtle */
 
     /* Text Colors */
     --text-primary: #2c3e50;
@@ -42,13 +59,11 @@
     --border-focus: var(--accent-color);
 
     /* Shadow Colors */
-    --shadow-color: rgba(0, 0, 0, 0.1);
     --shadow-light: rgba(0, 0, 0, 0.05);
     --shadow-medium: rgba(0, 0, 0, 0.15);
     --shadow-dark: rgba(0, 0, 0, 0.25);
 
     /* Input Colors */
-    --input-bg: #ffffff;
     --input-border: var(--border-color);
     --input-focus-border: var(--accent-color);
     --input-placeholder: var(--text-muted);
@@ -96,8 +111,8 @@
     /* Table Colors */
     --table-bg: var(--bg-secondary);
     --table-border: var(--border-color);
-    --table-header-bg: var(--bg-tertiary);
-    --table-row-hover: var(--bg-tertiary);
+    --table-row-hover: none;
+    --table-header-bg: none;
     --table-row-selected: var(--accent-light);
 
     /* Modal Colors */
@@ -148,11 +163,33 @@
 /* ===== DARK THEME OVERRIDES ===== */
 .dark-mode,
 .dark {
+
+    --bg-tertiary: #be7fe3;
+    --bg-quaternary: #af85ee;
+
+    --hover-bg: rgba(190, 163, 243, 0.3);
+
+
+    --border-color-hover: #64748B;
+
+
+
+    --shadow-hover: rgba(0, 0, 0, 0.4);
+
+    /* Input Colors for Dark Mode */
+    --input-focus: #aa7fea;
+
+    /* Racing Theme Colors */
+    --racing-lilach: #9146FF;
+    --racing-purple: #6441A4;
+    --racing-blurple: #711cf2;
+    --racing-light-purple: #8B5CF6;
+
     /* Primary Colors */
     --bg-primary: #0f0f0f;
     --bg-secondary: #1a1a1a;
-    --bg-tertiary: #9969e3;
-    --bg-quaternary: #bfbfbf;
+    --bg-tertiary: rgba(174, 12, 238, 0.1); /* Very subtle purple */
+    --bg-quaternary: rgba(174, 12, 238, 0.05); /* Even more subtle */
 
     /* Text Colors */
     --text-primary: rgb(251, 251, 251);
@@ -242,8 +279,8 @@
     /* Table Colors */
     --table-bg: var(--bg-secondary);
     --table-border: var(--border-color);
-    --table-header-bg: var(--bg-tertiary);
-    --table-row-hover: var(--bg-tertiary);
+    --table-row-hover: none;
+    --table-header-bg: none;
     --table-row-selected: var(--accent-light);
 
     /* Modal Colors */

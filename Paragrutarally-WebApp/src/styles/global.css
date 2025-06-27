@@ -1,107 +1,4 @@
-/* src/styles/global.css - Unified Admin Theme with Light/Dark Mode Support */
-
-/* ========================================
-   CSS CUSTOM PROPERTIES (CSS VARIABLES)
-   ======================================== */
-
-:root {
-    /* Light Mode Colors */
-    --bg-primary: #FFF9E6;
-    --bg-secondary: #FFFFFF;
-    --bg-tertiary: rgba(196, 167, 245, 0.79);
-    --bg-quaternary: #b472d2;
-
-    --text-primary: #000000;
-    --text-secondary: #4B5563;
-    --text-muted: #6B7280;
-
-    --border-color: #E2E8F0;
-    --border-color-hover: #D1D5DB;
-
-    --accent-color: #3B82F6;
-    --accent-hover: #2563EB;
-
-    --success-color: #10B981;
-    --success-light: #ECFDF5;
-    --success-hover: #059669;
-
-    --warning-color: #F59E0B;
-    --warning-light: #FFFBEB;
-    --warning-hover: #D97706;
-
-    --error-color: #EF4444;
-    --error-light: #FEF2F2;
-    --error-hover: #DC2626;
-
-    --info-color: #3B82F6;
-    --info-light: #EFF6FF;
-
-    --shadow-color: rgba(0, 0, 0, 0.1);
-    --shadow-hover: rgba(0, 0, 0, 0.15);
-
-    /* Racing Theme Colors */
-    --racing-lilach: rgba(190, 163, 243, 0.79);
-    --racing-purple: #c57de1;
-    --racing-blurple: #ad83f2;
-    --racing-light-purple: #cc8bef;
-    --racing-blue: #3B82F6;
-    --racing-green: #10B981;
-    --racing-pink: #EC4899;
-
-    /* Input Colors */
-    --input-bg: #FFFFFF;
-    --input-border: #E2E8F0;
-    --input-focus: #aa80e3;
-}
-
-/* Dark Mode Colors */
-[data-theme="dark"],
-.dark-mode,
-.dark {
-    --bg-primary: #0F172A;
-    --bg-secondary: #1E293B;
-    --bg-tertiary: #be7fe3;
-    --bg-quaternary: #af85ee;
-
-    --text-primary: #F1F5F9;
-    --text-secondary: #CBD5E1;
-    --text-muted: #94A3B8;
-
-    --border-color: #475569;
-    --border-color-hover: #64748B;
-
-    --accent-color: #60A5FA;
-    --accent-hover: #3B82F6;
-
-    --success-color: #34D399;
-    --success-light: #064E3B;
-    --success-hover: #10B981;
-
-    --warning-color: #a87ee5;
-    --warning-light: #451A03;
-    --warning-hover: #F59E0B;
-
-    --error-color: #F87171;
-    --error-light: #7F1D1D;
-    --error-hover: #EF4444;
-
-    --info-color: #60A5FA;
-    --info-light: #6286e6;
-
-    --shadow-color: rgba(0, 0, 0, 0.3);
-    --shadow-hover: rgba(0, 0, 0, 0.4);
-
-    /* Input Colors for Dark Mode */
-    --input-bg: #374151;
-    --input-border: #6B7280;
-    --input-focus: #aa7fea;
-
-    /* Racing Theme Colors */
-    --racing-lilach: #9146FF;
-    --racing-purple: #6441A4;
-    --racing-blurple: #711cf2;
-    --racing-light-purple: #8B5CF6;
-}
+/* src/styles/global.css
 
 /* ========================================
    GLOBAL RESET & BASE STYLES
@@ -170,7 +67,7 @@
 
 /* Racing-style headers */
 .racing-header {
-    background: linear-gradient(135deg, var(--racing-lilach) 0%, var(--racing-purple) 100%);
+    background: var(--hover-bg) !important;
     border-radius: 20px;
     padding: 30px;
     margin-bottom: 30px;
@@ -187,7 +84,7 @@
     left: 0;
     right: 0;
     height: 6px;
-    background: linear-gradient(90deg, var(--racing-blurple), var(--racing-lilach), var(--racing-blurple));
+    background-color: var(--bg-hover) !important;
     z-index: 1;
 }
 
@@ -224,6 +121,7 @@
 
 /* Page header with actions */
 .page-header {
+    background: var(--hover-bg) !important;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -286,7 +184,7 @@
 .btn-primary:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(255, 215, 0, 0.6);
-    background: linear-gradient(135deg, var(--racing-purple) 0%, var(--racing-lilach) 100%);
+    background: var(--hover-bg);
 }
 
 /* Secondary buttons */
@@ -741,18 +639,35 @@ body.dark .stat-card.total::before {
     border-collapse: collapse;
 }
 
+
 .data-table th {
-    background: linear-gradient(90deg, var(--bg-tertiary) 99%, var(--bg-quaternary) 100%);
+    background: var(--bg-hover) !important;
+    background-image: none !important;
     color: var(--text-primary);
     font-weight: 700;
     font-size: 14px;
     padding: 20px 16px;
     text-align: left;
     border-bottom: 2px solid var(--border-color);
+    border-right: 1px solid var(--border-color);
     text-transform: uppercase;
     letter-spacing: 1px;
     transition: all 0.3s ease;
 }
+
+.data-table th:hover {
+    background: var(--bg-hover) !important;
+    background-image: none !important;
+    color: var(--text-primary);
+    transform: none;
+    cursor: default;
+}
+
+.data-table th:last-child {
+    border-right: none;
+}
+
+
 
 .data-table td {
     color: var(--text-secondary);
@@ -767,7 +682,7 @@ body.dark .stat-card.total::before {
 }
 
 .data-table tbody tr:hover {
-    background: linear-gradient(135deg, var() 90%, var(--bg-quaternary) 100%);
+    background-color: var(--hover-bg);
     transform: scale(1.01);
 }
 

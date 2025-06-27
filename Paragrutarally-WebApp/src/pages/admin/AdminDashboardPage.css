@@ -135,14 +135,14 @@
 
 /* Enhanced hover effects */
 .activity-item:hover {
-    background-color: var(--bg-tertiary);
+    background-color: var(--hover-bg);
     border-radius: 4px;
     margin: 0 -10px;
     padding: 15px 10px;
 }
 
 .event-item:hover {
-    background-color: var(--bg-tertiary);
+    background-color: var(--hover-bg);
     border-radius: 4px;
     margin: 0 -10px;
     padding: 12px 5px;
