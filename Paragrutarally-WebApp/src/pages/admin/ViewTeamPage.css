@@ -295,7 +295,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    color: #000000;
+    color: black;
     font-size: 14px;
     margin-bottom: 5px;
 }
@@ -329,6 +329,10 @@
     transform: translateY(-2px);
     box-shadow: 0 6px 20px var(--shadow-color);
     border-color: var(--success-color);
+}
+
+.instructor-card:hover .contact-info{
+    color: white;
 }
 
 .instructor-header {
@@ -406,7 +410,7 @@
 }
 
 .racer-card {
-    background: white;
+    background: var(--info-light);
     border: 2px solid var(--border-color);
     border-radius: 15px;
     padding: 20px;
@@ -475,7 +479,7 @@
 }
 
 .parent-info {
-    color: var(--text-muted);
+    color: var(--text-primary);
     font-size: 14px;
 }
 

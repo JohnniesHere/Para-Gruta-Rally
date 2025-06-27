@@ -19,14 +19,6 @@
    RACING HEADER DARK MODE FIXES
    ======================================== */
 
-/* Racing header text color fixes for dark mode */
-.racing-header .title-section h2 {
-    color: #2D3748; /* Dark text for light background */
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-    font-weight: 700;
-    text-align: center; /* CENTER THE HEADER */
-}
-
 .racing-header .subtitle {
     color: #4B5563; /* Darker gray for better contrast */
     font-weight: 600;
@@ -34,13 +26,6 @@
     text-align: center; /* CENTER THE SUBTITLE */
 }
 
-/* Dark mode overrides for racing header text */
-[data-theme="dark"] .racing-header .title-section h2,
-.dark-mode .racing-header .title-section h2,
-.dark .racing-header .title-section h2 {
-    color: #2D3748 !important; /* Keep dark text even in dark mode */
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-}
 
 [data-theme="dark"] .racing-header .subtitle,
 .dark-mode .racing-header .subtitle,
@@ -236,7 +221,7 @@
 }
 
 .instructor-details {
-    color: var(--text-muted);
+    color: var(--text-primary);
     font-size: 14px;
     margin-left: 30px;
 }
@@ -291,7 +276,7 @@
 }
 
 .kid-details {
-    color: var(--text-muted);
+    color: var(--text-primary);
     font-size: 14px;
     margin-left: 30px;
     display: flex;

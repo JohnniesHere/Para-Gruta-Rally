@@ -70,7 +70,7 @@
 
 /* Racing-style headers */
 .racing-header {
-    background: var(--hover-bg) !important;
+    background: var(--border-color) !important;
     border-radius: 20px;
     padding: 30px;
     margin-bottom: 30px;
@@ -193,14 +193,16 @@
 }
 
 /* Secondary buttons */
+/*REAL CLASSIFIER THAT CHANGES THE ACTUAL BUTTON!!!*/
 .btn-secondary {
-    background: linear-gradient(135deg, #6B7280 0%, #9CA3AF 100%);
-    color: white;
+    background: var(--bg-tertiary) !important;
+    color: var(--text-primary) !important;
     box-shadow: 0 4px 15px rgba(107, 114, 128, 0.3);
+    border: var(--text-secondary) 1px solid;
 }
 
 .btn-secondary:hover {
-    transform: translateY(-2px);
+    /*transform: translateY(-2px);*/
     box-shadow: 0 6px 20px rgba(107, 114, 128, 0.4);
     /*background: linear-gradient(135deg, #4B5563 0%, #6B7280 100%);*/
 }
@@ -688,7 +690,7 @@ body.dark .stat-card.total::before {
 }
 
 .data-table tbody tr:hover {
-    background-color: var(--hover-bg);
+    background-color: var(--bg-tertiary);
     /*background: linear-gradient(135deg, var() 90%, var(--bg-quaternary) 100%);*/
     transform: scale(1.01);
 }
@@ -1015,9 +1017,9 @@ body.dark .stat-card.total::before {
 .instructor-card.selected,
 .kid-card.selected {
     border-color: var(--racing-lilach) !important;
-    background: linear-gradient(135deg, var(--racing-lilach) 0%, var(--racing-purple) 100%) !important;
+    background: var(--info-light) !important;
     box-shadow: 0 4px 15px rgba(211, 189, 245, 0.5) !important;
-    color: white !important; /* Make text white on the dark background */
+    color: var(--text-primary) !important; /* Make text white on the dark background */
 }
 
 /* Make sure the text inside selected cards is visible */
@@ -1025,7 +1027,7 @@ body.dark .stat-card.total::before {
 .instructor-card.selected .instructor-details,
 .kid-card.selected .kid-name,
 .kid-card.selected .kid-details {
-    color: white !important;
+    color: var(--text-primary) !important;
 }
 
 /* Make the icons white too */
@@ -1033,7 +1035,7 @@ body.dark .stat-card.total::before {
 .instructor-card.selected .selected-icon,
 .kid-card.selected .card-icon,
 .kid-card.selected .selected-icon {
-    color: white !important;
+    color: var(--text-primary) !important;
 }
 
 .card.selected {
@@ -1355,6 +1357,8 @@ body.dark .stat-card.total::before {
 .modal-body {
     padding: 24px;
 }
+
+
 
 /* ========================================
    RACING THEME SPECIFIC

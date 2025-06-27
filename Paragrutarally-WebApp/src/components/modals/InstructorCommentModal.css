@@ -224,7 +224,7 @@
 }
 
 .form-textarea::placeholder {
-    color: var(--text-muted);
+    color: var(--text-secondary) !important;
 }
 
 .character-count {
@@ -269,12 +269,6 @@
 .btn:disabled {
     opacity: 0.6;
     cursor: not-allowed;
-}
-
-.btn-secondary {
-    background-color: var(--bg-tertiary);
-    color: var(--text-primary);
-    border: 1px solid var(--border-color);
 }
 
 .btn-secondary:hover:not(:disabled) {

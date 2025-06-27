@@ -590,7 +590,7 @@
 [data-theme="dark"] .stat-item,
 .dark-mode .stat-item,
 .dark .stat-item {
-    background: var(--bg-quaternary, #475569) !important;
+    background: var(--bg-tertiary) !important;
     border-color: var(--border-color, #64748b) !important;
 }
 

@@ -237,7 +237,7 @@
 
 .section-header {
     padding: 20px 30px;
-    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-quaternary) 100%);
+    background: var(--bg-tertiary);
     border-bottom: 2px solid var(--border-color);
 }
 

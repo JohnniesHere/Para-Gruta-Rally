@@ -187,14 +187,8 @@
     transform: translateY(-1px);
 }
 
-.btn-secondary {
-    background-color: var(--bg-tertiary);
-    color: var(--text-primary);
-    border: 1px solid var(--border-color);
-}
-
 .btn-secondary:hover {
-    background-color: var(--bg-quaternary);
+    /*background-color: var(--bg-quaternary);*/
     border-color: var(--accent-color);
 }
 

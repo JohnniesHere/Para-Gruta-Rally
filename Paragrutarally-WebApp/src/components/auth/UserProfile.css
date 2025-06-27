@@ -193,7 +193,7 @@
     border-radius: 6px;
     background-color: var(--input-bg);
     border: 1px solid var(--border-color);
-    color: var(--text-primary);
+    color: var(--text-primary) !important;
     font-size: 1rem;
     box-sizing: border-box;
     transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;

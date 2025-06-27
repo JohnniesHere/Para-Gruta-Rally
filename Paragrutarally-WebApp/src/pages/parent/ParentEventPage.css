@@ -673,18 +673,6 @@
     background: linear-gradient(135deg, var(--racing-purple) 0%, var(--racing-lilach) 100%);
 }
 
-.btn-secondary {
-    background: var(--bg-tertiary);
-    color: var(--text-primary);
-    border: 2px solid var(--border-color);
-}
-
-.btn-secondary:hover {
-    transform: translateY(-2px);
-    background: var(--bg-quaternary);
-    border-color: var(--racing-lilach);
-}
-
 .btn-icon {
     flex-shrink: 0;
 }

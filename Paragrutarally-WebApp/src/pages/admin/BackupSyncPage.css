@@ -194,7 +194,7 @@
 }
 
 .backup-item:hover {
-    background-color: var(--bg-quaternary);
+    background-color: var(--bg-secondary);
 }
 
 .backup-info {
@@ -295,7 +295,7 @@
 }
 
 .schedule-option:hover:not(:has(input:disabled)) {
-    background-color: var(--bg-quaternary);
+    background-color: var(--bg-secondary);
     border-color: var(--accent-color);
 }
 
@@ -440,6 +440,10 @@
     align-items: center;
 }
 
+.file-upload:hover{
+    background-color: var(--bg-secondary);
+}
+
 #backup-file-input {
     display: none;
 }
@@ -459,7 +463,7 @@
 
 .file-input-label:hover {
     border-color: var(--accent-color);
-    background-color: var(--bg-quaternary);
+    background-color: var(--bg-secondary);
 }
 
 .restore-btn {
@@ -517,7 +521,7 @@
 
 .sync-option:hover {
     border-color: var(--accent-color);
-    background-color: var(--bg-quaternary);
+    background-color: var(--bg-secondary);
 }
 
 .sync-option h3 {
@@ -601,7 +605,7 @@
 }
 
 .schedule-option:hover {
-    background-color: var(--bg-quaternary);
+    background-color: var(--bg-secondary);
     border-color: var(--accent-color);
 }
 

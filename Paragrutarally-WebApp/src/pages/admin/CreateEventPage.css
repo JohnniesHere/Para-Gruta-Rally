@@ -82,27 +82,11 @@
     border-color: #cbd5e1;
 }
 
-/* Racing header text color fixes for dark mode */
-.racing-header .title-section h2 {
-    color: #2D3748; /* Dark text for light background */
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-    font-weight: 700;
-    text-align: center; /* CENTER THE HEADER */
-}
-
 .racing-header .subtitle {
     color: #4B5563; /* Darker gray for better contrast */
     font-weight: 600;
     text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
     text-align: center; /* CENTER THE SUBTITLE */
-}
-
-/* Dark mode overrides for racing header text */
-[data-theme="dark"] .racing-header .title-section h2,
-.dark-mode .racing-header .title-section h2,
-.dark .racing-header .title-section h2 {
-    color: #2D3748 !important; /* Keep dark text even in dark mode */
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 [data-theme="dark"] .racing-header .subtitle,
@@ -496,7 +480,7 @@
 
 .image-upload-area:hover {
     border-color: var(--racing-purple);
-    background: linear-gradient(135deg, #FFEAA7 0%, #FDCB6E 100%);
+    background: var(--hover-bg);
     transform: translateY(-2px);
 }
 
@@ -1027,8 +1011,8 @@
     align-items: center;
     padding: 40px 20px;
     text-align: center;
-    color: var(--text-muted);
-    background: var(--bg-quaternary);
+    color: var(--text-secondary);
+    background: var(--bg-tertiary);
     border: 2px dashed var(--border-color);
     border-radius: 12px;
 }

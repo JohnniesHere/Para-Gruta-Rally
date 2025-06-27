@@ -207,7 +207,7 @@
 }
 
 .parent-comments-textarea::placeholder {
-    color: var(--text-muted);
+    color: var(--text-secondary);
     font-style: italic;
 }
 

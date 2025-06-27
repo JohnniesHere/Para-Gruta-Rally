@@ -584,19 +584,8 @@
     justify-content: flex-end;
 }
 
-.btn-secondary {
-    background: var(--bg-secondary);
-    color: var(--text-primary);
-    border: 1px solid var(--border-color);
-    padding: 12px 20px;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
 .btn-secondary:hover:not(:disabled) {
-    background: var(--bg-tertiary);
+    /*background: var(--bg-tertiary);*/
     border-color: var(--accent-color);
     transform: translateY(-1px);
 }
