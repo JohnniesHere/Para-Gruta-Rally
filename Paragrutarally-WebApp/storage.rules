@@ -1,11 +1,183 @@
 rules_version = '2';
 
-// Craft rules based on data in your Firestore database
-// allow write: if firestore.get(
-//    /databases/(default)/documents/users/$(request.auth.uid)).data.isAdmin;
+// Firebase Storage Security Rules for Racing App
 service firebase.storage {
   match /b/{bucket}/o {
-    match /{allPaths=**} {
+
+    // Helper functions for role checking
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function getUserRole() {
+      return request.auth.token.role;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && getUserRole() == 'admin';
+    }
+
+    function isInstructor() {
+      return isAuthenticated() && getUserRole() == 'instructor';
+    }
+
+    function isParent() {
+      return isAuthenticated() && getUserRole() == 'parent';
+    }
+
+    function isHost() {
+      return isAuthenticated() && getUserRole() == 'host';
+    }
+
+    function canUploadToGallery() {
+      return isAdmin() || isInstructor();
+    }
+
+    function canDeleteFromGallery() {
+      return isAdmin();
+    }
+
+    function canAccessKidsPhotos() {
+      return isAdmin() || isParent();
+    }
+
+    function canAccessVehiclePhotos() {
+      return isAdmin() || isInstructor();
+    }
+
+    function canAccessParentDeclarations() {
+      return isAdmin() || isParent();
+    }
+
+    function canReadParentDeclarations() {
+      return isAdmin() || isParent() || isInstructor();
+    }
+
+    // Validate image file types
+    function isValidImageType() {
+      return request.resource.contentType.matches('image/.*') &&
+             (request.resource.contentType.matches('image/jpeg') ||
+              request.resource.contentType.matches('image/jpg') ||
+              request.resource.contentType.matches('image/png') ||
+              request.resource.contentType.matches('image/webp') ||
+              request.resource.contentType.matches('image/gif') ||
+              request.resource.contentType.matches('image/bmp') ||
+              request.resource.contentType.matches('image/svg+xml'));
+    }
+
+    // Validate file size (5MB limit for images)
+    function isValidImageSize() {
+      return request.resource.size <= 5 * 1024 * 1024; // 5MB
+    }
+
+    // Validate PDF file type for declarations
+    function isValidPdfType() {
+      return request.resource.contentType == 'application/pdf';
+    }
+
+    // Validate PDF file size (10MB limit for PDFs)
+    function isValidPdfSize() {
+      return request.resource.size <= 10 * 1024 * 1024; // 10MB
+    }
+
+    // **EVENTS FOLDER** - Event main images (for event creation)
+    // Used in: CreateEventPage.jsx handleImageUpload
+    match /events/{eventImageFile} {
+      // Read: All authenticated users can view event images
+      allow read: if isAuthenticated();
+
+      // Write: Only admins and instructors can upload event images
+      allow write: if canUploadToGallery() &&
+                      isValidImageType() &&
+                      isValidImageSize();
+
+      // Delete: Only admins can delete event images
+      allow delete: if isAdmin();
+    }
+
+    // **GALLERY FOLDER** - Event and general photo galleries
+    // Used in: GalleryPage.jsx
+    match /gallery/{allPaths=**} {
+      // Gallery general folder - not tied to specific events
+      match /general/{generalPhotoFile} {
+        // Read: All authenticated users can view general gallery photos
+        allow read: if isAuthenticated();
+
+        // Write: Only admins and instructors can upload to general gallery
+        allow write: if canUploadToGallery() &&
+                        isValidImageType() &&
+                        isValidImageSize();
+
+        // Delete: Only admins can delete from general gallery
+        allow delete: if canDeleteFromGallery();
+      }
+
+      // Gallery events folder - photos organized by event name
+      match /events/{eventName}/{eventPhotoFile} {
+        // Read: All authenticated users can view event gallery photos
+        allow read: if isAuthenticated();
+
+        // Write: Only admins and instructors can upload to event galleries
+        // This includes the .folder_info.json placeholder files
+        allow write: if canUploadToGallery() &&
+                        (isValidImageType() ||
+                         request.resource.contentType == 'application/json') &&
+                        (isValidImageSize() ||
+                         request.resource.size <= 1024); // Allow small JSON files
+
+        // Delete: Only admins can delete from event galleries
+        allow delete: if canDeleteFromGallery();
+      }
+    }
+
+    // **KIDS PROFILE PICTURES** - Kid photo management
+    // Used in: kidPhotoService.js
+    match /kidsPFP/{kidPhotoFile} {
+      // Read: All authenticated users can view kid photos
+      allow read: if isAuthenticated();
+
+      // Write: Admins and parents can upload/update kid photos
+      allow write: if canAccessKidsPhotos() &&
+                      isValidImageType() &&
+                      isValidImageSize();
+
+      // Delete: Admins and parents can delete kid photos
+      allow delete: if canAccessKidsPhotos();
+    }
+
+    // **VEHICLE PHOTOS** - Vehicle photo management
+    // Used in: vehiclePhotoService.js
+    match /vehiclePhotos/{vehiclePhotoFile} {
+      // Read: All authenticated users can view vehicle photos
+      allow read: if isAuthenticated();
+
+      // Write: Admins and instructors can upload/update vehicle photos
+      allow write: if canAccessVehiclePhotos() &&
+                      isValidImageType() &&
+                      isValidImageSize();
+
+      // Delete: Admins and instructors can delete vehicle photos
+      allow delete: if canAccessVehiclePhotos();
+    }
+
+    // **SIGNED PARENT DECLARATIONS** - Legal documents
+    // Used for storing signed parent declaration PDFs
+    match /signedParentDeclarations/{declarationFile} {
+      // Read: Admins, parents, and instructors can view declarations
+      allow read: if canReadParentDeclarations();
+
+      // Write: Admins and parents can upload declarations
+      allow write: if canAccessParentDeclarations() &&
+                      isValidPdfType() &&
+                      isValidPdfSize();
+
+      // Delete: Admins and parents can delete declarations
+      allow delete: if canAccessParentDeclarations();
+    }
+
+    // **FALLBACK RULE** - Deny all other access
+    // This ensures that any paths not explicitly covered above are denied
+    match /{allOtherPaths=**} {
       allow read, write: if false;
     }
   }
