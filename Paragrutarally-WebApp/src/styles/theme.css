@@ -2,59 +2,17 @@
 
 /* ===== ROOT VARIABLES (Light Theme Default) ===== */
 :root {
-
-    --bg-tertiary: rgba(196, 167, 245, 0.79);
-
-    --border-color-hover: #D1D5DB;
-
-    --shadow-hover: rgba(0, 0, 0, 0.15);
-
-    /* Racing Theme Colors */
-    --racing-lilach: rgba(190, 163, 243, 0.79);
-    --racing-purple: #c57de1;
-    --racing-blurple: #ad83f2;
-    --racing-light-purple: #cc8bef;
-    --racing-blue: #3B82F6;
-    --racing-green: #10B981;
-    --racing-pink: #EC4899;
-
-    /* Input Colors */
-    --input-focus: #aa80e3;
-
     /* Primary Colors */
-    --bg-secondary: #FFFFFF;
-    --hover-bg: rgba(196, 167, 245, 0.2);
-    --border-color-hover: #D1D5DB;
-    --shadow-color: rgba(0, 0, 0, 0.1);
-    --shadow-hover: rgba(0, 0, 0, 0.15);
-
-    /* Racing Theme Colors */
-    --racing-lilach: rgba(190, 163, 243, 0.79);
-    --racing-purple: #c57de1;
-    --racing-blurple: #ad83f2;
-    --racing-light-purple: #cc8bef;
-    --racing-blue: #3B82F6;
-    --racing-green: #10B981;
-    --racing-pink: #EC4899;
-
-    /* Input Colors */
-    --input-bg: #FFFFFF;
-    --input-focus: #aa80e3;
     --bg-primary: #f8f9fa;
-<<<<<<< Updated upstream
-    --bg-tertiary: rgba(174, 12, 238, 0.1); /* Very subtle purple */
-    --bg-quaternary: rgba(174, 12, 238, 0.05); /* Even more subtle */
-=======
     --bg-secondary: #ffffff;
-    --bg-tertiary: #e6e6e6;
+    --bg-tertiary: #ae0cee;
     --bg-quaternary: #e8eaed;
->>>>>>> Stashed changes
 
     /* Text Colors */
     --text-primary: #2c3e50;
     --text-secondary: #566573;
     --text-tertiary: #7f8c8d;
-    --text-muted: rgba(189, 189, 189, 0.7);
+    --text-muted: #95a5a6;
     --text-inverse: #ffffff;
 
     /* Interactive Colors */
@@ -84,16 +42,18 @@
     --border-focus: var(--accent-color);
 
     /* Shadow Colors */
+    --shadow-color: rgba(0, 0, 0, 0.1);
     --shadow-light: rgba(0, 0, 0, 0.05);
     --shadow-medium: rgba(0, 0, 0, 0.15);
     --shadow-dark: rgba(0, 0, 0, 0.25);
 
     /* Input Colors */
+    --input-bg: #ffffff;
     --input-border: var(--border-color);
     --input-focus-border: var(--accent-color);
     --input-placeholder: var(--text-muted);
     --input-disabled-bg: #f8f9fa;
-    --input-disabled-color: var(--text-tertiary);
+    --input-disabled-color: var(--text-muted);
 
     /* Card Colors */
     --card-bg: rgba(255, 255, 255, 0.8);
@@ -136,13 +96,8 @@
     /* Table Colors */
     --table-bg: var(--bg-secondary);
     --table-border: var(--border-color);
-<<<<<<< Updated upstream
-    --table-row-hover: none;
-    --table-header-bg: none;
-=======
-    --table-header-bg: var(--bg-primary);
-    --table-row-hover: var(--bg-primary);
->>>>>>> Stashed changes
+    --table-header-bg: var(--bg-tertiary);
+    --table-row-hover: var(--bg-tertiary);
     --table-row-selected: var(--accent-light);
 
     /* Modal Colors */
@@ -193,50 +148,17 @@
 /* ===== DARK THEME OVERRIDES ===== */
 .dark-mode,
 .dark {
-<<<<<<< Updated upstream
-
-    --bg-tertiary: #be7fe3;
-    --bg-quaternary: #af85ee;
-
-    --hover-bg: rgba(190, 163, 243, 0.3);
-
-
-    --border-color-hover: #64748B;
-
-
-
-=======
-    --border-color-hover: #64748B;
-    --success-light: #064E3B;
-    --error-light: #7F1D1D;
->>>>>>> Stashed changes
-    --shadow-hover: rgba(0, 0, 0, 0.4);
-
-    /* Input Colors for Dark Mode */
-    --input-focus: #aa7fea;
-
-    /* Racing Theme Colors */
-    --racing-lilach: #9146FF;
-    --racing-purple: #6441A4;
-    --racing-blurple: #711cf2;
-    --racing-light-purple: #8B5CF6;
-
     /* Primary Colors */
     --bg-primary: #0f0f0f;
     --bg-secondary: #1a1a1a;
-<<<<<<< Updated upstream
-    --bg-tertiary: rgba(174, 12, 238, 0.1); /* Very subtle purple */
-    --bg-quaternary: rgba(174, 12, 238, 0.05); /* Even more subtle */
-=======
-    --bg-tertiary: #454545;
+    --bg-tertiary: #9969e3;
     --bg-quaternary: #bfbfbf;
->>>>>>> Stashed changes
 
     /* Text Colors */
     --text-primary: rgb(251, 251, 251);
     --text-secondary: #c0c0c0;
     --text-tertiary: #a0a0a0;
-    --text-muted: #787878;
+    --text-muted: #808080;
     --text-inverse: #000000;
 
     /* Interactive Colors */
@@ -294,7 +216,6 @@
 
     /* Sidebar Colors */
     --sidebar-bg: #1a1a1a;
-<<<<<<< Updated upstream
     --sidebar-border: var(--border-color);
     --sidebar-link-color: var(--text-secondary);
     --sidebar-link-hover: var(--text-primary);
@@ -321,14 +242,12 @@
     /* Table Colors */
     --table-bg: var(--bg-secondary);
     --table-border: var(--border-color);
-    --table-row-hover: none;
-    --table-header-bg: none;
+    --table-header-bg: var(--bg-tertiary);
+    --table-row-hover: var(--bg-tertiary);
     --table-row-selected: var(--accent-light);
 
     /* Modal Colors */
     --modal-bg: var(--bg-secondary);
-=======
->>>>>>> Stashed changes
     --modal-overlay: rgba(0, 0, 0, 0.7);
     --modal-border: var(--border-color);
     --modal-shadow: var(--shadow-dark);
@@ -409,7 +328,7 @@ input::placeholder, textarea::placeholder {
 }
 
 input:disabled, textarea:disabled, select:disabled {
-    background-color: var(--input-disabled-bg) !important;
+    background-color: var(--input-disabled-bg);
     color: var(--input-disabled-color);
     cursor: not-allowed;
 }
