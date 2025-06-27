@@ -3,12 +3,12 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { collection, getDocs, query, orderBy, doc, deleteDoc } from 'firebase/firestore';
 import { ref, listAll, getDownloadURL, deleteObject, uploadBytes, getMetadata } from 'firebase/storage';
-import { db, storage } from '../../firebase/config';
+import { db, storage } from '@/firebase/config.js';
 import Dashboard from '../../components/layout/Dashboard';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { useStorage } from '../../hooks/useStorage';
+import { useStorage } from '@/hooks/useStorage.js';
 import {
     IconPhoto as Photo,
     IconUpload as Upload,
@@ -348,7 +348,7 @@ const GalleryPage = () => {
 
     // Permission checks
     const canUpload = () => {
-        return ['admin', 'host', 'instructor'].includes(userRole);
+        return ['admin', 'instructor'].includes(userRole);
     };
 
     const canDelete = () => {
