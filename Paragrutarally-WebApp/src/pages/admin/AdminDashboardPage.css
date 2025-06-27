@@ -135,22 +135,14 @@
 
 /* Enhanced hover effects */
 .activity-item:hover {
-<<<<<<< Updated upstream
     background-color: var(--hover-bg);
-=======
-    background-color: var(--text-muted);
->>>>>>> Stashed changes
     border-radius: 4px;
     margin: 0 -10px;
     padding: 15px 10px;
 }
 
 .event-item:hover {
-<<<<<<< Updated upstream
     background-color: var(--hover-bg);
-=======
-    background-color: var(--bg-secondary);
->>>>>>> Stashed changes
     border-radius: 4px;
     margin: 0 -10px;
     padding: 12px 5px;
@@ -161,7 +153,7 @@
    ======================================== */
 
 .loading-skeleton {
-    /*background: linear-gradient(90deg, var(--bg-tertiary) 25%, var(--bg-secondary) 50%, var(--bg-tertiary) 75%);*/
+    background: linear-gradient(90deg, var(--bg-tertiary) 25%, var(--bg-secondary) 50%, var(--bg-tertiary) 75%);
     background-size: 200% 100%;
     animation: loading 1.5s infinite;
 }

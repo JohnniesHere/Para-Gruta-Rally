@@ -1,19 +1,4 @@
-<<<<<<< Updated upstream
 /* src/styles/global.css
-=======
-/* src/styles/global.css - Unified Admin Theme with Light/Dark Mode Support */
-
-/* ========================================
-   CSS CUSTOM PROPERTIES (CSS VARIABLES)
-   ======================================== */
-
-/* Dark Mode Colors */
-[data-theme="dark"],
-.dark-mode,
-.dark {
-
-}
->>>>>>> Stashed changes
 
 /* ========================================
    GLOBAL RESET & BASE STYLES
@@ -171,7 +156,7 @@
 
 /* Primary buttons (Racing Gold theme) */
 .btn-primary {
-    background: var(--bg-primary);
+    background: linear-gradient(135deg, var(--racing-lilach) 0%, var(--racing-purple) 100%);
     color: var(--text-primary);
     box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
     position: relative;
@@ -199,11 +184,7 @@
 .btn-primary:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(255, 215, 0, 0.6);
-<<<<<<< Updated upstream
     background: var(--hover-bg);
-=======
-    background: var(--bg-primary);
->>>>>>> Stashed changes
 }
 
 /* Secondary buttons */
@@ -216,7 +197,7 @@
 .btn-secondary:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(107, 114, 128, 0.4);
-    /*background: linear-gradient(135deg, #4B5563 0%, #6B7280 100%);*/
+    background: linear-gradient(135deg, #4B5563 0%, #6B7280 100%);
 }
 
 /* Success buttons */
@@ -492,7 +473,7 @@ body.dark .stat-card.total::before {
 
 .stat-subtitle {
     font-size: 12px;
-    color: var(--text-tertiary);
+    color: var(--text-muted);
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -660,12 +641,8 @@ body.dark .stat-card.total::before {
 
 
 .data-table th {
-<<<<<<< Updated upstream
     background: var(--bg-hover) !important;
     background-image: none !important;
-=======
-    /*background: linear-gradient(90deg, var(--bg-tertiary) 99%, var(--bg-quaternary) 100%);*/
->>>>>>> Stashed changes
     color: var(--text-primary);
     font-weight: 700;
     font-size: 14px;
@@ -705,11 +682,7 @@ body.dark .stat-card.total::before {
 }
 
 .data-table tbody tr:hover {
-<<<<<<< Updated upstream
     background-color: var(--hover-bg);
-=======
-    /*background: linear-gradient(135deg, var() 90%, var(--bg-quaternary) 100%);*/
->>>>>>> Stashed changes
     transform: scale(1.01);
 }
 
@@ -722,7 +695,7 @@ body.dark .stat-card.total::before {
    ======================================== */
 
 .form-section {
-    background: var(--bg-secondary);
+    background: var(--bg-tertiary);
     border-radius: 20px;
     padding: 25px;
     margin-bottom: 25px;
@@ -1114,7 +1087,7 @@ body.dark .stat-card.total::before {
     width: 40px;
     height: 40px;
     border: 4px solid var(--border-color);
-    /*border-top: 4px solid var(--racing-lilach);*/
+    border-top: 4px solid var(--racing-lilach);
     border-radius: 50%;
     animation: spin 1s linear infinite;
     margin-bottom: 20px;
@@ -1150,7 +1123,7 @@ body.dark .stat-card.total::before {
     text-align: center;
     padding: 60px 20px;
     color: var(--text-muted);
-    background: var(--bg-secondary);
+    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-quaternary) 100%);
     border-radius: 20px;
     border: 2px dashed var(--racing-lilach);
     grid-column: 1 / -1;
@@ -1395,11 +1368,11 @@ body.dark .stat-card.total::before {
 [data-theme="dark"] .racing-actions,
 .dark-mode .racing-actions,
 .dark .racing-actions {
-    background: var(--bg-secondary);
+    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-quaternary) 100%);
 }
 
 .btn-submit.racing-submit {
-    background: var(--btn-primary-bg);
+    background: linear-gradient(135deg, var(--racing-lilach) 0%, var(--racing-purple) 100%);
     color: var(--text-primary);
     border: none;
     padding: 15px 30px;
@@ -1436,7 +1409,7 @@ body.dark .stat-card.total::before {
 .btn-submit.racing-submit:hover {
     transform: translateY(-3px);
     box-shadow: 0 8px 25px rgba(255, 215, 0, 0.6);
-    background: var(--btn-primary-hover);
+    background: linear-gradient(135deg, var(--racing-purple) 0%, var(--racing-lilach) 100%);
 }
 
 .btn-cancel {
