@@ -2,12 +2,7 @@
 
 /* ===== ROOT VARIABLES (Light Theme Default) ===== */
 :root {
-    /* Primary Colors */
-    --bg-secondary: #FFFFFF;
-    --hover-bg: rgba(196, 167, 245, 0.2);
-    --border-color-hover: #D1D5DB;
-    --shadow-color: rgba(0, 0, 0, 0.1);
-    --shadow-hover: rgba(0, 0, 0, 0.15);
+
 
     /* Racing Theme Colors */
     --racing-lilach: rgba(190, 163, 243, 0.79);
@@ -19,17 +14,30 @@
     --racing-pink: #EC4899;
 
     /* Input Colors */
-    --input-bg: #FFFFFF;
     --input-focus: #aa80e3;
+
+    /* Primary Colors */
+    --hover-bg: rgba(196, 167, 245, 0.2);
+    --border-color-hover: #D1D5DB;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+    --shadow-hover: rgba(0, 0, 0, 0.15);
+
+    /* Racing Theme Colors */
+
+    /* Input Colors */
+    --input-bg: #FFFFFF;
     --bg-primary: #f8f9fa;
     --bg-tertiary: rgba(174, 12, 238, 0.1); /* Very subtle purple */
     --bg-quaternary: rgba(174, 12, 238, 0.05); /* Even more subtle */
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #e6e6e6;
+    --bg-quaternary: #e8eaed;
 
     /* Text Colors */
     --text-primary: #2c3e50;
     --text-secondary: #566573;
     --text-tertiary: #7f8c8d;
-    --text-muted: #95a5a6;
+    --text-muted: rgba(189, 189, 189, 0.7);
     --text-inverse: #ffffff;
 
     /* Interactive Colors */
@@ -68,7 +76,7 @@
     --input-focus-border: var(--accent-color);
     --input-placeholder: var(--text-muted);
     --input-disabled-bg: #f8f9fa;
-    --input-disabled-color: var(--text-muted);
+    --input-disabled-color: var(--text-tertiary);
 
     /* Card Colors */
     --card-bg: rgba(255, 255, 255, 0.8);
@@ -111,8 +119,8 @@
     /* Table Colors */
     --table-bg: var(--bg-secondary);
     --table-border: var(--border-color);
-    --table-row-hover: none;
-    --table-header-bg: none;
+    --table-header-bg: var(--bg-primary);
+    --table-row-hover: var(--bg-primary);
     --table-row-selected: var(--accent-light);
 
     /* Modal Colors */
@@ -174,6 +182,9 @@
 
 
 
+    --border-color-hover: #64748B;
+    --success-light: #064E3B;
+    --error-light: #7F1D1D;
     --shadow-hover: rgba(0, 0, 0, 0.4);
 
     /* Input Colors for Dark Mode */
@@ -190,12 +201,14 @@
     --bg-secondary: #1a1a1a;
     --bg-tertiary: rgba(174, 12, 238, 0.1); /* Very subtle purple */
     --bg-quaternary: rgba(174, 12, 238, 0.05); /* Even more subtle */
+    --bg-tertiary: #454545;
+    --bg-quaternary: #bfbfbf;
 
     /* Text Colors */
     --text-primary: rgb(251, 251, 251);
     --text-secondary: #c0c0c0;
     --text-tertiary: #a0a0a0;
-    --text-muted: #808080;
+    --text-muted: #787878;
     --text-inverse: #000000;
 
     /* Interactive Colors */
@@ -285,6 +298,8 @@
 
     /* Modal Colors */
     --modal-bg: var(--bg-secondary);
+=======
+>>>>>>> Stashed changes
     --modal-overlay: rgba(0, 0, 0, 0.7);
     --modal-border: var(--border-color);
     --modal-shadow: var(--shadow-dark);
@@ -365,7 +380,7 @@ input::placeholder, textarea::placeholder {
 }
 
 input:disabled, textarea:disabled, select:disabled {
-    background-color: var(--input-disabled-bg);
+    background-color: var(--input-disabled-bg) !important;
     color: var(--input-disabled-color);
     cursor: not-allowed;
 }
