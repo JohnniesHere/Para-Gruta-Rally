@@ -20,7 +20,7 @@ import {
     IconExclamationCircle as Warning
 } from '@tabler/icons-react';
 import { updateKid } from '@/services/kidService.js';
-import { uploadKidPhoto, deleteKidPhoto, getKidPhotoInfo } from '@/services/kidPhotoService.js';
+import { uploadKidPhoto, deleteKidPhoto, getKidPhotoInfo } from '../../services/kidPhotoService.js';
 import { validateKid, getKidFullName } from '@/schemas/kidSchema.js';
 import './ParentKidEditModal.css';
 

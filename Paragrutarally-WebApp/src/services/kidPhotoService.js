@@ -71,7 +71,7 @@ export const uploadKidPhoto = async (kidId, photoFile) => {
 };
 
 /**
- * Delete a kid's profile photo
+ * Delete a kid's profile photo - CORRECTED VERSION
  * @param {string} kidId - The kid's document ID
  * @param {string} photoUrl - The current photo URL
  * @returns {Promise<void>}
@@ -81,15 +81,27 @@ export const deleteKidPhoto = async (kidId, photoUrl) => {
         if (!photoUrl) return;
 
         console.log(`🔄 Deleting photo for kid ${kidId}`);
+        console.log(`📄 Photo URL: ${photoUrl}`);
 
-        // Extract filename from URL
+        // Parse Firebase Storage URL properly
         const url = new URL(photoUrl);
-        const pathParts = url.pathname.split('/');
-        const encodedFilename = pathParts[pathParts.length - 1];
-        const filename = decodeURIComponent(encodedFilename.split('?')[0]);
 
-        // Create storage reference
-        const photoRef = ref(storage, `${filename}`);
+        // Extract the encoded path from Firebase Storage URL
+        const pathMatch = url.pathname.match(/\/o\/(.+)/);
+        if (!pathMatch) {
+            throw new Error('Invalid Firebase Storage URL format - no path found after /o/');
+        }
+
+        // The path after /o/ is URL encoded and contains the full storage path
+        const encodedPath = pathMatch[1];
+
+        // Decode the path to get the actual storage path
+        const fullStoragePath = decodeURIComponent(encodedPath);
+
+        console.log(`📁 Extracted storage path: ${fullStoragePath}`);
+
+        // Create storage reference using the extracted path
+        const photoRef = ref(storage, fullStoragePath);
 
         // Delete file from storage
         await deleteObject(photoRef);
@@ -110,6 +122,12 @@ export const deleteKidPhoto = async (kidId, photoUrl) => {
 
     } catch (error) {
         console.error('💥 Error deleting kid photo:', error);
+        console.error('💥 Error details:', {
+            code: error.code,
+            message: error.message,
+            stack: error.stack
+        });
+
         // Don't throw error if file doesn't exist
         if (error.code !== 'storage/object-not-found') {
             throw new Error(`Failed to delete photo: ${error.message}`);

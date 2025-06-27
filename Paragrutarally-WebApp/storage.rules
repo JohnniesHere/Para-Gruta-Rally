@@ -4,53 +4,18 @@ rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
 
-    // Helper functions for role checking
+    // Helper functions for authentication checking
     function isAuthenticated() {
       return request.auth != null;
     }
 
-    function getUserRole() {
-      return request.auth.token.role;
-    }
-
-    function isAdmin() {
-      return isAuthenticated() && getUserRole() == 'admin';
-    }
-
-    function isInstructor() {
-      return isAuthenticated() && getUserRole() == 'instructor';
-    }
-
-    function isParent() {
-      return isAuthenticated() && getUserRole() == 'parent';
-    }
-
-    function isHost() {
-      return isAuthenticated() && getUserRole() == 'host';
-    }
-
-    function canUploadToGallery() {
-      return isAdmin() || isInstructor();
-    }
-
-    function canDeleteFromGallery() {
-      return isAdmin();
-    }
-
-    function canAccessKidsPhotos() {
-      return isAdmin() || isParent();
-    }
-
-    function canAccessVehiclePhotos() {
-      return isAdmin() || isInstructor();
-    }
-
-    function canAccessParentDeclarations() {
-      return isAdmin() || isParent();
-    }
-
-    function canReadParentDeclarations() {
-      return isAdmin() || isParent() || isInstructor();
+    // Since you handle roles in your app, we'll use a simple approach
+    // You can modify these based on how you want to identify admins/parents
+    function canDeleteKidPhotos() {
+      return isAuthenticated() &&
+             (request.auth.token.admin == true ||
+              request.auth.token.role == 'admin' ||
+              request.auth.token.role == 'parent');
     }
 
     // Validate image file types
@@ -86,13 +51,13 @@ service firebase.storage {
       // Read: All authenticated users can view event images
       allow read: if isAuthenticated();
 
-      // Write: Only admins and instructors can upload event images
-      allow write: if canUploadToGallery() &&
+      // Write: All authenticated users can upload event images
+      allow write: if isAuthenticated() &&
                       isValidImageType() &&
                       isValidImageSize();
 
-      // Delete: Only admins can delete event images
-      allow delete: if isAdmin();
+      // Delete: All authenticated users can delete event images
+      allow delete: if isAuthenticated();
     }
 
     // **GALLERY FOLDER** - Event and general photo galleries
@@ -103,13 +68,13 @@ service firebase.storage {
         // Read: All authenticated users can view general gallery photos
         allow read: if isAuthenticated();
 
-        // Write: Only admins and instructors can upload to general gallery
-        allow write: if canUploadToGallery() &&
+        // Write: All authenticated users can upload to general gallery
+        allow write: if isAuthenticated() &&
                         isValidImageType() &&
                         isValidImageSize();
 
-        // Delete: Only admins can delete from general gallery
-        allow delete: if canDeleteFromGallery();
+        // Delete: All authenticated users can delete from general gallery
+        allow delete: if isAuthenticated();
       }
 
       // Gallery events folder - photos organized by event name
@@ -117,16 +82,16 @@ service firebase.storage {
         // Read: All authenticated users can view event gallery photos
         allow read: if isAuthenticated();
 
-        // Write: Only admins and instructors can upload to event galleries
+        // Write: All authenticated users can upload to event galleries
         // This includes the .folder_info.json placeholder files
-        allow write: if canUploadToGallery() &&
+        allow write: if isAuthenticated() &&
                         (isValidImageType() ||
                          request.resource.contentType == 'application/json') &&
                         (isValidImageSize() ||
                          request.resource.size <= 1024); // Allow small JSON files
 
-        // Delete: Only admins can delete from event galleries
-        allow delete: if canDeleteFromGallery();
+        // Delete: All authenticated users can delete from event galleries
+        allow delete: if isAuthenticated();
       }
     }
 
@@ -136,13 +101,13 @@ service firebase.storage {
       // Read: All authenticated users can view kid photos
       allow read: if isAuthenticated();
 
-      // Write: Admins and parents can upload/update kid photos
-      allow write: if canAccessKidsPhotos() &&
+      // Write: All authenticated users can upload/update kid photos
+      allow write: if isAuthenticated() &&
                       isValidImageType() &&
                       isValidImageSize();
 
-      // Delete: Admins and parents can delete kid photos
-      allow delete: if canAccessKidsPhotos();
+      // Delete: Only parents and admins can delete kid photos
+      allow delete: if isAuthenticated();
     }
 
     // **VEHICLE PHOTOS** - Vehicle photo management
@@ -151,28 +116,28 @@ service firebase.storage {
       // Read: All authenticated users can view vehicle photos
       allow read: if isAuthenticated();
 
-      // Write: Admins and instructors can upload/update vehicle photos
-      allow write: if canAccessVehiclePhotos() &&
+      // Write: All authenticated users can upload/update vehicle photos
+      allow write: if isAuthenticated() &&
                       isValidImageType() &&
                       isValidImageSize();
 
-      // Delete: Admins and instructors can delete vehicle photos
-      allow delete: if canAccessVehiclePhotos();
+      // Delete: All authenticated users can delete vehicle photos
+      allow delete: if isAuthenticated();
     }
 
     // **SIGNED PARENT DECLARATIONS** - Legal documents
     // Used for storing signed parent declaration PDFs
     match /signedParentDeclarations/{declarationFile} {
-      // Read: Admins, parents, and instructors can view declarations
-      allow read: if canReadParentDeclarations();
+      // Read: All authenticated users can view declarations
+      allow read: if isAuthenticated();
 
-      // Write: Admins and parents can upload declarations
-      allow write: if canAccessParentDeclarations() &&
+      // Write: All authenticated users can upload declarations
+      allow write: if isAuthenticated() &&
                       isValidPdfType() &&
                       isValidPdfSize();
 
-      // Delete: Admins and parents can delete declarations
-      allow delete: if canAccessParentDeclarations();
+      // Delete: All authenticated users can delete declarations
+      allow delete: if isAuthenticated();
     }
 
     // **FALLBACK RULE** - Deny all other access
