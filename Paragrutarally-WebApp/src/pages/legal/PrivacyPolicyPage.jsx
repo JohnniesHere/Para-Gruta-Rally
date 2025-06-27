@@ -7,16 +7,15 @@ const PrivacyPolicyPage = () => {
         <div className="simple-legal-page">
             <div className="legal-container">
                 <h1>Privacy Policy</h1>
-                <p className="effective-date"><strong>Effective Date:</strong> December 25, 2024</p>
+                <p className="effective-date"><strong>Effective Date:</strong> June 23, 2025</p>
 
                 <section>
                     <h2>Information We Collect</h2>
-                    <p>Our charity management application collects the following types of information:</p>
+                    <p>The Paragrutarally application collects the following types of information:</p>
                     <ul>
                         <li><strong>Account Information:</strong> Name, email address, phone number, organization affiliation</li>
                         <li><strong>Profile Data:</strong> Display name, role within your organization, contact preferences</li>
                         <li><strong>Organizational Data:</strong> Event details, participant data, team information, form submissions</li>
-                        <li><strong>Technical Information:</strong> Usage data, device information, log data for security and performance</li>
                     </ul>
                 </section>
 
@@ -24,7 +23,7 @@ const PrivacyPolicyPage = () => {
                     <h2>How We Use Your Information</h2>
                     <p>We use the collected information to:</p>
                     <ul>
-                        <li>Provide core charity management services</li>
+                        <li>Provide core management services</li>
                         <li>Secure user authentication through Firebase</li>
                         <li>Replace disorganized Excel workflows with structured data management</li>
                         <li>Send important updates about your account and organizational activities</li>
@@ -60,7 +59,7 @@ const PrivacyPolicyPage = () => {
                     <h2>Data Sharing</h2>
                     <p>We never sell your personal information. We only share data:</p>
                     <ul>
-                        <li>Within your charity organization based on assigned roles and permissions</li>
+                        <li>Within your organization based on assigned roles and permissions</li>
                         <li>With Firebase services for data processing and storage</li>
                         <li>When required by law or to protect our legal rights</li>
                         <li>In emergency situations to prevent harm</li>
@@ -70,8 +69,7 @@ const PrivacyPolicyPage = () => {
                 <section>
                     <h2>Contact Information</h2>
                     <p>For questions about this Privacy Policy, please contact us at:</p>
-                    <p><strong>Email:</strong> privacy@paragrutarally.org<br/>
-                    <strong>Phone:</strong> (555) 123-4567</p>
+                    <p><strong>Email:</strong> privacy@paragrutarally.org</p>
                 </section>
 
                 <div className="back-to-app">

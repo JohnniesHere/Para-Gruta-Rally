@@ -1,8 +1,11 @@
+
 .simple-legal-page {
     min-height: 100vh;
     background-color: #f9fafb;
     padding: 2rem 1rem;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    overflow-y: auto;
+    box-sizing: border-box;
 }
 
 .legal-container {
@@ -12,6 +15,8 @@
     border-radius: 0.5rem;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     padding: 3rem;
+    margin-bottom: 2rem;
+    box-sizing: border-box;
 }
 
 .legal-container h1 {
@@ -67,6 +72,7 @@
     padding-top: 2rem;
     border-top: 1px solid #e5e7eb;
     text-align: center;
+    margin-bottom: 2rem;
 }
 
 .back-to-app a {
@@ -84,10 +90,27 @@
     color: white;
 }
 
+/* Ensure body and html don't interfere with scrolling */
+html, body {
+    overflow-x: hidden;
+    overflow-y: auto !important;
+    height: auto !important;
+    min-height: 100vh;
+}
+
+/* Remove any fixed heights that might prevent scrolling */
+.simple-legal-page * {
+    box-sizing: border-box;
+}
+
 @media (max-width: 768px) {
+    .simple-legal-page {
+        padding: 1rem 0.5rem;
+    }
+
     .legal-container {
         padding: 1.5rem;
-        margin: 1rem;
+        margin: 1rem 0.5rem 2rem 0.5rem;
     }
 
     .legal-container h1 {
@@ -96,5 +119,25 @@
 
     .legal-container h2 {
         font-size: 1.25rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .simple-legal-page {
+        padding: 0.5rem 0.25rem;
+    }
+
+    .legal-container {
+        padding: 1rem;
+        margin: 0.5rem 0.25rem 1.5rem 0.25rem;
+        border-radius: 0.25rem;
+    }
+
+    .legal-container h1 {
+        font-size: 1.5rem;
+    }
+
+    .legal-container h2 {
+        font-size: 1.125rem;
     }
 }

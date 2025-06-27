@@ -7,16 +7,16 @@ const TermsOfServicePage = () => {
         <div className="simple-legal-page">
             <div className="legal-container">
                 <h1>Terms of Service</h1>
-                <p className="effective-date"><strong>Effective Date:</strong> December 25, 2024</p>
+                <p className="effective-date"><strong>Effective Date:</strong> June 23, 2025</p>
 
                 <section>
                     <h2>Acceptance of Terms</h2>
-                    <p>By accessing or using our charity management application, you agree to be bound by these Terms of Service. If you do not agree to these Terms, please do not use the Service.</p>
+                    <p>By accessing or using the Paragrutarally management application, you agree to be bound by these Terms of Service. If you do not agree to these Terms, please do not use the Service.</p>
                 </section>
 
                 <section>
                     <h2>Description of Service</h2>
-                    <p>Our charity management application helps organizations:</p>
+                    <p>The Paragrutarally management application helps organizations:</p>
                     <ul>
                         <li>Manage events, teams, and organizational data</li>
                         <li>Replace disorganized Excel-based workflows</li>
@@ -86,8 +86,7 @@ const TermsOfServicePage = () => {
                 <section>
                     <h2>Contact Information</h2>
                     <p>For questions about these Terms, please contact us at:</p>
-                    <p><strong>Email:</strong> legal@paragrutarally.org<br/>
-                    <strong>Phone:</strong> (555) 123-4567</p>
+                    <p><strong>Email:</strong> ParaGrutaRally.Project@gmail.com</p>
                 </section>
 
                 <div className="back-to-app">
