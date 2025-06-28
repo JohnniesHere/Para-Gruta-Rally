@@ -34,7 +34,7 @@ const UpdateUserModal = ({ isOpen, onClose, user, onUserUpdated }) => {
     // Populate form with user data when modal opens
     useEffect(() => {
         if (user && isOpen) {
-            console.log('Loading user data:', user);
+
             setFormData({
                 displayName: user.displayName || '',
                 name: user.name || '',
@@ -92,17 +92,17 @@ const UpdateUserModal = ({ isOpen, onClose, user, onUserUpdated }) => {
         setIsLoading(true);
 
         try {
-            console.log('Updating user:', user.id, 'with data:', formData);
+
 
             // Prepare user data for Firestore using schema
             const updateData = prepareUserForFirestore(formData, true);
-            console.log('Prepared update data:', updateData);
+
 
             // Update user document in Firestore
             const userDocRef = doc(db, 'users', user.id);
             await updateDoc(userDocRef, updateData);
 
-            console.log('✅ User updated successfully');
+
 
             // Reset errors
             setErrors({});

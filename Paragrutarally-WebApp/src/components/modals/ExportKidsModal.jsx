@@ -327,7 +327,6 @@ const ExportKidsModal = ({ isOpen, onClose }) => {
             document.body.removeChild(link);
             window.URL.revokeObjectURL(url);
 
-            console.log(`✅ Successfully exported ${kids.length} kids to ${filename}`);
             onClose();
         } catch (error) {
             console.error('Error exporting kids:', error);

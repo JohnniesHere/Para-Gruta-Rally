@@ -335,7 +335,6 @@ const ExportTeamsModal = ({ isOpen, onClose }) => {
             document.body.removeChild(link);
             window.URL.revokeObjectURL(url);
 
-            console.log(`✅ Successfully exported ${teams.length} teams to ${filename}`);
             onClose();
         } catch (error) {
             console.error('Error exporting teams:', error);

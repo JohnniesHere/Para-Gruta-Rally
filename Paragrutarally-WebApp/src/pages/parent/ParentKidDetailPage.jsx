@@ -45,17 +45,13 @@ const ParentKidDetailPage = () => {
 
     // Validation function
     const performValidation = (kidData) => {
-        console.log('🔍 Performing validation on kid data:', kidData);
 
         const validation = validateKid(kidData, t);
-        console.log('📋 Validation result:', validation);
 
         if (!validation.isValid) {
             setValidationErrors(validation.errors);
-            console.log('❌ Validation errors found:', validation.errors);
         } else {
             setValidationErrors({});
-            console.log('✅ Validation passed');
         }
 
         // Check for warnings (non-critical issues)
@@ -92,7 +88,6 @@ const ParentKidDetailPage = () => {
         }
 
         setValidationWarnings(warnings);
-        console.log('⚠️ Validation warnings:', warnings);
     };
 
     // Helper functions
@@ -218,14 +213,12 @@ const ParentKidDetailPage = () => {
                 }
             };
 
-            console.log('💾 Saving comments through kidService...');
             const updatedKid = await updateKid(kidId, updatedKidData);
 
             // Update local state with validated data
             setKid(updatedKid);
             setIsEditingComment(false);
 
-            console.log('✅ Comments saved successfully');
 
         } catch (err) {
             console.error('Error saving comments:', err);

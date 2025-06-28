@@ -49,17 +49,13 @@ const AddTeamPage = () => {
             setIsLoading(true);
 
             // Load instructors using the new service function
-            console.log('📋 Loading instructors...');
             const instructorsData = await getAllInstructors();
             setInstructors(instructorsData);
-            console.log('✅ Instructors loaded:', instructorsData.length);
 
             // Load kids without teams
-            console.log('👶 Loading available kids...');
             const allKids = await getAllKids();
             const kidsWithoutTeams = allKids.filter(kid => !kid.teamId);
             setAvailableKids(kidsWithoutTeams);
-            console.log('✅ Available kids loaded:', kidsWithoutTeams.length);
 
         } catch (error) {
             console.error('❌ Error loading initial data:', error);
@@ -109,13 +105,11 @@ const AddTeamPage = () => {
     };
 
     const validateForm = () => {
-        console.log('🔍 Validating form data:', formData);
 
         // Use schema validation
         const validation = validateTeam(formData, false); // false = not an update
 
         if (!validation.isValid) {
-            console.log('❌ Validation failed:', validation.errors);
             setErrors(validation.errors);
 
             // Set field errors for visual indicators
@@ -128,7 +122,6 @@ const AddTeamPage = () => {
             return false;
         }
 
-        console.log('✅ Validation passed');
         setErrors({});
         setFieldErrors({});
         return true;
@@ -143,9 +136,7 @@ const AddTeamPage = () => {
 
         setIsSubmitting(true);
         try {
-            console.log('🏁 Creating team with data:', formData);
             const teamId = await addTeam(formData);
-            console.log('✅ Team created with ID:', teamId);
 
             // Navigate to the new team's view page with success message
             navigate(`/admin/teams/view/${teamId}`, {

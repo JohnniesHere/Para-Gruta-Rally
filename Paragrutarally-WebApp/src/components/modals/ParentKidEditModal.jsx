@@ -110,7 +110,7 @@ const ParentKidEditModal = ({ kid, isOpen, onClose, onSuccess }) => {
     if (!isOpen || !kid) return null;
 
     const validateFormData = () => {
-        console.log('🔍 Running real-time validation...');
+
 
         // Create full kid object for validation by merging with existing data
         const fullKidData = {
@@ -126,7 +126,7 @@ const ParentKidEditModal = ({ kid, isOpen, onClose, onSuccess }) => {
         };
 
         const validation = validateKid(fullKidData, t);
-        console.log('📋 Validation result:', validation);
+
 
         // Only show errors for fields we're editing
         const editableFields = [
@@ -223,9 +223,6 @@ const ParentKidEditModal = ({ kid, isOpen, onClose, onSuccess }) => {
             setValidationStatus('invalid');
         }
 
-        console.log('❌ Validation errors:', relevantErrors);
-        console.log('⚠️ Validation warnings:', formWarnings);
-        console.log('✅ Validation status:', Object.keys(relevantErrors).length === 0 ? 'valid' : 'invalid');
     };
 
     const handleInputChange = (path, value) => {
@@ -320,9 +317,9 @@ const ParentKidEditModal = ({ kid, isOpen, onClose, onSuccess }) => {
         try {
             // Delete photo from storage if it exists
             if (formData.personalInfo?.photo) {
-                console.log('🗑️ Deleting photo from storage...');
+
                 await deleteKidPhoto(kid.id, formData.personalInfo.photo);
-                console.log('✅ Photo deleted successfully');
+
             }
 
             // Update form data
@@ -375,17 +372,16 @@ const ParentKidEditModal = ({ kid, isOpen, onClose, onSuccess }) => {
 
                     // Delete old photo first if it exists
                     if (formData.personalInfo?.photo) {
-                        console.log('🗑️ Deleting old photo before uploading new one...');
+
                         try {
                             await deleteKidPhoto(kid.id, formData.personalInfo.photo);
-                            console.log('✅ Old photo deleted successfully');
+
                         } catch (deleteError) {
                             console.warn('⚠️ Failed to delete old photo:', deleteError.message);
                         }
                     }
 
                     // Upload new photo
-                    console.log('📷 Uploading new photo...');
                     const photoUrl = await uploadKidPhoto(kid.id, selectedPhoto);
                     finalFormData = {
                         ...finalFormData,
@@ -394,7 +390,6 @@ const ParentKidEditModal = ({ kid, isOpen, onClose, onSuccess }) => {
                             photo: photoUrl
                         }
                     };
-                    console.log('✅ New photo uploaded successfully:', photoUrl);
                 } catch (photoError) {
                     console.error('❌ Photo upload failed:', photoError);
                     alert(t('parentKidEdit.photoUploadError', 'Photo upload failed: {error}. Your other changes will still be saved.', { error: photoError.message }));
@@ -416,12 +411,10 @@ const ParentKidEditModal = ({ kid, isOpen, onClose, onSuccess }) => {
                 }
             };
 
-            console.log('💾 Updating kid through service with validation...');
 
             // Update the kid using the service (which includes validation)
             await updateKid(kid.id, updateData, t);
 
-            console.log('✅ Kid updated successfully');
 
             // Success callback
             if (onSuccess) {

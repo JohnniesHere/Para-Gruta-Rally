@@ -195,9 +195,7 @@ const EditVehiclePage = () => {
         try {
             // Delete an old photo from storage if it exists
             if (formData.photo) {
-                console.log('🗑️ Deleting old photo from storage...');
                 await deleteVehiclePhoto(id, formData.photo);
-                console.log('✅ Old photo deleted successfully');
             }
 
             // Update form data to remove a photo
@@ -215,7 +213,6 @@ const EditVehiclePage = () => {
             const fileInput = document.getElementById('photo-upload');
             if (fileInput) fileInput.value = '';
 
-            console.log('✅ Photo removed successfully');
 
         } catch (error) {
             console.error('❌ Error removing photo:', error);
@@ -282,7 +279,6 @@ const EditVehiclePage = () => {
             // ❌ REMOVED: history and currentKidId - these are managed by assign/unassign functions
         };
 
-        console.log('🔍 Sending cleaned data:', cleanedFormData);
 
         try {
             // Handle photo upload first if needed
@@ -292,20 +288,16 @@ const EditVehiclePage = () => {
 
                     // Delete an old photo first if it exists
                     if (formData.photo) {
-                        console.log('🗑️ Deleting old photo before uploading new one...');
                         try {
                             await deleteVehiclePhoto(id, formData.photo);
-                            console.log('✅ Old photo deleted successfully');
                         } catch (deleteError) {
                             console.warn('⚠️ Failed to delete old photo:', deleteError.message);
                         }
                     }
 
                     // Upload a new photo
-                    console.log('📷 Uploading new photo...');
                     const photoUrl = await uploadVehiclePhoto(id, selectedPhoto);
                     cleanedFormData.photo = String(photoUrl);
-                    console.log('✅ New photo uploaded successfully:', photoUrl);
                 } catch (photoError) {
                     console.error('❌ Photo upload failed:', photoError);
                     alert(t('editVehicle.photoUploadWarning', 'Photo upload failed: {error}. The vehicle will be updated without the new photo.', { error: photoError.message }));

@@ -160,11 +160,9 @@ const GalleryPage = () => {
 
     const loadPhotosFromFolder = async (folderPath, albumId, photosArray, eventName = null) => {
         try {
-            console.log(`Loading photos from: ${folderPath}`);
             const folderRef = ref(storage, folderPath);
             const result = await listAll(folderRef);
 
-            console.log(`Found ${result.items.length} items in ${folderPath}`);
 
             for (const itemRef of result.items) {
                 try {
@@ -172,7 +170,6 @@ const GalleryPage = () => {
                     if (itemRef.name === '.folder_info.json' ||
                         itemRef.name.startsWith('.') ||
                         !isImageFile(itemRef.name)) {
-                        console.log(`Skipping non-image file: ${itemRef.name}`);
                         continue;
                     }
 
@@ -205,7 +202,6 @@ const GalleryPage = () => {
                     };
 
                     photosArray.push(photo);
-                    console.log(`Successfully loaded photo: ${itemRef.name}`);
 
                 } catch (photoError) {
                     console.warn(`Failed to load photo ${itemRef.name}:`, photoError);
@@ -214,7 +210,6 @@ const GalleryPage = () => {
             }
         } catch (err) {
             // Folder might not exist yet, which is okay
-            console.log(`Folder ${folderPath} not found or empty:`, err.message);
         }
     };
 
@@ -331,7 +326,6 @@ const GalleryPage = () => {
 
                 // Upload file
                 await uploadBytes(storageRef, file);
-                console.log(`Uploaded ${fileName} to ${uploadPath}`);
             }
 
             // Reload photos after upload

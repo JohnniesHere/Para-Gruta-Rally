@@ -43,9 +43,9 @@ const TeamAssignmentModal = ({
         setError(null);
 
         try {
-            console.log('🔄 Loading teams for assignment modal...');
+
             const allTeams = await getAllTeams({ active: true });
-            console.log('📋 All teams loaded:', allTeams.length);
+
 
             // Don't filter out already assigned teams - show all teams but mark assigned ones as selected
             setTeams(allTeams);
@@ -53,7 +53,7 @@ const TeamAssignmentModal = ({
             // Pre-select teams that are already assigned to this event
             setSelectedTeamIds([...currentTeamIds]);
 
-            console.log('✅ Teams loaded for modal, current assignments:', currentTeamIds);
+
         } catch (err) {
             console.error('❌ Error loading teams:', err);
             setError('Failed to load teams. Please try again.');
@@ -77,12 +77,12 @@ const TeamAssignmentModal = ({
     const handleSave = async () => {
         setIsSubmitting(true);
         try {
-            console.log('💾 Saving team assignments:', selectedTeamIds);
+
 
             // Call the callback with selected team IDs
             await onAssignTeams(selectedTeamIds);
 
-            console.log('✅ Team assignments saved successfully');
+
             onClose();
         } catch (error) {
             console.error('❌ Error saving team assignments:', error);

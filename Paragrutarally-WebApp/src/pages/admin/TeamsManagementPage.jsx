@@ -68,7 +68,6 @@ const TeamsManagementPage = () => {
     const loadTeams = async () => {
         if (!permissions) return;
 
-        console.log(`🔄 Loading teams for ${userRole}`);
         setIsLoading(true);
         setError(null);
 
@@ -80,7 +79,6 @@ const TeamsManagementPage = () => {
                 getAllKids()
             ]);
 
-            console.log(`✅ Loaded ${teamsData.length} teams, ${instructorsData.length} instructors, ${kidsData.length} kids`);
 
             // Create lookup maps for efficient data processing
             const instructorsLookup = new Map();
@@ -97,7 +95,6 @@ const TeamsManagementPage = () => {
 
             // Transform teams data for display with proper lookups
             const processedTeams = teamsData.map(team => {
-                console.log('Processing team:', team.name, team);
 
                 // Get instructor information
                 let instructorName = t('teams.noInstructor', 'No Instructor');
@@ -134,7 +131,6 @@ const TeamsManagementPage = () => {
                 };
             });
 
-            console.log('Processed teams:', processedTeams);
             setTeams(processedTeams);
         } catch (err) {
             console.error('💥 Error loading teams:', err);

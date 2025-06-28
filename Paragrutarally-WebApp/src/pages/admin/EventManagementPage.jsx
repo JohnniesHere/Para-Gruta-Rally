@@ -99,7 +99,7 @@ const EventManagementPage = () => {
 
             setEvents(eventsData);
             setFilteredEvents(eventsData);
-            console.log('Fetched events:', eventsData);
+
         } catch (error) {
             console.error('Error fetching events:', error);
             setError(t('events.fetchError', 'Failed to load events. Please try again.'));
@@ -229,10 +229,10 @@ const EventManagementPage = () => {
                 const encodedPath = pathMatch[1];
                 const decodedPath = decodeURIComponent(encodedPath);
 
-                console.log('Deleting event image from storage:', decodedPath);
+
                 const imageRef = ref(storage, decodedPath);
                 await deleteObject(imageRef);
-                console.log('Event image deleted successfully from storage');
+
                 return true;
             } else {
                 console.warn('Could not extract storage path from URL:', imageUrl);
@@ -250,24 +250,24 @@ const EventManagementPage = () => {
     const deleteGalleryFolder = async (eventName, galleryFolderPath = null) => {
         try {
             const folderPath = galleryFolderPath || `gallery/events/${eventName}`;
-            console.log('Deleting gallery folder:', folderPath);
+
 
             const folderRef = ref(storage, folderPath);
             const result = await listAll(folderRef);
 
             if (result.items.length === 0) {
-                console.log('Gallery folder is empty or does not exist');
+
                 return true;
             }
 
             const deletePromises = result.items.map(itemRef => {
-                console.log('Deleting file:', itemRef.fullPath);
+
                 return deleteObject(itemRef);
             });
 
             await Promise.all(deletePromises);
 
-            console.log(`Gallery folder deleted successfully. Removed ${result.items.length} files.`);
+
             return true;
         } catch (error) {
             console.error(`Error deleting gallery folder for ${eventName}:`, error);
@@ -287,7 +287,7 @@ const EventManagementPage = () => {
      */
     const deleteEventWithCleanup = async (eventData, eventId, includeGallery = false) => {
         try {
-            console.log('Starting event deletion with cleanup for:', eventData.name);
+
             const cleanupResults = {
                 eventImage: false,
                 gallery: false,
@@ -296,7 +296,7 @@ const EventManagementPage = () => {
 
             // Delete the event image if it exists and is not a default image
             if (eventData.image && !eventData.image.includes('unsplash.com')) {
-                console.log('Deleting event image...');
+
                 cleanupResults.eventImage = await deleteEventImage(eventData.image);
                 if (!cleanupResults.eventImage) {
                     console.warn('Failed to delete event image, but continuing with event deletion');
@@ -307,7 +307,7 @@ const EventManagementPage = () => {
 
             // Delete the gallery folder if requested and it exists
             if (includeGallery && (eventData.hasGalleryFolder || eventData.galleryFolderPath)) {
-                console.log('Deleting gallery folder...');
+
                 cleanupResults.gallery = await deleteGalleryFolder(
                     eventData.name,
                     eventData.galleryFolderPath
@@ -320,11 +320,11 @@ const EventManagementPage = () => {
             }
 
             // Delete the event document from Firestore
-            console.log('Deleting event document from Firestore...');
+
             await deleteDoc(doc(db, 'events', eventId));
             cleanupResults.firestoreDoc = true;
 
-            console.log('Event deletion completed successfully', cleanupResults);
+
 
             let message = t('events.deleteSuccess', 'Event "{eventName}" deleted successfully', { eventName: eventData.name });
             if (includeGallery && eventData.hasGalleryFolder) {
@@ -362,7 +362,7 @@ const EventManagementPage = () => {
 
             if (result.success) {
                 setEvents(events.filter(event => event.id !== eventToDelete.id));
-                console.log('Event deleted successfully');
+
                 alert(result.message);
             } else {
                 alert(result.message);

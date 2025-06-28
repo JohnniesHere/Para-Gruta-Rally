@@ -36,7 +36,6 @@ export const createForm = async (formData, createdBy) => {
         };
 
         const docRef = await addDoc(collection(db, 'forms'), formToSave);
-        console.log('✅ Form created successfully with ID:', docRef.id);
         return docRef.id;
     } catch (error) {
         console.error('❌ Error creating form:', error);
@@ -124,7 +123,6 @@ export const updateForm = async (formId, updates) => {
         };
 
         await updateDoc(doc(db, 'forms', formId), updateData);
-        console.log('✅ Form updated successfully');
     } catch (error) {
         console.error('❌ Error updating form:', error);
         throw new Error(`Failed to update form: ${error.message}`);
@@ -139,7 +137,6 @@ export const updateForm = async (formId, updates) => {
 export const deleteForm = async (formId) => {
     try {
         await deleteDoc(doc(db, 'forms', formId));
-        console.log('✅ Form deleted successfully');
     } catch (error) {
         console.error('❌ Error deleting form:', error);
         throw new Error(`Failed to delete form: ${error.message}`);
@@ -171,7 +168,6 @@ export const sendFormToUsers = async (formId, targetUsers) => {
         });
 
         await batch.commit();
-        console.log(`✅ Form sent to ${targetUsers.length} users`);
         return targetUsers.length;
     } catch (error) {
         console.error('❌ Error sending form:', error);
@@ -204,7 +200,6 @@ export const submitFormResponse = async (submissionData) => {
             });
         }
 
-        console.log('✅ Form submission created with ID:', docRef.id);
         return docRef.id;
     } catch (error) {
         console.error('❌ Error submitting form:', error);
@@ -323,7 +318,6 @@ export const uploadSignedDeclaration = async (file, userId) => {
         const snapshot = await uploadBytes(fileRef, file);
         const downloadURL = await getDownloadURL(snapshot.ref);
 
-        console.log('✅ File uploaded successfully:', downloadURL);
         return downloadURL;
     } catch (error) {
         console.error('❌ Error uploading file:', error);
@@ -381,7 +375,7 @@ export const markAssignmentCompleted = async (assignmentId) => {
             status: 'completed',
             completedAt: serverTimestamp()
         });
-        console.log('✅ Assignment marked as completed');
+
     } catch (error) {
         console.error('❌ Error marking assignment completed:', error);
         throw new Error(`Failed to mark assignment completed: ${error.message}`);

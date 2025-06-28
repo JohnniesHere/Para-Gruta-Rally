@@ -42,41 +42,29 @@ const Login = () => {
 
     // FIXED: Enhanced redirect logic with proper conditions and debugging
     useEffect(() => {
-        console.log('Login useEffect triggered:', {
-            authInitialized,
-            currentUser: !!currentUser,
-            userRole,
-            from,
-            authLoading,
-            isRedirecting
-        });
+
 
         // Only proceed if auth is fully initialized and not currently loading
         if (!authInitialized || authLoading) {
-            console.log('Auth not ready yet - authInitialized:', authInitialized, 'authLoading:', authLoading);
             return;
         }
 
         // If we have a user and role, and we're not already redirecting
         if (currentUser && userRole && !isRedirecting) {
             const targetPath = from || getDashboardForRole(userRole);
-            console.log(`User authenticated, preparing redirect to: ${targetPath}`);
 
             setIsRedirecting(true);
 
             // Add a delay to ensure all state has settled, then redirect
             const redirectTimer = setTimeout(() => {
-                console.log(`Executing redirect to: ${targetPath}`);
                 navigate(targetPath, { replace: true });
             }, 800); // Slightly longer delay to ensure everything is ready
 
             return () => {
-                console.log('Cleaning up redirect timer');
                 clearTimeout(redirectTimer);
             };
         } else if (authInitialized && !currentUser && !authLoading) {
             // User is not authenticated, make sure we're not in redirecting state
-            console.log('User not authenticated, staying on login page');
             setIsRedirecting(false);
         }
     }, [authInitialized, currentUser, userRole, from, getDashboardForRole, navigate, authLoading, isRedirecting]);
@@ -89,7 +77,6 @@ const Login = () => {
 
         try {
             const userCredential = await signIn(email, password);
-            console.log('Sign in successful:', userCredential.user.email);
 
             // Let the useEffect above handle the redirect after auth state updates
 
@@ -136,7 +123,6 @@ const Login = () => {
 
         try {
             const userCredential = await signInWithGoogle();
-            console.log('Google sign in successful:', userCredential.user.email);
 
             // Let the useEffect above handle the redirect after auth state updates
 
@@ -184,15 +170,6 @@ const Login = () => {
         !isRedirecting
     );
 
-    console.log('=== LOGIN RENDER DECISION ===');
-    console.log('authInitialized:', authInitialized);
-    console.log('authLoading:', authLoading);
-    console.log('currentUser:', !!currentUser);
-    console.log('userRole:', userRole);
-    console.log('isRedirecting:', isRedirecting);
-    console.log('shouldShowLoadingSpinner:', shouldShowLoadingSpinner);
-    console.log('shouldShowLoginForm:', shouldShowLoginForm);
-    console.log('=== END RENDER DECISION ===');
 
     // Show loading while auth is initializing OR we have a user and are redirecting
     if (shouldShowLoadingSpinner) {

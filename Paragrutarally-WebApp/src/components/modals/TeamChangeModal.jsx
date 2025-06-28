@@ -22,11 +22,11 @@ const TeamChangeModal = ({ kid, isOpen, onClose, onTeamChanged }) => {
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState(null);
 
-    console.log(t('debug.teamChangeModalRender', '🔍 TeamChangeModal render:'), { kid, isOpen, selectedTeamId });
+
 
     useEffect(() => {
         if (isOpen && kid) {
-            console.log(t('debug.loadingTeamsForModal', '📂 Loading teams for modal...'));
+
             loadTeams();
             setSelectedTeamId(kid?.teamId || '');
             setError(null);
@@ -41,7 +41,7 @@ const TeamChangeModal = ({ kid, isOpen, onClose, onTeamChanged }) => {
             const teamsData = await getAllTeams();
             const activeTeams = teamsData.filter(team => team.active !== false);
             setTeams(activeTeams);
-            console.log(t('debug.teamsLoadedForModal', '✅ Teams loaded for modal:'), activeTeams);
+
         } catch (err) {
             console.error(t('debug.errorLoadingTeams', 'Error loading teams:'), err);
             setError(t('teamChange.failedToLoadTeams', 'Failed to load teams: {error}', { error: err.message }));

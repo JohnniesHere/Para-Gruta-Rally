@@ -115,12 +115,6 @@ const CreateEventPage = () => {
         try {
             if (user) {
                 const idTokenResult = await user.getIdTokenResult();
-                console.log('User ID Token Claims:', idTokenResult.claims);
-                console.log('User Role from Claims:', idTokenResult.claims.role);
-                console.log('User Data from Hook:', userData);
-                console.log('User Role from Hook:', userRole);
-            } else {
-                console.log('No user logged in');
             }
         } catch (error) {
             console.error('Error getting user claims:', error);
@@ -205,7 +199,6 @@ const CreateEventPage = () => {
 
     // Updated team assignment handler - replaces all teams instead of adding
     const handleAssignTeams = (selectedTeamIds) => {
-        console.log('🔄 Updating participating teams to:', selectedTeamIds);
         setFormData(prev => ({
             ...prev,
             participatingTeams: selectedTeamIds // Replace the entire array
@@ -227,9 +220,7 @@ const CreateEventPage = () => {
      */
     const createEventGalleryFolder = async (eventName) => {
         try {
-            // Debug logging
-            console.log('createEventGalleryFolder called with:');
-            console.log('- eventName:', eventName);
+
 
             // Validate inputs
             if (!eventName) {
@@ -239,7 +230,7 @@ const CreateEventPage = () => {
             // Use the event name directly as the folder path (same as photo upload logic)
             const folderPath = `gallery/events/${eventName}`;
 
-            console.log('Creating folder at path:', folderPath);
+
 
             // Create a placeholder file to establish the folder structure
             const placeholderContent = JSON.stringify({
@@ -257,9 +248,9 @@ const CreateEventPage = () => {
             const placeholderRef = ref(storage, `${folderPath}/.folder_info.json`);
 
             // Upload the placeholder file
-            console.log(`Uploading placeholder file to: ${folderPath}/.folder_info.json`);
+
             const snapshot = await uploadBytes(placeholderRef, blob);
-            console.log('Gallery folder created successfully with placeholder file');
+
 
             // Return the folder path for reference
             return {
@@ -298,10 +289,8 @@ const CreateEventPage = () => {
                 const encodedPath = pathMatch[1];
                 const decodedPath = decodeURIComponent(encodedPath);
 
-                console.log('Deleting image from storage:', decodedPath);
                 const imageRef = ref(storage, decodedPath);
                 await deleteObject(imageRef);
-                console.log('Image deleted successfully from storage');
                 return true;
             } else {
                 console.warn('Could not extract storage path from URL:', imageUrl);
@@ -336,12 +325,10 @@ const CreateEventPage = () => {
                     uploadedImageRef = storageRef;
 
                     // Upload the file
-                    console.log('Uploading image...');
                     const snapshot = await uploadBytes(storageRef, formData.image);
 
                     // Get the download URL
                     imageUrl = await getDownloadURL(snapshot.ref);
-                    console.log('Image uploaded successfully:', imageUrl);
                 } catch (imageError) {
                     console.error('Error uploading image:', imageError);
                     alert(t('events.create.imageUploadWarning', 'Warning: Failed to upload image, but event will be created without it.'));
@@ -373,13 +360,10 @@ const CreateEventPage = () => {
             };
 
             // Add document to Firestore
-            console.log('Creating event document with all fields:', eventDoc);
             const docRef = await addDoc(collection(db, 'events'), eventDoc);
 
             // Extract the document ID
             const eventId = docRef.id;
-            console.log('Event created with document ID:', eventId);
-            console.log('DocRef object:', docRef);
 
             // Ensure we have a valid document ID
             if (!eventId || eventId === undefined) {
@@ -389,11 +373,9 @@ const CreateEventPage = () => {
             // Create gallery folder if requested
             let galleryResult = null;
             if (formData.createGalleryFolder) {
-                console.log('Creating gallery folder for event:', formData.name);
                 galleryResult = await createEventGalleryFolder(formData.name);
 
                 if (galleryResult.success) {
-                    console.log('Gallery folder created successfully at:', galleryResult.folderPath);
 
                     // Update the event document with the gallery folder path
                     try {
@@ -401,7 +383,6 @@ const CreateEventPage = () => {
                             galleryFolderPath: galleryResult.folderPath,
                             updatedAt: serverTimestamp()
                         });
-                        console.log('Event document updated with gallery path');
                     } catch (updateError) {
                         console.error('Failed to update event document with gallery path:', updateError);
                     }
@@ -422,10 +403,8 @@ const CreateEventPage = () => {
 
             // If event creation failed and we uploaded an image, clean it up
             if (uploadedImageRef && imageUrl) {
-                console.log('Cleaning up uploaded image due to event creation failure...');
                 try {
                     await deleteObject(uploadedImageRef);
-                    console.log('Uploaded image cleaned up successfully');
                 } catch (cleanupError) {
                     console.error('Failed to cleanup uploaded image:', cleanupError);
                 }

@@ -39,7 +39,6 @@ const InstructorKidsManagementPage = () => {
             const instructorId = user?.uid || userData?.id;
 
             if (!instructorId || userRole !== 'instructor') {
-                console.log('Access check failed:', { instructorId, userRole, userData, user });
                 setError(t('instructor.accessDenied', 'Access denied: Instructor credentials required'));
                 setLoading(false);
                 return;
@@ -47,7 +46,6 @@ const InstructorKidsManagementPage = () => {
 
             try {
                 setError('');
-                console.log('Loading kids for instructor:', instructorId);
 
                 // FIXED: Use instructorIds array for teams (same as Events page)
                 const teamsQuery = query(
@@ -64,7 +62,6 @@ const InstructorKidsManagementPage = () => {
                 // Sort in memory instead
                 teamsData.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
 
-                console.log('Found teams for instructor:', teamsData.length, teamsData);
 
                 // Load kids from instructor's teams
                 let kidsData = [];
@@ -91,7 +88,6 @@ const InstructorKidsManagementPage = () => {
                     });
                 }
 
-                console.log('Found kids for instructor:', kidsData.length);
 
                 setKids(kidsData);
                 setTeams(teamsData);

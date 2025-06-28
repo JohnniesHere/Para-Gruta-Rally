@@ -90,7 +90,6 @@ class GoogleDriveService {
     // Initialize GAPI client
     async loadGapi() {
         return new Promise((resolve, reject) => {
-            console.log('[GoogleDrive] Initializing GAPI client...');
 
             window.gapi.load('client', async () => {
                 try {
@@ -100,7 +99,6 @@ class GoogleDriveService {
                     });
 
                     this.gapi = window.gapi;
-                    console.log('[GoogleDrive] GAPI client initialized successfully');
                     resolve();
                 } catch (error) {
                     console.error('[GoogleDrive] GAPI initialization error:', error);
@@ -113,7 +111,6 @@ class GoogleDriveService {
     // Initialize Google Identity Services
     async loadGis() {
         return new Promise((resolve, reject) => {
-            console.log('[GoogleDrive] Initializing Google Identity Services...');
 
             try {
                 if (!window.google?.accounts?.oauth2) {
@@ -124,7 +121,6 @@ class GoogleDriveService {
                     client_id: this.CLIENT_ID,
                     scope: this.SCOPES,
                     callback: (response) => {
-                        console.log('[GoogleDrive] Default callback triggered:', response);
                         // This is the default callback, actual handling happens in signIn()
                     },
                 });
@@ -133,11 +129,8 @@ class GoogleDriveService {
                     throw new Error('Failed to create token client');
                 }
 
-                console.log('[GoogleDrive] GIS initialized successfully');
-                console.log('[GoogleDrive] Token client created:', !!this.tokenClient);
                 resolve();
             } catch (error) {
-                console.error('[GoogleDrive] GIS initialization error:', error);
                 reject(error);
             }
         });
@@ -151,24 +144,20 @@ class GoogleDriveService {
             }
 
             if (this.isSignedIn && this.accessToken) {
-                console.log('[GoogleDrive] Already signed in');
                 return true;
             }
 
             // Check for stored token
             const storedToken = localStorage.getItem('googleDriveAccessToken');
             if (storedToken) {
-                console.log('[GoogleDrive] Found stored token, verifying...');
                 this.accessToken = storedToken;
                 this.isSignedIn = true;
 
                 // Verify token is still valid
                 try {
                     await this.getStorageInfo();
-                    console.log('[GoogleDrive] Stored token is valid');
                     return true;
                 } catch (error) {
-                    console.log('[GoogleDrive] Stored token is invalid, clearing...');
                     // Token is invalid, clear it and continue with new auth
                     localStorage.removeItem('googleDriveAccessToken');
                     localStorage.removeItem('googleDriveConnected');
@@ -177,7 +166,6 @@ class GoogleDriveService {
                 }
             }
 
-            console.log('[GoogleDrive] Starting OAuth flow...');
 
             return new Promise((resolve, reject) => {
                 let authCompleted = false;
@@ -185,13 +173,11 @@ class GoogleDriveService {
                 // Set up callback for successful authentication
                 const originalCallback = this.tokenClient.callback;
                 this.tokenClient.callback = (response) => {
-                    console.log('[GoogleDrive] OAuth callback triggered:', response);
 
                     // Restore original callback
                     this.tokenClient.callback = originalCallback;
 
                     if (authCompleted) {
-                        console.log('[GoogleDrive] Auth already completed, ignoring duplicate callback');
                         return;
                     }
                     authCompleted = true;
@@ -208,7 +194,6 @@ class GoogleDriveService {
                         return;
                     }
 
-                    console.log('[GoogleDrive] Setting access token...');
                     this.accessToken = response.access_token;
                     this.isSignedIn = true;
 
@@ -216,9 +201,6 @@ class GoogleDriveService {
                     localStorage.setItem('googleDriveConnected', 'true');
                     localStorage.setItem('googleDriveAccessToken', this.accessToken);
 
-                    console.log('[GoogleDrive] Authentication successful, tokens stored');
-                    console.log('[GoogleDrive] isSignedIn:', this.isSignedIn);
-                    console.log('[GoogleDrive] accessToken exists:', !!this.accessToken);
 
                     resolve(true);
                 };
@@ -234,7 +216,6 @@ class GoogleDriveService {
 
                 try {
                     // Request access token
-                    console.log('[GoogleDrive] Requesting access token...');
                     this.tokenClient.requestAccessToken({
                         prompt: 'consent',  // Force consent screen to ensure fresh token
                         hint: ''
@@ -506,7 +487,6 @@ class GoogleDriveService {
                 throw new Error('Invalid backup data format');
             }
 
-            console.log('[GoogleDrive] Starting backup restoration...');
             const results = {
                 success: [],
                 errors: [],
@@ -523,12 +503,10 @@ class GoogleDriveService {
                 results.totalDocuments += documents.length;
             });
 
-            console.log(`[GoogleDrive] Total documents to restore: ${results.totalDocuments}`);
 
             // Restore each collection using batch operations for better performance
             for (const [collectionName, documents] of Object.entries(backupData.data)) {
                 try {
-                    console.log(`[GoogleDrive] Restoring ${documents.length} documents to ${collectionName}`);
 
                     // Process documents in batches of 500 (Firestore batch limit)
                     const batchSize = 500;
@@ -560,7 +538,6 @@ class GoogleDriveService {
                         try {
                             await batch.commit();
                             results.restoredDocuments += batchDocuments.length;
-                            console.log(`[GoogleDrive] Batch ${Math.floor(i/batchSize) + 1} committed for ${collectionName}`);
                         } catch (batchError) {
                             console.error(`Error committing batch for ${collectionName}:`, batchError);
                             results.errors.push(`${collectionName} batch ${Math.floor(i/batchSize) + 1}: ${batchError.message}`);
@@ -568,7 +545,6 @@ class GoogleDriveService {
                     }
 
                     results.success.push(`${collectionName}: ${documents.length} documents`);
-                    console.log(`[GoogleDrive] Successfully restored ${collectionName}`);
 
                 } catch (collectionError) {
                     console.error(`Error restoring collection ${collectionName}:`, collectionError);
@@ -576,7 +552,6 @@ class GoogleDriveService {
                 }
             }
 
-            console.log(`[GoogleDrive] Restoration complete. Restored ${results.restoredDocuments}/${results.totalDocuments} documents`);
             return results;
 
         } catch (error) {

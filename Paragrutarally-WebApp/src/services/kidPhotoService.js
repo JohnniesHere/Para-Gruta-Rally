@@ -31,7 +31,6 @@ export const uploadKidPhoto = async (kidId, photoFile) => {
         // Create storage reference
         const photoRef = ref(storage, `kidsPFP/${filename}`);
 
-        console.log(`🔄 Uploading photo for kid ${kidId}:`, filename);
 
         // Upload file
         const uploadResult = await uploadBytes(photoRef, photoFile, {
@@ -46,7 +45,6 @@ export const uploadKidPhoto = async (kidId, photoFile) => {
         // Get download URL
         const downloadURL = await getDownloadURL(uploadResult.ref);
 
-        console.log(`✅ Photo uploaded successfully:`, downloadURL);
 
         // Update kid document with photo URL
         const kid = await getKidById(kidId);
@@ -60,7 +58,6 @@ export const uploadKidPhoto = async (kidId, photoFile) => {
 
         await updateKid(kidId, updatedKidData);
 
-        console.log(`✅ Kid document updated with photo URL`);
 
         return downloadURL;
 
@@ -80,8 +77,6 @@ export const deleteKidPhoto = async (kidId, photoUrl) => {
     try {
         if (!photoUrl) return;
 
-        console.log(`🔄 Deleting photo for kid ${kidId}`);
-        console.log(`📄 Photo URL: ${photoUrl}`);
 
         // Parse Firebase Storage URL properly
         const url = new URL(photoUrl);
@@ -98,7 +93,6 @@ export const deleteKidPhoto = async (kidId, photoUrl) => {
         // Decode the path to get the actual storage path
         const fullStoragePath = decodeURIComponent(encodedPath);
 
-        console.log(`📁 Extracted storage path: ${fullStoragePath}`);
 
         // Create storage reference using the extracted path
         const photoRef = ref(storage, fullStoragePath);
@@ -118,7 +112,6 @@ export const deleteKidPhoto = async (kidId, photoUrl) => {
 
         await updateKid(kidId, updatedKidData);
 
-        console.log(`✅ Photo deleted successfully for kid ${kidId}`);
 
     } catch (error) {
         console.error('💥 Error deleting kid photo:', error);

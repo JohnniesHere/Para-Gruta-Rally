@@ -34,13 +34,11 @@ const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 // Helper function to retry Firestore reads with exponential backoff
 const retryFirestoreRead = async (docRef, maxRetries = 3, baseDelay = 1000) => {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
-        console.log(`Firestore read attempt ${attempt}/${maxRetries}`);
 
         const doc = await getDoc(docRef);
 
         if (doc.exists()) {
             const data = doc.data();
-            console.log(`Attempt ${attempt} - Document data:`, data);
 
             // Check if we have meaningful data (not just lastLogin)
             const hasRole = data.role && typeof data.role === 'string';
@@ -49,26 +47,19 @@ const retryFirestoreRead = async (docRef, maxRetries = 3, baseDelay = 1000) => {
 
             // If we have a role or this is our last attempt, return the data
             if (hasRole || attempt === maxRetries) {
-                console.log(`Using data from attempt ${attempt}:`, {
-                    hasRole,
-                    hasEmail,
-                    hasDisplayName,
-                    role: data.role
-                });
+
                 return { exists: true, data };
             }
 
             // If we only have partial data, wait longer before next attempt
             if (attempt < maxRetries) {
                 const waitTime = baseDelay * Math.pow(2, attempt - 1); // Exponential backoff
-                console.log(`Partial data detected, waiting ${waitTime}ms before retry...`);
                 await delay(waitTime);
             }
         } else {
             // Document doesn't exist, wait before retry (except on last attempt)
             if (attempt < maxRetries) {
                 const waitTime = baseDelay * Math.pow(2, attempt - 1);
-                console.log(`Document not found, waiting ${waitTime}ms before retry...`);
                 await delay(waitTime);
             }
         }
@@ -84,7 +75,6 @@ const getDashboardForRole = (role) => {
 
 // Provider component to wrap the app and provide auth context
 export function AuthProvider({ children }) {
-    console.log("AuthProvider initializing");
 
     // State management
     const [currentUser, setCurrentUser] = useState(null);
@@ -118,7 +108,6 @@ export function AuthProvider({ children }) {
 
                 return { displayName, email, role: defaultRole, ...additionalData };
             } catch (error) {
-                console.error("Error creating user document:", error);
                 throw error;
             }
         }
@@ -232,7 +221,6 @@ export function AuthProvider({ children }) {
             // Force a small delay to ensure Firebase state is cleared
             await new Promise(resolve => setTimeout(resolve, 100));
 
-            console.log("Logout completed successfully");
             return true;
         } catch (error) {
             console.error("Logout error:", error);
@@ -259,15 +247,11 @@ export function AuthProvider({ children }) {
 
     // FIXED: Proper auth state change handler
     useEffect(() => {
-        console.log("Setting up auth state change listener");
 
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
-            console.log("=== AUTH STATE CHANGE ===");
-            console.log("User:", user ? `${user.email} (${user.uid})` : "No user");
 
             // If no user, clear all state
             if (!user) {
-                console.log("User signed out - clearing all state");
                 setCurrentUser(null);
                 setUserData(null);
                 setUserRole(null);
@@ -279,7 +263,6 @@ export function AuthProvider({ children }) {
 
             // If we have a different user than before, clear previous state first
             if (currentUser && currentUser.uid !== user.uid) {
-                console.log(`Different user detected: ${currentUser.uid} -> ${user.uid}`);
                 setCurrentUser(null);
                 setUserData(null);
                 setUserRole(null);
@@ -289,10 +272,8 @@ export function AuthProvider({ children }) {
             setLoading(true);
 
             try {
-                console.log("Fetching user data from Firestore...");
 
                 // Add initial delay for international users
-                console.log("Adding initial delay for international latency...");
                 await delay(500);
 
                 // FIXED: Try to get user by UID with retry logic
@@ -303,10 +284,8 @@ export function AuthProvider({ children }) {
 
                 if (userDocResult.exists) {
                     firestoreData = userDocResult.data;
-                    console.log("Found user by UID after retries:", firestoreData);
                 } else {
                     // If no document by UID, try to find by email
-                    console.log("No document found by UID after retries, searching by email...");
 
                     // Add delay before email search
                     await delay(1000);
@@ -317,7 +296,6 @@ export function AuthProvider({ children }) {
                     // Retry email query as well
                     let emailFound = false;
                     for (let attempt = 1; attempt <= 3; attempt++) {
-                        console.log(`Email search attempt ${attempt}/3`);
 
                         const emailQuerySnapshot = await getDocs(emailQuery);
 
@@ -325,59 +303,44 @@ export function AuthProvider({ children }) {
                             const existingUserDoc = emailQuerySnapshot.docs[0];
                             actualDocId = existingUserDoc.id;
                             firestoreData = existingUserDoc.data();
-                            console.log(`Found user by email on attempt ${attempt}:`, {
-                                docId: actualDocId,
-                                data: firestoreData
-                            });
+
                             emailFound = true;
                             break;
                         }
 
                         if (attempt < 3) {
                             const waitTime = 1000 * Math.pow(2, attempt - 1);
-                            console.log(`Email search failed, waiting ${waitTime}ms before retry...`);
                             await delay(waitTime);
                         }
                     }
 
                     if (emailFound && firestoreData) {
                         // IMPORTANT: Copy the data to the correct UID document for future lookups
-                        console.log("Copying data to UID-based document for future consistency");
 
                         try {
                             await setDoc(userRef, {
                                 ...firestoreData,
                                 lastLogin: serverTimestamp()
                             });
-                            console.log("Data copied to UID document successfully");
 
                             // Wait a bit for the write to propagate
                             await delay(500);
                         } catch (copyError) {
-                            console.warn("Could not copy data to UID document:", copyError);
                         }
                     }
                 }
 
                 // If we found user data, process it
                 if (firestoreData) {
-                    console.log("=== DETAILED ROLE ANALYSIS ===");
-                    console.log("Raw Firestore data:", JSON.stringify(firestoreData, null, 2));
-                    console.log("All keys in firestoreData:", Object.keys(firestoreData));
 
                     // FIXED: Get role with proper validation
                     let userRole = firestoreData.role;
-                    console.log(`Role from database: "${userRole}"`);
-                    console.log(`Role type: ${typeof userRole}`);
 
                     if (userRole && typeof userRole === 'string') {
                         userRole = userRole.trim();
-                        console.log(`Role after trim: "${userRole}"`);
                     }
 
                     const allowedRoles = ['admin', 'instructor', 'parent', 'host'];
-                    console.log(`Allowed roles:`, allowedRoles);
-                    console.log(`Role includes check:`, allowedRoles.includes(userRole));
 
                     // Enhanced validation
                     const isRoleValid = userRole &&
@@ -385,10 +348,8 @@ export function AuthProvider({ children }) {
                         userRole.trim().length > 0 &&
                         allowedRoles.includes(userRole.trim());
 
-                    console.log(`Is role valid: ${isRoleValid}`);
 
                     if (!isRoleValid) {
-                        console.log(`❌ ROLE INVALID - Original: "${userRole}", setting to 'host'`);
                         userRole = 'host';
 
                         // Update the document we're actually using
@@ -398,7 +359,6 @@ export function AuthProvider({ children }) {
                                 role: userRole,
                                 lastLogin: serverTimestamp()
                             }, { merge: true });
-                            console.log(`✅ Updated document ${actualDocId} with role: ${userRole}`);
 
                             // Wait for update to propagate
                             await delay(500);
@@ -406,21 +366,17 @@ export function AuthProvider({ children }) {
                             console.warn('❌ Could not update role in Firestore:', updateError);
                         }
                     } else {
-                        console.log(`✅ ROLE VALID - Keeping role: "${userRole}"`);
                         // Role is valid, just update lastLogin
                         const updateRef = doc(db, 'users', actualDocId);
                         try {
                             await setDoc(updateRef, {
                                 lastLogin: serverTimestamp()
                             }, { merge: true });
-                            console.log(`Updated lastLogin for document: ${actualDocId}`);
                         } catch (updateError) {
                             console.warn('Could not update lastLogin:', updateError);
                         }
                     }
 
-                    console.log(`Final role: "${userRole}"`);
-                    console.log("=== END ROLE ANALYSIS ===");
 
                     // Create clean user data
                     const cleanUserData = {
@@ -442,20 +398,16 @@ export function AuthProvider({ children }) {
                     };
 
                     // Set all state
-                    console.log("Setting user state...");
                     setCurrentUser(enhancedUser);
                     setUserData(cleanUserData);
                     setUserRole(userRole);
                     setError(null);
 
-                    console.log(`User state updated: ${user.email} with role ${userRole}`);
 
                     setLoading(false);
                     setAuthInitialized(true);
-                    console.log("Loading set to false manually");
                 } else {
                     // No user found in database after retries - create with default role
-                    console.log("User not found in database after retries - creating with default role");
 
                     const defaultUserData = await createUserDocument(user, {
                         role: 'host'
@@ -476,7 +428,6 @@ export function AuthProvider({ children }) {
                     setUserRole(userRole);
                     setError(null);
 
-                    console.log(`New user created with role: ${userRole}`);
                 }
             } catch (firestoreError) {
                 console.error("Error in auth state change handler:", firestoreError);
@@ -549,13 +500,7 @@ export function AuthProvider({ children }) {
         login: signIn
     };
 
-    console.log("AuthProvider rendering", {
-        loading,
-        userRole,
-        authInitialized,
-        hasUser: !!currentUser,
-        shouldRedirect
-    });
+
 
     // Show loading spinner while initializing
     if (!authInitialized || loading) {

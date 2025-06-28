@@ -54,7 +54,6 @@ const InstructorEventsPage = () => {
         const instructorId = user?.uid || userData?.id;
 
         if (!instructorId || userRole !== 'instructor') {
-            console.log('Access check failed:', { instructorId, userRole, userData, user });
             setError(t('instructor.accessDenied', 'Access denied: Instructor credentials required'));
             setLoading(false);
             return;
@@ -63,7 +62,6 @@ const InstructorEventsPage = () => {
         try {
             setError('');
             setLoading(true);
-            console.log('Loading events for instructor:', instructorId);
 
             // Load instructor's teams using the correct field name
             const teamsQuery = query(
@@ -77,7 +75,6 @@ const InstructorEventsPage = () => {
                 ...doc.data()
             }));
 
-            console.log('Found teams for instructor:', teamsData.length, teamsData);
 
             // Load all events (using same structure as ParentEventPage)
             const eventsQuery = query(
@@ -129,11 +126,7 @@ const InstructorEventsPage = () => {
                 return dateB - dateA; // Newest first
             });
 
-            console.log('Total events found:', allEvents.length);
 
-            // Don't filter events - show ALL events but mark which ones have instructor's teams
-            console.log('Showing all events:', allEvents.length);
-            console.log('Instructor teams:', teamsData.map(t => t.name));
 
             setEvents(allEvents);
             setFilteredEvents(allEvents);

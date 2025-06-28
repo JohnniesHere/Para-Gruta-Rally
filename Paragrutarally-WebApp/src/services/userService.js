@@ -28,7 +28,6 @@ export const updateUserProfile = async (userId, userData) => {
             ...(userData.role && { role: userData.role })
         });
 
-        console.log('✅ User profile updated successfully');
     } catch (error) {
         console.error('❌ Error updating user profile:', error);
         throw new Error('Failed to update user profile. Please try again.');
@@ -64,7 +63,6 @@ export const getUserData = async (userId) => {
  */
 export const deleteUserCompletely = async (userIdToDelete) => {
     try {
-        console.log('🗑️ Starting complete user deletion process...');
 
         // Get current user
         const currentUser = auth.currentUser;
@@ -72,34 +70,27 @@ export const deleteUserCompletely = async (userIdToDelete) => {
             throw new Error('You must be logged in to perform this action.');
         }
 
-        console.log('👤 Current user:', currentUser.uid);
-        console.log('🎯 User to delete:', userIdToDelete);
 
         // Create callable function reference
         const deleteUserFunction = httpsCallable(functions, 'deleteUser');
 
-        console.log('📞 Calling Firebase Callable Function...');
 
         // Call the function (Firebase handles authentication automatically)
         const result = await deleteUserFunction({
             userIdToDelete: userIdToDelete
         });
 
-        console.log('📦 Function result:', result.data);
 
         if (!result.data.success) {
             console.error('❌ Callable function error:', result.data.message);
             throw new Error(result.data.message || 'Failed to delete authentication account.');
         }
 
-        console.log('✅ Authentication account deleted successfully');
 
         // Delete user document from Firestore
-        console.log('🗄️ Deleting user document from Firestore...');
         const userDocRef = doc(db, 'users', userIdToDelete);
         await deleteDoc(userDocRef);
 
-        console.log('✅ User document deleted from Firestore');
 
         return {
             success: true,
@@ -162,7 +153,6 @@ export const getUserInfo = async (userId) => {
  */
 export const updateUserPassword = async (currentPassword, newPassword) => {
     try {
-        console.log('🔐 Starting password update process...');
 
         const user = auth.currentUser;
 
@@ -176,24 +166,18 @@ export const updateUserPassword = async (currentPassword, newPassword) => {
             throw new Error('User email not available. Please sign in again.');
         }
 
-        console.log('👤 User found:', user.email);
-        console.log('🔑 Creating credentials for reauthentication...');
 
         // Create credential for reauthentication
         const credential = EmailAuthProvider.credential(user.email, currentPassword);
 
-        console.log('🔐 Attempting reauthentication...');
 
         // Reauthenticate user with current password
         await reauthenticateWithCredential(user, credential);
 
-        console.log('✅ Reauthentication successful');
-        console.log('🔄 Updating password...');
 
         // Update password
         await updatePassword(user, newPassword);
 
-        console.log('✅ Password updated successfully');
     } catch (error) {
         console.error('❌ Error updating password:', error);
         console.error('Error code:', error.code);
@@ -331,7 +315,6 @@ export const testCloudFunctions = async () => {
     try {
         const healthCheckFunction = httpsCallable(functions, 'healthCheck');
         const result = await healthCheckFunction();
-        console.log('🧪 Health check result:', result.data);
         return result.data.success === true;
     } catch (error) {
         console.error('Cloud Functions connectivity test failed:', error);

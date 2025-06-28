@@ -86,12 +86,10 @@ export const addKid = async (kidData, t = null) => {
         // Prepare data for Firestore
         const preparedData = prepareKidForFirestore(kidData, false);
 
-        console.log('Adding kid to Firestore:', preparedData);
 
         // Add to Firestore
         const docRef = await addDoc(collection(db, 'kids'), preparedData);
 
-        console.log('Kid added successfully with ID:', docRef.id);
         return docRef.id;
 
     } catch (error) {
@@ -107,7 +105,6 @@ export const addKid = async (kidData, t = null) => {
  */
 export const getKidById = async (kidId) => {
     try {
-        console.log('🔍 Getting kid by ID:', kidId);
         const kidDoc = await getDoc(doc(db, 'kids', kidId));
 
         if (!kidDoc.exists()) {
@@ -115,7 +112,6 @@ export const getKidById = async (kidId) => {
         }
 
         const kidData = convertFirestoreToKid(kidDoc);
-        console.log('✅ Kid retrieved successfully:', kidData);
         return kidData;
     } catch (error) {
         console.error('❌ Error getting kid:', error);
@@ -132,11 +128,8 @@ export const getKidById = async (kidId) => {
  */
 export const updateKid = async (kidId, updates, t = null) => {
     try {
-        console.log('🔄 Starting kid update for ID:', kidId);
-        console.log('📝 Update data received:', updates);
 
         // Validate the updated data with translation support
-        console.log('🔍 Validating update data...');
         const validation = validateKid(updates, t);
 
         if (!validation.isValid) {
@@ -145,22 +138,16 @@ export const updateKid = async (kidId, updates, t = null) => {
             throw new Error(`Validation failed: ${errorMessages}`);
         }
 
-        console.log('✅ Validation passed');
 
         // Prepare data for Firestore
-        console.log('🔧 Preparing data for Firestore...');
         const preparedData = prepareKidForFirestore(updates, true);
-        console.log('📦 Prepared data:', preparedData);
 
         // Update in Firestore
-        console.log('💾 Updating document in Firestore...');
         const kidRef = doc(db, 'kids', kidId);
         await updateDoc(kidRef, preparedData);
 
-        console.log('✅ Kid updated successfully in Firestore');
 
         // Fetch and return the updated document to verify
-        console.log('🔍 Fetching updated document...');
         const updatedDoc = await getDoc(kidRef);
 
         if (!updatedDoc.exists()) {
@@ -168,7 +155,6 @@ export const updateKid = async (kidId, updates, t = null) => {
         }
 
         const updatedKidData = convertFirestoreToKid(updatedDoc);
-        console.log('✅ Update complete. Final data:', updatedKidData);
 
         return updatedKidData;
 
@@ -201,8 +187,6 @@ export const updateKid = async (kidId, updates, t = null) => {
  */
 export const updateKidTeamAssignment = async (kidId, newTeamId) => {
     try {
-        console.log(`🔄 Updating kid ${kidId} team assignment...`);
-        console.log(`📝 New team ID: ${newTeamId || 'null (remove from team)'}`);
 
         // First, get the current kid data to find the old team
         const kidDoc = await getDoc(doc(db, 'kids', kidId));
@@ -213,13 +197,11 @@ export const updateKidTeamAssignment = async (kidId, newTeamId) => {
         const currentKidData = kidDoc.data();
         const oldTeamId = currentKidData.teamId;
 
-        console.log(`📊 Current team ID: ${oldTeamId || 'none'}`);
 
         // Update the team arrays first
         try {
             const { updateKidTeam } = await import('./teamService');
             await updateKidTeam(kidId, newTeamId, oldTeamId);
-            console.log('✅ Team arrays updated successfully');
         } catch (teamError) {
             console.error('❌ Team array update failed:', teamError);
             throw new Error(`Failed to update team assignments: ${teamError.message}`);
@@ -231,11 +213,8 @@ export const updateKidTeamAssignment = async (kidId, newTeamId) => {
             updatedAt: Timestamp.now()
         };
 
-        console.log('💾 Updating kid document...');
         await updateDoc(doc(db, 'kids', kidId), updateData);
-        console.log('✅ Kid document updated successfully');
 
-        console.log('🎉 Team assignment update completed successfully');
 
     } catch (error) {
         console.error('❌ Error updating kid team:', error);
@@ -261,7 +240,6 @@ export const updateKidTeamAssignment = async (kidId, newTeamId) => {
 export const deleteKid = async (kidId) => {
     try {
         await deleteDoc(doc(db, 'kids', kidId));
-        console.log('Kid deleted successfully');
     } catch (error) {
         console.error('Error deleting kid:', error);
         throw new Error(`Failed to delete kid: ${error.message}`);
@@ -377,8 +355,6 @@ export const searchKids = async (searchTerm, t = null) => {
  */
 export const updateKidTeam = async (kidId, newTeamId) => {
     try {
-        console.log(`🔄 Updating kid ${kidId} team assignment...`);
-        console.log(`📝 New team ID: ${newTeamId || 'null (remove from team)'}`);
 
         // First, get the current kid data to find the old team
         const kidDoc = await getDoc(doc(db, 'kids', kidId));
@@ -389,7 +365,6 @@ export const updateKidTeam = async (kidId, newTeamId) => {
         const currentKidData = kidDoc.data();
         const oldTeamId = currentKidData.teamId;
 
-        console.log(`📊 Current team ID: ${oldTeamId || 'none'}`);
 
         // Prepare the kid update data
         const updateData = {
@@ -398,9 +373,7 @@ export const updateKidTeam = async (kidId, newTeamId) => {
         };
 
         // Update the kid document
-        console.log('💾 Updating kid document...');
         await updateDoc(doc(db, 'kids', kidId), updateData);
-        console.log('✅ Kid document updated successfully');
 
         // Now handle team membership updates
         try {
@@ -409,10 +382,8 @@ export const updateKidTeam = async (kidId, newTeamId) => {
 
             // Remove from old team if it exists and is different from new team
             if (oldTeamId && oldTeamId !== newTeamId) {
-                console.log(`🗑️ Removing kid from old team: ${oldTeamId}`);
                 try {
                     await removeKidFromTeam(oldTeamId, kidId);
-                    console.log('✅ Successfully removed from old team');
                 } catch (removeError) {
                     console.warn('⚠️ Failed to remove from old team (continuing anyway):', removeError.message);
                 }
@@ -420,10 +391,8 @@ export const updateKidTeam = async (kidId, newTeamId) => {
 
             // Add to new team if specified and different from old team
             if (newTeamId && newTeamId !== oldTeamId) {
-                console.log(`➕ Adding kid to new team: ${newTeamId}`);
                 try {
                     await addKidToTeam(newTeamId, kidId);
-                    console.log('✅ Successfully added to new team');
                 } catch (addError) {
                     console.warn('⚠️ Failed to add to new team (kid document was updated):', addError.message);
                 }
@@ -434,7 +403,6 @@ export const updateKidTeam = async (kidId, newTeamId) => {
             // Don't throw here - the main kid update succeeded
         }
 
-        console.log('🎉 Team assignment update completed successfully');
 
     } catch (error) {
         console.error('❌ Error updating kid team:', error);

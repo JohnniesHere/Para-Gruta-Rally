@@ -7,7 +7,6 @@ import { db } from '../firebase/config';
  */
 export const assignVehicleToKid = async (vehicleId, kidId, kidName, assignedBy) => {
     try {
-        console.log(`🚗 Assigning vehicle ${vehicleId} to kid ${kidId}`);
 
         // Get current vehicle data
         const vehicleRef = doc(db, 'vehicles', vehicleId);
@@ -48,7 +47,6 @@ export const assignVehicleToKid = async (vehicleId, kidId, kidName, assignedBy) 
             updatedAt: serverTimestamp()
         });
 
-        console.log(`✅ Vehicle ${vehicleId} successfully assigned to kid ${kidId}`);
         return true;
 
     } catch (error) {
@@ -62,7 +60,6 @@ export const assignVehicleToKid = async (vehicleId, kidId, kidName, assignedBy) 
  */
 export const unassignVehicleFromKid = async (vehicleId) => {
     try {
-        console.log(`🚗 Unassigning vehicle ${vehicleId}`);
 
         // Update vehicle directly without schema validation
         const vehicleRef = doc(db, 'vehicles', vehicleId);
@@ -71,7 +68,6 @@ export const unassignVehicleFromKid = async (vehicleId) => {
             updatedAt: serverTimestamp()
         });
 
-        console.log(`✅ Vehicle ${vehicleId} successfully unassigned`);
         return true;
 
     } catch (error) {
@@ -85,16 +81,12 @@ export const unassignVehicleFromKid = async (vehicleId) => {
  */
 export const updateKidVehicleAssignments = async (kidId, kidName, assignedBy, newVehicleIds = [], oldVehicleIds = []) => {
     try {
-        console.log(`🔄 Updating vehicle assignments for kid ${kidId}`);
-        console.log(`Old vehicles: ${oldVehicleIds.join(', ')}`);
-        console.log(`New vehicles: ${newVehicleIds.join(', ')}`);
 
         // Remove kid from old vehicles that are no longer assigned
         const vehiclesToRemove = oldVehicleIds.filter(id => !newVehicleIds.includes(id));
         for (const vehicleId of vehiclesToRemove) {
             try {
                 await unassignVehicleFromKid(vehicleId);
-                console.log(`✅ Removed kid ${kidId} from vehicle ${vehicleId}`);
             } catch (error) {
                 console.warn(`⚠️ Failed to remove kid from vehicle ${vehicleId}:`, error);
             }
@@ -105,13 +97,11 @@ export const updateKidVehicleAssignments = async (kidId, kidName, assignedBy, ne
         for (const vehicleId of vehiclesToAdd) {
             try {
                 await assignVehicleToKid(vehicleId, kidId, kidName, assignedBy);
-                console.log(`✅ Assigned kid ${kidId} to vehicle ${vehicleId}`);
             } catch (error) {
                 console.warn(`⚠️ Failed to assign kid to vehicle ${vehicleId}:`, error);
             }
         }
 
-        console.log(`✅ Vehicle assignments updated successfully for kid ${kidId}`);
         return true;
 
     } catch (error) {

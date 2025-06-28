@@ -110,7 +110,6 @@ const KidsManagementPage = () => {
     const loadTeamsAndKids = async () => {
         if (!permissions) return;
 
-        console.log(`🔄 Loading teams and kids for ${userRole}`);
         setIsLoading(true);
         setError(null);
 
@@ -118,7 +117,6 @@ const KidsManagementPage = () => {
             // Load teams first
             const teamsData = await getAllTeams();
             setTeams(teamsData);
-            console.log(`✅ Loaded ${teamsData.length} teams`);
 
             // Load kids based on role
             let kidsData = [];
@@ -144,7 +142,6 @@ const KidsManagementPage = () => {
                     kidsData = [];
             }
 
-            console.log(`✅ Loaded ${kidsData.length} kids for ${userRole}`);
 
             // Filter and transform based on role-based access
             const accessibleKids = kidsData
@@ -172,7 +169,6 @@ const KidsManagementPage = () => {
                     };
                 });
 
-            console.log(`✅ User can access ${accessibleKids.length} kids`);
             setKids(accessibleKids);
 
         } catch (err) {
@@ -286,7 +282,6 @@ const KidsManagementPage = () => {
 
     // TEAM CHANGE MODAL HANDLERS - FIXED with fresh data
     const handleChangeTeam = (kid) => {
-        console.log('🎯 handleChangeTeam called for kid:', kid);
 
         // Get the most up-to-date kid data from the current state
         const currentKidData = kids.find(k => k.id === kid.id);
@@ -306,20 +301,17 @@ const KidsManagementPage = () => {
             ...currentKidData.originalData
         };
 
-        console.log('📦 Prepared modal kid data with fresh teamId:', modalKidData);
 
         // Set the selected kid FIRST
         setSelectedKidForTeamChange(modalKidData);
 
         // Then open the modal in the next tick to avoid race conditions
         setTimeout(() => {
-            console.log('🔓 Opening team modal...');
             setTeamModalOpen(true);
         }, 0);
     };
 
     const handleTeamChanged = async (kidId, newTeamId) => {
-        console.log(`🔄 Team changed for kid ${kidId} to team ${newTeamId}`);
 
         // Update the kids state with the new team information
         setKids(prevKids =>
@@ -355,7 +347,6 @@ const KidsManagementPage = () => {
     };
 
     const handleCloseTeamModal = () => {
-        console.log('❌ Closing team change modal');
         setTeamModalOpen(false);
         // Clear the selected kid after a brief delay to prevent re-render issues
         setTimeout(() => {
@@ -762,7 +753,6 @@ const KidsManagementPage = () => {
                                                         className={`btn-action ${kid.team === t('kids.noTeam', 'No Team') ? 'assign-team priority' : 'change-team'}`}
                                                         onClick={(e) => {
                                                             e.stopPropagation();
-                                                            console.log('Team change button clicked for kid:', kid);
                                                             handleChangeTeam(kid);
                                                         }}
                                                         title={kid.team === t('kids.noTeam', 'No Team') ? t('kids.assignTeam', 'Assign Team') : t('kids.changeTeam', 'Change Team')}

@@ -245,10 +245,8 @@ const EditEventPage = () => {
                 const encodedPath = pathMatch[1];
                 const decodedPath = decodeURIComponent(encodedPath);
 
-                console.log('Deleting old image from storage:', decodedPath);
                 const imageRef = ref(storage, decodedPath);
                 await deleteObject(imageRef);
-                console.log('Old image deleted successfully');
                 return true;
             }
             return false;
@@ -284,10 +282,8 @@ const EditEventPage = () => {
                     const fileName = `events/${timestamp}_${newImageFile.name}`;
                     const storageRef = ref(storage, fileName);
 
-                    console.log('Uploading new image...');
                     const snapshot = await uploadBytes(storageRef, newImageFile);
                     newImageUrl = await getDownloadURL(snapshot.ref);
-                    console.log('New image uploaded successfully:', newImageUrl);
                 } catch (imageError) {
                     console.error('Error uploading new image:', imageError);
                     alert(t('events.imageUploadWarning', 'Warning: Failed to upload new image, but event will be updated with other changes.'));
@@ -313,7 +309,6 @@ const EditEventPage = () => {
             };
 
             await updateDoc(doc(db, 'events', eventId), eventDoc);
-            console.log('Event updated successfully');
 
             alert(t('events.updateSuccess', 'Event updated successfully!'));
             navigate(`/admin/events/view/${eventId}`);

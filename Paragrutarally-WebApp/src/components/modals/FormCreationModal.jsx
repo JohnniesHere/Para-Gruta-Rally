@@ -221,11 +221,9 @@ const FormCreationModal = ({
     };
 
     if (!isOpen) {
-        console.log('🔧 FormCreationModal: isOpen is false, not rendering');
         return null;
     }
 
-    console.log('🔧 FormCreationModal: Rendering modal, isOpen:', isOpen, 'templateType:', templateType);
 
     return (
         <div className="form-creation-modal-overlay">

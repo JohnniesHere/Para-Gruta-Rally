@@ -42,7 +42,6 @@ const ViewTeamPage = () => {
     const loadTeamData = React.useCallback(async () => {
         try {
             setIsLoading(true);
-            console.log('🔄 Loading team data for ID:', id);
 
             // Load team data with details (kids, instructors, team leader)
             const team = await getTeamWithDetails(id);
@@ -51,7 +50,6 @@ const ViewTeamPage = () => {
                 return;
             }
 
-            console.log('✅ Team data loaded:', team);
             setTeamData(team);
 
         } catch (error) {
@@ -118,14 +116,12 @@ const ViewTeamPage = () => {
         if (!teamData?.kids) return { total: 0, ready: 0, pending: 0 };
 
         const total = teamData.kids.length;
-        console.log('📊 Calculating performance for', total, 'kids');
 
         // Count kids by their signedFormStatus
         let ready = 0;
         let pending = 0;
 
         teamData.kids.forEach(kid => {
-            console.log('Kid status check:', kid.personalInfo?.firstName, 'Status:', kid.signedFormStatus);
 
             // Check various possible status values that indicate "ready"
             const status = kid.signedFormStatus;
@@ -136,7 +132,6 @@ const ViewTeamPage = () => {
             }
         });
 
-        console.log('📈 Performance calculated:', { total, ready, pending });
         return { total, ready, pending };
     };
 

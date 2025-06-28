@@ -86,7 +86,6 @@ export const uploadVehiclePhoto = async (vehicleId, photoFile) => {
         const photoRef = ref(storage, `${VEHICLE_PHOTOS_PATH}/${fileName}`);
 
         // Upload the file with metadata
-        console.log('📤 Uploading vehicle photo:', fileName);
         const uploadResult = await uploadBytes(photoRef, photoFile, {
             contentType: photoFile.type,
             customMetadata: {
@@ -98,7 +97,6 @@ export const uploadVehiclePhoto = async (vehicleId, photoFile) => {
 
         // Get download URL
         const downloadURL = await getDownloadURL(uploadResult.ref);
-        console.log('✅ Vehicle photo uploaded successfully:', downloadURL);
 
         // Update vehicle document with photo URL
         const vehicle = await getVehicleById(vehicleId);
@@ -108,7 +106,6 @@ export const uploadVehiclePhoto = async (vehicleId, photoFile) => {
         };
 
         await updateVehicle(vehicleId, updatedVehicleData);
-        console.log('✅ Vehicle document updated with photo URL');
 
         return downloadURL;
     } catch (error) {
@@ -123,11 +120,9 @@ export const uploadVehiclePhoto = async (vehicleId, photoFile) => {
 export const deleteVehiclePhoto = async (vehicleId, photoUrl) => {
     try {
         if (!photoUrl) {
-            console.log('ℹ️ No photo URL provided, skipping deletion');
             return;
         }
 
-        console.log(`🔄 Deleting photo for vehicle ${vehicleId}`);
 
         // Extract filename from URL (same method as kids service)
         const url = new URL(photoUrl);
@@ -150,7 +145,6 @@ export const deleteVehiclePhoto = async (vehicleId, photoUrl) => {
 
         await updateVehicle(vehicleId, updatedVehicleData);
 
-        console.log(`✅ Photo deleted successfully for vehicle ${vehicleId}`);
 
     } catch (error) {
         console.error('❌ Vehicle photo deletion failed:', error);
@@ -166,13 +160,11 @@ export const deleteVehiclePhoto = async (vehicleId, photoUrl) => {
  */
 export const replaceVehiclePhoto = async (vehicleId, newPhotoFile, oldPhotoUrl) => {
     try {
-        console.log(`🔄 Replacing photo for vehicle ${vehicleId}`);
 
         // Delete old photo first (if exists)
         if (oldPhotoUrl) {
             try {
                 await deleteVehiclePhoto(vehicleId, oldPhotoUrl);
-                console.log('✅ Old photo deleted successfully');
             } catch (deleteError) {
                 console.warn('⚠️ Failed to delete old photo, continuing with upload:', deleteError);
             }
@@ -180,7 +172,6 @@ export const replaceVehiclePhoto = async (vehicleId, newPhotoFile, oldPhotoUrl) 
 
         // Upload new photo
         const newPhotoUrl = await uploadVehiclePhoto(vehicleId, newPhotoFile);
-        console.log('✅ New photo uploaded successfully');
 
         return newPhotoUrl;
     } catch (error) {
@@ -220,13 +211,11 @@ export const removeVehiclePhoto = async (vehicleId) => {
         const currentPhotoUrl = vehicle.photo;
 
         if (!currentPhotoUrl) {
-            console.log('ℹ️ No photo to remove for this vehicle');
             return;
         }
 
         // Delete the photo
         await deleteVehiclePhoto(vehicleId, currentPhotoUrl);
-        console.log('✅ Vehicle photo removed successfully');
 
     } catch (error) {
         console.error('❌ Failed to remove vehicle photo:', error);

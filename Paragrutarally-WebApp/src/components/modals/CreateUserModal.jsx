@@ -76,7 +76,6 @@ const CreateUserModal = ({ isOpen, onClose, onUserCreated }) => {
         setErrors({}); // Clear any previous errors
 
         try {
-            console.log('Creating user with data:', formData);
 
             // Get Firebase config from environment variables
             const firebaseConfig = {
@@ -102,21 +101,17 @@ const CreateUserModal = ({ isOpen, onClose, onUserCreated }) => {
                 );
 
                 const uid = userCredential.user.uid;
-                console.log('User created in auth, UID:', uid);
 
                 // Prepare user data for Firestore using schema
                 const userDoc = prepareUserForFirestore(formData, false);
-                console.log('Creating user document with data:', userDoc);
 
                 // Create the document using the UID from Firebase Auth
                 await setDoc(doc(db, 'users', uid), userDoc);
-                console.log('User document created in Firestore with UID:', uid);
 
                 // Verification: Read back the document
                 const verificationDoc = await getDoc(doc(db, 'users', uid));
                 if (verificationDoc.exists()) {
                     const verificationData = verificationDoc.data();
-                    console.log('✅ VERIFICATION: Document created successfully:', verificationData);
                 } else {
                     console.error('❌ VERIFICATION: Document was not created properly');
                     throw new Error('User document verification failed');

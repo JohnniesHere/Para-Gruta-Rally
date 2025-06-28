@@ -90,7 +90,6 @@ const AddKidPage = () => {
 
             // Load teams with better error handling
             try {
-                console.log('📋 Loading teams...');
                 const teamsQuery = collection(db, 'teams');
                 const teamsSnapshot = await getDocs(teamsQuery);
 
@@ -101,7 +100,6 @@ const AddKidPage = () => {
                     }))
                     .filter(team => team.active !== false);
 
-                console.log('✅ Teams loaded successfully:', teamsData.length);
                 setTeams(teamsData);
             } catch (teamsError) {
                 console.error('❌ Error loading teams:', teamsError);
@@ -110,9 +108,7 @@ const AddKidPage = () => {
 
             // Load instructors using the new service function
             try {
-                console.log('👨‍🏫 Loading instructors from users collection...');
                 const instructorsData = await getAllInstructors();
-                console.log('✅ Instructors loaded successfully:', instructorsData.length);
                 setInstructors(instructorsData);
             } catch (instructorsError) {
                 console.error('❌ Error loading instructors:', instructorsError);
@@ -121,7 +117,6 @@ const AddKidPage = () => {
 
             // Load parents (users with parent role)
             try {
-                console.log('👨‍👩‍👧‍👦 Loading parents...');
                 const parentsQuery = query(
                     collection(db, 'users'),
                     where('role', '==', 'parent')
@@ -131,7 +126,6 @@ const AddKidPage = () => {
                     id: doc.id,
                     ...doc.data()
                 }));
-                console.log('✅ Parents loaded successfully:', parentsData.length);
                 setParents(parentsData);
             } catch (parentsError) {
                 console.error('❌ Error loading parents:', parentsError);
@@ -208,7 +202,6 @@ const AddKidPage = () => {
             };
             reader.readAsDataURL(file);
 
-            console.log('📸 Photo selected and ready for upload');
 
         } catch (error) {
             console.error('Error processing photo:', error);
@@ -306,20 +299,20 @@ const AddKidPage = () => {
 
         setIsSubmitting(true);
         try {
-            console.log('🏁 Creating kid with data:', formData);
+
 
             // First, create the kid
             const kidId = await addKid(formData);
-            console.log('✅ Kid created with ID:', kidId);
+
 
             // Upload photo if one was selected
             if (selectedPhoto) {
                 try {
                     setIsUploadingPhoto(true);
-                    console.log('📸 Uploading photo for kid:', kidId);
+
 
                     const photoUrl = await uploadKidPhoto(kidId, selectedPhoto);
-                    console.log('✅ Photo uploaded successfully:', photoUrl);
+
 
                 } catch (photoError) {
                     console.error('⚠️ Photo upload failed:', photoError);

@@ -308,7 +308,7 @@ const AdminDashboardPage = () => {
 
                 // Get vehicle stats
                 const vehicleStats = await getVehicleStats();
-                console.log('✅ Vehicle stats loaded:', vehicleStats);
+
                 data.stats.totalVehicles = vehicleStats.total;
                 data.stats.activeVehicles = vehicleStats.active;
                 data.stats.vehiclesInUse = vehicleStats.inUse;

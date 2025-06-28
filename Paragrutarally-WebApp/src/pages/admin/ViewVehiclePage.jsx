@@ -65,11 +65,9 @@ const ViewVehiclePage = () => {
             // Load current kid info if assigned - WITH BETTER ERROR HANDLING
             if (vehicleData.currentKidId) {
                 try {
-                    console.log(`🔍 Loading kid data for ID: ${vehicleData.currentKidId}`);
                     const kidData = await getKidById(vehicleData.currentKidId);
                     if (kidData) {
                         setCurrentKid(kidData);
-                        console.log(`✅ Kid data loaded successfully for: ${kidData.personalInfo?.firstName}`);
                     } else {
                         console.warn(`⚠️ Kid not found for ID: ${vehicleData.currentKidId}`);
                         setCurrentKid(null);

@@ -9,13 +9,7 @@ const RoleRedirectHandler = ({ children }) => {
     const { shouldRedirect, userRole, authInitialized, currentUser } = useAuth();
 
     useEffect(() => {
-        console.log('RoleRedirectHandler useEffect triggered:', {
-            authInitialized,
-            currentUser: !!currentUser,
-            userRole,
-            shouldRedirect,
-            currentPath: location.pathname
-        });
+
 
         // Only redirect if all conditions are met
         if (authInitialized && currentUser && shouldRedirect && userRole) {
@@ -42,13 +36,11 @@ const RoleRedirectHandler = ({ children }) => {
             });
 
             if (isSharedPage) {
-                console.log(`Current path ${location.pathname} is a shared page, allowing access`);
                 return;
             }
 
             // Check if we're already on the target page or in the correct area
             if (location.pathname === shouldRedirect) {
-                console.log(`Already on target page ${shouldRedirect}, skipping redirect`);
                 return;
             }
 
@@ -57,7 +49,6 @@ const RoleRedirectHandler = ({ children }) => {
             const targetArea = shouldRedirect.split('/')[1]; // Get the target area
 
             if (currentArea === targetArea) {
-                console.log(`Already in ${targetArea} area, skipping redirect`);
                 return;
             }
 
@@ -82,7 +73,6 @@ const RoleRedirectHandler = ({ children }) => {
             );
 
             if (shouldActuallyRedirect) {
-                console.log(`Redirecting ${userRole} to ${shouldRedirect} from ${location.pathname}`);
 
                 // Small delay to ensure state has settled
                 const redirectTimer = setTimeout(() => {
@@ -91,7 +81,6 @@ const RoleRedirectHandler = ({ children }) => {
 
                 return () => clearTimeout(redirectTimer);
             } else {
-                console.log(`No redirect needed for ${userRole} on ${location.pathname}`);
             }
         }
     }, [shouldRedirect, authInitialized, currentUser, userRole, navigate, location.pathname]);

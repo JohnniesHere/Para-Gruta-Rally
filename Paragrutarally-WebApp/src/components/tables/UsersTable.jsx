@@ -118,7 +118,6 @@ const UsersTable = ({ users, isLoading, onUpdateUser, onUserDeleted }) => {
 
     // Delete functionality with Cloud Function integration
     const handleDeleteClick = (user) => {
-        console.log('Delete clicked for user:', user.id);
         setUserToDelete(user);
         setShowDeleteModal(true);
     };
@@ -129,12 +128,10 @@ const UsersTable = ({ users, isLoading, onUpdateUser, onUserDeleted }) => {
         setDeletingUser(userToDelete.id);
 
         try {
-            console.log('🗑️ Starting complete deletion for user:', userToDelete.id, userToDelete.email);
 
             // Use the new userService function for complete deletion
             const result = await deleteUserCompletely(userToDelete.id);
 
-            console.log('✅ User deleted completely:', result);
 
             // Show success message
             alert(
@@ -179,7 +176,6 @@ const UsersTable = ({ users, isLoading, onUpdateUser, onUserDeleted }) => {
     };
 
     const handleDeleteCancel = () => {
-        console.log('Delete cancelled');
         setShowDeleteModal(false);
         setUserToDelete(null);
     };

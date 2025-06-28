@@ -43,7 +43,6 @@ const InstructorTeamsManagementPage = () => {
             const instructorId = user?.uid || userData?.id;
 
             if (!instructorId || userRole !== 'instructor') {
-                console.log('Access check failed:', { instructorId, userRole, userData, user });
                 setError(t('instructor.accessDenied', 'Access denied: Instructor credentials required'));
                 setLoading(false);
                 return;
@@ -51,7 +50,6 @@ const InstructorTeamsManagementPage = () => {
 
             try {
                 setError('');
-                console.log('Loading teams for instructor:', instructorId);
 
                 // FIXED: Remove orderBy to avoid index requirement
                 const teamsQuery = query(
@@ -68,7 +66,6 @@ const InstructorTeamsManagementPage = () => {
                 // Sort in memory instead
                 teamsData.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
 
-                console.log('Found teams for instructor:', teamsData.length, teamsData);
 
                 // Load kids for these teams
                 let kidsData = [];
@@ -115,8 +112,6 @@ const InstructorTeamsManagementPage = () => {
                     return dateB - dateA; // Newest first
                 });
 
-                console.log('Found kids for teams:', kidsData.length);
-                console.log('Found events for teams:', eventsData.length);
 
                 setTeams(teamsData);
                 setKids(kidsData);

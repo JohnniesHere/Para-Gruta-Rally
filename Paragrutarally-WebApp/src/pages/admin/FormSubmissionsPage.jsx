@@ -70,7 +70,6 @@ const FormSubmissionsPage = () => {
                 setSubmissions(submissionsData);
             }
 
-            console.log('✅ Data loaded successfully');
         } catch (error) {
             console.error('❌ Error loading data:', error);
         } finally {

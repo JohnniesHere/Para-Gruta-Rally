@@ -43,7 +43,6 @@ const UserManagementPage = () => {
     const fetchUsers = async () => {
         setIsLoading(true);
         try {
-            console.log('Fetching users from Firestore...');
             const usersQuery = query(
                 collection(db, 'users'),
                 orderBy('createdAt', 'desc')
@@ -59,8 +58,6 @@ const UserManagementPage = () => {
                 });
             });
 
-            console.log(`✅ Fetched ${usersData.length} users from Firestore`);
-            console.log('User data sample:', usersData.slice(0, 2)); // Debug log
             setUsers(usersData);
             setFilteredUsers(usersData);
         } catch (error) {
@@ -137,57 +134,47 @@ const UserManagementPage = () => {
 
     // Modal handlers
     const handleCreateUser = () => {
-        console.log('Opening create user modal');
         setIsCreateModalOpen(true);
     };
 
     const handleCloseCreateModal = () => {
-        console.log('Closing create user modal');
         setIsCreateModalOpen(false);
     };
 
     const handleUserCreated = () => {
-        console.log('User created successfully, refreshing list');
         fetchUsers();
     };
 
     const handleUserUpdated = () => {
-        console.log('User updated successfully, refreshing list');
         fetchUsers();
         setSelectedUser(null);
         setIsUpdateModalOpen(false);
     };
 
     const handleUserDeleted = () => {
-        console.log('User deleted successfully, refreshing list');
         fetchUsers();
     };
 
     const handleCloseUpdateModal = () => {
-        console.log('Closing update user modal');
         setIsUpdateModalOpen(false);
         setSelectedUser(null);
     };
 
     const handleExportUsers = () => {
-        console.log('Opening export users modal');
         setIsExportModalOpen(true);
     };
 
     const handleCloseExportModal = () => {
-        console.log('Closing export users modal');
         setIsExportModalOpen(false);
     };
 
     const handleUpdateUser = (user) => {
-        console.log('Opening update modal for user:', user.id);
         setSelectedUser(user);
         setIsUpdateModalOpen(true);
     };
 
     // Load users on component mount
     useEffect(() => {
-        console.log('UserManagementPage mounted, loading users...');
         fetchUsers();
     }, []);
 
@@ -205,10 +192,6 @@ const UserManagementPage = () => {
         parents: users.filter(u => u.role === 'parent').length
     };
 
-    // Debug log for stats
-    console.log('📊 Current stats:', stats);
-    console.log('📋 Total users loaded:', users.length);
-    console.log('🔍 Filtered users showing:', filteredUsers.length);
 
     // Get translated role names
     const getRoleName = (role) => {

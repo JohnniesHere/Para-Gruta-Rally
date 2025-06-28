@@ -165,12 +165,12 @@ const BackupSyncPage = () => {
     // Perform automated backup
     const performAutomatedBackup = async () => {
         if (!googleDriveStatus.isConnected) {
-            console.log('Automated backup skipped: Google Drive not connected');
+
             return;
         }
 
         try {
-            console.log('Performing automated backup...');
+
             await handleCreateBackup(true, true); // true for Google Drive, true for automated
 
             // Update next backup time
@@ -197,7 +197,7 @@ const BackupSyncPage = () => {
             };
 
             saveAutomatedBackupSettings(updatedSettings);
-            console.log('Automated backup completed');
+
         } catch (error) {
             console.error('Automated backup failed:', error);
         }
@@ -417,7 +417,7 @@ const BackupSyncPage = () => {
                 }));
             }
 
-            console.log('Restore results:', results);
+
 
         } catch (error) {
             throw error; // Re-throw to be handled by calling function

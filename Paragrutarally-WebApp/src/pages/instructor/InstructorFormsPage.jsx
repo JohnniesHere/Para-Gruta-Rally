@@ -62,7 +62,6 @@ const InstructorFormsPage = () => {
             setSubmissions(submissionsData);
             setAvailableForms(availableFormsData);
 
-            console.log('✅ Instructor forms data loaded successfully');
         } catch (error) {
             console.error('❌ Error loading forms data:', error);
         } finally {
@@ -341,7 +340,6 @@ const InstructorFormsPage = () => {
                         }}
                         eventData={selectedEventData}
                         onSubmit={(submissionData) => {
-                            console.log('Instructor form submitted:', submissionData);
                             loadFormsData(); // Reload data after submission
                         }}
                     />

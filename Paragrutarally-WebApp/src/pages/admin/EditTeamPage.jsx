@@ -155,13 +155,11 @@ const EditTeamPage = () => {
     };
 
     const validateForm = () => {
-        console.log('🔍 Validating form data:', formData);
 
         // Use schema validation
         const validation = validateTeam(formData, true); // true = is an update
 
         if (!validation.isValid) {
-            console.log('❌ Validation failed:', validation.errors);
             setErrors(validation.errors);
 
             // Set field errors for visual indicators
@@ -174,7 +172,6 @@ const EditTeamPage = () => {
             return false;
         }
 
-        console.log('✅ Validation passed');
         setErrors({});
         setFieldErrors({});
         return true;
@@ -189,7 +186,6 @@ const EditTeamPage = () => {
 
         setIsSubmitting(true);
         try {
-            console.log('🔄 Updating team with validated data:', formData);
             await updateTeam(id, formData);
 
             // Navigate back with success message
@@ -281,9 +277,6 @@ const EditTeamPage = () => {
         const currentCount = formData.kidIds?.length || 0;
         const maxCount = formData.maxCapacity || 15;
 
-        console.log('Current count:', currentCount);
-        console.log('Max count:', maxCount);
-        console.log('Interpolations object:', { current: currentCount, max: maxCount });
 
     return (
         <Dashboard requiredRole={userRole}>

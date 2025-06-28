@@ -140,7 +140,6 @@ const UserProfile = () => {
     const handlePasswordUpdate = async (e) => {
         e.preventDefault();
 
-        console.log('🔐 Password update form submitted');
 
         // Clear previous messages
         setMessage({ type: '', text: '' });
@@ -170,7 +169,6 @@ const UserProfile = () => {
         }
 
         if (Object.keys(newErrors).length > 0) {
-            console.log('❌ Form validation failed:', newErrors);
             setPasswordErrors(newErrors);
             return;
         }
@@ -179,11 +177,9 @@ const UserProfile = () => {
         setPasswordErrors({});
 
         try {
-            console.log('🔄 Attempting to update password...');
 
             await updateUserPassword(passwordData.currentPassword, passwordData.newPassword);
 
-            console.log('✅ Password updated successfully');
 
             setMessage({
                 type: 'success',

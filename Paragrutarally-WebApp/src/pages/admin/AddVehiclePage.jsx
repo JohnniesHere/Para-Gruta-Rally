@@ -140,7 +140,6 @@ const AddVehiclePage = () => {
             };
             reader.readAsDataURL(file);
 
-            console.log('📸 Vehicle photo selected and ready for upload');
 
         } catch (error) {
             console.error('Error processing photo:', error);
@@ -201,17 +200,14 @@ const AddVehiclePage = () => {
         try {
             // Create the vehicle first (schema validation happens in the service)
             const vehicleId = await addVehicle(formData);
-            console.log('✅ Vehicle created with ID:', vehicleId);
 
             // Upload photo if one was selected
             let finalPhotoUrl = '';
             if (selectedPhoto) {
                 try {
                     setIsUploadingPhoto(true);
-                    console.log('📸 Uploading photo for vehicle:', vehicleId);
 
                     finalPhotoUrl = await uploadVehiclePhoto(vehicleId, selectedPhoto);
-                    console.log('✅ Photo uploaded successfully:', finalPhotoUrl);
 
                     // Update vehicle with photo URL
                     await updateVehicle(vehicleId, { photo: finalPhotoUrl });

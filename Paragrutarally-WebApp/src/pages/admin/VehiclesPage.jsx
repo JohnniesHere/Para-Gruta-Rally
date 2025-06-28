@@ -221,7 +221,6 @@ const VehiclesPage = () => {
 
             // If vehicle is assigned, unassign it first
             if (vehicle.currentKidId) {
-                console.log(`🔄 Unassigning vehicle ${vehicle.id} before deletion...`);
                 await unassignVehicleFromKid(vehicle.id);
             }
 

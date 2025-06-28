@@ -97,7 +97,6 @@ const ParentEventPage = () => {
 
             setEvents(eventsData);
             setFilteredEvents(eventsData);
-            console.log('Fetched events for parent view:', eventsData);
         } catch (error) {
             console.error('Error fetching events:', error);
             setError(t('parentEvents.fetchError', 'Failed to load events. Please try again.'));

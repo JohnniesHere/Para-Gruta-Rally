@@ -61,7 +61,6 @@ const MyFormsPage = () => {
             setSubmissions(submissionsData);
             setAvailableForms(availableFormsData);
 
-            console.log('✅ Forms data loaded successfully');
         } catch (error) {
             console.error('❌ Error loading forms data:', error);
         } finally {
@@ -347,7 +346,6 @@ const MyFormsPage = () => {
                         }}
                         eventData={selectedEventData}
                         onSubmit={(submissionData) => {
-                            console.log('Form submitted:', submissionData);
                             loadFormsData(); // Reload data after submission
                         }}
                     />

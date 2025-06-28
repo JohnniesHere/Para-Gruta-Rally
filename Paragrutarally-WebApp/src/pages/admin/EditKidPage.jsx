@@ -165,9 +165,6 @@ const EditKidPage = () => {
             setInstructors(instructorsData);
             setParents(parentsData.docs.map(doc => ({ id: doc.id, ...doc.data() })));
 
-            console.log('✅ Loaded instructors:', instructorsData.length);
-            console.log('✅ Loaded teams:', teamsData.length);
-            console.log('✅ Loaded vehicles:', vehiclesData.length);
 
         } catch (error) {
             console.error('Error loading kid data:', error);
@@ -279,9 +276,7 @@ const EditKidPage = () => {
         try {
             // Delete old photo from storage if it exists
             if (formData.personalInfo?.photo) {
-                console.log('🗑️ Deleting old photo from storage...');
                 await deleteKidPhoto(id, formData.personalInfo.photo);
-                console.log('✅ Old photo deleted successfully');
             }
 
             // Update form data to remove photo
@@ -302,7 +297,6 @@ const EditKidPage = () => {
             const fileInput = document.getElementById('photo-upload');
             if (fileInput) fileInput.value = '';
 
-            console.log('✅ Photo removed successfully');
 
         } catch (error) {
             console.error('❌ Error removing photo:', error);
@@ -407,10 +401,8 @@ const EditKidPage = () => {
 
                     // Delete old photo first if it exists
                     if (formData.personalInfo?.photo) {
-                        console.log('🗑️ Deleting old photo before uploading new one...');
                         try {
                             await deleteKidPhoto(id, formData.personalInfo.photo);
-                            console.log('✅ Old photo deleted successfully');
                         } catch (deleteError) {
                             console.warn('⚠️ Failed to delete old photo:', deleteError.message);
                             // Continue with upload even if old photo deletion fails
@@ -418,7 +410,6 @@ const EditKidPage = () => {
                     }
 
                     // Upload new photo
-                    console.log('📷 Uploading new photo...');
                     const photoUrl = await uploadKidPhoto(id, selectedPhoto);
                     finalFormData = {
                         ...finalFormData,
@@ -427,7 +418,6 @@ const EditKidPage = () => {
                             photo: photoUrl
                         }
                     };
-                    console.log('✅ New photo uploaded successfully:', photoUrl);
                 } catch (photoError) {
                     console.error('❌ Photo upload failed:', photoError);
                     alert(t('editKid.photoUploadError', 'Photo upload failed: {error}. The kid will be updated without the new photo.', { error: photoError.message }));
@@ -441,13 +431,9 @@ const EditKidPage = () => {
             const newTeamId = finalFormData.teamId || null;
 
             if (oldTeamId !== newTeamId) {
-                console.log('👥 Team assignment changed - updating team memberships...');
-                console.log(`📤 Old team: ${oldTeamId || 'none'}`);
-                console.log(`📥 New team: ${newTeamId || 'none'}`);
 
                 try {
                     await updateKidTeam(id, newTeamId);
-                    console.log('✅ Team assignment updated successfully');
                 } catch (teamError) {
                     console.error('❌ Team assignment failed:', teamError);
                     // Don't fail the whole operation, but warn the user
@@ -460,9 +446,7 @@ const EditKidPage = () => {
             const newVehicleIds = finalFormData.vehicleIds || [];
 
             if (JSON.stringify(oldVehicleIds.sort()) !== JSON.stringify(newVehicleIds.sort())) {
-                console.log('🚗 Updating vehicle assignments...');
                 await updateVehicleAssignments(newVehicleIds, oldVehicleIds);
-                console.log('✅ Vehicle assignments updated successfully');
             }
 
             // Update the kid (this will update the kid's teamId field)

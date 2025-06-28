@@ -42,7 +42,6 @@ const InstructorVehiclesPage = () => {
             const instructorId = user?.uid || userData?.id;
 
             if (!instructorId || userRole !== 'instructor') {
-                console.log('Access check failed:', { instructorId, userRole, userData, user });
                 setError(t('instructor.accessDenied', 'Access denied: Instructor credentials required'));
                 setLoading(false);
                 return;
@@ -50,7 +49,6 @@ const InstructorVehiclesPage = () => {
 
             try {
                 setError('');
-                console.log('Loading vehicles for instructor:', instructorId);
 
                 // Load ALL vehicles (instructors can see all but edit only assigned ones)
                 const vehiclesQuery = query(
@@ -77,8 +75,6 @@ const InstructorVehiclesPage = () => {
                     ...doc.data()
                 }));
 
-                console.log('Found vehicles:', vehiclesData.length);
-                console.log('Found teams for instructor:', teamsData.length, teamsData);
 
                 setVehicles(vehiclesData);
                 setTeams(teamsData);

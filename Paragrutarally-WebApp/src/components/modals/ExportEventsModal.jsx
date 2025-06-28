@@ -173,7 +173,6 @@ const ExportEventsModal = ({ isOpen, onClose }) => {
             document.body.removeChild(link);
             window.URL.revokeObjectURL(url);
 
-            console.log(`✅ Successfully exported ${events.length} events to ${filename}`);
             onClose();
         } catch (error) {
             console.error('Error exporting events:', error);

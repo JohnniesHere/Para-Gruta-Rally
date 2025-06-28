@@ -26,16 +26,13 @@ const VEHICLES_COLLECTION = 'vehicles';
  */
 export const getAllVehicles = async () => {
     try {
-        console.log('🔍 Fetching all vehicles...');
 
         // Simple query without ordering to avoid index issues
         const vehiclesRef = collection(db, VEHICLES_COLLECTION);
         const snapshot = await getDocs(vehiclesRef);
 
-        console.log('📊 Vehicles snapshot size:', snapshot.size);
 
         if (snapshot.empty) {
-            console.log('📝 No vehicles found, returning empty array');
             return [];
         }
 
@@ -56,14 +53,12 @@ export const getAllVehicles = async () => {
             return dateB - dateA; // Descending order (newest first)
         });
 
-        console.log('✅ Successfully fetched vehicles:', vehicles.length);
         return vehicles;
     } catch (error) {
         console.error('❌ Error fetching all vehicles:', error);
 
         // Handle specific error cases
         if (error.code === 'failed-precondition') {
-            console.log('📝 Index not available, returning empty array');
             return [];
         }
 
@@ -72,7 +67,6 @@ export const getAllVehicles = async () => {
         }
 
         // For other errors, return empty array to prevent app crash
-        console.log('🔄 Returning empty array due to error:', error.message);
         return [];
     }
 };
@@ -82,14 +76,12 @@ export const getAllVehicles = async () => {
  */
 export const getVehiclesByTeam = async (teamId) => {
     try {
-        console.log('🔍 Fetching vehicles for team:', teamId);
 
         const vehiclesRef = collection(db, VEHICLES_COLLECTION);
         const vehiclesQuery = query(vehiclesRef, where('teamId', '==', teamId));
         const snapshot = await getDocs(vehiclesQuery);
 
         if (snapshot.empty) {
-            console.log('📝 No vehicles found for team, returning empty array');
             return [];
         }
 
@@ -110,7 +102,6 @@ export const getVehiclesByTeam = async (teamId) => {
             return dateB - dateA;
         });
 
-        console.log('✅ Successfully fetched team vehicles:', vehicles.length);
         return vehicles;
     } catch (error) {
         console.error('❌ Error fetching vehicles by team:', error);
@@ -180,7 +171,6 @@ export const getVehicleById = async (vehicleId) => {
  */
 export const addVehicle = async (vehicleData) => {
     try {
-        console.log('🚗 Adding new vehicle with data:', vehicleData);
 
         // Step 1: Validate the data against schema
         const validation = validateVehicle(vehicleData, false);
@@ -191,7 +181,6 @@ export const addVehicle = async (vehicleData) => {
         }
 
         const validatedData = validation.data;
-        console.log('✅ Vehicle data validated successfully:', validatedData);
 
         // Step 2: Check license plate uniqueness
         const isUnique = await checkLicensePlateUniqueness(validatedData.licensePlate);
@@ -210,7 +199,6 @@ export const addVehicle = async (vehicleData) => {
 
         // Step 4: Add to Firestore
         const docRef = await addDoc(collection(db, VEHICLES_COLLECTION), vehicleWithTimestamps);
-        console.log('🎉 Vehicle created with ID:', docRef.id);
         return docRef.id;
     } catch (error) {
         console.error('💥 Error adding vehicle:', error);
@@ -223,7 +211,6 @@ export const addVehicle = async (vehicleData) => {
  */
 export const updateVehicle = async (vehicleId, updates) => {
     try {
-        console.log('🔄 Updating vehicle with ID:', vehicleId, 'Data:', updates);
 
         // Step 1: Validate the update data against schema
         const validation = validateVehicle(updates, true);
@@ -234,7 +221,6 @@ export const updateVehicle = async (vehicleId, updates) => {
         }
 
         const validatedData = validation.data;
-        console.log('✅ Vehicle update data validated successfully:', validatedData);
 
         // Step 2: Check license plate uniqueness if license plate is being updated
         if (validatedData.licensePlate) {
@@ -253,7 +239,6 @@ export const updateVehicle = async (vehicleId, updates) => {
 
         // Step 4: Update in Firestore
         await updateDoc(vehicleRef, updateData);
-        console.log('🎉 Vehicle updated successfully:', vehicleId);
 
         return vehicleId;
     } catch (error) {
@@ -288,7 +273,6 @@ export const assignVehicleToKid = async (vehicleId, kidId) => {
             updatedAt: serverTimestamp()
         });
 
-        console.log('Vehicle assigned successfully:', vehicleId, 'to kid:', kidId);
         return vehicleId;
     } catch (error) {
         console.error('Error assigning vehicle:', error);
@@ -322,7 +306,6 @@ export const unassignVehicle = async (vehicleId) => {
             updatedAt: serverTimestamp()
         });
 
-        console.log('Vehicle unassigned successfully:', vehicleId);
         return vehicleId;
     } catch (error) {
         console.error('Error unassigning vehicle:', error);
@@ -336,7 +319,6 @@ export const unassignVehicle = async (vehicleId) => {
 export const deleteVehicle = async (vehicleId) => {
     try {
         await deleteDoc(doc(db, VEHICLES_COLLECTION, vehicleId));
-        console.log('Vehicle deleted successfully:', vehicleId);
         return vehicleId;
     } catch (error) {
         console.error('Error deleting vehicle:', error);
@@ -409,7 +391,6 @@ export const updateVehicleBattery = async (vehicleId, batteryType, batteryDate) 
             updatedAt: serverTimestamp()
         });
 
-        console.log('Vehicle battery updated successfully:', vehicleId);
         return vehicleId;
     } catch (error) {
         console.error('Error updating vehicle battery:', error);
@@ -422,7 +403,6 @@ export const updateVehicleBattery = async (vehicleId, batteryType, batteryDate) 
  */
 export const getVehicleStats = async (teamId = null) => {
     try {
-        console.log('📊 Calculating vehicle stats for team:', teamId);
 
         let vehicles;
         if (teamId) {
@@ -450,7 +430,6 @@ export const getVehicleStats = async (teamId = null) => {
             }).length
         };
 
-        console.log('✅ Vehicle stats calculated:', stats);
         return stats;
     } catch (error) {
         console.error('❌ Error calculating vehicle stats:', error);

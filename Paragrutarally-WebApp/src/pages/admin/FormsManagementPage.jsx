@@ -101,21 +101,18 @@ const FormsManagementPage = () => {
 
     // Handle create new form
     const handleCreateForm = (template = null) => {
-        console.log('🔧 Create form button clicked!', template);
         setTemplateType(template);
         setShowFormCreationModal(true);
     };
 
     // Handle edit form
     const handleEditForm = (form) => {
-        console.log('🔧 Edit form clicked:', form);
         setSelectedForm(form);
         setShowFormEditModal(true);
     };
 
     // Handle view form
     const handleViewForm = (form) => {
-        console.log('🔧 View form clicked:', form);
         setSelectedForm(form);
         setShowFormViewModal(true);
     };
@@ -534,12 +531,10 @@ const FormsManagementPage = () => {
                         isOpen={showFormCreationModal}
                         templateType={templateType}
                         onClose={() => {
-                            console.log('🔧 Modal close called');
                             setShowFormCreationModal(false);
                             setTemplateType(null);
                         }}
                         onSuccess={(formId) => {
-                            console.log('🔧 Form created with ID:', formId);
                             setShowFormCreationModal(false);
                             setTemplateType(null);
                             loadFormsData(); // Reload data

@@ -29,13 +29,9 @@ export const deleteUser = onCall(
     },
     async (request) => {
         try {
-            console.log('🗑️ Delete user callable function invoked');
-            console.log('📦 Data received:', request.data);
-            console.log('👤 Auth context:', request.auth ? request.auth.uid : 'No auth');
 
             // Check if user is authenticated
             if (!request.auth) {
-                console.log('❌ Unauthenticated request');
                 throw new HttpsError(
                     'unauthenticated',
                     'User must be authenticated to delete users.'
@@ -43,7 +39,6 @@ export const deleteUser = onCall(
             }
 
             const callingUserId = request.auth.uid;
-            console.log(`📋 Delete request from user: ${callingUserId}`);
 
             // Check if the calling user is an admin
             const callingUserDoc = await firestore
@@ -52,7 +47,6 @@ export const deleteUser = onCall(
                 .get();
 
             if (!callingUserDoc.exists) {
-                console.log('❌ Calling user document not found');
                 throw new HttpsError(
                     'permission-denied',
                     'User profile not found. Please contact support.'
@@ -60,17 +54,14 @@ export const deleteUser = onCall(
             }
 
             const callingUserData = callingUserDoc.data();
-            console.log(`👤 Calling user role: ${callingUserData.role}`);
 
             if (callingUserData.role !== 'admin') {
-                console.log(`❌ Unauthorized delete attempt by non-admin: ${callingUserId}, role: ${callingUserData.role}`);
                 throw new HttpsError(
                     'permission-denied',
                     'Only admin users can delete other users.'
                 );
             }
 
-            console.log('✅ Admin verification successful');
 
             // Get the user ID to delete
             const { userIdToDelete } = request.data;
@@ -98,7 +89,6 @@ export const deleteUser = onCall(
                 );
             }
 
-            console.log(`🎯 Attempting to delete user: ${userIdToDelete}`);
 
             // Get user data before deletion for logging
             let userToDeleteData = null;
@@ -110,24 +100,17 @@ export const deleteUser = onCall(
 
                 if (userToDeleteDoc.exists) {
                     userToDeleteData = userToDeleteDoc.data();
-                    console.log(`📋 User to delete found: ${userToDeleteData.email}`);
-                } else {
-                    console.log('⚠️ User document not found in Firestore, but continuing with auth deletion...');
                 }
             } catch (error) {
-                console.log('⚠️ Could not fetch user data for logging:', error.message);
             }
 
             // Delete user from Firebase Authentication
             try {
                 await auth.deleteUser(userIdToDelete);
-                console.log(`✅ Successfully deleted auth user: ${userIdToDelete}`);
             } catch (authError) {
-                console.error('❌ Auth deletion error:', authError);
 
                 // If user doesn't exist in auth, that's okay
                 if (authError.code === 'auth/user-not-found') {
-                    console.log('ℹ️ User not found in auth system (may have been deleted already)');
                 } else {
                     console.error(`❌ Failed to delete auth user ${userIdToDelete}:`, authError.message);
                     throw new HttpsError(
@@ -137,14 +120,7 @@ export const deleteUser = onCall(
                 }
             }
 
-            // Log the successful deletion
-            console.log(`🎉 User deleted by admin ${callingUserId}:`, {
-                deletedUserId: userIdToDelete,
-                deletedUserEmail: userToDeleteData?.email || 'unknown',
-                deletedUserName: userToDeleteData?.displayName || 'unknown',
-                deletedUserRole: userToDeleteData?.role || 'unknown',
-                timestamp: new Date().toISOString()
-            });
+
 
             // Return success
             return {

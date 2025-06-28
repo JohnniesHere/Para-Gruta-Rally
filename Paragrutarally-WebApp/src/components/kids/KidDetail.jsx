@@ -27,24 +27,20 @@ function KidDetailView() {
         const fetchKidData = async () => {
             // Wait for permissions to load
             if (permissionsLoading) {
-                console.log('⏳ Waiting for permissions...');
                 return;
             }
 
             if (!permissions) {
-                console.log('❌ No permissions available');
                 setError('Permissions not available');
                 setLoading(false);
                 return;
             }
 
             try {
-                console.log('🔄 Fetching kid details for:', kidId);
                 const kidDoc = await getDoc(doc(db, 'kids', kidId));
 
                 if (kidDoc.exists()) {
                     const data = kidDoc.data();
-                    console.log('📄 Kid data found:', data);
 
                     // Check if user can view this kid
                     if (!permissions.canViewKid(data)) {
@@ -54,7 +50,6 @@ function KidDetailView() {
                     }
 
                     setKidData({ id: kidDoc.id, ...data });
-                    console.log('✅ Kid data set successfully');
                 } else {
                     setError('Kid not found');
                 }

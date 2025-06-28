@@ -209,7 +209,6 @@ export const getRecentActivities = async () => {
                 });
             });
         } catch (usersError) {
-            console.log('Users collection may not exist yet:', usersError.message);
         }
 
         // Get recent events (last 10)
@@ -247,7 +246,6 @@ export const getRecentActivities = async () => {
                 });
             });
         } catch (eventsError) {
-            console.log('Events collection may not exist yet:', eventsError.message);
         }
 
         // Get recent kids registrations (last 5)
@@ -284,7 +282,6 @@ export const getRecentActivities = async () => {
                 });
             });
         } catch (kidsError) {
-            console.log('Kids collection may not exist yet:', kidsError.message);
         }
 
         // Get recent teams (last 5)
@@ -321,7 +318,6 @@ export const getRecentActivities = async () => {
                 });
             });
         } catch (teamsError) {
-            console.log('Teams collection may not exist yet:', teamsError.message);
         }
 
         // If we don't have many real activities, add some mock ones based on your screenshots
