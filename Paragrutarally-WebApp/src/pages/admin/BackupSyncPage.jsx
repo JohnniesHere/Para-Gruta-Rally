@@ -291,7 +291,7 @@ const BackupSyncPage = () => {
                 createdAt: serverTimestamp(),
                 size: JSON.stringify(completeBackup).length,
                 collections: collections,
-                status: t('backup.statusCompleted', 'completed'),
+                status: 'completed', // Store as raw status key
                 uploadedToGoogleDrive: uploadToGoogleDrive,
                 isAutomated: isAutomated
             };
@@ -444,6 +444,17 @@ const BackupSyncPage = () => {
         return `${mb.toFixed(1)} MB`;
     };
 
+    // Translate status helper
+    const getTranslatedStatus = (status) => {
+        const statusTranslations = {
+            'completed': t('status.completed', 'Completed'),
+            'pending': t('status.pending', 'Pending'),
+            'failed': t('status.failed', 'Failed'),
+            'in-progress': t('status.inProgress', 'In Progress')
+        };
+        return statusTranslations[status] || status;
+    };
+
     return (
         <Dashboard requiredRole="admin">
             <div className={`backup-sync-page ${appliedTheme}-mode`}>
@@ -558,7 +569,7 @@ const BackupSyncPage = () => {
                                                 </span>
                                             </div>
                                             <span className={`backup-status-badge ${backup.status}`}>
-                                                {backup.status}
+                                                {getTranslatedStatus(backup.status)}
                                             </span>
                                         </div>
                                     ))}
