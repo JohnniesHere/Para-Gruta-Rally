@@ -8,6 +8,47 @@
 :root {
     --primary-color: #3b82f6;
 }
+/* Add this to your EventManagementPage.css file */
+
+/* ========================================
+   LIGHT MODE TEXT FIXES - EVENT DESCRIPTION
+   ======================================== */
+
+/* Fix event description text in light mode */
+:root .event-description {
+    color: #7f8c8d !important; /* Darker gray for better contrast in light mode */
+}
+
+/* Ensure event name is also properly visible in light mode */
+:root .event-name {
+    color: #2c3e50 !important; /* Dark text for light mode */
+}
+
+/* Keep dark mode text as intended */
+[data-theme="dark"] .event-description,
+.dark-mode .event-description {
+    color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .event-name,
+.dark-mode .event-name {
+    color: var(--text-primary) !important;
+}
+
+/* Additional light mode table text fixes */
+:root .data-table td {
+    color: #2c3e50 !important; /* Ensure all table cell text is dark in light mode */
+}
+
+:root .data-table .event-info {
+    color: inherit; /* Inherit the dark color from parent */
+}
+
+/* Keep dark mode table text properly visible */
+[data-theme="dark"] .data-table td,
+.dark-mode .data-table td {
+    color: var(--text-secondary) !important;
+}
 
 [data-theme="dark"],
 .dark-mode,
