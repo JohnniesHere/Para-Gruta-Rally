@@ -61,7 +61,6 @@
 
 .form-icon {
     color: #FBBF24;
-    animation: float 3s ease-in-out infinite;
 }
 
 @keyframes float {
