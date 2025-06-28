@@ -613,6 +613,13 @@ export const LANGUAGES = {
         'users.exporting': 'Exporting...',
         'users.exportToCsv': 'Export to CSV',
         'users.hosts': 'Hosts',
+        "users.basicInformation": "Basic Information",
+        "users.accountInformation": "Account Information",
+        "users.contactInformation": "Contact Information",
+        "users.rolePermissions": "Role & Permissions",
+        "users.passwordHint": "User can change this password after first login",
+        "users.emailHint": "This will be used for login and notifications",
+        "users.roleHint": "Select the appropriate role for this user",
 
 
         // UserSchema validation error messages
@@ -3804,6 +3811,13 @@ export const LANGUAGES = {
         'users.exporting': 'מייצא משתמשים ל-CSV...',
         'users.exportError': 'ייצוא המשתמשים נכשל. אנא נסה שוב.',
         'users.hosts': 'מארחים',
+        "users.basicInformation": "מידע בסיסי",
+        "users.accountInformation": "מידע חשבון",
+        "users.contactInformation": "פרטי התקשרות",
+        "users.rolePermissions": "תפקיד והרשאות",
+        "users.passwordHint": "המשתמש יכול לשנות את הסיסמה לאחר הכניסה הראשונה",
+        "users.emailHint": "זה ישמש להתחברות ולהתראות",
+        "users.roleHint": "בחר את התפקיד המתאים למשתמש זה",
 
         //UserSchema validation error messages
         // Field requirements
