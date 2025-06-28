@@ -656,3 +656,271 @@
         padding: 10px !important;
     }
 }
+
+/* Fix datetime display background and text contrast in light mode */
+:root .datetime-display {
+    background: var(--bg-tertiary) !important;
+    color: #2c3e50 !important;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    font-weight: 500;
+}
+
+/* Fix all view values in light mode */
+:root .view-value {
+    color: #2c3e50 !important;
+}
+
+/* Fix labels in light mode */
+:root .form-creation-modal-content label {
+    color: #34495e !important;
+}
+
+/* Fix section headings in light mode */
+:root .form-creation-modal-content h4 {
+    color: #2c3e50 !important;
+}
+
+/* Fix notes text in light mode */
+:root .notes-text {
+    color: #2c3e50 !important;
+    background: var(--bg-tertiary);
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    line-height: 1.5;
+}
+
+/* Fix contact display items in light mode */
+:root .contact-display-item {
+    color: #2c3e50 !important;
+}
+
+/* Fix user type badges in light mode */
+:root .user-type-badge {
+    background: var(--accent-color) !important;
+    color: white !important;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-right: 8px;
+}
+
+/* Fix stats display in light mode */
+:root .stat-item label {
+    color: #34495e !important;
+}
+
+:root .stat-value {
+    color: #2c3e50 !important;
+    font-weight: 600;
+}
+
+/* Fix link buttons in light mode */
+:root .link-button {
+    color: var(--accent-color) !important;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: var(--bg-tertiary);
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+}
+
+:root .link-button:hover {
+    background: var(--bg-quaternary) !important;
+    border-color: var(--accent-color) !important;
+}
+
+/* Fix payment link styling */
+:root .payment-link {
+    background: linear-gradient(135deg, var(--success-color), var(--success-hover)) !important;
+    color: white !important;
+    border: none !important;
+}
+
+:root .payment-link:hover {
+    background: linear-gradient(135deg, var(--success-hover), var(--success-color)) !important;
+    color: white !important;
+}
+
+/* Fix form grid view items */
+:root .form-view-grid .view-item {
+    background: var(--bg-secondary);
+    padding: 16px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+/* Fix status badges in light mode */
+:root .status-badge.active {
+    background: var(--success-light) !important;
+    color: var(--success-color) !important;
+    border: 1px solid var(--success-color);
+}
+
+:root .status-badge.draft {
+    background: var(--warning-light) !important;
+    color: var(--warning-color) !important;
+    border: 1px solid var(--warning-color);
+}
+
+:root .status-badge.archived {
+    background: var(--error-light) !important;
+    color: var(--error-color) !important;
+    border: 1px solid var(--error-color);
+}
+
+/* Ensure proper spacing for datetime display */
+.datetime-display {
+    font-size: 14px;
+    font-weight: 500;
+    margin-top: 4px;
+}
+
+/* Fix contact info styling */
+.contact-display {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.contact-display-item {
+    padding: 12px;
+    background: var(--bg-tertiary);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.contact-email,
+.contact-phone {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.contact-email a,
+.contact-phone a {
+    color: var(--accent-color);
+    text-decoration: none;
+}
+
+.contact-email a:hover,
+.contact-phone a:hover {
+    text-decoration: underline;
+}
+
+/* Fix stats display layout */
+.stats-display {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 16px;
+}
+
+.stat-item {
+    background: var(--bg-tertiary);
+    padding: 16px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    text-align: center;
+}
+
+.stat-item label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.stat-value {
+    font-size: 24px;
+    font-weight: 700;
+}
+
+/* Ensure dark mode compatibility */
+[data-theme="dark"] .datetime-display,
+.dark-mode .datetime-display {
+    background: var(--bg-quaternary) !important;
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .view-value,
+.dark-mode .view-value {
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .form-creation-modal-content label,
+.dark-mode .form-creation-modal-content label {
+    color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .form-creation-modal-content h4,
+.dark-mode .form-creation-modal-content h4 {
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .notes-text,
+.dark-mode .notes-text {
+    color: var(--text-primary) !important;
+    background: var(--bg-quaternary);
+}
+
+[data-theme="dark"] .contact-display-item,
+.dark-mode .contact-display-item {
+    color: var(--text-primary) !important;
+    background: var(--bg-quaternary);
+}
+
+[data-theme="dark"] .user-type-badge,
+.dark-mode .user-type-badge {
+    background: var(--accent-color) !important;
+    color: white !important;
+}
+
+[data-theme="dark"] .stat-item label,
+.dark-mode .stat-item label {
+    color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .stat-value,
+.dark-mode .stat-value {
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .link-button,
+.dark-mode .link-button {
+    background: var(--bg-quaternary);
+    color: var(--accent-color) !important;
+}
+
+[data-theme="dark"] .link-button:hover,
+.dark-mode .link-button:hover {
+    background: var(--bg-tertiary) !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .form-view-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .stats-display {
+        grid-template-columns: 1fr;
+    }
+
+    .contact-display {
+        gap: 8px;
+    }
+
+    .datetime-display {
+        font-size: 13px;
+        padding: 10px 12px;
+    }
+}

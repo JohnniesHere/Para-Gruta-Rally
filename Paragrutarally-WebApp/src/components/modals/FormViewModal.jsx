@@ -1,4 +1,4 @@
-// src/components/modals/FormViewModal.jsx - Form View Modal (Read-only)
+// src/components/modals/FormViewModal.jsx - Fixed Version
 import React from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import {
@@ -19,37 +19,61 @@ const FormViewModal = ({
                            form,
                            onClose
                        }) => {
-    const { t } = useLanguage();
+    const { t, isRTL } = useLanguage();
 
     if (!isOpen || !form) {
         return null;
     }
 
-    // Format date and time for display
+    // Enhanced date formatting with proper translation support
     const formatDateTime = () => {
         if (form.eventDetails?.dayAndDate) {
+            // If dayAndDate is already a formatted string, try to parse and reformat it
+            const dateMatch = form.eventDetails.dayAndDate.match(/(\w+),\s*(\w+)\s+(\d+),\s*(\d+)/);
+            if (dateMatch) {
+                try {
+                    const [, , month, day, year] = dateMatch;
+                    const date = new Date(`${month} ${day}, ${year}`);
+                    return formatLocalizedDate(date);
+                } catch (error) {
+                    // If parsing fails, return the original string
+                    return form.eventDetails.dayAndDate;
+                }
+            }
             return form.eventDetails.dayAndDate;
         }
 
         if (!form.eventDetails?.eventDate) return '';
 
         const date = new Date(form.eventDetails.eventDate);
-        const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
-        const dateStr = date.toLocaleDateString('en-US', {
+        return formatLocalizedDate(date);
+    };
+
+    // Helper function to format date with proper localization
+    const formatLocalizedDate = (date) => {
+        const locale = isRTL ? 'he-IL' : 'en-US';
+
+        const dayName = date.toLocaleDateString(locale, { weekday: 'long' });
+        const dateStr = date.toLocaleDateString(locale, {
             year: 'numeric',
             month: 'long',
             day: 'numeric'
         });
 
         let timeStr = '';
-        if (form.eventDetails.startTime) {
+        if (form.eventDetails?.startTime) {
             timeStr = form.eventDetails.startTime;
             if (form.eventDetails.endTime) {
                 timeStr += ` - ${form.eventDetails.endTime}`;
             }
         }
 
-        return `${dayName}, ${dateStr}${timeStr ? ` (${timeStr})` : ''}`;
+        // Format based on language direction
+        if (isRTL) {
+            return `${dayName}, ${dateStr}${timeStr ? ` (${timeStr})` : ''}`;
+        } else {
+            return `${dayName}, ${dateStr}${timeStr ? ` (${timeStr})` : ''}`;
+        }
     };
 
     const getStatusLabel = (status) => {
@@ -122,7 +146,7 @@ const FormViewModal = ({
                             <div className="view-item">
                                 <label>{t('forms.created', 'Created')}</label>
                                 <div className="view-value">
-                                    {form.createdAt?.toLocaleDateString() || 'Unknown'}
+                                    {form.createdAt?.toLocaleDateString(isRTL ? 'he-IL' : 'en-US') || 'Unknown'}
                                 </div>
                             </div>
 

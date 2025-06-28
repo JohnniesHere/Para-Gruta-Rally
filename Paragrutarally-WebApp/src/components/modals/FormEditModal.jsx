@@ -1,4 +1,4 @@
-// src/components/modals/FormEditModal.jsx - Form Edit Modal
+// src/components/modals/FormEditModal.jsx - Fixed Version with Date Translation and Color Fixes
 import React, { useState, useEffect } from 'react';
 import { updateForm } from '@/services/formService.js';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -21,7 +21,7 @@ const FormEditModal = ({
                            onClose,
                            onSuccess
                        }) => {
-    const { t } = useLanguage();
+    const { t, isRTL } = useLanguage();
     const { user } = usePermissions();
 
     // Form state
@@ -126,13 +126,15 @@ const FormEditModal = ({
         }
     };
 
-    // Format date and time for submission
+    // Enhanced date formatting with proper translation support
     const formatDateTime = () => {
         if (!formData.eventDate) return '';
 
         const date = new Date(formData.eventDate);
-        const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
-        const dateStr = date.toLocaleDateString('en-US', {
+        const locale = isRTL ? 'he-IL' : 'en-US';
+
+        const dayName = date.toLocaleDateString(locale, { weekday: 'long' });
+        const dateStr = date.toLocaleDateString(locale, {
             year: 'numeric',
             month: 'long',
             day: 'numeric'
@@ -146,6 +148,7 @@ const FormEditModal = ({
             }
         }
 
+        // Format based on language direction
         return `${dayName}, ${dateStr}${timeStr ? ` (${timeStr})` : ''}`;
     };
 
@@ -503,4 +506,3 @@ const FormEditModal = ({
 };
 
 export default FormEditModal;
-
