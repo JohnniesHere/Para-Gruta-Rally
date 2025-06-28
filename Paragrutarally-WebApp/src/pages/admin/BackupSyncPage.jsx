@@ -1,4 +1,4 @@
-// src/pages/admin/BackupSyncPage.jsx - Production Version
+// src/pages/admin/BackupSyncPage.jsx - Reorganized Layout Version
 import React, { useEffect, useState } from 'react';
 import Dashboard from '../../components/layout/Dashboard';
 import { useTheme } from '../../contexts/ThemeContext.jsx';
@@ -448,97 +448,15 @@ const BackupSyncPage = () => {
         <Dashboard requiredRole="admin">
             <div className={`backup-sync-page ${appliedTheme}-mode`}>
                 <h1 className="page-title">{t('backup.title', 'Backup & Sync')}</h1>
-                <div className="content-section">
-                    <h2>{t('backup.databaseBackup', 'Database Backup')}</h2>
-                    <p>{t('backup.description', 'Create and manage backups of your application data.')}</p>
 
-                    <div className="action-buttons">
-                        {googleDriveStatus.isConnected ? (
-                            <button
-                                className="primary-button google-drive-btn"
-                                onClick={() => handleCreateBackup(true)}
-                                disabled={isCreatingBackup || isRestoring}
-                            >
-                                {isCreatingBackup
-                                    ? t('backup.uploading', 'Uploading...')
-                                    : t('backup.createAndUpload', 'Create & Upload to Drive')
-                                }
-                            </button>
-                        ) : (
-                            <div className="backup-notice">
-                                <p>{t('backup.connectToCreateBackups', 'Connect to Google Drive to create backups')}</p>
-                            </div>
-                        )}
+                {/* Status Message */}
+                {backupStatus && (
+                    <div className={`backup-status ${backupStatus.includes('Error') ? 'error' : 'success'}`}>
+                        {backupStatus}
                     </div>
+                )}
 
-                    {backupStatus && (
-                        <div className={`backup-status ${backupStatus.includes('Error') ? 'error' : 'success'}`}>
-                            {backupStatus}
-                        </div>
-                    )}
-
-                    <div className="backup-history">
-                        <h3>{t('backup.recentBackups', 'Recent Backups')}</h3>
-                        {recentBackups.length > 0 ? (
-                            <div className="backup-list-container">
-                                <div className="backup-list">
-                                    {recentBackups.map((backup) => (
-                                        <div key={backup.id} className="backup-item">
-                                            <div className="backup-info">
-                                                <span className="backup-date">
-                                                    {formatDate(backup.createdAt)}
-                                                    {backup.isAutomated && <span className="auto-badge">AUTO</span>}
-                                                </span>
-                                                <span className="backup-size">
-                                                    {formatSize(backup.size)}
-                                                </span>
-                                                <span className="backup-collections">
-                                                    {backup.collections?.length || 0} collections
-                                                </span>
-                                            </div>
-                                            <span className={`backup-status-badge ${backup.status}`}>
-                                                {backup.status}
-                                            </span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="empty-state">
-                                <p>{t('backup.noBackups', 'No backups created yet. Connect to Google Drive and create your first backup!')}</p>
-                            </div>
-                        )}
-                    </div>
-                </div>
-
-                <div className="content-section">
-                    <h2>{t('backup.restore', 'Restore from Backup')}</h2>
-                    <p>{t('backup.restoreDescription', 'Restore your application data from a backup file.')}</p>
-
-                    <div className="restore-section">
-                        <div className="file-upload">
-                            <input
-                                type="file"
-                                id="backup-file-input"
-                                accept=".json"
-                                onChange={handleFileSelect}
-                                disabled={isRestoring || isCreatingBackup}
-                            />
-                            <label htmlFor="backup-file-input" className="file-input-label">
-                                {selectedFile ? selectedFile.name : t('backup.chooseBackupFile', 'Choose backup file...')}
-                            </label>
-                        </div>
-
-                        <button
-                            className="secondary-button restore-btn"
-                            onClick={handleRestoreFromFile}
-                            disabled={!selectedFile || isRestoring || isCreatingBackup}
-                        >
-                            {isRestoring ? t('backup.restoring', 'Restoring...') : t('backup.restoreFromFile', 'Restore from File')}
-                        </button>
-                    </div>
-                </div>
-
+                {/* 1. GOOGLE DRIVE CONNECTION - FIRST */}
                 <div className="content-section">
                     <h2>{t('backup.cloudSync', 'Cloud Sync Settings')}</h2>
                     <p>{t('backup.configureSync', 'Configure synchronization with cloud storage services.')}</p>
@@ -594,6 +512,64 @@ const BackupSyncPage = () => {
                             )}
                         </div>
                     </div>
+                </div>
+
+                {/* 2. CREATE BACKUP - SECOND */}
+                <div className="content-section">
+                    <h2>{t('backup.databaseBackup', 'Database Backup')}</h2>
+                    <p>{t('backup.description', 'Create and manage backups of your application data.')}</p>
+
+                    <div className="action-buttons">
+                        {googleDriveStatus.isConnected ? (
+                            <button
+                                className="primary-button google-drive-btn"
+                                onClick={() => handleCreateBackup(true)}
+                                disabled={isCreatingBackup || isRestoring}
+                            >
+                                {isCreatingBackup
+                                    ? t('backup.uploading', 'Uploading...')
+                                    : t('backup.createAndUpload', 'Create & Upload to Drive')
+                                }
+                            </button>
+                        ) : (
+                            <div className="backup-notice">
+                                <p>{t('backup.connectToCreateBackups', 'Connect to Google Drive to create backups')}</p>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="backup-history">
+                        <h3>{t('backup.recentBackups', 'Recent Backups')}</h3>
+                        {recentBackups.length > 0 ? (
+                            <div className="backup-list-container">
+                                <div className="backup-list">
+                                    {recentBackups.map((backup) => (
+                                        <div key={backup.id} className="backup-item">
+                                            <div className="backup-info">
+                                                <span className="backup-date">
+                                                    {formatDate(backup.createdAt)}
+                                                    {backup.isAutomated && <span className="auto-badge">AUTO</span>}
+                                                </span>
+                                                <span className="backup-size">
+                                                    {formatSize(backup.size)}
+                                                </span>
+                                                <span className="backup-collections">
+                                                    {backup.collections?.length || 0} collections
+                                                </span>
+                                            </div>
+                                            <span className={`backup-status-badge ${backup.status}`}>
+                                                {backup.status}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="empty-state">
+                                <p>{t('backup.noBackups', 'No backups created yet. Connect to Google Drive and create your first backup!')}</p>
+                            </div>
+                        )}
+                    </div>
 
                     {googleDriveStatus.isConnected && driveBackups.length > 0 && (
                         <div className="google-drive-backups">
@@ -634,6 +610,36 @@ const BackupSyncPage = () => {
                     )}
                 </div>
 
+                {/* 3. RESTORE - THIRD */}
+                <div className="content-section">
+                    <h2>{t('backup.restore', 'Restore from Backup')}</h2>
+                    <p>{t('backup.restoreDescription', 'Restore your application data from a backup file.')}</p>
+
+                    <div className="restore-section">
+                        <div className="file-upload">
+                            <input
+                                type="file"
+                                id="backup-file-input"
+                                accept=".json"
+                                onChange={handleFileSelect}
+                                disabled={isRestoring || isCreatingBackup}
+                            />
+                            <label htmlFor="backup-file-input" className="file-input-label">
+                                {selectedFile ? selectedFile.name : t('backup.chooseBackupFile', 'Choose backup file...')}
+                            </label>
+                        </div>
+
+                        <button
+                            className="secondary-button restore-btn"
+                            onClick={handleRestoreFromFile}
+                            disabled={!selectedFile || isRestoring || isCreatingBackup}
+                        >
+                            {isRestoring ? t('backup.restoring', 'Restoring...') : t('backup.restoreFromFile', 'Restore from File')}
+                        </button>
+                    </div>
+                </div>
+
+                {/* 4. AUTOMATED BACKUP - FOURTH */}
                 <div className="content-section">
                     <h2>{t('backup.automatedSchedule', 'Automated Backup Schedule')}</h2>
                     <p>{t('backup.setSchedule', 'Set up automated backups on a regular schedule.')}</p>
