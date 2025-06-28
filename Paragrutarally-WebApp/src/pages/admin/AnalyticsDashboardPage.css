@@ -942,3 +942,72 @@
 .victory-animation {
     animation: victory 2s ease-in-out infinite;
 }
+
+/* ========================================
+   MAINTENANCE TAB TEXT FIXES
+   ======================================== */
+
+/* Fix text direction and spacing for maintenance recommendations */
+.recommendations-section .recommendation-card h4 {
+    direction: rtl;
+    text-align: right;
+    color: var(--text-primary) !important;
+}
+
+.recommendations-section .recommendation-content p {
+    direction: rtl;
+    text-align: right;
+    color: var(--text-secondary) !important;
+}
+
+.recommendations-section .recommendation-action {
+    direction: rtl;
+    text-align: right;
+    color: var(--text-secondary) !important;
+}
+
+/* Keep priority badges in LTR for consistency */
+.priority-badge {
+    direction: ltr !important;
+    text-align: center !important;
+    display: inline-block;
+    min-width: 60px;
+}
+
+/* Ensure proper RTL layout for Hebrew text */
+.rtl .recommendations-section .recommendation-card {
+    text-align: right;
+}
+
+.rtl .recommendations-section .recommendation-header {
+    flex-direction: row-reverse;
+    justify-content: space-between;
+}
+
+/* Fix alert cards text direction */
+.alerts-section .alert-content h4,
+.alerts-section .alert-content p {
+    direction: rtl;
+    text-align: right;
+}
+
+.alerts-section .alert-priority {
+    direction: ltr;
+    text-align: center;
+}
+
+/* Fix monitoring section text */
+.monitoring-list .monitoring-info {
+    direction: rtl;
+    text-align: right;
+}
+
+.monitoring-list .monitoring-details {
+    direction: rtl;
+    text-align: right;
+}
+
+.monitoring-list .monitoring-priority {
+    direction: ltr;
+    text-align: center;
+}

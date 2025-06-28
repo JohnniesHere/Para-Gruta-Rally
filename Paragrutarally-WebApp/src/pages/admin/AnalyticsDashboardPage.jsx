@@ -536,9 +536,21 @@ const TeamsTab = ({ data }) => {
                                 <h4>{team.name}</h4>
                                 <div className="utilization-badge">{team.utilizationRate}%</div>
                                 <InfoTooltip
-                                    title={t('analytics.tooltip.teamAnalysis.title', `Team ${team.name} Analysis`)}
-                                    description={t('analytics.tooltip.teamAnalysis.description', `This team is ${team.utilizationRate}% full with ${team.currentMembers} out of ${team.maxCapacity} possible members.`)}
-                                    action={team.utilizationRate < 70 ? t('analytics.tooltip.teamAnalysis.actionLow', "Consider recruiting more members for this team.") : team.utilizationRate > 90 ? t('analytics.tooltip.teamAnalysis.actionHigh', "This team is near capacity. Consider expansion or creating a new team.") : t('analytics.tooltip.teamAnalysis.actionOptimal', "Team size is optimal.")}
+                                    title={t('analytics.tooltip.teamAnalysis.title', 'Team Analysis', { teamName: team.name })}
+                                    description={t('analytics.tooltip.teamAnalysis.description',
+                                        'This team is {utilizationRate}% full with {currentMembers} out of {maxCapacity} possible members.',
+                                        {
+                                            utilizationRate: team.utilizationRate,
+                                            currentMembers: team.currentMembers,
+                                            maxCapacity: team.maxCapacity
+                                        }
+                                    )}
+                                    action={team.utilizationRate < 70 ?
+                                        t('analytics.tooltip.teamAnalysis.actionLow', "Consider recruiting more members for this team.") :
+                                        team.utilizationRate > 90 ?
+                                            t('analytics.tooltip.teamAnalysis.actionHigh', "This team is near capacity. Consider expansion or creating a new team.") :
+                                            t('analytics.tooltip.teamAnalysis.actionOptimal', "Team size is optimal.")
+                                    }
                                 />
                             </div>
                             <div className="team-stats">
@@ -702,11 +714,14 @@ const ParticipationTab = ({ data }) => {
                             </div>
                             <div className="event-stats">
                                 <span>{event.participantCount} {t('analytics.participation.participants', 'participants')}</span>
-                                <span>{event.teamCount} {t('analytics.participation.teams', 'teams')}</span>
-                                <span>{event.vehicleCount} {t('analytics.vehicles.vehiclesCount', 'vehicles')}</span>
+                                <span> • {event.teamCount} {t('analytics.participation.teams', 'teams')}</span>
+                                <span> • {event.vehicleCount} {t('analytics.vehicles.vehiclesCount', 'vehicles')}</span>
                             </div>
                             <div className="event-status">
-                                <span className={`status-badge ${event.status}`}>{event.status}</span>
+                                <span className={`status-badge ${event.status}`}>
+                                        {event.status === 'upcoming' ? t('analytics.participation.upcomingEvents', 'upcoming') :
+                                        event.status === 'completed' ? t('analytics.participation.completedEvents', 'completed') :
+                                        event.status === 'cancelled' ? t('analytics.participation.cancelled', 'cancelled') : event.status}</span>
                             </div>
                         </div>
                     ))}
@@ -803,20 +818,39 @@ const MaintenanceTab = ({ vehicles, performance }) => {
                         {performance.recommendations.map((rec, index) => (
                             <div key={index} className={`recommendation-card ${rec.priority}`}>
                                 <div className="recommendation-header">
-                                    <h4>{rec.title}</h4>
+                                    {/* Fix the title translation */}
+                                    <h4>{t(`analytics.maintenance.recommendation.${rec.type}`, rec.title)}</h4>
+
+                                    {/* Fix the priority badge translation */}
                                     <span className={`priority-badge ${rec.priority}`}>
-                                        {rec.priority.toUpperCase()}
-                                    </span>
+                           {rec.priority === 'high' ? t('analytics.maintenance.priorityHigh', 'HIGH') :
+                               rec.priority === 'medium' ? t('analytics.maintenance.priorityMedium', 'MEDIUM') :
+                                   rec.priority === 'low' ? t('analytics.maintenance.priorityLow', 'LOW') :
+                                       rec.priority.toUpperCase()}
+                        </span>
+
                                     <InfoTooltip
-                                        title={t('analytics.tooltip.priorityRecommendation.title', `${rec.priority.toUpperCase()} Priority Recommendation`)}
-                                        description={rec.description}
-                                        action={t('analytics.tooltip.priorityRecommendation.action', `Implementation: ${rec.action}`)}
+                                        title={t('analytics.tooltip.priorityRecommendation.title', 'priority recommendation {priority}', {
+                                            priority: rec.priority === 'high' ? 'גבוהה' :
+                                                rec.priority === 'medium' ? 'בינונית' : 'נמוכה'
+                                        })}
+                                        description={t('analytics.tooltip.priorityRecommendation.description', rec.description)}
+                                        action={t('analytics.tooltip.priorityRecommendation.action', 'יישום: {action}', {
+                                            action: rec.type === 'teamsWithoutVehicles' ?
+                                                t('analytics.maintenance.teamsWithoutVehiclesAction', 'Take recommended actions to improve system performance and prevent future issues.') :
+                                                rec.type === 'vehicleDistribution' ?
+                                                    t('analytics.maintenance.vehicleDistributionAction', 'Check vehicle distribution and rebalance as needed') :
+                                                    rec.type === 'maintenanceSchedule' ?
+                                                        t('analytics.maintenance.maintenanceScheduleAction', 'Schedule regular maintenance checks') :
+                                                        rec.action // fallback to original if no translation found
+                                        })}
                                     />
                                 </div>
                                 <div className="recommendation-content">
-                                    <p>{rec.description}</p>
+                                    {/* Fix the description translation */}
+                                    <p>{t(`analytics.maintenance.recommendationDesc.${rec.type}`, rec.description)}</p>
                                     <div className="recommendation-action">
-                                        <strong>{t('analytics.tooltip.priorityRecommendation.actionLabel', 'Action')}:</strong> {rec.action}
+                                        <strong>{t('analytics.maintenance.actionLabel', 'Action')}:</strong> {t(`analytics.maintenance.recommendationAction.${rec.type}`, rec.action)}
                                     </div>
                                 </div>
                             </div>
