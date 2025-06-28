@@ -267,3 +267,131 @@
     outline: 2px solid var(--accent-color);
     outline-offset: 2px;
 }
+
+/* Add this to your Sidebar.css file - Legal Button Light Mode Fix */
+
+/* ========================================
+   SIDEBAR LEGAL TRIGGER - LIGHT MODE FIXES
+   ======================================== */
+
+/* Fix legal trigger colors for light mode - override the white text */
+:root .sidebar .legal-trigger-minimal {
+    background-color: var(--bg-tertiary) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-primary) !important;
+    backdrop-filter: none;
+}
+
+:root .sidebar .legal-trigger-minimal:hover {
+    background-color: var(--bg-quaternary) !important;
+    border-color: var(--accent-color) !important;
+    color: var(--text-primary) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px var(--shadow-color);
+}
+
+:root .sidebar .legal-trigger-minimal svg {
+    color: var(--text-secondary) !important;
+}
+
+:root .sidebar .legal-trigger-minimal:hover svg {
+    color: var(--accent-color) !important;
+}
+
+/* Remove the light theme class-based styling that was conflicting */
+.sidebar.light-theme .legal-trigger-minimal {
+    background-color: var(--bg-tertiary) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-primary) !important;
+}
+
+.sidebar.light-theme .legal-trigger-minimal:hover {
+    background-color: var(--bg-quaternary) !important;
+    border-color: var(--accent-color) !important;
+    color: var(--text-primary) !important;
+}
+
+.sidebar.light-theme .legal-trigger-minimal svg {
+    color: var(--text-secondary) !important;
+}
+
+.sidebar.light-theme .legal-trigger-minimal:hover svg {
+    color: var(--accent-color) !important;
+}
+
+/* Ensure dark mode keeps the original glass effect styling */
+[data-theme="dark"] .sidebar .legal-trigger-minimal,
+.dark-mode .sidebar .legal-trigger-minimal {
+    background-color: rgba(255, 255, 255, 0.08) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    color: rgba(255, 255, 255, 0.7) !important;
+    backdrop-filter: blur(10px);
+}
+
+[data-theme="dark"] .sidebar .legal-trigger-minimal:hover,
+.dark-mode .sidebar .legal-trigger-minimal:hover {
+    background-color: rgba(255, 255, 255, 0.12) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+[data-theme="dark"] .sidebar .legal-trigger-minimal svg,
+.dark-mode .sidebar .legal-trigger-minimal svg {
+    color: rgba(255, 255, 255, 0.6) !important;
+}
+
+[data-theme="dark"] .sidebar .legal-trigger-minimal:hover svg,
+.dark-mode .sidebar .legal-trigger-minimal:hover svg {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Enhanced styling for better visibility */
+:root .sidebar-legal-trigger {
+    background: linear-gradient(transparent, var(--bg-secondary) 50%);
+    backdrop-filter: none; /* Remove blur in light mode */
+}
+
+[data-theme="dark"] .sidebar-legal-trigger,
+.dark-mode .sidebar-legal-trigger {
+    background: linear-gradient(transparent, var(--bg-secondary) 50%);
+    backdrop-filter: blur(10px); /* Keep blur in dark mode */
+}
+
+/* Additional contrast improvements */
+:root .sidebar .legal-trigger-minimal {
+    font-weight: 600 !important; /* Make text bolder for better readability */
+    box-shadow: 0 2px 8px var(--shadow-color) !important;
+}
+
+:root .sidebar .legal-trigger-minimal:hover {
+    box-shadow: 0 4px 12px var(--shadow-hover) !important;
+}
+
+/* Ensure proper text rendering */
+.sidebar .legal-trigger-minimal {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+/* Responsive adjustments with proper colors */
+@media (max-width: 768px) {
+    :root .sidebar .legal-trigger-minimal {
+        padding: 0.375rem 0.5rem !important;
+        font-size: 0.7rem !important;
+        font-weight: 600 !important;
+    }
+}
+
+@media (max-width: 480px) {
+    :root .sidebar .legal-trigger-minimal {
+        padding: 0.375rem 0.5rem !important;
+        font-size: 0.65rem !important;
+        font-weight: 600 !important;
+    }
+
+    :root .sidebar .legal-trigger-minimal svg {
+        width: 12px !important;
+        height: 12px !important;
+    }
+}
