@@ -494,6 +494,18 @@ const KidsManagementPage = () => {
 
                     {/* OPTIMIZED Stats Cards - Single Row Layout */}
                     <div className="stats-grid-optimized">
+                        <div
+                            className={`stat-card total ${activeCardFilter === 'total' ? 'active' : ''}`}
+                            onClick={() => handleStatCardClick('total')}
+                            style={{ cursor: 'pointer' }}
+                        >
+                            <Users className="stat-icon" size={40} />
+                            <div className="stat-content">
+                                <h3>{userRole === 'parent' ? t('kids.yourKids', 'Your Kids') : t('kids.totalKids', 'Total Kids')}</h3>
+                                <div className="stat-value">{stats.totalKids}</div>
+                            </div>
+                        </div>
+
                         {(userRole === 'admin' || userRole === 'instructor') && (
                             <div
                                 className={`stat-card priority-warning clickable ${activeCardFilter === 'without-teams' ? 'active' : ''}`}
@@ -507,18 +519,6 @@ const KidsManagementPage = () => {
                                 </div>
                             </div>
                         )}
-
-                        <div
-                            className={`stat-card total ${activeCardFilter === 'total' ? 'active' : ''}`}
-                            onClick={() => handleStatCardClick('total')}
-                            style={{ cursor: 'pointer' }}
-                        >
-                            <Users className="stat-icon" size={40} />
-                            <div className="stat-content">
-                                <h3>{userRole === 'parent' ? t('kids.yourKids', 'Your Kids') : t('kids.totalKids', 'Total Kids')}</h3>
-                                <div className="stat-value">{stats.totalKids}</div>
-                            </div>
-                        </div>
 
                         <div
                             className={`stat-card active-kids ${activeCardFilter === 'active' ? 'active' : ''}`}

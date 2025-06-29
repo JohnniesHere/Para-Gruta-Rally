@@ -460,7 +460,6 @@ const AddTeamPage = () => {
                         {/* Racing Action Buttons */}
                         <div className="racing-actions">
                             <button type="button" onClick={handleCancel} className="btn btn-cancel">
-                                <ArrowLeft className="btn-icon" size={18}/>
                                 {t('general.cancel', 'Cancel')}
                             </button>
                             <button

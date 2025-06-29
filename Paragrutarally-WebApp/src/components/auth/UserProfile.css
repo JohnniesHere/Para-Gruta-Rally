@@ -120,9 +120,9 @@
 }
 
 .edit-button, .secondary-button {
-    background-color: transparent;
+    background-color: var(--input-bg);
     color: var(--text-secondary);
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--border-focus);
     padding: 8px 15px;
     border-radius: 6px;
     cursor: pointer;
@@ -276,6 +276,10 @@
 
 .notice-card:hover {
     box-shadow: 0 4px 15px rgba(66, 133, 244, 0.1);
+}
+
+.notice-card a:hover {
+    background-color: var(--bg-hover);
 }
 
 .notice-icon {
@@ -678,4 +682,23 @@
     .password-change {
         padding: 15px;
     }
+}
+
+/* Force LTR layout for section header even in RTL mode */
+.profile-content .section-header {
+    direction: ltr !important;
+    justify-content: space-between;
+}
+
+.profile-content .section-header h3 {
+    order: 1; /* Title on the left */
+}
+
+.profile-content .section-header .edit-button {
+    order: 2; /* Button on the right */
+}
+
+/* Ensure Hebrew text in the title still displays properly */
+[dir="rtl"] .profile-content .section-header h3 {
+    text-align: right; /* Keep Hebrew text right-aligned for readability */
 }

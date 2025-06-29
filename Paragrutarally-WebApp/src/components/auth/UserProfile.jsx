@@ -9,7 +9,7 @@ import './UserProfile.css';
 const UserProfile = () => {
     const { currentUser } = useAuth();
     const { isDarkMode } = useTheme();
-    const { t } = useLanguage();
+    const { t , isHebrew, isRTL } = useLanguage();
 
     const [activeTab, setActiveTab] = useState('profile');
     const [isEditing, setIsEditing] = useState(false);
@@ -235,7 +235,6 @@ const UserProfile = () => {
                 <div className="profile-info">
                     <h2>{profileData.displayName || t('common.user')}</h2>
                     <p>{profileData.email}</p>
-                    <p className="user-role">{t('users.role')}: {profileData.role || t('common.user')}</p>
                     {isGoogleUser && (
                         <p className="auth-provider">
                             <span style={{ color: '#4285f4', fontWeight: '500' }}>
@@ -539,43 +538,6 @@ const UserProfile = () => {
                                         />
                                         <label htmlFor="lightTheme">{t('settings.lightMode')}</label>
                                     </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="notification-settings">
-                            <h4>{t('settings.notificationPreferences')}</h4>
-                            <div className="notification-options">
-                                <div className="notification-option">
-                                    <input
-                                        type="checkbox"
-                                        id="emailNotifications"
-                                        defaultChecked
-                                    />
-                                    <label htmlFor="emailNotifications">{t('settings.emailNotificationsEvents')}</label>
-                                </div>
-                                <div className="notification-option">
-                                    <input
-                                        type="checkbox"
-                                        id="reminderNotifications"
-                                        defaultChecked
-                                    />
-                                    <label htmlFor="reminderNotifications">{t('settings.eventReminders')}</label>
-                                </div>
-                                <div className="notification-option">
-                                    <input
-                                        type="checkbox"
-                                        id="systemNotifications"
-                                    />
-                                    <label htmlFor="systemNotifications">{t('settings.systemUpdates')}</label>
-                                </div>
-                                <div className="notification-option">
-                                    <input
-                                        type="checkbox"
-                                        id="weeklyDigest"
-                                        defaultChecked
-                                    />
-                                    <label htmlFor="weeklyDigest">{t('settings.weeklyDigest')}</label>
                                 </div>
                             </div>
                         </div>

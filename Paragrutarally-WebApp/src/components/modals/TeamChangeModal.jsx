@@ -21,15 +21,29 @@ const TeamChangeModal = ({ kid, isOpen, onClose, onTeamChanged }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState(null);
+    const [currentTeamName, setCurrentTeamName] = useState('');
+
 
 
 
     useEffect(() => {
-        if (isOpen && kid) {
+        const fetchCurrentTeam = async () => {
+            if (kid?.teamId) {
+                try {
+                    const { getTeamById } = await import('../../services/teamService');
+                    const team = await getTeamById(kid.teamId);
+                    setCurrentTeamName(team?.name || '');
+                } catch (error) {
+                    console.error('Error fetching current team:', error);
+                    setCurrentTeamName('');
+                }
+            } else {
+                setCurrentTeamName('');
+            }
+        };
 
-            loadTeams();
-            setSelectedTeamId(kid?.teamId || '');
-            setError(null);
+        if (isOpen && kid) {
+            fetchCurrentTeam();
         }
     }, [isOpen, kid, t]);
 
@@ -147,7 +161,7 @@ const TeamChangeModal = ({ kid, isOpen, onClose, onTeamChanged }) => {
                         <div className="team-modal-current-team">
                             <Car className="team-modal-current-icon" size={16} />
                             <span>
-                                <strong>{t('teamChange.currentTeam', 'Current Team')}:</strong> {kid?.team || t('teamChange.noTeam', 'No Team')}
+                                <strong>{t('teamChange.currentTeam', 'Current Team')}:</strong> {currentTeamName || t('teamChange.noTeam', 'No Team')}
                             </span>
                         </div>
                     </div>

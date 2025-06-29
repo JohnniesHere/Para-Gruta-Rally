@@ -1,4 +1,4 @@
-// src/components/modals/ExportEventsModal.jsx - WITH HEBREW SUPPORT
+// src/components/modals/ExportEventsModal.jsx - UPDATED WITH CLEAN MODAL STRUCTURE
 import React, { useState } from 'react';
 import { collection, getDocs, query, where, orderBy } from 'firebase/firestore';
 import { db } from '../../firebase/config';
@@ -6,7 +6,10 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import {
     IconX as X,
     IconDownload as Download,
-    IconClock as Clock
+    IconClock as Clock,
+    IconCalendarEvent as CalendarEvent,
+    IconFilter as Filter,
+    IconSettings as Settings
 } from '@tabler/icons-react';
 
 const ExportEventsModal = ({ isOpen, onClose }) => {
@@ -197,103 +200,118 @@ const ExportEventsModal = ({ isOpen, onClose }) => {
     if (!isOpen) return null;
 
     return (
-        <div className="modal-overlay active" onClick={handleClose} dir={isRTL ? 'rtl' : 'ltr'}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                <div className="modal-header">
+        <div className="form-creation-modal-overlay" dir={isRTL ? 'rtl' : 'ltr'}>
+            <div className="form-creation-modal-content">
+                <div className="form-creation-modal-header">
                     <h3>
-                        <Download size={20} style={{ marginRight: isRTL ? '0' : '8px', marginLeft: isRTL ? '8px' : '0' }} />
+                        <CalendarEvent size={24} />
                         {t('events.exportEvents', 'Export Events')}
                     </h3>
                     <button
-                        className="modal-close"
+                        className="form-creation-modal-close"
                         onClick={handleClose}
                         disabled={isExporting}
                         type="button"
+                        aria-label={t('common.close', 'Close')}
                     >
                         <X size={20} />
                     </button>
                 </div>
 
-                <div className="modal-body">
-                    <div className="form-group">
-                        <label htmlFor="statusFilter">{t('exportEvents.filterByStatus', 'Filter by Status')}</label>
-                        <select
-                            id="statusFilter"
-                            value={exportOptions.statusFilter}
-                            onChange={(e) => setExportOptions(prev => ({
-                                ...prev,
-                                statusFilter: e.target.value
-                            }))}
-                            disabled={isExporting}
-                            className="filter-select"
-                        >
-                            <option value="all">{t('events.allEvents', 'All Events')}</option>
-                            <option value="upcoming">{t('events.upcoming', 'Upcoming')}</option>
-                            <option value="completed">{t('events.completed', 'Completed')}</option>
-                        </select>
+                <div className="form-creation-modal-body">
+                    {/* Filter Options */}
+                    <div className="form-section">
+                        <h4>
+                            <Filter size={18} />
+                            {t('exportEvents.filterOptions', 'Filter Options')}
+                        </h4>
+
+                        <div className="form-grid">
+                            <div className="form-group">
+                                <label htmlFor="statusFilter">
+                                    {t('exportEvents.filterByStatus', 'Filter by Status')}
+                                </label>
+                                <select
+                                    id="statusFilter"
+                                    value={exportOptions.statusFilter}
+                                    onChange={(e) => setExportOptions(prev => ({
+                                        ...prev,
+                                        statusFilter: e.target.value
+                                    }))}
+                                    disabled={isExporting}
+                                    className="form-select"
+                                >
+                                    <option value="all">{t('events.allEvents', 'All Events')}</option>
+                                    <option value="upcoming">{t('events.upcoming', 'Upcoming')}</option>
+                                    <option value="completed">{t('events.completed', 'Completed')}</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
 
-                    <div className="form-group">
-                        <label>
-                            <input
-                                type="checkbox"
-                                checked={exportOptions.includeParticipants}
-                                onChange={(e) => setExportOptions(prev => ({
-                                    ...prev,
-                                    includeParticipants: e.target.checked
-                                }))}
-                                disabled={isExporting}
-                                style={{ marginRight: isRTL ? '0' : '8px', marginLeft: isRTL ? '8px' : '0' }}
-                            />
-                            {t('exportEvents.includeParticipants', 'Include participant count')}
-                        </label>
+                    {/* Export Options */}
+                    <div className="form-section">
+                        <h4>
+                            <Settings size={18} />
+                            {t('exportEvents.exportOptions', 'Export Options')}
+                        </h4>
+
+                        <div className="target-users-grid">
+                            <label className="checkbox-label">
+                                <input
+                                    type="checkbox"
+                                    checked={exportOptions.includeParticipants}
+                                    onChange={(e) => setExportOptions(prev => ({
+                                        ...prev,
+                                        includeParticipants: e.target.checked
+                                    }))}
+                                    disabled={isExporting}
+                                />
+                                {t('exportEvents.includeParticipants', 'Include participant count')}
+                            </label>
+
+                            <label className="checkbox-label">
+                                <input
+                                    type="checkbox"
+                                    checked={exportOptions.includeTeams}
+                                    onChange={(e) => setExportOptions(prev => ({
+                                        ...prev,
+                                        includeTeams: e.target.checked
+                                    }))}
+                                    disabled={isExporting}
+                                />
+                                {t('exportEvents.includeTeams', 'Include participating teams count')}
+                            </label>
+
+                            <label className="checkbox-label">
+                                <input
+                                    type="checkbox"
+                                    checked={exportOptions.includeTimestamps}
+                                    onChange={(e) => setExportOptions(prev => ({
+                                        ...prev,
+                                        includeTimestamps: e.target.checked
+                                    }))}
+                                    disabled={isExporting}
+                                />
+                                {t('import.includeTimestamp', 'Include Created At and Updated At timestamps')}
+                            </label>
+                        </div>
                     </div>
 
-                    <div className="form-group">
-                        <label>
-                            <input
-                                type="checkbox"
-                                checked={exportOptions.includeTeams}
-                                onChange={(e) => setExportOptions(prev => ({
-                                    ...prev,
-                                    includeTeams: e.target.checked
-                                }))}
-                                disabled={isExporting}
-                                style={{ marginRight: isRTL ? '0' : '8px', marginLeft: isRTL ? '8px' : '0' }}
-                            />
-                            {t('exportEvents.includeTeams', 'Include participating teams count')}
-                        </label>
-                    </div>
-
-                    <div className="form-group">
-                        <label>
-                            <input
-                                type="checkbox"
-                                checked={exportOptions.includeTimestamps}
-                                onChange={(e) => setExportOptions(prev => ({
-                                    ...prev,
-                                    includeTimestamps: e.target.checked
-                                }))}
-                                disabled={isExporting}
-                                style={{ marginRight: isRTL ? '0' : '8px', marginLeft: isRTL ? '8px' : '0' }}
-                            />
-                            {t('import.includeTimestamp', 'Include Created At and Updated At timestamps')}
-                        </label>
-                    </div>
-
+                    {/* Language Notice */}
                     {currentLanguage === 'he' && (
-                        <div className="export-notice">
-                            <p style={{ fontSize: '14px', color: '#666', fontStyle: 'italic' }}>
+                        <div className="form-section">
+                            <div className="info-alert">
                                 🌐 {t('export.hebrewNotice', 'הקובץ יוצא עם כותרות בעברית ותמיכה ב-RTL')}
-                            </p>
+                            </div>
                         </div>
                     )}
                 </div>
 
-                <div className="modal-footer">
+                <div className="form-creation-modal-footer">
                     <button
                         type="button"
-                        className="btn-secondary"
+                        className="btn btn-secondary"
                         onClick={handleClose}
                         disabled={isExporting}
                     >
@@ -301,18 +319,18 @@ const ExportEventsModal = ({ isOpen, onClose }) => {
                     </button>
                     <button
                         type="button"
-                        className="btn-primary"
+                        className="btn btn-primary"
                         onClick={handleExport}
                         disabled={isExporting}
                     >
                         {isExporting ? (
                             <>
-                                <Clock className="loading-spinner" size={16} style={{ marginRight: isRTL ? '0' : '6px', marginLeft: isRTL ? '6px' : '0' }} />
+                                <div className="loading-spinner-mini" aria-hidden="true"></div>
                                 {t('users.exporting', 'Exporting...')}
                             </>
                         ) : (
                             <>
-                                <Download size={16} style={{ marginRight: isRTL ? '0' : '6px', marginLeft: isRTL ? '6px' : '0' }} />
+                                <Download size={16} />
                                 {t('users.exportToCsv', 'Export to CSV')}
                             </>
                         )}

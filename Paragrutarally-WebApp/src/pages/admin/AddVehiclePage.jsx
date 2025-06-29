@@ -12,6 +12,7 @@ import {
     IconCar as Car,
     IconPlus as Plus,
     IconArrowLeft as ArrowLeft,
+    IconArrowRight as ArrowRight,
     IconAlertTriangle as AlertTriangle,
     IconBattery as Battery,
     IconEngine as Engine,
@@ -31,7 +32,7 @@ const AddVehiclePage = () => {
     const navigate = useNavigate();
     const { appliedTheme } = useTheme();
     const { permissions, userRole, userData } = usePermissions();
-    const { t } = useLanguage();
+    const { t , isRTL , isHebrew } = useLanguage();
 
     const [isLoading, setIsLoading] = useState(false);
     const [teams, setTeams] = useState([]);
@@ -308,20 +309,39 @@ const AddVehiclePage = () => {
         <Dashboard requiredRole={userRole}>
             <div className={`admin-page add-vehicle-page ${appliedTheme}-mode`}>
                 {/* Page Title */}
-                <h1>
-                    <Car size={32} className="page-title-icon" />
-                    {t('addVehicle.title', 'Add New Racing Vehicle!')}
-                    <Sparkles size={24} className="sparkle-icon" />
-                </h1>
+                <button
+                    onClick={handleCancel}
+                    className={`back-button ${appliedTheme}-back-button ${isRTL ? 'rtl' : ''}`}>
+                    {isHebrew ? (
+                        <>
+                            {t('addVehicle.backToVehicles', 'Back to Vehicles')}
+                            <ArrowRight className="btn-icon" size={20} />
+                        </>
+                    ) : (
+                        <>
+                            <ArrowLeft className="btn-icon" size={20} />
+                            {t('addVehicle.backToVehicles', 'Back to Vehicles')}
+                        </>
+
+                    )
+                    }
+                </button>
+
+                <div className="page-header">
+                    <div className="title-section">
+                        <h1>
+                            <Car size={32} className="page-title-icon" />
+                            {t('addVehicle.title', 'Add New Racing Vehicle!')}
+                            <Sparkles size={24} className="sparkle-icon" />
+                        </h1>
+                    </div>
+                </div>
+
 
                 <div className="admin-container add-vehicle-container">
                     {/* Racing Theme Header */}
                     <div className="racing-header">
                         <div className="header-content">
-                            <button onClick={handleCancel} className={`back-button ${appliedTheme}-back-button`}>
-                                <ArrowLeft className="btn-icon" size={20} />
-                                {t('addVehicle.backToVehicles', 'Back to Vehicles')}
-                            </button>
                             <div className="title-section">
                                 <h2>{t('addVehicle.welcomeTitle', 'Welcome to Vehicle Registration!')}</h2>
                                 <p className="subtitle">{t('addVehicle.subtitle', 'Let\'s add a new racing machine to the fleet! 🏁')}</p>
@@ -582,7 +602,6 @@ const AddVehiclePage = () => {
                         {/* Racing Action Buttons */}
                         <div className="racing-actions">
                             <button type="button" onClick={handleCancel} className="btn btn-cancel">
-                                <ArrowLeft className="btn-icon" size={18} />
                                 {t('general.cancel', 'Cancel')}
                             </button>
                             <button

@@ -6,7 +6,8 @@
    ======================================== */
 
 /* Page uses .admin-page class from global.css */
-.admin-dashboard {
+.admin-dashboard h1 {
+    justify-content: center;
     /* No additional styles needed - inherits from .admin-page */
 }
 

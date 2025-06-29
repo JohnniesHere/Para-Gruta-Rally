@@ -16,6 +16,7 @@ import {
     IconUserCircle as Baby,
     IconPlus as Plus,
     IconArrowLeft as ArrowLeft,
+    IconArrowRight as ArrowRight,
     IconCheck as Check,
     IconAlertTriangle as AlertTriangle,
     IconCar as Car,
@@ -41,7 +42,7 @@ const AddKidPage = () => {
     const navigate = useNavigate();
     const { isDarkMode, appliedTheme } = useTheme();
     const { permissions, userRole } = usePermissions();
-    const { t } = useLanguage();
+    const { t , isHebrew, isRTL} = useLanguage();
     const formStatusOptions = getFormStatusOptions(t);
     const [isLoading, setIsLoading] = useState(false);
     const [teams, setTeams] = useState([]);
@@ -406,9 +407,19 @@ const AddKidPage = () => {
                 {/* Page Title - Outside container */}
                 <button
                     onClick={handleCancel}
-                    className={`back-button ${appliedTheme}-back-button`}>
-                    <ArrowLeft className="btn-icon" size={20} />
-                    {t('addKid.backToKids', 'Back to Kids')}
+                    className={`back-button ${appliedTheme}-back-button ${isRTL ? 'rtl' : ''}`}>
+                    {isHebrew ? (
+                        <>
+                            {t('addKid.backToKids', 'Back to Kids')}
+                            <ArrowRight className="btn-icon" size={20} />
+                        </>
+                    ) : (
+                        <>
+                            <ArrowLeft className="btn-icon" size={20} />
+                            {t('addKid.backToKids', 'Back to Kids')}
+                        </>
+                    )}
+
                 </button>
                 <div className="page-header">
                     <div className="title-section">
@@ -886,7 +897,6 @@ const AddKidPage = () => {
                         {/* Racing Action Buttons */}
                         <div className="racing-actions">
                             <button type="button" onClick={handleCancel} className="btn btn-cancel">
-                                <ArrowLeft className="btn-icon" size={18} />
                                 {t('common.cancel', 'Cancel')}
                             </button>
                             <button

@@ -77,6 +77,11 @@
     text-decoration: none;
 }
 
+.my-account-page .edit-button {
+    border: var(--border-focus) 1px solid;
+    background-color: var(--input-bg);
+}
+
 .my-account-page .btn-primary,
 .my-account-page button[type="submit"] {
     background-color: var(--accent-color);

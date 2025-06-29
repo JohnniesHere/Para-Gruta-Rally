@@ -648,11 +648,11 @@ const EditEventPage = () => {
                         </div>
 
                         {/* Action Buttons */}
-                        <div className="form-actions">
+                        <div className="racing-actions">
                             <button
                                 type="button"
                                 className="btn-secondary"
-                                onClick={() => navigate(`/admin/events/view/${eventId}`)}
+                                onClick={() => navigate(`/admin/events`)}
                                 disabled={isSubmitting}
                             >
                                 {t('general.cancel', 'Cancel')}

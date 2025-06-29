@@ -18,6 +18,7 @@ import {
     IconUserCircle as Baby,
     IconDeviceFloppy as Save,
     IconArrowLeft as ArrowLeft,
+    IconArrowRight as ArrowRight,
     IconCheck as Check,
     IconAlertTriangle as AlertTriangle,
     IconCar as Car,
@@ -39,7 +40,7 @@ import {
     IconMessage as MessageCircle,
     IconTrash as Trash2,
     IconSettings as Settings,
-    IconBattery as Battery, IconArrowRight as ArrowRight
+    IconBattery as Battery,
 } from '@tabler/icons-react';
 import { updateKidVehicleAssignments } from '../../services/vehicleAssignmentService';
 
@@ -474,7 +475,7 @@ const EditKidPage = () => {
     };
 
     const handleCancel = () => {
-        navigate(`/admin/kids/view/${id}`);
+        navigate(`/admin/kids`);
     };
 
     // Get photo display info
@@ -608,7 +609,8 @@ const EditKidPage = () => {
                     <div className="error-container">
                         <h3>{t('editKid.error', 'Error')}</h3>
                         <p>{errors.general}</p>
-                        <button onClick={() => navigate('/admin/kids')}
+                        <button
+                            onClick={() => navigate('/admin/kids')}
                             className={`back-button ${appliedTheme}-back-button ${isRTL ? 'rtl' : ''}`}>
                         {isHebrew ? (
                         <>
@@ -1156,7 +1158,6 @@ const EditKidPage = () => {
                         {/* Racing Action Buttons */}
                         <div className="racing-actions">
                             <button type="button" onClick={handleCancel} className="btn btn-cancel">
-                                <ArrowLeft className="btn-icon" size={18}/>
                                 {t('editKid.cancelButton', 'Cancel')}
                             </button>
 

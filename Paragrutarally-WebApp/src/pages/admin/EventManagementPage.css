@@ -1017,7 +1017,7 @@
 }
 
 .dark-mode .delete-option.danger .option-content p {
-    color: var(--error-light);
+    color: var(--text-secondary);
 }
 
 /* ========================================

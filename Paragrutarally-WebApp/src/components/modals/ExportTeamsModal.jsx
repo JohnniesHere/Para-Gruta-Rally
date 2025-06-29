@@ -1,4 +1,4 @@
-// src/components/modals/ExportTeamsModal.jsx - WITH HEBREW SUPPORT
+// src/components/modals/ExportTeamsModal.jsx - UPDATED WITH CLEAN MODAL STRUCTURE
 import React, { useState } from 'react';
 import { collection, getDocs, query, where, orderBy } from 'firebase/firestore';
 import { db } from '../../firebase/config';
@@ -8,7 +8,10 @@ import {
     IconX as X,
     IconDownload as Download,
     IconClock as Clock,
-    IconUsers as Team
+    IconUsers as Team,
+    IconFilter as Filter,
+    IconSettings as Settings,
+    IconInfoCircle as InfoCircle
 } from '@tabler/icons-react';
 
 const ExportTeamsModal = ({ isOpen, onClose }) => {
@@ -363,66 +366,85 @@ const ExportTeamsModal = ({ isOpen, onClose }) => {
     if (!isOpen) return null;
 
     return (
-        <div className="modal-overlay active" onClick={handleClose} dir={isRTL ? 'rtl' : 'ltr'}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                <div className="modal-header">
+        <div className="form-creation-modal-overlay" dir={isRTL ? 'rtl' : 'ltr'}>
+            <div className="form-creation-modal-content">
+                <div className="form-creation-modal-header">
                     <h3>
-                        <Download size={20} style={{ marginRight: isRTL ? '0' : '8px', marginLeft: isRTL ? '8px' : '0' }} />
+                        <Team size={24} />
                         {t('teams.exportTeams', 'Export Teams')}
                     </h3>
                     <button
-                        className="modal-close"
+                        className="form-creation-modal-close"
                         onClick={handleClose}
                         disabled={isExporting}
                         type="button"
+                        aria-label={t('common.close', 'Close')}
                     >
                         <X size={20} />
                     </button>
                 </div>
 
-                <div className="modal-body">
-                    <div className="form-group">
-                        <label htmlFor="statusFilter">{t('exportTeams.filterByStatus', 'Filter by Status')}</label>
-                        <select
-                            id="statusFilter"
-                            value={exportOptions.statusFilter}
-                            onChange={(e) => setExportOptions(prev => ({
-                                ...prev,
-                                statusFilter: e.target.value
-                            }))}
-                            disabled={isExporting}
-                            className="filter-select"
-                        >
-                            <option value="all">{t('teams.allTeams', 'All Teams')}</option>
-                            <option value="active">{t('teams.active', 'Active')}</option>
-                            <option value="inactive">{t('teams.inactive', 'Inactive')}</option>
-                        </select>
+                <div className="form-creation-modal-body">
+                    {/* Filter Options */}
+                    <div className="form-section">
+                        <h4>
+                            <Filter size={18} />
+                            {t('exportTeams.filterOptions', 'Filter Options')}
+                        </h4>
+
+                        <div className="form-grid">
+                            <div className="form-group">
+                                <label htmlFor="statusFilter">
+                                    {t('exportTeams.filterByStatus', 'Filter by Status')}
+                                </label>
+                                <select
+                                    id="statusFilter"
+                                    value={exportOptions.statusFilter}
+                                    onChange={(e) => setExportOptions(prev => ({
+                                        ...prev,
+                                        statusFilter: e.target.value
+                                    }))}
+                                    disabled={isExporting}
+                                    className="form-select"
+                                >
+                                    <option value="all">{t('teams.allTeams', 'All Teams')}</option>
+                                    <option value="active">{t('teams.active', 'Active')}</option>
+                                    <option value="inactive">{t('teams.inactive', 'Inactive')}</option>
+                                </select>
+                            </div>
+
+                            <div className="form-group">
+                                <label htmlFor="capacityFilter">
+                                    {t('exportTeams.filterByCapacity', 'Filter by Capacity')}
+                                </label>
+                                <select
+                                    id="capacityFilter"
+                                    value={exportOptions.capacityFilter}
+                                    onChange={(e) => setExportOptions(prev => ({
+                                        ...prev,
+                                        capacityFilter: e.target.value
+                                    }))}
+                                    disabled={isExporting}
+                                    className="form-select"
+                                >
+                                    <option value="all">{t('teams.allTeams', 'All Teams')}</option>
+                                    <option value="empty">{t('teams.emptyTeams', 'Empty Teams')}</option>
+                                    <option value="available">{t('teams.availableSpots', 'Teams with Available Spots')}</option>
+                                    <option value="full">{t('teams.fullTeams', 'Full Teams')}</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
 
-                    <div className="form-group">
-                        <label htmlFor="capacityFilter">{t('exportTeams.filterByCapacity', 'Filter by Capacity')}</label>
-                        <select
-                            id="capacityFilter"
-                            value={exportOptions.capacityFilter}
-                            onChange={(e) => setExportOptions(prev => ({
-                                ...prev,
-                                capacityFilter: e.target.value
-                            }))}
-                            disabled={isExporting}
-                            className="filter-select"
-                        >
-                            <option value="all">{t('teams.allTeams', 'All Teams')}</option>
-                            <option value="empty">{t('teams.emptyTeams', 'Empty Teams')}</option>
-                            <option value="available">{t('teams.availableSpots', 'Teams with Available Spots')}</option>
-                            <option value="full">{t('teams.fullTeams', 'Full Teams')}</option>
-                        </select>
-                    </div>
+                    {/* Export Options */}
+                    <div className="form-section">
+                        <h4>
+                            <Settings size={18} />
+                            {t('exportTeams.dataToInclude', 'Data to Include')}
+                        </h4>
 
-                    <div className="form-group">
-                        <label>{t('exportTeams.dataToInclude', 'Data to Include')}</label>
-
-                        <div className="checkbox-group">
-                            <label>
+                        <div className="target-users-grid">
+                            <label className="checkbox-label">
                                 <input
                                     type="checkbox"
                                     checked={exportOptions.includeBasicInfo}
@@ -431,15 +453,12 @@ const ExportTeamsModal = ({ isOpen, onClose }) => {
                                         includeBasicInfo: e.target.checked
                                     }))}
                                     disabled={isExporting}
-                                    style={{ marginRight: isRTL ? '0' : '8px', marginLeft: isRTL ? '8px' : '0' }}
                                 />
                                 <Team size={16} style={{ marginRight: isRTL ? '0' : '4px', marginLeft: isRTL ? '4px' : '0' }} />
                                 {t('exportTeams.includeBasicInfo', 'Include basic information (name, description, status)')}
                             </label>
-                        </div>
 
-                        <div className="checkbox-group">
-                            <label>
+                            <label className="checkbox-label">
                                 <input
                                     type="checkbox"
                                     checked={exportOptions.includeInstructorInfo}
@@ -448,14 +467,11 @@ const ExportTeamsModal = ({ isOpen, onClose }) => {
                                         includeInstructorInfo: e.target.checked
                                     }))}
                                     disabled={isExporting}
-                                    style={{ marginRight: isRTL ? '0' : '8px', marginLeft: isRTL ? '8px' : '0' }}
                                 />
                                 👨‍🏫 {t('exportTeams.includeInstructorInfo', 'Include instructor information')}
                             </label>
-                        </div>
 
-                        <div className="checkbox-group">
-                            <label>
+                            <label className="checkbox-label">
                                 <input
                                     type="checkbox"
                                     checked={exportOptions.includeCapacityInfo}
@@ -464,14 +480,11 @@ const ExportTeamsModal = ({ isOpen, onClose }) => {
                                         includeCapacityInfo: e.target.checked
                                     }))}
                                     disabled={isExporting}
-                                    style={{ marginRight: isRTL ? '0' : '8px', marginLeft: isRTL ? '8px' : '0' }}
                                 />
                                 📊 {t('exportTeams.includeCapacityInfo', 'Include capacity and member count')}
                             </label>
-                        </div>
 
-                        <div className="checkbox-group">
-                            <label>
+                            <label className="checkbox-label">
                                 <input
                                     type="checkbox"
                                     checked={exportOptions.includeMemberInfo}
@@ -480,14 +493,11 @@ const ExportTeamsModal = ({ isOpen, onClose }) => {
                                         includeMemberInfo: e.target.checked
                                     }))}
                                     disabled={isExporting}
-                                    style={{ marginRight: isRTL ? '0' : '8px', marginLeft: isRTL ? '8px' : '0' }}
                                 />
                                 👥 {t('exportTeams.includeMemberInfo', 'Include member names list')}
                             </label>
-                        </div>
 
-                        <div className="checkbox-group">
-                            <label>
+                            <label className="checkbox-label">
                                 <input
                                     type="checkbox"
                                     checked={exportOptions.includeKidsDetails}
@@ -496,14 +506,11 @@ const ExportTeamsModal = ({ isOpen, onClose }) => {
                                         includeKidsDetails: e.target.checked
                                     }))}
                                     disabled={isExporting}
-                                    style={{ marginRight: isRTL ? '0' : '8px', marginLeft: isRTL ? '8px' : '0' }}
                                 />
                                 🎯 {t('exportTeams.includeKidsDetails', 'Include detailed kids information (age, parent)')}
                             </label>
-                        </div>
 
-                        <div className="checkbox-group">
-                            <label>
+                            <label className="checkbox-label">
                                 <input
                                     type="checkbox"
                                     checked={exportOptions.includeTimestamps}
@@ -512,34 +519,37 @@ const ExportTeamsModal = ({ isOpen, onClose }) => {
                                         includeTimestamps: e.target.checked
                                     }))}
                                     disabled={isExporting}
-                                    style={{ marginRight: isRTL ? '0' : '8px', marginLeft: isRTL ? '8px' : '0' }}
                                 />
                                 ⏰ {t('import.includeTimestamp', 'Include Created At and Updated At timestamps')}
                             </label>
                         </div>
                     </div>
 
-                    {userRole === 'instructor' && (
-                        <div className="export-notice">
-                            <p style={{ fontSize: '14px', color: '#666', fontStyle: 'italic' }}>
-                                👨‍🏫 {t('exportTeams.instructorExportNotice', 'You can export all teams data based on your instructor permissions.')}
-                            </p>
-                        </div>
-                    )}
+                    {/* User Role Notices */}
+                    <div className="form-section">
+                        <h4>
+                            <InfoCircle size={18} />
+                            {t('exportTeams.notices', 'Important Notices')}
+                        </h4>
 
-                    {currentLanguage === 'he' && (
-                        <div className="export-notice">
-                            <p style={{ fontSize: '14px', color: '#666', fontStyle: 'italic' }}>
+                        {userRole === 'instructor' && (
+                            <div className="info-alert">
+                                👨‍🏫 {t('exportTeams.instructorExportNotice', 'You can export all teams data based on your instructor permissions.')}
+                            </div>
+                        )}
+
+                        {currentLanguage === 'he' && (
+                            <div className="info-alert">
                                 🌐 {t('export.hebrewNotice', 'הקובץ יוצא עם כותרות בעברית ותמיכה ב-RTL')}
-                            </p>
-                        </div>
-                    )}
+                            </div>
+                        )}
+                    </div>
                 </div>
 
-                <div className="modal-footer">
+                <div className="form-creation-modal-footer">
                     <button
                         type="button"
-                        className="btn-secondary"
+                        className="btn btn-secondary"
                         onClick={handleClose}
                         disabled={isExporting}
                     >
@@ -547,18 +557,18 @@ const ExportTeamsModal = ({ isOpen, onClose }) => {
                     </button>
                     <button
                         type="button"
-                        className="btn-primary"
+                        className="btn btn-primary"
                         onClick={handleExport}
                         disabled={isExporting}
                     >
                         {isExporting ? (
                             <>
-                                <Clock className="loading-spinner" size={16} style={{ marginRight: isRTL ? '0' : '6px', marginLeft: isRTL ? '6px' : '0' }} />
+                                <div className="loading-spinner-mini" aria-hidden="true"></div>
                                 {t('users.exporting', 'Exporting...')}
                             </>
                         ) : (
                             <>
-                                <Download size={16} style={{ marginRight: isRTL ? '0' : '6px', marginLeft: isRTL ? '6px' : '0' }} />
+                                <Download size={16} />
                                 {t('users.exportToCsv', 'Export to CSV')}
                             </>
                         )}

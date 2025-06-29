@@ -418,7 +418,6 @@ const VehiclesPage = () => {
                             <div className="stat-content">
                                 <h3>{t('vehicles.totalVehicles', 'Total Vehicles')}</h3>
                                 <div className="stat-value">{stats.total}</div>
-                                <div className="stat-subtitle">{t('vehicles.inFleet', 'In Fleet')}</div>
                             </div>
                         </div>
 
@@ -431,7 +430,6 @@ const VehiclesPage = () => {
                             <div className="stat-content">
                                 <h3>{t('vehicles.activeVehicles', 'Active Vehicles')}</h3>
                                 <div className="stat-value">{stats.active}</div>
-                                <div className="stat-subtitle">{t('vehicles.readyToRace', 'Ready to Race')}</div>
                             </div>
                         </div>
 
@@ -444,7 +442,6 @@ const VehiclesPage = () => {
                             <div className="stat-content">
                                 <h3>{t('vehicles.inUse', 'In Use')}</h3>
                                 <div className="stat-value">{stats.inUse}</div>
-                                <div className="stat-subtitle">{t('vehicles.currentlyRacing', 'Currently Racing')}</div>
                             </div>
                         </div>
 
@@ -457,7 +454,6 @@ const VehiclesPage = () => {
                             <div className="stat-content">
                                 <h3>{t('vehicles.available', 'Available')}</h3>
                                 <div className="stat-value">{stats.available}</div>
-                                <div className="stat-subtitle">{t('vehicles.readyForAssignment', 'Ready for Assignment')}</div>
                             </div>
                         </div>
                     </div>

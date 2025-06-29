@@ -11,18 +11,18 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0, 0, 0, 0.75);
-    backdrop-filter: blur(8px);
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 9999; /* Very high z-index */
-    animation: fadeInModal 0.3s ease-out;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
     padding: 20px;
     box-sizing: border-box;
 }
 
-@keyframes fadeInModal {
+@keyframes fadeIn {
     from {
         opacity: 0;
     }
@@ -37,25 +37,25 @@
 
 .delete-modal-container {
     background: var(--bg-secondary);
-    border: 3px solid var(--error-color);
+    border: 3px solid var(--error-color); /* Keep red border for delete modal */
     border-radius: 20px;
     max-width: 600px;
     width: 100%;
-    max-height: 90vh;
+    max-height: 80vh;
     overflow-y: auto;
-    box-shadow: 0 25px 75px rgba(0, 0, 0, 0.4);
-    animation: slideInModal 0.3s ease-out;
+    box-shadow: 0 20px 60px var(--shadow-color);
+    animation: slideInUp 0.3s ease;
     position: relative;
 }
 
-@keyframes slideInModal {
+@keyframes slideInUp {
     from {
         opacity: 0;
-        transform: scale(0.9) translateY(-30px);
+        transform: translateY(20px);
     }
     to {
         opacity: 1;
-        transform: scale(1) translateY(0);
+        transform: translateY(0);
     }
 }
 
@@ -67,8 +67,8 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 24px 28px;
-    border-bottom: 2px solid var(--border-color);
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border-color);
     background: linear-gradient(135deg, var(--error-light) 0%, var(--bg-secondary) 100%);
     border-radius: 17px 17px 0 0;
 }
@@ -76,11 +76,11 @@
 .delete-modal-header h2 {
     margin: 0;
     color: var(--error-color);
-    font-size: 1.75rem;
+    font-size: 1.5rem;
     font-weight: 700;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 15px;
 }
 
 .delete-modal-header h2::before {
@@ -90,24 +90,28 @@
 
 .delete-modal-close {
     background: var(--bg-tertiary);
-    border: 2px solid var(--border-color);
+    border: 1px solid var(--border-color);
+    font-size: 18px;
     color: var(--text-secondary);
     cursor: pointer;
-    padding: 8px;
-    border-radius: 50%;
-    transition: all 0.3s ease;
+    padding: 6px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
+    width: 32px;
+    height: 32px;
+    font-weight: 500;
+    line-height: 1;
+    box-shadow: 0 1px 3px var(--shadow-light);
 }
 
 .delete-modal-close:hover {
     background: var(--error-color);
-    border-color: var(--error-color);
     color: white;
-    transform: scale(1.1);
+    border-color: var(--error-color);
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
 }
 
 /* ========================================
@@ -115,7 +119,7 @@
    ======================================== */
 
 .delete-modal-body {
-    padding: 28px;
+    padding: 24px;
 }
 
 /* ========================================
@@ -209,6 +213,7 @@
     padding: 20px;
     margin-top: 20px;
     text-align: left;
+    direction: ltr !important;
 }
 
 .dark-mode .deletion-summary {
@@ -221,12 +226,16 @@
     margin: 0 0 15px 0;
     font-size: 1.1rem;
     font-weight: 700;
+    text-align: left !important;
+    direction: ltr !important;
 }
 
 .deletion-summary ul {
     margin: 0;
     padding-left: 0;
     list-style: none;
+    direction: ltr !important;
+    text-align: left !important;
 }
 
 .deletion-summary li {
@@ -238,11 +247,24 @@
     background: rgba(248, 113, 113, 0.1);
     border-radius: 8px;
     border-left: 4px solid var(--error-color);
+    direction: ltr !important;
+    text-align: left !important;
 }
 
 .dark-mode .deletion-summary li {
     color: #FEE2E2;
     background: rgba(248, 113, 113, 0.15);
+}
+
+/* For RTL mode, ensure the title text is still readable but maintain LTR structure */
+[dir="rtl"] .deletion-summary h4 {
+    text-align: right !important; /* Hebrew text right-aligned for readability */
+    direction: ltr !important; /* But container stays LTR */
+}
+
+[dir="rtl"] .deletion-summary li {
+    text-align: right !important; /* Hebrew text right-aligned */
+    direction: ltr !important; /* But list structure stays LTR */
 }
 
 /* ========================================
@@ -363,7 +385,7 @@
 }
 
 .dark-mode .delete-option.danger .option-content p {
-    color: var(--error-light);
+    color: var(--text-secondary);
 }
 
 /* ========================================
@@ -372,11 +394,11 @@
 
 .delete-modal-actions {
     display: flex;
-    gap: 16px;
+    gap: 12px;
     justify-content: flex-end;
-    padding-top: 24px;
-    border-top: 2px solid var(--border-color);
-    margin-top: 20px;
+    padding: 20px 24px;
+    border-top: 1px solid var(--border-color);
+    margin-top: 0;
 }
 
 .btn-cancel-delete {

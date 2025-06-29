@@ -1,4 +1,4 @@
-// src/components/modals/ExportKidsModal.jsx - WITH HEBREW SUPPORT
+// src/components/modals/ExportKidsModal.jsx - UPDATED WITH CLEAN MODAL STRUCTURE
 import React, { useState } from 'react';
 import { collection, getDocs, query, where, orderBy } from 'firebase/firestore';
 import { db } from '../../firebase/config';
@@ -8,7 +8,10 @@ import {
     IconX as X,
     IconDownload as Download,
     IconClock as Clock,
-    IconUserCircle as Baby
+    IconUserCircle as Baby,
+    IconFilter as Filter,
+    IconSettings as Settings,
+    IconInfoCircle as InfoCircle
 } from '@tabler/icons-react';
 
 const ExportKidsModal = ({ isOpen, onClose }) => {
@@ -354,67 +357,86 @@ const ExportKidsModal = ({ isOpen, onClose }) => {
     if (!isOpen) return null;
 
     return (
-        <div className="modal-overlay active" onClick={handleClose} dir={isRTL ? 'rtl' : 'ltr'}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                <div className="modal-header">
+        <div className="form-creation-modal-overlay" dir={isRTL ? 'rtl' : 'ltr'}>
+            <div className="form-creation-modal-content">
+                <div className="form-creation-modal-header">
                     <h3>
-                        <Download size={20} style={{ marginRight: isRTL ? '0' : '8px', marginLeft: isRTL ? '8px' : '0' }} />
+                        <Baby size={24} />
                         {t('kids.exportKids', 'Export Kids')}
                     </h3>
                     <button
-                        className="modal-close"
+                        className="form-creation-modal-close"
                         onClick={handleClose}
                         disabled={isExporting}
                         type="button"
+                        aria-label={t('common.close', 'Close')}
                     >
                         <X size={20} />
                     </button>
                 </div>
 
-                <div className="modal-body">
-                    <div className="form-group">
-                        <label htmlFor="statusFilter">{t('exportKids.filterByStatus', 'Filter by Status')}</label>
-                        <select
-                            id="statusFilter"
-                            value={exportOptions.statusFilter}
-                            onChange={(e) => setExportOptions(prev => ({
-                                ...prev,
-                                statusFilter: e.target.value
-                            }))}
-                            disabled={isExporting}
-                            className="filter-select"
-                        >
-                            <option value="all">{t('kids.allKids', 'All Kids')}</option>
-                            <option value="active">{t('status.active', 'Active')}</option>
-                            <option value="pending">{t('status.pending', 'Pending')}</option>
-                            <option value="completed">{t('status.completed', 'Completed')}</option>
-                            <option value="cancelled">{t('status.cancelled', 'Cancelled')}</option>
-                        </select>
+                <div className="form-creation-modal-body">
+                    {/* Filter Options */}
+                    <div className="form-section">
+                        <h4>
+                            <Filter size={18} />
+                            {t('exportKids.filterOptions', 'Filter Options')}
+                        </h4>
+
+                        <div className="form-grid">
+                            <div className="form-group">
+                                <label htmlFor="statusFilter">
+                                    {t('exportKids.filterByStatus', 'Filter by Status')}
+                                </label>
+                                <select
+                                    id="statusFilter"
+                                    value={exportOptions.statusFilter}
+                                    onChange={(e) => setExportOptions(prev => ({
+                                        ...prev,
+                                        statusFilter: e.target.value
+                                    }))}
+                                    disabled={isExporting}
+                                    className="form-select"
+                                >
+                                    <option value="all">{t('kids.allKids', 'All Kids')}</option>
+                                    <option value="active">{t('status.active', 'Active')}</option>
+                                    <option value="pending">{t('status.pending', 'Pending')}</option>
+                                    <option value="completed">{t('status.completed', 'Completed')}</option>
+                                    <option value="cancelled">{t('status.cancelled', 'Cancelled')}</option>
+                                </select>
+                            </div>
+
+                            <div className="form-group">
+                                <label htmlFor="teamFilter">
+                                    {t('exportKids.filterByTeam', 'Filter by Team')}
+                                </label>
+                                <select
+                                    id="teamFilter"
+                                    value={exportOptions.teamFilter}
+                                    onChange={(e) => setExportOptions(prev => ({
+                                        ...prev,
+                                        teamFilter: e.target.value
+                                    }))}
+                                    disabled={isExporting}
+                                    className="form-select"
+                                >
+                                    <option value="all">{t('kids.allKids', 'All Kids')}</option>
+                                    <option value="no-team">{t('kids.kidsWithoutTeams', 'Kids without Teams')}</option>
+                                    <option value="with-team">{t('kids.kidsWithTeams', 'Kids with Teams')}</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
 
-                    <div className="form-group">
-                        <label htmlFor="teamFilter">{t('exportKids.filterByTeam', 'Filter by Team')}</label>
-                        <select
-                            id="teamFilter"
-                            value={exportOptions.teamFilter}
-                            onChange={(e) => setExportOptions(prev => ({
-                                ...prev,
-                                teamFilter: e.target.value
-                            }))}
-                            disabled={isExporting}
-                            className="filter-select"
-                        >
-                            <option value="all">{t('kids.allKids', 'All Kids')}</option>
-                            <option value="no-team">{t('kids.kidsWithoutTeams', 'Kids without Teams')}</option>
-                            <option value="with-team">{t('kids.kidsWithTeams', 'Kids with Teams')}</option>
-                        </select>
-                    </div>
+                    {/* Export Options */}
+                    <div className="form-section">
+                        <h4>
+                            <Settings size={18} />
+                            {t('exportKids.dataToInclude', 'Data to Include')}
+                        </h4>
 
-                    <div className="form-group">
-                        <label>{t('exportKids.dataToInclude', 'Data to Include')}</label>
-
-                        <div className="checkbox-group">
-                            <label>
+                        <div className="target-users-grid">
+                            <label className="checkbox-label">
                                 <input
                                     type="checkbox"
                                     checked={exportOptions.includePersonalInfo}
@@ -423,15 +445,12 @@ const ExportKidsModal = ({ isOpen, onClose }) => {
                                         includePersonalInfo: e.target.checked
                                     }))}
                                     disabled={isExporting}
-                                    style={{ marginRight: isRTL ? '0' : '8px', marginLeft: isRTL ? '8px' : '0' }}
                                 />
                                 <Baby size={16} style={{ marginRight: isRTL ? '0' : '4px', marginLeft: isRTL ? '4px' : '0' }} />
                                 {t('exportKids.includePersonalInfo', 'Include personal information (name, age, address)')}
                             </label>
-                        </div>
 
-                        <div className="checkbox-group">
-                            <label>
+                            <label className="checkbox-label">
                                 <input
                                     type="checkbox"
                                     checked={exportOptions.includeParentInfo}
@@ -440,14 +459,11 @@ const ExportKidsModal = ({ isOpen, onClose }) => {
                                         includeParentInfo: e.target.checked
                                     }))}
                                     disabled={isExporting}
-                                    style={{ marginRight: isRTL ? '0' : '8px', marginLeft: isRTL ? '8px' : '0' }}
                                 />
                                 👨‍👩‍👧‍👦 {t('exportKids.includeParentInfo', 'Include parent/guardian information')}
                             </label>
-                        </div>
 
-                        <div className="checkbox-group">
-                            <label>
+                            <label className="checkbox-label">
                                 <input
                                     type="checkbox"
                                     checked={exportOptions.includeTeamInfo}
@@ -456,15 +472,12 @@ const ExportKidsModal = ({ isOpen, onClose }) => {
                                         includeTeamInfo: e.target.checked
                                     }))}
                                     disabled={isExporting}
-                                    style={{ marginRight: isRTL ? '0' : '8px', marginLeft: isRTL ? '8px' : '0' }}
                                 />
                                 🏎️ {t('exportKids.includeTeamInfo', 'Include team information')}
                             </label>
-                        </div>
 
-                        {(userRole === 'admin' || userRole === 'instructor') && (
-                            <div className="checkbox-group">
-                                <label>
+                            {(userRole === 'admin' || userRole === 'instructor') && (
+                                <label className="checkbox-label">
                                     <input
                                         type="checkbox"
                                         checked={exportOptions.includeInstructorInfo}
@@ -473,15 +486,12 @@ const ExportKidsModal = ({ isOpen, onClose }) => {
                                             includeInstructorInfo: e.target.checked
                                         }))}
                                         disabled={isExporting}
-                                        style={{ marginRight: isRTL ? '0' : '8px', marginLeft: isRTL ? '8px' : '0' }}
                                     />
                                     👨‍🏫 {t('exportKids.includeInstructorInfo', 'Include instructor information')}
                                 </label>
-                            </div>
-                        )}
+                            )}
 
-                        <div className="checkbox-group">
-                            <label>
+                            <label className="checkbox-label">
                                 <input
                                     type="checkbox"
                                     checked={exportOptions.includeTimestamps}
@@ -490,42 +500,43 @@ const ExportKidsModal = ({ isOpen, onClose }) => {
                                         includeTimestamps: e.target.checked
                                     }))}
                                     disabled={isExporting}
-                                    style={{ marginRight: isRTL ? '0' : '8px', marginLeft: isRTL ? '8px' : '0' }}
                                 />
                                 ⏰ {t('import.includeTimestamp', 'Include Created At and Updated At timestamps')}
                             </label>
                         </div>
                     </div>
 
-                    {userRole === 'parent' && (
-                        <div className="export-notice">
-                            <p style={{ fontSize: '14px', color: '#666', fontStyle: 'italic' }}>
+                    {/* User Role Notices */}
+                    <div className="form-section">
+                        <h4>
+                            <InfoCircle size={18} />
+                            {t('exportKids.notices', 'Important Notices')}
+                        </h4>
+
+                        {userRole === 'parent' && (
+                            <div className="info-alert">
                                 📝 {t('exportKids.parentExportNotice', 'You can only export your own kids\' data.')}
-                            </p>
-                        </div>
-                    )}
+                            </div>
+                        )}
 
-                    {userRole === 'instructor' && (
-                        <div className="export-notice">
-                            <p style={{ fontSize: '14px', color: '#666', fontStyle: 'italic' }}>
+                        {userRole === 'instructor' && (
+                            <div className="info-alert">
                                 👨‍🏫 {t('exportKids.instructorExportNotice', 'You can only export kids assigned to you.')}
-                            </p>
-                        </div>
-                    )}
+                            </div>
+                        )}
 
-                    {currentLanguage === 'he' && (
-                        <div className="export-notice">
-                            <p style={{ fontSize: '14px', color: '#666', fontStyle: 'italic' }}>
+                        {currentLanguage === 'he' && (
+                            <div className="info-alert">
                                 🌐 {t('export.hebrewNotice', 'הקובץ יוצא עם כותרות בעברית ותמיכה ב-RTL')}
-                            </p>
-                        </div>
-                    )}
+                            </div>
+                        )}
+                    </div>
                 </div>
 
-                <div className="modal-footer">
+                <div className="form-creation-modal-footer">
                     <button
                         type="button"
-                        className="btn-secondary"
+                        className="btn btn-secondary"
                         onClick={handleClose}
                         disabled={isExporting}
                     >
@@ -533,18 +544,18 @@ const ExportKidsModal = ({ isOpen, onClose }) => {
                     </button>
                     <button
                         type="button"
-                        className="btn-primary"
+                        className="btn btn-primary"
                         onClick={handleExport}
                         disabled={isExporting}
                     >
                         {isExporting ? (
                             <>
-                                <Clock className="loading-spinner" size={16} style={{ marginRight: isRTL ? '0' : '6px', marginLeft: isRTL ? '6px' : '0' }} />
+                                <div className="loading-spinner-mini" aria-hidden="true"></div>
                                 {t('users.exporting', 'Exporting...')}
                             </>
                         ) : (
                             <>
-                                <Download size={16} style={{ marginRight: isRTL ? '0' : '6px', marginLeft: isRTL ? '6px' : '0' }} />
+                                <Download size={16} />
                                 {t('users.exportToCsv', 'Export to CSV')}
                             </>
                         )}

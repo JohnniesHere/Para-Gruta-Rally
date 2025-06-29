@@ -23,6 +23,7 @@ import {
     IconTarget as Target,
     IconFlag as Flag,
     IconArrowLeft as ArrowLeft,
+    IconArrowRight as ArrowRight,
     IconDeviceFloppy as Save,
     IconEye as Eye,
     IconMinus as Minus,
@@ -37,7 +38,7 @@ import './CreateEventPage.css';
 const CreateEventPage = () => {
     const navigate = useNavigate();
     const { isDarkMode, appliedTheme } = useTheme();
-    const { t, isRTL } = useLanguage();
+    const { t, isRTL , isHebrew} = useLanguage();
     const { permissions, userRole, userData, user, loading } = usePermissions();
 
     // Form state
@@ -466,10 +467,18 @@ const CreateEventPage = () => {
                 {/* Header */}
                 <button
                     onClick={() => navigate('/admin/events')}
-                    className={`back-button ${appliedTheme}-back-button`}
-                >
-                    <ArrowLeft size={20} />
-                    {t('common.backToEvents', 'Back to Events')}
+                    className={`back-button ${appliedTheme}-back-button ${isRTL ? 'rtl' : ''}`}>
+                    {isHebrew ? (
+                        <>
+                            {t('common.backToEvents', 'Back to Events')}
+                            <ArrowRight size={20} />
+                        </>
+                    ) : (
+                        <>
+                            {t('common.backToEvents', 'Back to Events')}
+                            <ArrowLeft size={20} />
+                        </>
+                    )}
                 </button>
                 <div className="page-header">
                     <div className="title-section">
@@ -776,7 +785,7 @@ const CreateEventPage = () => {
                         </div>
 
                         {/* Action Buttons */}
-                        <div className="form-actions">
+                        <div className="racing-actions">
                             <button
                                 type="button"
                                 className="btn-secondary"

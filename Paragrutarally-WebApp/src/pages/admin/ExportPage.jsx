@@ -69,11 +69,8 @@ const ExportPage = () => {
                     <Download className="page-title-icon" size={40} />
                     {t('export.title', 'Export Data')}
                 </h1>
-                <div className="page-header">
-                    <p className="page-subtitle">
-                        {t('export.subtitle', 'Download your data in CSV format for backup or analysis')}
-                    </p>
-                </div>
+                <br/>
+                <br/>
 
                 {/* Export Cards Grid */}
                 <div className="export-cards-grid">

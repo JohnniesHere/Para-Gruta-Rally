@@ -207,6 +207,16 @@
     /*background: linear-gradient(135deg, #4B5563 0%, #6B7280 100%);*/
 }
 
+.btn-outline {
+    border: var(--input-focus-border) 2px solid;
+    background-color: #cde9ff;
+    color: #2D3748;
+}
+
+.btn-outline:hover {
+    border-color: var(--info-hover);
+}
+
 /* Success buttons */
 .btn-success {
     background: linear-gradient(135deg, var(--success-color) 0%, var(--success-hover) 100%);
@@ -855,7 +865,7 @@ body.dark .stat-card.total::before {
 }
 
 .error-alert {
-    background: linear-gradient(135deg, var(--error-light) 0%, #FEE2E2 100%);
+    background: #ff6b6b;
     color: #991B1B;
     border-color: #F87171;
     box-shadow: 0 4px 15px rgba(239, 68, 68, 0.2);
@@ -1768,9 +1778,6 @@ body.dark .stat-card.total::before {
     flex-direction: row-reverse;
 }
 
-.rtl .page-header {
-    flex-direction: row-reverse;
-}
 
 /* RTL Results Content */
 .rtl .results-content {
