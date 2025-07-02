@@ -1,6 +1,6 @@
-# Charity Management Application
+# Paragrutarally Management Application
 
-A comprehensive web application for charities to manage participants, teams, activities, and forms, replacing Excel-based workflows with a modern, user-friendly solution.
+A comprehensive web application to manage users, kids, teams, events, vehicles and forms, replacing Excel-based workflows with a modern, user-friendly solution.
 
 ## 🌟 Features
 
@@ -18,7 +18,6 @@ A comprehensive web application for charities to manage participants, teams, act
 - **UI Framework**: Tailwind CSS
 - **State Management**: React Context API
 - **Backend**: Firebase (Firestore, Authentication, Storage, Functions)
-- **Excel Processing**: SheetJS (xlsx)
 
 ## 📋 Prerequisites
 
@@ -121,7 +120,7 @@ firebase/
 
 ## 👥 User Roles
 
-The application supports three user roles with different permissions:
+The application supports four user roles with different permissions:
 
 ### Administrator
 - Full access to all features
@@ -129,14 +128,15 @@ The application supports three user roles with different permissions:
 - Create and customize forms
 - Configure system settings
 
-### Staff
+### Instructor
 - Manage kids and teams
 - Import and export data
 - Submit and review forms
 - Generate reports
 
-### External Partner
-- View assigned teams and kids
+### Parents
+- View assigned kids
+- View events
 - Submit forms
 - Use basic search features
 
@@ -164,7 +164,7 @@ The application uses the following Firestore collections:
 - **users**: User profiles and permissions
 - **kids**: Participant information
 - **teams**: Team information and rosters
-- **activities**: Activity and event data
+- **events**: Events data
 - **forms**: Form templates
 - **formSubmissions**: Completed form submissions
 - **importLogs**: Records of data imports
