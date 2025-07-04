@@ -1,14 +1,15 @@
-// src/pages/instructor/InstructorFormsPage.jsx - Instructor Forms Interface
+// src/pages/instructor/InstructorFormsPage.jsx - Updated Instructor Forms Interface
 import React, { useState, useEffect } from 'react';
 import Dashboard from '../../components/layout/Dashboard';
-import EventRegistrationModal from '../../components/modals/EventRegistrationModal';
+import FormSubmissionModal from '../../components/modals/FormSubmissionModal';
+import FormViewModal from '../../components/modals/FormViewModal';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { usePermissions } from '../../hooks/usePermissions';
 import {
-    getUserFormAssignments,
     getFormSubmissions,
-    getFormsForRole
+    getActiveForms,
+    incrementFormViewCount
 } from '../../services/formService';
 import './InstructorFormsPage.css';
 import {
@@ -18,14 +19,13 @@ import {
     IconX as X,
     IconAlertTriangle as AlertTriangle,
     IconEye as Eye,
-    IconPlus as Plus,
     IconCalendar as Calendar,
     IconUsers as Users,
     IconShirt as Shirt,
     IconHeart as Heart,
-    IconFileText as FileIcon,
     IconExternalLink as ExternalLink,
-    IconChalkboard as ChalkboardTeacher
+    IconChalkboard as ChalkboardTeacher,
+    IconMapPin as MapPin
 } from '@tabler/icons-react';
 
 const InstructorFormsPage = () => {
@@ -34,12 +34,12 @@ const InstructorFormsPage = () => {
     const { userData, user } = usePermissions();
 
     // State management
-    const [assignments, setAssignments] = useState([]);
     const [submissions, setSubmissions] = useState([]);
     const [availableForms, setAvailableForms] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [showEventModal, setShowEventModal] = useState(false);
-    const [selectedEventData, setSelectedEventData] = useState(null);
+    const [showSubmissionModal, setShowSubmissionModal] = useState(false);
+    const [showViewModal, setShowViewModal] = useState(false);
+    const [selectedForm, setSelectedForm] = useState(null);
     const [viewSubmission, setViewSubmission] = useState(null);
 
     // Load data
@@ -52,13 +52,11 @@ const InstructorFormsPage = () => {
     const loadFormsData = async () => {
         setIsLoading(true);
         try {
-            const [assignmentsData, submissionsData, availableFormsData] = await Promise.all([
-                getUserFormAssignments(user.uid),
-                getFormSubmissions(null, { submitterId: user.uid }),
-                getFormsForRole('instructor')
+            const [submissionsData, availableFormsData] = await Promise.all([
+                getFormSubmissions({ submitterId: user.uid }),
+                getActiveForms('instructor') // Get active forms for instructors
             ]);
 
-            setAssignments(assignmentsData);
             setSubmissions(submissionsData);
             setAvailableForms(availableFormsData);
 
@@ -92,28 +90,48 @@ const InstructorFormsPage = () => {
         return statusMap[status] || statusMap['needs to decide'];
     };
 
-    // Handle create new event form
-    const handleCreateEventForm = () => {
-        // Sample event data for instructor registration
-        const sampleEventData = {
-            id: 'demo_instructor_event_' + Date.now(),
-            title: 'Instructor Training Event',
-            dayAndDate: 'Sunday, July 23rd, 2025',
-            hours: '8:00 AM - 6:00 PM',
-            location: 'Jerusalem Racing Academy',
-            googleMapsLink: 'https://maps.google.com/?q=Jerusalem+Racing+Academy',
-            wazeLink: 'https://waze.com/to/Jerusalem+Racing+Academy',
-            notes: 'Mandatory training session for all racing instructors. Please bring your certification documents.',
-            paymentLink: null, // Instructors typically don't pay
-            closingNotes: 'Lunch will be provided. Looking forward to an excellent training session!',
-            contactInfo: [
-                'Training coordinator: training@racingclub.com',
-                'Admin contact: +972-50-987-6543'
-            ]
-        };
+    // Handle form submission click
+    const handleFormSubmission = async (form) => {
+        try {
+            // Increment view count
+            await incrementFormViewCount(form.id);
 
-        setSelectedEventData(sampleEventData);
-        setShowEventModal(true);
+            // Update local state
+            setAvailableForms(prevForms =>
+                prevForms.map(f =>
+                    f.id === form.id
+                        ? { ...f, viewCount: (f.viewCount || 0) + 1 }
+                        : f
+                )
+            );
+
+            setSelectedForm(form);
+            setShowSubmissionModal(true);
+        } catch (error) {
+            console.error('❌ Error opening form:', error);
+        }
+    };
+
+    // Handle view form details
+    const handleViewForm = async (form) => {
+        try {
+            // Increment view count
+            await incrementFormViewCount(form.id);
+
+            // Update local state
+            setAvailableForms(prevForms =>
+                prevForms.map(f =>
+                    f.id === form.id
+                        ? { ...f, viewCount: (f.viewCount || 0) + 1 }
+                        : f
+                )
+            );
+
+            setSelectedForm(form);
+            setShowViewModal(true);
+        } catch (error) {
+            console.error('❌ Error viewing form:', error);
+        }
     };
 
     // Handle view submission details
@@ -131,6 +149,20 @@ const InstructorFormsPage = () => {
         return submissions.find(submission => submission.formId === formId);
     };
 
+    // Format date display
+    const formatEventDate = (eventDetails) => {
+        if (eventDetails?.dayAndDate) {
+            return eventDetails.dayAndDate;
+        }
+
+        if (eventDetails?.eventDate) {
+            const date = new Date(eventDetails.eventDate);
+            return date.toLocaleDateString();
+        }
+
+        return '';
+    };
+
     return (
         <Dashboard requiredRole="instructor">
             <div className={`instructor-forms-page ${appliedTheme}-mode`}>
@@ -146,27 +178,6 @@ const InstructorFormsPage = () => {
                 </div>
 
                 <div className="page-container">
-                    {/* Quick Actions */}
-                    <div className="quick-actions-section">
-                        <div className="section-header">
-                            <h3>{t('forms.quickActions', 'Quick Actions')}</h3>
-                        </div>
-                        <div className="quick-actions-grid">
-                            <button
-                                className="quick-action-card instructor-card"
-                                onClick={handleCreateEventForm}
-                            >
-                                <Plus size={24} />
-                                <span className="action-title">
-                                    {t('forms.newInstructorRegistration', 'New Training Registration')}
-                                </span>
-                                <span className="action-desc">
-                                    {t('forms.newInstructorDesc', 'Register for training events and workshops')}
-                                </span>
-                            </button>
-                        </div>
-                    </div>
-
                     {/* My Submissions */}
                     <div className="forms-section">
                         <div className="section-header">
@@ -251,28 +262,26 @@ const InstructorFormsPage = () => {
                                     <ChalkboardTeacher size={60} />
                                 </div>
                                 <h3>{t('forms.noSubmissions', 'No Submissions Yet')}</h3>
-                                <p>{t('forms.noInstructorSubmissionsDesc', 'You haven\'t registered for any training events yet. Start by registering for an upcoming training!')}</p>
-                                <button
-                                    className="btn btn-primary"
-                                    onClick={handleCreateEventForm}
-                                >
-                                    <Plus size={16} />
-                                    {t('forms.registerForTraining', 'Register for Training')}
-                                </button>
+                                <p>{t('forms.noInstructorSubmissionsDesc', 'You haven\'t registered for any training events yet. Check the available forms below!')}</p>
                             </div>
                         )}
                     </div>
 
                     {/* Available Forms */}
-                    {availableForms.length > 0 && (
-                        <div className="forms-section">
-                            <div className="section-header">
-                                <h3>
-                                    <Calendar size={20} />
-                                    {t('forms.availableForms', 'Available Training Events')}
-                                </h3>
-                            </div>
+                    <div className="forms-section">
+                        <div className="section-header">
+                            <h3>
+                                <Calendar size={20} />
+                                {t('forms.availableForms', 'Available Training Events')}
+                            </h3>
+                        </div>
 
+                        {isLoading ? (
+                            <div className="loading-state">
+                                <Clock className="loading-spinner" size={30} />
+                                <p>{t('forms.loadingForms', 'Loading forms...')}</p>
+                            </div>
+                        ) : availableForms.length > 0 ? (
                             <div className="available-forms-grid">
                                 {availableForms.map(form => {
                                     const hasSubmitted = hasSubmittedForm(form.id);
@@ -281,7 +290,15 @@ const InstructorFormsPage = () => {
                                     return (
                                         <div key={form.id} className="available-form-card instructor-form">
                                             <div className="card-header">
-                                                <h4>{form.title}</h4>
+                                                <div className="form-title-section">
+                                                    <h4>{form.title}</h4>
+                                                    {formatEventDate(form.eventDetails) && (
+                                                        <div className="event-date">
+                                                            <Calendar size={14} />
+                                                            {formatEventDate(form.eventDetails)}
+                                                        </div>
+                                                    )}
+                                                </div>
                                                 {hasSubmitted && (
                                                     <span className="submitted-badge">
                                                         <Check size={12} />
@@ -292,35 +309,56 @@ const InstructorFormsPage = () => {
 
                                             <div className="card-body">
                                                 <p>{form.description}</p>
-                                                {form.createdAt && (
-                                                    <div className="form-meta">
-                                                        <span className="meta-label">{t('forms.created', 'Created')}:</span>
-                                                        <span className="meta-value">
-                                                            {form.createdAt.toLocaleDateString()}
-                                                        </span>
+
+                                                {/* Event details preview */}
+                                                {form.eventDetails && (
+                                                    <div className="event-preview">
+                                                        {form.eventDetails.location && (
+                                                            <div className="event-detail">
+                                                                <MapPin size={14} />
+                                                                <span>{form.eventDetails.location}</span>
+                                                            </div>
+                                                        )}
+                                                        {form.eventDetails.hours && (
+                                                            <div className="event-detail">
+                                                                <Clock size={14} />
+                                                                <span>{form.eventDetails.hours}</span>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 )}
+
+                                                <div className="form-meta">
+                                                    <span className="meta-label">{t('forms.views', 'Views')}:</span>
+                                                    <span className="meta-value">{form.viewCount || 0}</span>
+                                                </div>
                                             </div>
 
                                             <div className="card-footer">
+                                                <button
+                                                    className="btn-action view"
+                                                    onClick={() => handleViewForm(form)}
+                                                    title={t('forms.viewForm', 'View Form')}
+                                                >
+                                                    <Eye size={16} />
+                                                    {t('forms.viewForm', 'View')}
+                                                </button>
+
                                                 {hasSubmitted ? (
                                                     <button
                                                         className="btn-action view"
                                                         onClick={() => handleViewSubmission(userSubmission)}
                                                     >
-                                                        <Eye size={16} />
+                                                        <FileText size={16} />
                                                         {t('forms.viewSubmission', 'View Submission')}
                                                     </button>
                                                 ) : (
                                                     <button
                                                         className="btn-action register instructor-register"
-                                                        onClick={() => {
-                                                            setSelectedEventData(form);
-                                                            setShowEventModal(true);
-                                                        }}
+                                                        onClick={() => handleFormSubmission(form)}
                                                     >
-                                                        <Plus size={16} />
-                                                        {t('forms.register', 'Register')}
+                                                        <FileText size={16} />
+                                                        {t('forms.fillForm', 'Fill Form')}
                                                     </button>
                                                 )}
                                             </div>
@@ -328,19 +366,38 @@ const InstructorFormsPage = () => {
                                     );
                                 })}
                             </div>
-                        </div>
-                    )}
+                        ) : (
+                            <div className="empty-state">
+                                <div className="empty-icon">
+                                    <Calendar size={60} />
+                                </div>
+                                <h3>{t('forms.noFormsAvailable', 'No Training Events Available')}</h3>
+                                <p>{t('forms.noInstructorFormsDesc', 'There are no active training events available at the moment.')}</p>
+                            </div>
+                        )}
+                    </div>
 
-                    {/* Event Registration Modal */}
-                    <EventRegistrationModal
-                        isOpen={showEventModal}
+                    {/* Form Submission Modal */}
+                    <FormSubmissionModal
+                        isOpen={showSubmissionModal}
                         onClose={() => {
-                            setShowEventModal(false);
-                            setSelectedEventData(null);
+                            setShowSubmissionModal(false);
+                            setSelectedForm(null);
                         }}
-                        eventData={selectedEventData}
+                        form={selectedForm}
+                        userType="instructor"
                         onSubmit={(submissionData) => {
                             loadFormsData(); // Reload data after submission
+                        }}
+                    />
+
+                    {/* Form View Modal */}
+                    <FormViewModal
+                        isOpen={showViewModal}
+                        form={selectedForm}
+                        onClose={() => {
+                            setShowViewModal(false);
+                            setSelectedForm(null);
                         }}
                     />
 
@@ -388,11 +445,15 @@ const InstructorFormsPage = () => {
                                             <div className="details-section">
                                                 <h4>{t('forms.extraAttendees', 'Additional Attendees')}</h4>
                                                 <div className="extra-attendees-list">
-                                                    {viewSubmission.extraAttendees.map((attendee, index) => (
-                                                        <div key={index} className="extra-attendee-item">
-                                                            {attendee}
-                                                        </div>
-                                                    ))}
+                                                    {viewSubmission.extraAttendees.map((attendeeString, index) => {
+                                                        const [firstName, lastName, phone] = attendeeString.split('|');
+                                                        return (
+                                                            <div key={index} className="extra-attendee-item">
+                                                                <strong>{firstName} {lastName}</strong>
+                                                                {phone && <span> - {phone}</span>}
+                                                            </div>
+                                                        );
+                                                    })}
                                                 </div>
                                             </div>
                                         )}

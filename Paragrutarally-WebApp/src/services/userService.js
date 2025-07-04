@@ -2,6 +2,13 @@
 import { doc, updateDoc, getDoc, deleteDoc } from 'firebase/firestore';
 import { updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
 import { getFunctions, httpsCallable } from 'firebase/functions';
+import {
+    collection,
+    query,
+    where,
+    getDocs,
+    orderBy
+} from 'firebase/firestore';
 import { db, auth } from '../firebase/config';
 
 // Initialize Firebase Functions
@@ -319,5 +326,42 @@ export const testCloudFunctions = async () => {
     } catch (error) {
         console.error('Cloud Functions connectivity test failed:', error);
         return false;
+    }
+};
+
+/**
+ * Get user's kids from the database
+ * @param {string} userId - Parent user ID
+ * @returns {Promise<Array>} List of kids belonging to the user
+ */
+export const getUserKids = async (userId) => {
+    try {
+        const kidsRef = collection(db, 'kids');
+        const q = query(
+            kidsRef,
+            where('parentId', '==', userId),
+            orderBy('firstName', 'asc')
+        );
+
+        const querySnapshot = await getDocs(q);
+        const kids = [];
+
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            kids.push({
+                id: doc.id,
+                ...data,
+                // Convert any Firestore timestamps if they exist
+                createdAt: data.createdAt?.toDate(),
+                updatedAt: data.updatedAt?.toDate(),
+                birthDate: data.birthDate?.toDate()
+            });
+        });
+
+        console.log(`✅ Retrieved ${kids.length} kids for user ${userId}`);
+        return kids;
+    } catch (error) {
+        console.error('❌ Error getting user kids:', error);
+        throw error;
     }
 };

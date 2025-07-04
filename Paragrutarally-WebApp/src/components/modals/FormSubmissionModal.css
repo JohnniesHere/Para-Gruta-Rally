@@ -1,0 +1,731 @@
+/* src/components/modals/FormSubmissionModal.css - Form Submission Modal Styling */
+@import url('../../styles/global.css');
+
+/* ========================================
+   FORM SUBMISSION MODAL OVERLAY
+   ======================================== */
+
+.form-submission-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.form-submission-modal-content {
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 20px;
+    width: 800px;
+    max-width: 95vw;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+/* ========================================
+   MODAL HEADER
+   ======================================== */
+
+.form-submission-modal-header {
+    background: linear-gradient(135deg, var(--racing-lilach) 0%, var(--racing-purple) 100%);
+    color: white;
+    padding: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+}
+
+.form-submission-modal-header h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.form-submission-modal-close {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.form-submission-modal-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+/* ========================================
+   MODAL BODY
+   ======================================== */
+
+.form-submission-modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* ========================================
+   FORM SECTIONS
+   ======================================== */
+
+.form-section {
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-radius: 15px;
+    padding: 20px;
+}
+
+.form-section h4 {
+    color: var(--text-primary);
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin: 0 0 16px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* ========================================
+   EVENT INFORMATION
+   ======================================== */
+
+.event-info-display {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.event-info-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+}
+
+.event-info-item svg {
+    color: var(--racing-lilach);
+}
+
+.event-notes {
+    background: var(--bg-primary);
+    padding: 16px;
+    border-radius: 10px;
+    border-left: 4px solid var(--racing-lilach);
+    margin-top: 12px;
+}
+
+.event-notes p {
+    margin: 0;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+/* ========================================
+   ATTENDANCE OPTIONS
+   ======================================== */
+
+.attendance-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.radio-option {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 16px;
+    background: var(--bg-primary);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.radio-option:hover {
+    border-color: var(--racing-lilach);
+    background: rgba(191, 148, 255, 0.05);
+}
+
+.radio-option input[type="radio"] {
+    margin: 0 12px 0 0;
+    accent-color: var(--racing-lilach);
+}
+
+.radio-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.radio-label.attending {
+    color: #10B981;
+}
+
+.radio-label.not-attending {
+    color: #EF4444;
+}
+
+.radio-label.needs-decision {
+    color: #F59E0B;
+}
+
+/* ========================================
+   USER INFORMATION
+   ======================================== */
+
+.user-info-display {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.info-item label {
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.info-item span {
+    color: var(--text-primary);
+    font-weight: 500;
+    padding: 8px 12px;
+    background: var(--bg-primary);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+/* ========================================
+   KIDS SELECTION
+   ======================================== */
+
+.kids-selection {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.checkbox-option {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 12px;
+    background: var(--bg-primary);
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.checkbox-option:hover {
+    border-color: var(--racing-lilach);
+    background: rgba(191, 148, 255, 0.05);
+}
+
+.checkbox-option input[type="checkbox"] {
+    margin: 0 12px 0 0;
+    accent-color: var(--racing-lilach);
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.warning-icon {
+    color: #F59E0B;
+}
+
+/* ========================================
+   ATTENDEE COUNT INPUT
+   ======================================== */
+
+.attendee-count-input {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.attendee-count-input label {
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.number-input {
+    padding: 12px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1rem;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    max-width: 200px;
+}
+
+.number-input:focus {
+    outline: none;
+    border-color: var(--racing-lilach);
+    box-shadow: 0 0 0 3px rgba(191, 148, 255, 0.1);
+}
+
+/* ========================================
+   EXTRA ATTENDEES TABLE
+   ======================================== */
+
+.extra-attendees-table {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.table-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    padding: 12px;
+    background: var(--racing-lilach);
+    color: white;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.table-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    padding: 8px;
+    background: var(--bg-primary);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.table-row input {
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 0.9rem;
+    background: var(--card-bg);
+    color: var(--text-primary);
+}
+
+.table-row input:focus {
+    outline: none;
+    border-color: var(--racing-lilach);
+    box-shadow: 0 0 0 2px rgba(191, 148, 255, 0.1);
+}
+
+/* ========================================
+   SHIRT SELECTION
+   ======================================== */
+
+.shirts-selection {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.shirts-group h5 {
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 0 0 12px 0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.shirts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 16px;
+}
+
+.shirt-input {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.shirt-input label {
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.shirt-input select {
+    padding: 8px 12px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    cursor: pointer;
+}
+
+.shirt-input select:focus {
+    outline: none;
+    border-color: var(--racing-lilach);
+    box-shadow: 0 0 0 3px rgba(191, 148, 255, 0.1);
+}
+
+/* ========================================
+   MOTTO TEXTAREA
+   ======================================== */
+
+.motto-textarea {
+    width: 100%;
+    padding: 16px;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    font-size: 1rem;
+    font-family: inherit;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    resize: vertical;
+    min-height: 80px;
+}
+
+.motto-textarea:focus {
+    outline: none;
+    border-color: var(--racing-lilach);
+    box-shadow: 0 0 0 3px rgba(191, 148, 255, 0.1);
+}
+
+.motto-textarea::placeholder {
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+/* ========================================
+   DECLARATION SECTION
+   ======================================== */
+
+.declaration-section {
+    border-color: #F59E0B !important;
+    background: rgba(245, 158, 11, 0.05) !important;
+}
+
+.declaration-warning {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.warning-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 16px;
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid #F59E0B;
+    border-radius: 10px;
+}
+
+.warning-content .warning-icon {
+    color: #F59E0B;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.warning-content p {
+    margin: 0 0 8px 0;
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.warning-details {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.warning-content ul {
+    margin: 0;
+    padding-left: 20px;
+    color: var(--text-primary);
+}
+
+.warning-content li {
+    margin-bottom: 4px;
+    font-weight: 500;
+}
+
+.file-upload {
+    display: flex;
+    justify-content: center;
+}
+
+.upload-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: var(--racing-lilach);
+    color: white;
+    border: none;
+    border-radius: 25px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.upload-button:hover {
+    background: var(--racing-purple);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(191, 148, 255, 0.3);
+}
+
+/* ========================================
+   MODAL FOOTER
+   ======================================== */
+
+.form-submission-modal-footer {
+    padding: 20px 24px;
+    border-top: 2px solid var(--border-color);
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    background: var(--bg-secondary);
+}
+
+/* ========================================
+   BUTTONS
+   ======================================== */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 25px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.btn-primary {
+    background: var(--racing-lilach);
+    color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: var(--racing-purple);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(191, 148, 255, 0.3);
+}
+
+.btn-secondary {
+    background: var(--bg-primary);
+    color: var(--text-secondary);
+    border: 2px solid var(--border-color);
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background: var(--bg-secondary);
+    border-color: var(--racing-lilach);
+    color: var(--racing-lilach);
+    transform: translateY(-1px);
+}
+
+.spinning {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+
+@media (max-width: 768px) {
+    .form-submission-modal-content {
+        width: 95vw;
+        margin: 10px;
+        max-height: 95vh;
+    }
+
+    .form-submission-modal-header {
+        padding: 20px;
+    }
+
+    .form-submission-modal-header h3 {
+        font-size: 1.3rem;
+    }
+
+    .form-submission-modal-body {
+        padding: 20px;
+        gap: 20px;
+    }
+
+    .form-section {
+        padding: 16px;
+    }
+
+    .form-section h4 {
+        font-size: 1.1rem;
+    }
+
+    .user-info-display {
+        grid-template-columns: 1fr;
+    }
+
+    .table-header,
+    .table-row {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .table-header {
+        display: none; /* Hide header on mobile, use placeholders instead */
+    }
+
+    .table-row input {
+        padding: 12px;
+    }
+
+    .shirts-grid {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 12px;
+    }
+
+    .event-info-display {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .event-info-item {
+        justify-content: center;
+        text-align: center;
+    }
+
+    .warning-content {
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+    }
+
+    .warning-content .warning-icon {
+        align-self: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .form-submission-modal-overlay {
+        padding: 10px;
+    }
+
+    .form-submission-modal-header {
+        padding: 16px;
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+    }
+
+    .form-submission-modal-header h3 {
+        font-size: 1.2rem;
+    }
+
+    .form-submission-modal-body {
+        padding: 16px;
+        gap: 16px;
+    }
+
+    .form-section {
+        padding: 12px;
+    }
+
+    .form-section h4 {
+        font-size: 1rem;
+        flex-direction: column;
+        gap: 4px;
+        text-align: center;
+    }
+
+    .attendance-options,
+    .kids-selection {
+        gap: 8px;
+    }
+
+    .radio-option,
+    .checkbox-option {
+        padding: 12px;
+    }
+
+    .shirts-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-submission-modal-footer {
+        padding: 16px;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .btn {
+        justify-content: center;
+        padding: 14px 20px;
+    }
+}

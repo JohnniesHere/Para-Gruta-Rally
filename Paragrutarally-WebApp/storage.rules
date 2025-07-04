@@ -1,149 +1,92 @@
 rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper function to check if user is admin
+    function isAdmin() {
+      return request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
 
-// Firebase Storage Security Rules for Racing App
-service firebase.storage {
-  match /b/{bucket}/o {
-
-    // Helper functions for authentication checking
     function isAuthenticated() {
       return request.auth != null;
     }
 
-    // Since you handle roles in your app, we'll use a simple approach
-    // You can modify these based on how you want to identify admins/parents
-    function canDeleteKidPhotos() {
-      return isAuthenticated() &&
-             (request.auth.token.admin == true ||
-              request.auth.token.role == 'admin' ||
-              request.auth.token.role == 'parent');
+    // User rules - users can read/write their own data, admins can read all
+    match /users/{userId} {
+      allow read: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+      allow write: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
     }
 
-    // Validate image file types
-    function isValidImageType() {
-      return request.resource.contentType.matches('image/.*') &&
-             (request.resource.contentType.matches('image/jpeg') ||
-              request.resource.contentType.matches('image/jpg') ||
-              request.resource.contentType.matches('image/png') ||
-              request.resource.contentType.matches('image/webp') ||
-              request.resource.contentType.matches('image/gif') ||
-              request.resource.contentType.matches('image/bmp') ||
-              request.resource.contentType.matches('image/svg+xml'));
+    // BACKUP RULES - Only admins can access backups
+    match /backups/{document} {
+      allow read, write: if isAdmin();
     }
 
-    // Validate file size (5MB limit for images)
-    function isValidImageSize() {
-      return request.resource.size <= 5 * 1024 * 1024; // 5MB
-    }
-
-    // Validate PDF file type for declarations
-    function isValidPdfType() {
-      return request.resource.contentType == 'application/pdf';
-    }
-
-    // Validate PDF file size (10MB limit for PDFs)
-    function isValidPdfSize() {
-      return request.resource.size <= 10 * 1024 * 1024; // 10MB
-    }
-
-    // **EVENTS FOLDER** - Event main images (for event creation)
-    // Used in: CreateEventPage.jsx handleImageUpload
-    match /events/{eventImageFile} {
-      // Read: All authenticated users can view event images
+    // Kids collection - role-based access
+    match /kids/{kidId} {
       allow read: if isAuthenticated();
-
-      // Write: All authenticated users can upload event images
-      allow write: if isAuthenticated() &&
-                      isValidImageType() &&
-                      isValidImageSize();
-
-      // Delete: All authenticated users can delete event images
-      allow delete: if isAuthenticated();
+      allow write: if isAdmin() ||
+        (isAuthenticated() &&
+         get(/databases/$(database)/documents/kids/$(kidId)).data.parentInfo.parentId == request.auth.uid);
     }
 
-    // **GALLERY FOLDER** - Event and general photo galleries
-    // Used in: GalleryPage.jsx
-    match /gallery/{allPaths=**} {
-      // Gallery general folder - not tied to specific events
-      match /general/{generalPhotoFile} {
-        // Read: All authenticated users can view general gallery photos
-        allow read: if isAuthenticated();
-
-        // Write: All authenticated users can upload to general gallery
-        allow write: if isAuthenticated() &&
-                        isValidImageType() &&
-                        isValidImageSize();
-
-        // Delete: All authenticated users can delete from general gallery
-        allow delete: if isAuthenticated();
-      }
-
-      // Gallery events folder - photos organized by event name
-      match /events/{eventName}/{eventPhotoFile} {
-        // Read: All authenticated users can view event gallery photos
-        allow read: if isAuthenticated();
-
-        // Write: All authenticated users can upload to event galleries
-        // This includes the .folder_info.json placeholder files
-        allow write: if isAuthenticated() &&
-                        (isValidImageType() ||
-                         request.resource.contentType == 'application/json') &&
-                        (isValidImageSize() ||
-                         request.resource.size <= 1024); // Allow small JSON files
-
-        // Delete: All authenticated users can delete from event galleries
-        allow delete: if isAuthenticated();
-      }
-    }
-
-    // **KIDS PROFILE PICTURES** - Kid photo management
-    // Used in: kidPhotoService.js
-    match /kidsPFP/{kidPhotoFile} {
-      // Read: All authenticated users can view kid photos
+    // Teams collection - instructors can edit their teams, others can read
+    match /teams/{teamId} {
       allow read: if isAuthenticated();
-
-      // Write: All authenticated users can upload/update kid photos
-      allow write: if isAuthenticated() &&
-                      isValidImageType() &&
-                      isValidImageSize();
-
-      // Delete: Only parents and admins can delete kid photos
-      allow delete: if isAuthenticated();
+      allow write: if isAdmin() ||
+        (isAuthenticated() &&
+         request.auth.uid in get(/databases/$(database)/documents/teams/$(teamId)).data.instructorIds);
     }
 
-    // **VEHICLE PHOTOS** - Vehicle photo management
-    // Used in: vehiclePhotoService.js
-    match /vehiclePhotos/{vehiclePhotoFile} {
-      // Read: All authenticated users can view vehicle photos
+    // Events collection - allow authenticated users to read, admins to write
+    match /events/{eventId} {
       allow read: if isAuthenticated();
-
-      // Write: All authenticated users can upload/update vehicle photos
-      allow write: if isAuthenticated() &&
-                      isValidImageType() &&
-                      isValidImageSize();
-
-      // Delete: All authenticated users can delete vehicle photos
-      allow delete: if isAuthenticated();
+      allow write: if isAdmin();
     }
 
-    // **SIGNED PARENT DECLARATIONS** - Legal documents
-    // Used for storing signed parent declaration PDFs
-    match /signedParentDeclarations/{declarationFile} {
-      // Read: All authenticated users can view declarations
+    // Instructors collection
+    match /instructors/{instructorId} {
       allow read: if isAuthenticated();
-
-      // Write: All authenticated users can upload declarations
-      allow write: if isAuthenticated() &&
-                      isValidPdfType() &&
-                      isValidPdfSize();
-
-      // Delete: All authenticated users can delete declarations
-      allow delete: if isAuthenticated();
+      allow write: if isAdmin();
     }
 
-    // **FALLBACK RULE** - Deny all other access
-    // This ensures that any paths not explicitly covered above are denied
-    match /{allOtherPaths=**} {
-      allow read, write: if false;
+    // Event participants
+    match /eventParticipants/{participantId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Reports - admin only
+    match /reports/{reportId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Vehicles collection
+    match /vehicles/{vehicleId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Forms - SIMPLIFIED: authenticated users can read, admins can write
+    match /forms/{formId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Form submissions - users can create/read their own, admin can read all
+    match /form_submissions/{submissionId} {
+      allow read: if isAuthenticated() &&
+        (resource.data.submitterId == request.auth.uid || isAdmin());
+      allow create: if isAuthenticated() &&
+        request.resource.data.submitterId == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    // Form assignments - admin can manage, users can read their own
+    match /form_assignments/{assignmentId} {
+      allow read: if isAuthenticated() &&
+        (resource.data.userId == request.auth.uid || isAdmin());
+      allow write: if isAdmin();
     }
   }
 }

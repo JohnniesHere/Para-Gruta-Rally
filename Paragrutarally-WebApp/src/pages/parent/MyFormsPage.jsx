@@ -1,14 +1,15 @@
-// src/pages/parent/MyFormsPage.jsx - Parent Forms Interface
+// src/pages/parent/MyFormsPage.jsx - Updated Parent Forms Interface
 import React, { useState, useEffect } from 'react';
 import Dashboard from '../../components/layout/Dashboard';
-import EventRegistrationModal from '../../components/modals/EventRegistrationModal';
+import FormSubmissionModal from '../../components/modals/FormSubmissionModal';
+import FormViewModal from '../../components/modals/FormViewModal';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { usePermissions } from '../../hooks/usePermissions';
 import {
-    getUserFormAssignments,
     getFormSubmissions,
-    getFormsForRole
+    getActiveForms,
+    incrementFormViewCount
 } from '../../services/formService';
 import './MyFormsPage.css';
 import {
@@ -16,15 +17,13 @@ import {
     IconClock as Clock,
     IconCheck as Check,
     IconX as X,
-    IconAlertTriangle as AlertTriangle,
     IconEye as Eye,
-    IconEdit as Edit,
-    IconPlus as Plus,
     IconCalendar as Calendar,
     IconUsers as Users,
     IconShirt as Shirt,
     IconFileText as FileIcon,
-    IconExternalLink as ExternalLink
+    IconExternalLink as ExternalLink,
+    IconMapPin as MapPin
 } from '@tabler/icons-react';
 
 const MyFormsPage = () => {
@@ -33,12 +32,12 @@ const MyFormsPage = () => {
     const { userData, user } = usePermissions();
 
     // State management
-    const [assignments, setAssignments] = useState([]);
     const [submissions, setSubmissions] = useState([]);
     const [availableForms, setAvailableForms] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [showEventModal, setShowEventModal] = useState(false);
-    const [selectedEventData, setSelectedEventData] = useState(null);
+    const [showSubmissionModal, setShowSubmissionModal] = useState(false);
+    const [showViewModal, setShowViewModal] = useState(false);
+    const [selectedForm, setSelectedForm] = useState(null);
     const [viewSubmission, setViewSubmission] = useState(null);
 
     // Load data
@@ -50,21 +49,60 @@ const MyFormsPage = () => {
 
     const loadFormsData = async () => {
         setIsLoading(true);
-        try {
-            const [assignmentsData, submissionsData, availableFormsData] = await Promise.all([
-                getUserFormAssignments(user.uid),
-                getFormSubmissions(null, { submitterId: user.uid }),
-                getFormsForRole('parent')
-            ]);
+        console.log('🔍 DEBUG: Starting to load forms data...');
+        console.log('🔍 DEBUG: Current user:', user);
 
-            setAssignments(assignmentsData);
+        try {
+            console.log('🔍 DEBUG: Calling getFormSubmissions...');
+            const submissionsData = await getFormSubmissions({ submitterId: user.uid });
+            console.log('🔍 DEBUG: Submissions loaded:', submissionsData);
             setSubmissions(submissionsData);
-            setAvailableForms(availableFormsData);
+
+            console.log('🔍 DEBUG: About to call getActiveForms with "parent"...');
+
+            // Let's try a more direct approach first
+            try {
+                const availableFormsData = await getActiveForms('parent');
+                console.log('🔍 DEBUG: Forms query result:', availableFormsData);
+                console.log('🔍 DEBUG: Number of forms found:', availableFormsData.length);
+
+                // Log each form for detailed inspection
+                availableFormsData.forEach((form, index) => {
+                    console.log(`🔍 DEBUG: Form ${index + 1}:`, {
+                        id: form.id,
+                        title: form.title,
+                        status: form.status,
+                        targetUsers: form.targetUsers,
+                        createdAt: form.createdAt,
+                        eventDetails: form.eventDetails
+                    });
+                });
+
+                setAvailableForms(availableFormsData);
+            } catch (formsError) {
+                console.error('❌ DEBUG: Error in getActiveForms:', formsError);
+                console.error('❌ DEBUG: Detailed error:', {
+                    message: formsError.message,
+                    stack: formsError.stack
+                });
+
+                // Try to set empty array so page doesn't break
+                setAvailableForms([]);
+            }
 
         } catch (error) {
-            console.error('❌ Error loading forms data:', error);
+            console.error('❌ DEBUG: Error loading forms data:', error);
+            console.error('❌ DEBUG: Error details:', {
+                message: error.message,
+                code: error.code,
+                stack: error.stack
+            });
+            // Set empty arrays so page doesn't break
+            setSubmissions([]);
+            setAvailableForms([]);
         } finally {
             setIsLoading(false);
+            console.log('🔍 DEBUG: Loading completed');
         }
     };
 
@@ -84,36 +122,55 @@ const MyFormsPage = () => {
             'needs to decide': {
                 label: t('forms.needsToDecide', 'Needs to Decide'),
                 color: '#F59E0B',
-                icon: AlertTriangle
+                icon: X
             }
         };
 
         return statusMap[status] || statusMap['needs to decide'];
     };
 
-    // Handle create new event form
-    const handleCreateEventForm = () => {
-        // For demo purposes, we'll use sample event data
-        // In real implementation, this would come from the selected form
-        const sampleEventData = {
-            id: 'demo_event_' + Date.now(),
-            title: 'Racing Event Registration',
-            dayAndDate: 'Saturday, July 15th, 2025',
-            hours: '9:00 AM - 5:00 PM',
-            location: 'Jerusalem Racing Track',
-            googleMapsLink: 'https://maps.google.com/?q=Jerusalem+Racing+Track',
-            wazeLink: 'https://waze.com/to/Jerusalem+Racing+Track',
-            notes: 'Please arrive 30 minutes early for registration. Bring comfortable clothing and closed-toe shoes.',
-            paymentLink: 'https://bit.ly/racing-event-payment',
-            closingNotes: 'We look forward to seeing you at the event!',
-            contactInfo: [
-                'For questions: info@racingclub.com',
-                'Emergency contact: +972-50-123-4567'
-            ]
-        };
+    // Handle form submission click
+    const handleFormSubmission = async (form) => {
+        try {
+            // Increment view count
+            await incrementFormViewCount(form.id);
 
-        setSelectedEventData(sampleEventData);
-        setShowEventModal(true);
+            // Update local state
+            setAvailableForms(prevForms =>
+                prevForms.map(f =>
+                    f.id === form.id
+                        ? { ...f, viewCount: (f.viewCount || 0) + 1 }
+                        : f
+                )
+            );
+
+            setSelectedForm(form);
+            setShowSubmissionModal(true);
+        } catch (error) {
+            console.error('❌ Error opening form:', error);
+        }
+    };
+
+    // Handle view form details
+    const handleViewForm = async (form) => {
+        try {
+            // Increment view count
+            await incrementFormViewCount(form.id);
+
+            // Update local state
+            setAvailableForms(prevForms =>
+                prevForms.map(f =>
+                    f.id === form.id
+                        ? { ...f, viewCount: (f.viewCount || 0) + 1 }
+                        : f
+                )
+            );
+
+            setSelectedForm(form);
+            setShowViewModal(true);
+        } catch (error) {
+            console.error('❌ Error viewing form:', error);
+        }
     };
 
     // Handle view submission details
@@ -131,6 +188,30 @@ const MyFormsPage = () => {
         return submissions.find(submission => submission.formId === formId);
     };
 
+    // Format date display
+    const formatEventDate = (eventDetails) => {
+        if (eventDetails?.dayAndDate) {
+            return eventDetails.dayAndDate;
+        }
+
+        if (eventDetails?.eventDate) {
+            // If it's already a string, return it
+            if (typeof eventDetails.eventDate === 'string') {
+                return eventDetails.eventDate;
+            }
+            // If it's a Date object, format it
+            if (eventDetails.eventDate instanceof Date) {
+                return eventDetails.eventDate.toLocaleDateString();
+            }
+            // If it has a toDate method (Firestore Timestamp), use it
+            if (eventDetails.eventDate.toDate) {
+                return eventDetails.eventDate.toDate().toLocaleDateString();
+            }
+        }
+
+        return '';
+    };
+
     return (
         <Dashboard requiredRole="parent">
             <div className={`parent-forms-page ${appliedTheme}-mode`}>
@@ -146,27 +227,29 @@ const MyFormsPage = () => {
                 </div>
 
                 <div className="page-container">
-                    {/* Quick Actions */}
-                    <div className="quick-actions-section">
-                        <div className="section-header">
-                            <h3>{t('forms.quickActions', 'Quick Actions')}</h3>
+                    {/* Debug Information - Remove this in production */}
+                    {process.env.NODE_ENV === 'development' && (
+                        <div style={{
+                            background: '#f0f0f0',
+                            padding: '16px',
+                            margin: '16px 0',
+                            borderRadius: '8px',
+                            border: '2px solid #ccc'
+                        }}>
+                            <h4>🔍 DEBUG INFO</h4>
+                            <p><strong>User ID:</strong> {user?.uid || 'No user'}</p>
+                            <p><strong>User Role:</strong> {userData?.role || 'No role'}</p>
+                            <p><strong>Is Loading:</strong> {isLoading.toString()}</p>
+                            <p><strong>Available Forms Count:</strong> {availableForms.length}</p>
+                            <p><strong>Submissions Count:</strong> {submissions.length}</p>
+                            <details>
+                                <summary>Raw Forms Data</summary>
+                                <pre style={{ background: '#fff', padding: '8px', overflow: 'auto' }}>
+                                    {JSON.stringify(availableForms, null, 2)}
+                                </pre>
+                            </details>
                         </div>
-                        <div className="quick-actions-grid">
-                            <button
-                                className="quick-action-card"
-                                onClick={handleCreateEventForm}
-                            >
-                                <Plus size={24} />
-                                <span className="action-title">
-                                    {t('forms.newEventRegistration', 'New Event Registration')}
-                                </span>
-                                <span className="action-desc">
-                                    {t('forms.newEventDesc', 'Register for upcoming events')}
-                                </span>
-                            </button>
-                        </div>
-                    </div>
-
+                    )}
                     {/* My Submissions */}
                     <div className="forms-section">
                         <div className="section-header">
@@ -257,28 +340,26 @@ const MyFormsPage = () => {
                                     <FileText size={60} />
                                 </div>
                                 <h3>{t('forms.noSubmissions', 'No Submissions Yet')}</h3>
-                                <p>{t('forms.noSubmissionsDesc', 'You haven\'t submitted any forms yet. Start by registering for an event!')}</p>
-                                <button
-                                    className="btn btn-primary"
-                                    onClick={handleCreateEventForm}
-                                >
-                                    <Plus size={16} />
-                                    {t('forms.registerForEvent', 'Register for Event')}
-                                </button>
+                                <p>{t('forms.noSubmissionsDesc', 'You haven\'t submitted any forms yet. Check the available forms below!')}</p>
                             </div>
                         )}
                     </div>
 
                     {/* Available Forms */}
-                    {availableForms.length > 0 && (
-                        <div className="forms-section">
-                            <div className="section-header">
-                                <h3>
-                                    <Calendar size={20} />
-                                    {t('forms.availableForms', 'Available Forms')}
-                                </h3>
-                            </div>
+                    <div className="forms-section">
+                        <div className="section-header">
+                            <h3>
+                                <Calendar size={20} />
+                                {t('forms.availableForms', 'Available Forms')}
+                            </h3>
+                        </div>
 
+                        {isLoading ? (
+                            <div className="loading-state">
+                                <Clock className="loading-spinner" size={30} />
+                                <p>{t('forms.loadingForms', 'Loading forms...')}</p>
+                            </div>
+                        ) : availableForms.length > 0 ? (
                             <div className="available-forms-grid">
                                 {availableForms.map(form => {
                                     const hasSubmitted = hasSubmittedForm(form.id);
@@ -287,7 +368,15 @@ const MyFormsPage = () => {
                                     return (
                                         <div key={form.id} className="available-form-card">
                                             <div className="card-header">
-                                                <h4>{form.title}</h4>
+                                                <div className="form-title-section">
+                                                    <h4>{form.title}</h4>
+                                                    {formatEventDate(form.eventDetails) && (
+                                                        <div className="event-date">
+                                                            <Calendar size={14} />
+                                                            {formatEventDate(form.eventDetails)}
+                                                        </div>
+                                                    )}
+                                                </div>
                                                 {hasSubmitted && (
                                                     <span className="submitted-badge">
                                                         <Check size={12} />
@@ -298,35 +387,56 @@ const MyFormsPage = () => {
 
                                             <div className="card-body">
                                                 <p>{form.description}</p>
-                                                {form.createdAt && (
-                                                    <div className="form-meta">
-                                                        <span className="meta-label">{t('forms.created', 'Created')}:</span>
-                                                        <span className="meta-value">
-                                                            {form.createdAt.toLocaleDateString()}
-                                                        </span>
+
+                                                {/* Event details preview */}
+                                                {form.eventDetails && (
+                                                    <div className="event-preview">
+                                                        {form.eventDetails.location && (
+                                                            <div className="event-detail">
+                                                                <MapPin size={14} />
+                                                                <span>{form.eventDetails.location}</span>
+                                                            </div>
+                                                        )}
+                                                        {form.eventDetails.hours && (
+                                                            <div className="event-detail">
+                                                                <Clock size={14} />
+                                                                <span>{form.eventDetails.hours}</span>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 )}
+
+                                                <div className="form-meta">
+                                                    <span className="meta-label">{t('forms.views', 'Views')}:</span>
+                                                    <span className="meta-value">{form.viewCount || 0}</span>
+                                                </div>
                                             </div>
 
                                             <div className="card-footer">
+                                                <button
+                                                    className="btn-action view"
+                                                    onClick={() => handleViewForm(form)}
+                                                    title={t('forms.viewForm', 'View Form')}
+                                                >
+                                                    <Eye size={16} />
+                                                    {t('forms.viewForm', 'View')}
+                                                </button>
+
                                                 {hasSubmitted ? (
                                                     <button
                                                         className="btn-action view"
                                                         onClick={() => handleViewSubmission(userSubmission)}
                                                     >
-                                                        <Eye size={16} />
+                                                        <FileIcon size={16} />
                                                         {t('forms.viewSubmission', 'View Submission')}
                                                     </button>
                                                 ) : (
                                                     <button
                                                         className="btn-action register"
-                                                        onClick={() => {
-                                                            setSelectedEventData(form);
-                                                            setShowEventModal(true);
-                                                        }}
+                                                        onClick={() => handleFormSubmission(form)}
                                                     >
-                                                        <Plus size={16} />
-                                                        {t('forms.register', 'Register')}
+                                                        <FileText size={16} />
+                                                        {t('forms.fillForm', 'Fill Form')}
                                                     </button>
                                                 )}
                                             </div>
@@ -334,19 +444,38 @@ const MyFormsPage = () => {
                                     );
                                 })}
                             </div>
-                        </div>
-                    )}
+                        ) : (
+                            <div className="empty-state">
+                                <div className="empty-icon">
+                                    <Calendar size={60} />
+                                </div>
+                                <h3>{t('forms.noFormsAvailable', 'No Forms Available')}</h3>
+                                <p>{t('forms.noFormsDesc', 'There are no active forms available at the moment.')}</p>
+                            </div>
+                        )}
+                    </div>
 
-                    {/* Event Registration Modal */}
-                    <EventRegistrationModal
-                        isOpen={showEventModal}
+                    {/* Form Submission Modal */}
+                    <FormSubmissionModal
+                        isOpen={showSubmissionModal}
                         onClose={() => {
-                            setShowEventModal(false);
-                            setSelectedEventData(null);
+                            setShowSubmissionModal(false);
+                            setSelectedForm(null);
                         }}
-                        eventData={selectedEventData}
+                        form={selectedForm}
+                        userType="parent"
                         onSubmit={(submissionData) => {
                             loadFormsData(); // Reload data after submission
+                        }}
+                    />
+
+                    {/* Form View Modal */}
+                    <FormViewModal
+                        isOpen={showViewModal}
+                        form={selectedForm}
+                        onClose={() => {
+                            setShowViewModal(false);
+                            setSelectedForm(null);
                         }}
                     />
 

@@ -651,3 +651,201 @@
         padding: 16px;
     }
 }
+
+/* ========================================
+   ADDITIONAL FORM CARD STYLES
+   ======================================== */
+
+.form-title-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+}
+
+.form-title-section h4 {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--text-primary);
+    font-weight: 700;
+}
+
+.event-date {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.event-date svg {
+    color: var(--racing-lilach);
+}
+
+.event-preview {
+    margin: 12px 0;
+    padding: 12px;
+    background: var(--bg-primary);
+    border-radius: 8px;
+    border-left: 3px solid var(--racing-lilach);
+}
+
+.event-detail {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+}
+
+.event-detail:last-child {
+    margin-bottom: 0;
+}
+
+.event-detail svg {
+    color: var(--racing-lilach);
+    flex-shrink: 0;
+}
+
+.available-form-card .form-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    margin-top: 12px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border-color);
+}
+
+.available-form-card .meta-label {
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.available-form-card .meta-value {
+    color: var(--text-primary);
+    font-weight: 700;
+}
+
+.available-form-card .card-header {
+    padding: 16px;
+    background: var(--bg-tertiary);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.available-form-card .card-footer {
+    padding: 12px 16px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+/* ========================================
+   ENHANCED BUTTON STYLES
+   ======================================== */
+
+.btn-action.register {
+    background: var(--card-bg);
+    color: var(--racing-lilach);
+    border-color: var(--racing-lilach);
+}
+
+.btn-action.register:hover {
+    background: rgba(191, 148, 255, 0.1);
+    border-color: var(--racing-lilach);
+    color: var(--racing-lilach);
+    transform: translateY(-1px);
+}
+
+/* ========================================
+   EMPTY STATE ENHANCEMENTS
+   ======================================== */
+
+.empty-state .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: var(--racing-lilach);
+    color: white;
+    border: none;
+    border-radius: 25px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.empty-state .btn:hover {
+    background: var(--racing-purple);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(191, 148, 255, 0.3);
+}
+
+/* ========================================
+   RESPONSIVE UPDATES
+   ======================================== */
+
+@media (max-width: 768px) {
+    .form-title-section {
+        gap: 6px;
+    }
+
+    .event-date {
+        font-size: 0.75rem;
+    }
+
+    .event-preview {
+        margin: 8px 0;
+        padding: 10px;
+    }
+
+    .event-detail {
+        font-size: 0.8rem;
+        margin-bottom: 4px;
+    }
+
+    .available-form-card .card-header {
+        padding: 12px;
+        flex-direction: column;
+        gap: 8px;
+        align-items: flex-start;
+    }
+
+    .available-form-card .card-footer {
+        padding: 10px 12px;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .btn-action {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .form-title-section h4 {
+        font-size: 0.9rem;
+    }
+
+    .event-date {
+        font-size: 0.7rem;
+    }
+
+    .event-detail {
+        font-size: 0.75rem;
+    }
+
+    .available-form-card .form-meta {
+        font-size: 0.75rem;
+    }
+}
