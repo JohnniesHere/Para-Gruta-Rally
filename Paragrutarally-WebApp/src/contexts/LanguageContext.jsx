@@ -2490,6 +2490,13 @@ export const LANGUAGES = {
         "forms.lastName": "Last Name",
         "forms.extraAttendees": "Extra Attendees",
         "forms.additionalAttendees": "Additional Attendees",
+        'forms.createEventRegistration': 'Create Event Registration Form',
+        'forms.selectEvent': 'Select Existing Event',
+        'forms.refreshEvents': 'Refresh Events',
+        'forms.loadingEvents': 'Loading events...',
+        'forms.selectEventOption': 'Select an event or enter manually',
+        'forms.eventSelected': 'Event selected - form fields have been auto-filled',
+        'forms.registrationFor': 'Registration for',
 
 // Shirt Management
         "forms.shirtSizes": "Shirt Sizes",
@@ -3895,7 +3902,7 @@ export const LANGUAGES = {
         // Forms
         'forms.title': 'ניהול טפסים',
         'forms.manage': 'נהל טפסים',
-        'forms.description': 'עמוד זה יכיל פונקציונליות ניהול טפסים כולל:',
+        'forms.description': 'מידע חשוב שיוצג בראש הטופס:',
         'forms.createNew': 'צור טפסים חדשים',
         'forms.editExisting': 'ערוך טפסים קיימים',
         'forms.viewSubmissions': 'צפה בהגשות טפסים',
@@ -5322,6 +5329,13 @@ export const LANGUAGES = {
         "forms.lastName": "שם משפחה",
         "forms.extraAttendees": "משתתפים נוספים",
         "forms.additionalAttendees": "משתתפים נוספים",
+        'forms.createEventRegistration': 'צור טופס הרשמה לאירוע',
+        'forms.selectEvent': 'בחר אירוע קיים',
+        'forms.refreshEvents': 'רענן אירועים',
+        'forms.loadingEvents': 'טוען אירועים...',
+        'forms.selectEventOption': 'בחר אירוע או הזן ידנית',
+        'forms.eventSelected': 'אירוע נבחר - השדות מולאו אוטומטית',
+        'forms.registrationFor': 'הרשמה עבור',
 
 // Shirt Management
         "forms.shirtSizes": "מידות חולצה",

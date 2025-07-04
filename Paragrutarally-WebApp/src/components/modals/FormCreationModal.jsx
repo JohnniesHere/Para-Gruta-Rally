@@ -1,4 +1,4 @@
-// src/components/modals/FormCreationModal.jsx - Updated with Templates and Date/Time
+// src/components/modals/FormCreationModal.jsx - Updated with Event Selection
 import React, { useState, useEffect } from 'react';
 import { createForm } from '@/services/formService.js';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -13,7 +13,8 @@ import {
     IconUsers as Users,
     IconFileText as FileText,
     IconClock as Clock,
-    IconDeviceFloppy as Save
+    IconDeviceFloppy as Save,
+    IconRefresh as Refresh
 } from '@tabler/icons-react';
 import './FormCreationModal.css';
 
@@ -23,15 +24,19 @@ const FormCreationModal = ({
                                onClose,
                                onSuccess
                            }) => {
-    const { t } = useLanguage();
+    const { t, isRTL } = useLanguage();
     const { user } = usePermissions();
 
     // Form state
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [loadingEvents, setLoadingEvents] = useState(false);
+    const [events, setEvents] = useState([]);
+    const [selectedEventId, setSelectedEventId] = useState('');
+
     const [formData, setFormData] = useState({
         title: '',
         description: '',
-        type: 'event_registration',
+        type: 'event_registration', // Fixed to event registration
         status: 'draft',
         targetUsers: ['parent'],
 
@@ -48,35 +53,78 @@ const FormCreationModal = ({
         contactInfo: ['']
     });
 
-    // Template configurations
-    const templateConfigs = {
-        parent: {
-            title: 'Parent Event Registration',
-            description: 'Registration form for parents to register their kids for racing events',
-            targetUsers: ['parent'],
-            type: 'event_registration'
-        },
-        instructor: {
-            title: 'Instructor Training Registration',
-            description: 'Registration form for instructor training sessions and workshops',
-            targetUsers: ['instructor'],
-            type: 'training_registration'
+    // Load events when modal opens
+    useEffect(() => {
+        if (isOpen) {
+            loadEvents();
+        }
+    }, [isOpen]);
+
+    // Load events from database
+    const loadEvents = async () => {
+        try {
+            setLoadingEvents(true);
+
+            // Import events service
+            const { getAllEvents } = await import('../../services/eventService'); // Adjust path as needed
+            const eventsData = await getAllEvents();
+
+            // Filter for upcoming events only
+            const upcomingEvents = eventsData.filter(event => event.status === 'upcoming');
+            setEvents(upcomingEvents);
+
+        } catch (error) {
+            console.error('Error loading events:', error);
+            // If events service doesn't exist, we'll handle it gracefully
+            setEvents([]);
+        } finally {
+            setLoadingEvents(false);
         }
     };
 
-    // Apply template when templateType changes
-    useEffect(() => {
-        if (templateType && templateConfigs[templateType]) {
-            const config = templateConfigs[templateType];
+    // Handle event selection
+    const handleEventSelection = (eventId) => {
+        setSelectedEventId(eventId);
+
+        if (!eventId) {
+            // Clear event-related fields if no event selected
             setFormData(prev => ({
                 ...prev,
-                title: config.title,
-                description: config.description,
-                targetUsers: config.targetUsers,
-                type: config.type
+                eventDate: '',
+                startTime: '',
+                endTime: '',
+                location: ''
+            }));
+            return;
+        }
+
+        // Find selected event and populate fields
+        const selectedEvent = events.find(event => event.id === eventId);
+        if (selectedEvent) {
+            // Parse the date from the event
+            let eventDate = '';
+            if (selectedEvent.date && selectedEvent.date !== 'Date TBD') {
+                try {
+                    const date = new Date(selectedEvent.date);
+                    if (!isNaN(date.getTime())) {
+                        eventDate = date.toISOString().split('T')[0]; // YYYY-MM-DD format
+                    }
+                } catch (error) {
+                    console.warn('Could not parse event date:', selectedEvent.date);
+                }
+            }
+
+            setFormData(prev => ({
+                ...prev,
+                title: `${t('forms.registrationFor', 'Registration for')} ${selectedEvent.name}`,
+                eventDate: eventDate,
+                startTime: '', // Events don't seem to have separate start/end times
+                endTime: '',
+                location: selectedEvent.location || '',
+                notes: selectedEvent.description || selectedEvent.notes || ''
             }));
         }
-    }, [templateType]);
+    };
 
     // Handle form data change
     const handleInputChange = (field, value) => {
@@ -127,8 +175,8 @@ const FormCreationModal = ({
         if (!formData.eventDate) return '';
 
         const date = new Date(formData.eventDate);
-        const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
-        const dateStr = date.toLocaleDateString('en-US', {
+        const dayName = date.toLocaleDateString(isRTL ? 'he-IL' : 'en-US', { weekday: 'long' });
+        const dateStr = date.toLocaleDateString(isRTL ? 'he-IL' : 'en-US', {
             year: 'numeric',
             month: 'long',
             day: 'numeric'
@@ -161,12 +209,13 @@ const FormCreationModal = ({
             const formToCreate = {
                 title: formData.title,
                 description: formData.description,
-                type: formData.type,
+                type: 'event_registration', // Fixed type
                 status: formData.status,
                 targetUsers: formData.targetUsers,
 
                 // Event details for registration forms
                 eventDetails: {
+                    selectedEventId: selectedEventId || null, // Store reference to source event
                     dayAndDate: formatDateTime(),
                     eventDate: formData.eventDate,
                     startTime: formData.startTime,
@@ -217,6 +266,7 @@ const FormCreationModal = ({
             closingNotes: '',
             contactInfo: ['']
         });
+        setSelectedEventId('');
         onClose();
     };
 
@@ -224,17 +274,13 @@ const FormCreationModal = ({
         return null;
     }
 
-
     return (
-        <div className="form-creation-modal-overlay">
+        <div className="form-creation-modal-overlay" dir={isRTL ? 'rtl' : 'ltr'}>
             <div className="form-creation-modal-content">
                 <div className="form-creation-modal-header">
                     <h3>
                         <FileText size={24} />
-                        {templateType
-                            ? t('forms.createFromTemplate', 'Create Form from Template')
-                            : t('forms.createNewForm', 'Create New Form')
-                        }
+                        {t('forms.createEventRegistration', 'Create Event Registration Form')}
                     </h3>
                     <button className="form-creation-modal-close" onClick={handleClose}>
                         <X size={20} />
@@ -262,21 +308,14 @@ const FormCreationModal = ({
                             </div>
 
                             <div className="form-group">
-                                <label>{t('forms.formType', 'Form Type')}</label>
+                                <label>{t('forms.status', 'Status')}</label>
                                 <select
-                                    value={formData.type}
-                                    onChange={(e) => handleInputChange('type', e.target.value)}
+                                    value={formData.status}
+                                    onChange={(e) => handleInputChange('status', e.target.value)}
                                     className="form-select"
                                 >
-                                    <option value="event_registration">
-                                        {t('forms.types.eventRegistration', 'Event Registration')}
-                                    </option>
-                                    <option value="training_registration">
-                                        {t('forms.types.trainingRegistration', 'Training Registration')}
-                                    </option>
-                                    <option value="feedback">
-                                        {t('forms.types.feedback', 'Feedback')}
-                                    </option>
+                                    <option value="draft">{t('forms.status.draft', 'Draft')}</option>
+                                    <option value="active">{t('forms.status.active', 'Active')}</option>
                                 </select>
                             </div>
 
@@ -289,18 +328,6 @@ const FormCreationModal = ({
                                     className="form-textarea"
                                     rows={3}
                                 />
-                            </div>
-
-                            <div className="form-group">
-                                <label>{t('forms.status', 'Status')}</label>
-                                <select
-                                    value={formData.status}
-                                    onChange={(e) => handleInputChange('status', e.target.value)}
-                                    className="form-select"
-                                >
-                                    <option value="draft">{t('forms.status.draft', 'Draft')}</option>
-                                    <option value="active">{t('forms.status.active', 'Active')}</option>
-                                </select>
                             </div>
                         </div>
                     </div>
@@ -332,12 +359,53 @@ const FormCreationModal = ({
                         </div>
                     </div>
 
-                    {/* Event Details - Updated with Date and Time Pickers */}
+                    {/* Event Selection & Details */}
                     <div className="form-section">
                         <h4>
                             <Calendar size={18} />
                             {t('forms.eventDetails', 'Event Details')}
                         </h4>
+
+                        {/* Event Selection */}
+                        <div className="form-group full-width">
+                            <label>
+                                {t('forms.selectEvent', 'Select Existing Event')}
+                                <button
+                                    type="button"
+                                    onClick={loadEvents}
+                                    className="refresh-events-btn"
+                                    disabled={loadingEvents}
+                                    title={t('forms.refreshEvents', 'Refresh Events')}
+                                >
+                                    <Refresh size={14} className={loadingEvents ? 'spinning' : ''} />
+                                </button>
+                            </label>
+                            <select
+                                value={selectedEventId}
+                                onChange={(e) => handleEventSelection(e.target.value)}
+                                className="form-select"
+                                disabled={loadingEvents}
+                            >
+                                <option value="">
+                                    {loadingEvents
+                                        ? t('forms.loadingEvents', 'Loading events...')
+                                        : t('forms.selectEventOption', 'Select an event or enter manually')
+                                    }
+                                </option>
+                                {events.map(event => (
+                                    <option key={event.id} value={event.id}>
+                                        🏁 {event.name} {event.date && event.date !== 'Date TBD' ? `(${event.date})` : ''}
+                                    </option>
+                                ))}
+                            </select>
+                            {selectedEventId && (
+                                <div className="selected-event-info">
+                                    <small>
+                                        {t('forms.eventSelected', 'Event selected - form fields have been auto-filled')}
+                                    </small>
+                                </div>
+                            )}
+                        </div>
 
                         <div className="form-grid">
                             <div className="form-group">
