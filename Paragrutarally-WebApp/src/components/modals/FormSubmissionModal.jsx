@@ -1,4 +1,4 @@
-// src/components/modals/FormSubmissionModal.jsx - Unified Form Submission Modal
+// src/components/modals/FormSubmissionModal.jsx - Complete Implementation
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { usePermissions } from '../../hooks/usePermissions';
@@ -6,7 +6,7 @@ import {
     createFormSubmission,
     uploadDeclarationFile
 } from '../../services/formService';
-import { getUserKids } from '../../services/userService';
+import { getKidsByParent } from '../../services/kidService';
 import {
     IconX as X,
     IconUser as User,
@@ -20,7 +20,8 @@ import {
     IconCalendar as Calendar,
     IconMapPin as MapPin,
     IconClock as Clock,
-    IconCheck as Check
+    IconCheck as Check,
+    IconExternalLink as ExternalLink
 } from '@tabler/icons-react';
 import './FormSubmissionModal.css';
 
@@ -28,7 +29,7 @@ const FormSubmissionModal = ({
                                  isOpen,
                                  onClose,
                                  form,
-                                 userType = 'parent', // 'parent' or 'instructor'
+                                 userType = 'parent',
                                  onSubmit
                              }) => {
     const { t } = useLanguage();
@@ -58,8 +59,11 @@ const FormSubmissionModal = ({
     useEffect(() => {
         if (isOpen && userType === 'parent' && user?.uid) {
             loadUserKids();
+            // Debug user data
+            console.log('🔍 DEBUG: Full userData object:', userData);
+            console.log('🔍 DEBUG: userData keys:', Object.keys(userData || {}));
         }
-    }, [isOpen, userType, user]);
+    }, [isOpen, userType, user, userData]);
 
     // Reset form when modal opens/closes
     useEffect(() => {
@@ -79,12 +83,33 @@ const FormSubmissionModal = ({
 
     // Check for declaration requirements when kids are selected
     useEffect(() => {
-        checkDeclarationRequirements();
-    }, [formData.kidIds, userKids]);
+        if (userType === 'parent') {
+            checkDeclarationRequirements();
+        }
+    }, [formData.kidIds, userKids, userType]);
+
+    // Update extra attendees based on count
+    useEffect(() => {
+        if (formData.confirmationStatus === 'attending') {
+            const baseCount = 1 + formData.kidIds.length; // Parent + selected kids
+            const extraCount = Math.max(0, formData.attendeesCount - baseCount);
+
+            setFormData(prev => ({
+                ...prev,
+                extraAttendees: Array(extraCount).fill('').map((_, index) => {
+                    // Preserve existing data if available
+                    const existing = prev.extraAttendees[index] || '';
+                    return existing;
+                })
+            }));
+        }
+    }, [formData.attendeesCount, formData.kidIds, formData.confirmationStatus]);
 
     const loadUserKids = async () => {
         try {
-            const kids = await getUserKids(user.uid);
+            console.log('🔍 Loading kids for parent:', user.uid);
+            const kids = await getKidsByParent(user.uid);
+            console.log('✅ Loaded kids:', kids);
             setUserKids(kids || []);
         } catch (error) {
             console.error('❌ Error loading user kids:', error);
@@ -93,7 +118,7 @@ const FormSubmissionModal = ({
     };
 
     const checkDeclarationRequirements = () => {
-        if (userType !== 'parent' || !userKids.length) {
+        if (!userKids.length || formData.kidIds.length === 0) {
             setKidsWithoutDeclaration([]);
             setShowDeclarationWarning(false);
             return;
@@ -106,19 +131,6 @@ const FormSubmissionModal = ({
         setShowDeclarationWarning(kidsNeedingDeclaration.length > 0);
     };
 
-    // Update extra attendees array based on count
-    useEffect(() => {
-        const baseCount = 1 + formData.kidIds.length; // User + selected kids
-        const extraCount = Math.max(0, formData.attendeesCount - baseCount);
-
-        setFormData(prev => ({
-            ...prev,
-            extraAttendees: Array(extraCount).fill('').map((_, index) =>
-                prev.extraAttendees[index] || ''
-            )
-        }));
-    }, [formData.attendeesCount, formData.kidIds]);
-
     const handleInputChange = (field, value) => {
         setFormData(prev => ({
             ...prev,
@@ -127,20 +139,45 @@ const FormSubmissionModal = ({
     };
 
     const handleKidSelection = (kidId, selected) => {
-        setFormData(prev => ({
-            ...prev,
-            kidIds: selected
+        setFormData(prev => {
+            const newKidIds = selected
                 ? [...prev.kidIds, kidId]
-                : prev.kidIds.filter(id => id !== kidId)
-        }));
+                : prev.kidIds.filter(id => id !== kidId);
+
+            // Auto-adjust attendee count when kids are selected/deselected
+            const newAttendeeCount = Math.max(prev.attendeesCount, 1 + newKidIds.length);
+
+            return {
+                ...prev,
+                kidIds: newKidIds,
+                attendeesCount: newAttendeeCount
+            };
+        });
     };
 
-    const handleExtraAttendeeChange = (index, value) => {
+    const handleExtraAttendeeChange = (index, field, value) => {
         setFormData(prev => ({
             ...prev,
-            extraAttendees: prev.extraAttendees.map((attendee, i) =>
-                i === index ? value : attendee
-            )
+            extraAttendees: prev.extraAttendees.map((attendee, i) => {
+                if (i === index) {
+                    const parts = (attendee || '').split('|');
+                    const firstName = parts[0] || '';
+                    const lastName = parts[1] || '';
+                    const phone = parts[2] || '';
+
+                    switch (field) {
+                        case 'firstName':
+                            return `${value}|${lastName}|${phone}`;
+                        case 'lastName':
+                            return `${firstName}|${value}|${phone}`;
+                        case 'phone':
+                            return `${firstName}|${lastName}|${value}`;
+                        default:
+                            return attendee;
+                    }
+                }
+                return attendee;
+            })
         }));
     };
 
@@ -179,7 +216,9 @@ const FormSubmissionModal = ({
             // Validate extra attendees
             const requiredExtraAttendees = Math.max(0, formData.attendeesCount - 1 - formData.kidIds.length);
             for (let i = 0; i < requiredExtraAttendees; i++) {
-                if (!formData.extraAttendees[i] || formData.extraAttendees[i].trim() === '') {
+                const attendee = formData.extraAttendees[i] || '';
+                const parts = attendee.split('|');
+                if (!parts[0] || !parts[1] || parts[0].trim() === '' || parts[1].trim() === '') {
                     alert(t('forms.validation.extraAttendeesRequired', 'Please fill in all extra attendee details'));
                     return false;
                 }
@@ -213,21 +252,33 @@ const FormSubmissionModal = ({
                 submitterId: user.uid,
                 updatedAt: new Date(),
                 attendeesCount: formData.attendeesCount,
-                formType: userType,
-                // Optional fields based on form data
-                ...(formData.kidIds.length > 0 && { kidIds: formData.kidIds }),
-                ...(formData.extraAttendees.some(a => a.trim()) && {
-                    extraAttendees: formData.extraAttendees.filter(a => a.trim())
-                }),
-                ...(formData.shirts.some(s => s) && {
-                    shirts: formData.shirts.filter(s => s)
-                }),
-                ...(formData.extraShirts.some(s => s) && {
-                    extraShirts: formData.extraShirts.filter(s => s)
-                }),
-                ...(declarationUrl && { declarationUploaded: declarationUrl }),
-                ...(formData.motoForLife.trim() && { motoForLife: formData.motoForLife.trim() })
+                formType: userType
             };
+
+            // Add optional fields based on form data
+            if (formData.kidIds.length > 0) {
+                submissionData.kidIds = formData.kidIds;
+            }
+
+            if (formData.extraAttendees.some(a => a && a.trim())) {
+                submissionData.extraAttendees = formData.extraAttendees.filter(a => a && a.trim());
+            }
+
+            if (formData.shirts.some(s => s)) {
+                submissionData.shirts = formData.shirts.filter(s => s);
+            }
+
+            if (formData.extraShirts.some(s => s)) {
+                submissionData.extraShirts = formData.extraShirts.filter(s => s);
+            }
+
+            if (declarationUrl) {
+                submissionData.declarationUploaded = declarationUrl;
+            }
+
+            if (formData.motoForLife.trim()) {
+                submissionData.motoForLife = formData.motoForLife.trim();
+            }
 
             // Submit to database
             await createFormSubmission(submissionData);
@@ -263,6 +314,9 @@ const FormSubmissionModal = ({
         return '';
     };
 
+    // Calculate required extra attendees
+    const requiredExtraAttendees = Math.max(0, formData.attendeesCount - 1 - formData.kidIds.length);
+
     return (
         <div className="form-submission-modal-overlay">
             <div className="form-submission-modal-content">
@@ -281,7 +335,7 @@ const FormSubmissionModal = ({
                     <div className="form-section">
                         <h4>
                             <Calendar size={18} />
-                            {t('forms.eventInformation', 'Event Information')}
+                            {t('forms.eventDetails', 'Event Details')}
                         </h4>
 
                         <div className="event-info-display">
@@ -305,11 +359,61 @@ const FormSubmissionModal = ({
                                     <span>{form.eventDetails.location}</span>
                                 </div>
                             )}
+
+                            {form.eventDetails?.googleMapsLink && (
+                                <div className="event-info-item">
+                                    <a
+                                        href={form.eventDetails.googleMapsLink}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="link-button"
+                                    >
+                                        <MapPin size={16} />
+                                        {t('forms.googleMaps', 'Google Maps')}
+                                        <ExternalLink size={12} />
+                                    </a>
+                                </div>
+                            )}
+
+                            {form.eventDetails?.wazeLink && (
+                                <div className="event-info-item">
+                                    <a
+                                        href={form.eventDetails.wazeLink}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="link-button"
+                                    >
+                                        <MapPin size={16} />
+                                        {t('forms.waze', 'Waze')}
+                                        <ExternalLink size={12} />
+                                    </a>
+                                </div>
+                            )}
                         </div>
 
                         {form.eventDetails?.notes && (
                             <div className="event-notes">
                                 <p>{form.eventDetails.notes}</p>
+                            </div>
+                        )}
+
+                        {form.eventDetails?.paymentLink && (
+                            <div className="payment-section">
+                                <a
+                                    href={form.eventDetails.paymentLink}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="payment-button"
+                                >
+                                    {t('forms.paymentLink', 'Payment Link')}
+                                    <ExternalLink size={16} />
+                                </a>
+                            </div>
+                        )}
+
+                        {form.eventDetails?.closingNotes && (
+                            <div className="closing-notes">
+                                <p>{form.eventDetails.closingNotes}</p>
                             </div>
                         )}
                     </div>
@@ -369,24 +473,50 @@ const FormSubmissionModal = ({
                     {/* Attendee Details - Only if attending */}
                     {formData.confirmationStatus === 'attending' && (
                         <>
-                            {/* User Information */}
+                            {/* Parent Information */}
                             <div className="form-section">
                                 <h4>
                                     <User size={18} />
-                                    {userType === 'parent'
-                                        ? t('forms.parentInformation', 'Parent Information')
-                                        : t('forms.instructorInformation', 'Instructor Information')
-                                    }
+                                    {t('forms.parentInformation', 'Parent Information')}
                                 </h4>
 
                                 <div className="user-info-display">
                                     <div className="info-item">
                                         <label>{t('forms.name', 'Name')}</label>
-                                        <span>{userData?.displayName || userData?.firstName + ' ' + userData?.lastName || 'N/A'}</span>
+                                        <span>{userData?.displayName || `${userData?.firstName || ''} ${userData?.lastName || ''}`.trim() || userData?.name || 'N/A'}</span>
                                     </div>
                                     <div className="info-item">
                                         <label>{t('forms.phoneNumber', 'Phone Number')}</label>
-                                        <span>{userData?.phoneNumber || 'N/A'}</span>
+                                        <span>
+                                            {(() => {
+                                                // Try different phone field combinations
+                                                const phoneFields = [
+                                                    userData?.phoneNumber,
+                                                    userData?.phone,
+                                                    userData?.mobile,
+                                                    userData?.cellphone,
+                                                    userData?.contactInfo?.phone,
+                                                    userData?.personalInfo?.phone,
+                                                    userData?.parentInfo?.phone,
+                                                    // Check if it's nested deeper
+                                                    userData?.profile?.phone,
+                                                    userData?.profile?.phoneNumber
+                                                ];
+
+                                                const phone = phoneFields.find(field => field && field.toString().trim() !== '');
+
+                                                // Debug log
+                                                if (process.env.NODE_ENV === 'development') {
+                                                    console.log('🔍 DEBUG: Phone search result:', {
+                                                        found: phone,
+                                                        phoneFields: phoneFields,
+                                                        userData: userData
+                                                    });
+                                                }
+
+                                                return phone || 'N/A';
+                                            })()}
+                                        </span>
                                     </div>
                                 </div>
                             </div>
@@ -408,6 +538,7 @@ const FormSubmissionModal = ({
                                                     onChange={(e) => handleKidSelection(kid.id, e.target.checked)}
                                                 />
                                                 <span className="checkbox-label">
+                                                    <Users size={14} />
                                                     {kid.firstName} {kid.lastName}
                                                     {!kid.signedDeclaration && (
                                                         <AlertTriangle size={14} className="warning-icon" />
@@ -430,16 +561,20 @@ const FormSubmissionModal = ({
                                     <label>{t('forms.totalPeopleAttending', 'Total people attending (including yourself)')}</label>
                                     <input
                                         type="number"
-                                        min="1"
+                                        min={1 + formData.kidIds.length}
                                         value={formData.attendeesCount}
-                                        onChange={(e) => handleInputChange('attendeesCount', parseInt(e.target.value) || 1)}
+                                        onChange={(e) => handleInputChange('attendeesCount', Math.max(parseInt(e.target.value) || 1, 1 + formData.kidIds.length))}
                                         className="number-input"
                                     />
+                                    <small className="helper-text">
+                                        {t('forms.minimumAttendees', 'Minimum')}: {1 + formData.kidIds.length}
+                                        ({t('forms.youPlusKids', 'You + selected kids')})
+                                    </small>
                                 </div>
                             </div>
 
                             {/* Extra Attendees */}
-                            {formData.extraAttendees.length > 0 && (
+                            {requiredExtraAttendees > 0 && (
                                 <div className="form-section">
                                     <h4>
                                         <Users size={18} />
@@ -453,36 +588,29 @@ const FormSubmissionModal = ({
                                             <span>{t('forms.phoneNumber', 'Phone Number')}</span>
                                         </div>
 
-                                        {formData.extraAttendees.map((attendee, index) => {
-                                            const [firstName, lastName, phone] = (attendee || '').split('|');
+                                        {Array(requiredExtraAttendees).fill(null).map((_, index) => {
+                                            const attendee = formData.extraAttendees[index] || '';
+                                            const [firstName, lastName, phone] = attendee.split('|');
+
                                             return (
                                                 <div key={index} className="table-row">
                                                     <input
                                                         type="text"
                                                         placeholder={t('forms.firstName', 'First Name')}
                                                         value={firstName || ''}
-                                                        onChange={(e) => {
-                                                            const newValue = `${e.target.value}|${lastName || ''}|${phone || ''}`;
-                                                            handleExtraAttendeeChange(index, newValue);
-                                                        }}
+                                                        onChange={(e) => handleExtraAttendeeChange(index, 'firstName', e.target.value)}
                                                     />
                                                     <input
                                                         type="text"
                                                         placeholder={t('forms.lastName', 'Last Name')}
                                                         value={lastName || ''}
-                                                        onChange={(e) => {
-                                                            const newValue = `${firstName || ''}|${e.target.value}|${phone || ''}`;
-                                                            handleExtraAttendeeChange(index, newValue);
-                                                        }}
+                                                        onChange={(e) => handleExtraAttendeeChange(index, 'lastName', e.target.value)}
                                                     />
                                                     <input
                                                         type="tel"
                                                         placeholder={t('forms.phoneNumber', 'Phone Number')}
                                                         value={phone || ''}
-                                                        onChange={(e) => {
-                                                            const newValue = `${firstName || ''}|${lastName || ''}|${e.target.value}`;
-                                                            handleExtraAttendeeChange(index, newValue);
-                                                        }}
+                                                        onChange={(e) => handleExtraAttendeeChange(index, 'phone', e.target.value)}
                                                     />
                                                 </div>
                                             );
