@@ -7,11 +7,11 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { usePermissions } from '../../hooks/usePermissions.jsx';
 import { addKid, getNextParticipantNumber } from '../../services/kidService';
 import { getAllInstructors } from '../../services/teamService'; // Added import for instructor service
-import { uploadKidPhoto, validatePhotoFile, resizeImage, getKidPhotoInfo } from '../../services/kidPhotoService';
-import { createEmptyKid, validateKid, getFormStatusOptions } from '../../schemas/kidSchema';
+import { uploadKidPhoto, validatePhotoFile, resizeImage, getKidPhotoInfo } from '@/services/kidPhotoService.js';
+import { createEmptyKid, validateKid, getFormStatusOptions } from '@/schemas/kidSchema.js';
 import { getDocs, collection, query, where } from 'firebase/firestore';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { db } from '../../firebase/config';
+import { db } from '@/firebase/config.js';
 import {
     IconUserCircle as Baby,
     IconPlus as Plus,
@@ -53,6 +53,8 @@ const AddKidPage = () => {
     const [fieldErrors, setFieldErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [loadingError, setLoadingError] = useState(null);
+    const [selectedTeamInstructor, setSelectedTeamInstructor] = useState('');
+    const [loadingTeamInstructor, setLoadingTeamInstructor] = useState(false);
 
     // Parent selection state
     const [selectedParentId, setSelectedParentId] = useState('');
@@ -68,6 +70,69 @@ const AddKidPage = () => {
     useEffect(() => {
         loadInitialData();
     }, []);
+
+    const handleTeamSelection = async (teamId) => {
+        // Update the form data
+        handleInputChange('teamId', teamId);
+
+        // Clear instructor info if no team selected
+        if (!teamId) {
+            setSelectedTeamInstructor('');
+            setFormData(prev => ({
+                ...prev,
+                instructorId: '' // Clear instructor ID as well
+            }));
+            return;
+        }
+
+        // Fetch team details to get instructor
+        try {
+            setLoadingTeamInstructor(true);
+
+            // Import the team service function
+            const { getTeamWithDetails } = await import('../../services/teamService');
+            const teamDetails = await getTeamWithDetails(teamId);
+
+            if (teamDetails) {
+                // Check if team has a team leader (primary instructor)
+                if (teamDetails.teamLeader) {
+                    setSelectedTeamInstructor(teamDetails.teamLeader.name || teamDetails.teamLeader.displayName || t('addKid.unknownInstructor', 'Unknown Instructor'));
+                    // Set the instructor ID in form data
+                    setFormData(prev => ({
+                        ...prev,
+                        instructorId: teamDetails.teamLeader.id
+                    }));
+                }
+                // If no team leader, check if there are instructors in the array
+                else if (teamDetails.instructors && teamDetails.instructors.length > 0) {
+                    const primaryInstructor = teamDetails.instructors[0]; // Use first instructor
+                    setSelectedTeamInstructor(primaryInstructor.name || primaryInstructor.displayName || t('addKid.unknownInstructor', 'Unknown Instructor'));
+                    // Set the instructor ID in form data
+                    setFormData(prev => ({
+                        ...prev,
+                        instructorId: primaryInstructor.id
+                    }));
+                }
+                // No instructor assigned to team
+                else {
+                    setSelectedTeamInstructor(t('addKid.noInstructorAssignedToTeam', 'No instructor assigned to this team'));
+                    setFormData(prev => ({
+                        ...prev,
+                        instructorId: ''
+                    }));
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching team instructor:', error);
+            setSelectedTeamInstructor(t('addKid.errorLoadingInstructor', 'Error loading instructor'));
+            setFormData(prev => ({
+                ...prev,
+                instructorId: ''
+            }));
+        } finally {
+            setLoadingTeamInstructor(false);
+        }
+    };
 
     const loadInitialData = async () => {
         try {
@@ -798,8 +863,9 @@ const AddKidPage = () => {
                                         </label>
                                         <select
                                             value={formData.teamId}
-                                            onChange={(e) => handleInputChange('teamId', e.target.value)}
+                                            onChange={(e) => handleTeamSelection(e.target.value)}
                                             className="form-select"
+                                            dir={isRTL ? 'rtl' : 'ltr'}
                                         >
                                             <option value="">{t('addKid.noTeamAssigned', '🚫 No Team Assigned (Yet!)')}</option>
                                             {teams.map(team => (
@@ -815,20 +881,22 @@ const AddKidPage = () => {
                                     <div className="field-wrapper">
                                         <label className="form-label">
                                             <User className="label-icon" size={16} />
-                                            {t('addKid.racingInstructor', 'Racing Instructor')}
+                                            {t('addKid.teamInstructor', 'Team Instructor')}
                                         </label>
-                                        <select
-                                            value={formData.instructorId}
-                                            onChange={(e) => handleInputChange('instructorId', e.target.value)}
-                                            className="form-select"
-                                        >
-                                            <option value="">{t('addKid.noInstructorAssigned', '👨‍🏫 No Instructor Assigned')}</option>
-                                            {instructors.map(instructor => (
-                                                <option key={instructor.id} value={instructor.id}>
-                                                    🏎️ {getInstructorDisplayName(instructor)}
-                                                </option>
-                                            ))}
-                                        </select>
+                                        <div className="instructor-display" dir={isRTL ? 'rtl' : 'ltr'}>
+                                            {loadingTeamInstructor ? (
+                                                <div className="loading-instructor">
+                                                    <div className="loading-spinner-mini"></div>
+                                                    <span>{t('addKid.loadingInstructor', 'Loading instructor...')}</span>
+                                                </div>
+                                            ) : (
+                                                <div className={`instructor-info ${!selectedTeamInstructor ? 'empty' : ''}`}>
+                            <span>
+                                {selectedTeamInstructor || t('addKid.selectTeamFirst', 'Select a team to see instructor')}
+                            </span>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -863,12 +931,12 @@ const AddKidPage = () => {
 
                                 <div className="form-group">
                                     <label className="form-label checkbox-label">
+                                        {t('addKid.healthDeclarationSigned', '🛡️ Racing Safety Declaration Signed')}
                                         <input
                                             type="checkbox"
                                             checked={formData.signedDeclaration}
                                             onChange={(e) => handleInputChange('signedDeclaration', e.target.checked)}
                                         />
-                                        {t('addKid.healthDeclarationSigned', '🛡️ Racing Safety Declaration Signed')}
                                     </label>
                                 </div>
                             </div>

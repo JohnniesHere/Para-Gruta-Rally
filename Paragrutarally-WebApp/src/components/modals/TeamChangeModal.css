@@ -712,3 +712,360 @@
         display: none !important;
     }
 }
+
+/* ========================================
+   RTL SUPPORT FOR CHECKMARK AND LAYOUT
+   ======================================== */
+
+/* RTL Support for Selected Icon (Checkmark) */
+[dir="rtl"] .team-modal-selected-icon {
+    position: absolute;
+    top: -10px;
+    left: -10px; /* Move to left in RTL */
+    right: auto; /* Reset right positioning */
+    background: var(--team-modal-success-color);
+    color: white;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+}
+
+/* RTL Support for Team Headers */
+[dir="rtl"] .team-modal-team-header {
+    direction: rtl;
+    text-align: right;
+}
+
+/* RTL Support for Team Details */
+[dir="rtl"] .team-modal-team-details {
+    direction: rtl;
+    text-align: right;
+}
+
+[dir="rtl"] .team-modal-team-members,
+[dir="rtl"] .team-modal-team-instructors {
+    direction: rtl;
+    flex-direction: row-reverse;
+    text-align: right;
+}
+
+/* RTL Support for Modal Content */
+[dir="rtl"] .team-modal-section-header {
+    direction: rtl;
+    flex-direction: row-reverse;
+    text-align: right;
+}
+
+[dir="rtl"] .team-modal-current-team {
+    direction: rtl;
+    flex-direction: row-reverse;
+    text-align: right;
+}
+
+/* RTL Support for Preview */
+[dir="rtl"] .team-modal-preview-header {
+    direction: rtl;
+    flex-direction: row-reverse;
+    text-align: right;
+}
+
+[dir="rtl"] .team-modal-preview-details > div {
+    direction: rtl;
+    flex-direction: row-reverse;
+    text-align: right;
+}
+
+/* RTL Support for Actions */
+[dir="rtl"] .team-modal-actions {
+    direction: rtl;
+}
+
+[dir="rtl"] .team-modal-action-buttons {
+    flex-direction: row-reverse;
+}
+
+/* ========================================
+   FULL TEAM STYLING
+   ======================================== */
+
+.team-modal-team-full {
+    opacity: 0.6 !important;
+    cursor: not-allowed !important;
+    background: var(--team-modal-bg-tertiary) !important;
+    border-color: var(--team-modal-border-color) !important;
+}
+
+.team-modal-team-full:hover {
+    transform: none !important;
+    box-shadow: 0 2px 8px var(--team-modal-shadow-color) !important;
+    border-color: var(--team-modal-border-color) !important;
+}
+
+.team-modal-team-full-notice {
+    font-size: 12px;
+    color: var(--team-modal-warning-color);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 8px;
+    padding: 4px 8px;
+    background: rgba(245, 158, 11, 0.1);
+    border-radius: 4px;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+/* RTL Support for Full Team Notice */
+[dir="rtl"] .team-modal-team-full-notice {
+    direction: rtl;
+    text-align: right;
+    flex-direction: row-reverse;
+}
+
+/* ========================================
+   RESPONSIVE RTL ADJUSTMENTS
+   ======================================== */
+
+@media (max-width: 640px) {
+    [dir="rtl"] .team-modal-title {
+        direction: rtl;
+        text-align: center;
+    }
+
+    [dir="rtl"] .team-modal-action-buttons {
+        flex-direction: column;
+    }
+}
+
+/* Modal Title */
+[dir="rtl"] .team-modal-title {
+    direction: rtl;
+    text-align: right;
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .team-modal-title h3 {
+    direction: rtl;
+    text-align: right;
+}
+
+/* Section Headers */
+[dir="rtl"] .team-modal-section-header {
+    direction: rtl;
+    text-align: right;
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .team-modal-section-header h4 {
+    direction: rtl;
+    text-align: right;
+    flex: 1;
+}
+
+/* Current Team Display */
+[dir="rtl"] .team-modal-current-team {
+    direction: rtl;
+    text-align: right;
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .team-modal-current-team span {
+    direction: rtl;
+    text-align: right;
+    width: 100%;
+}
+
+/* Team Card Headers */
+[dir="rtl"] .team-modal-team-header {
+    direction: rtl;
+    text-align: right;
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .team-modal-team-name {
+    direction: rtl;
+    text-align: right;
+    flex: 1;
+}
+
+/* Team Details */
+[dir="rtl"] .team-modal-team-details {
+    direction: rtl;
+    text-align: right;
+}
+
+[dir="rtl"] .team-modal-team-members,
+[dir="rtl"] .team-modal-team-instructors {
+    direction: rtl;
+    text-align: right;
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .team-modal-team-description {
+    direction: rtl;
+    text-align: right;
+}
+
+/* Selected Icon (Checkmark) */
+[dir="rtl"] .team-modal-selected-icon {
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    right: auto;
+    background: var(--team-modal-success-color);
+    color: white;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+}
+
+/* Preview Section */
+[dir="rtl"] .team-modal-preview-header {
+    direction: rtl;
+    text-align: right;
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .team-modal-preview-name {
+    direction: rtl;
+    text-align: right;
+    flex: 1;
+}
+
+[dir="rtl"] .team-modal-preview-details {
+    direction: rtl;
+    text-align: right;
+}
+
+[dir="rtl"] .team-modal-preview-details > div {
+    direction: rtl;
+    text-align: right;
+    flex-direction: row-reverse;
+}
+
+/* Button Text */
+[dir="rtl"] .team-modal-btn {
+    direction: rtl;
+    text-align: center;
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .team-modal-action-buttons {
+    direction: rtl;
+    flex-direction: row-reverse;
+}
+
+/* Error Messages */
+[dir="rtl"] .team-modal-error {
+    direction: rtl;
+    text-align: right;
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .team-modal-error-content {
+    direction: rtl;
+    text-align: right;
+    flex: 1;
+}
+
+/* Empty State */
+[dir="rtl"] .team-modal-empty {
+    direction: rtl;
+    text-align: center;
+}
+
+[dir="rtl"] .team-modal-empty h4,
+[dir="rtl"] .team-modal-empty p {
+    direction: rtl;
+    text-align: center;
+}
+
+/* Loading State */
+[dir="rtl"] .team-modal-loading {
+    direction: rtl;
+    text-align: center;
+}
+
+[dir="rtl"] .team-modal-loading p {
+    direction: rtl;
+    text-align: center;
+}
+
+/* Full Team Notice */
+[dir="rtl"] .team-modal-team-full-notice {
+    direction: rtl;
+    text-align: right;
+    flex-direction: row-reverse;
+}
+
+/* Section Icons - Adjust margins for RTL */
+[dir="rtl"] .team-modal-section-icon {
+    margin-left: 0;
+    margin-right: 12px;
+}
+
+[dir="rtl"] .team-modal-team-icon,
+[dir="rtl"] .team-modal-current-icon,
+[dir="rtl"] .team-modal-preview-icon {
+    margin-left: 8px;
+    margin-right: 0;
+}
+
+/* Ensure all text content is RTL */
+[dir="rtl"] .team-modal-container {
+    direction: rtl;
+}
+
+[dir="rtl"] .team-modal-body {
+    direction: rtl;
+    text-align: right;
+}
+
+[dir="rtl"] .team-modal-section {
+    direction: rtl;
+    text-align: right;
+}
+
+/* Button icons alignment */
+[dir="rtl"] .team-modal-btn svg {
+    margin-left: 8px;
+    margin-right: 0;
+}
+
+[dir="rtl"] .team-modal-btn .team-modal-spinner-mini {
+    margin-left: 8px;
+    margin-right: 0;
+}
+
+/* Responsive RTL */
+@media (max-width: 640px) {
+    [dir="rtl"] .team-modal-title {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    [dir="rtl"] .team-modal-action-buttons {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    [dir="rtl"] .team-modal-btn {
+        width: 100%;
+        justify-content: center;
+        flex-direction: row-reverse;
+    }
+}
+
+@media (max-width: 480px) {
+    [dir="rtl"] .team-modal-title h3 {
+        text-align: center;
+    }
+}

@@ -65,6 +65,23 @@
     border: 1px solid var(--border-color, #e5e7eb);
 }
 
+/* RTL Support for Event Headers */
+[dir="rtl"] .event-headers,
+[dir="rtl"] .event-item {
+    /* Reverse the grid column order for RTL */
+    grid-template-columns: 1.5fr 2fr 1fr;
+    direction: rtl;
+}
+
+[dir="rtl"] .event-header-date,
+[dir="rtl"] .event-header-name,
+[dir="rtl"] .event-header-location,
+[dir="rtl"] .event-date,
+[dir="rtl"] .event-name,
+[dir="rtl"] .event-location {
+    text-align: right;
+}
+
 .dark-mode .event-headers {
     background-color: var(--bg-secondary);
     color: var(--text-secondary);

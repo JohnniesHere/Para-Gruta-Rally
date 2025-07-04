@@ -1,4 +1,4 @@
-// src/components/TeamChangeModal.jsx - Fixed with translations
+// src/components/TeamChangeModal.jsx - FIXED VERSION
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { getAllTeams } from '../../services/teamService';
@@ -23,41 +23,64 @@ const TeamChangeModal = ({ kid, isOpen, onClose, onTeamChanged }) => {
     const [error, setError] = useState(null);
     const [currentTeamName, setCurrentTeamName] = useState('');
 
-
-
-
+    // Initialize modal data when it opens
     useEffect(() => {
-        const fetchCurrentTeam = async () => {
-            if (kid?.teamId) {
-                try {
-                    const { getTeamById } = await import('../../services/teamService');
-                    const team = await getTeamById(kid.teamId);
-                    setCurrentTeamName(team?.name || '');
-                } catch (error) {
-                    console.error('Error fetching current team:', error);
-                    setCurrentTeamName('');
-                }
-            } else {
-                setCurrentTeamName('');
-            }
-        };
-
         if (isOpen && kid) {
-            fetchCurrentTeam();
+            console.log('🔄 Modal opened for kid:', kid);
+
+            // Set current selection to kid's current team
+            const currentTeam = kid?.teamId || '';
+            setSelectedTeamId(currentTeam);
+            console.log('🎯 Setting initial selected team:', currentTeam);
+
+            // Load teams and current team info
+            loadTeams();
+            fetchCurrentTeamName();
+        } else {
+            // Reset state when modal closes
+            setTeams([]);
+            setSelectedTeamId('');
+            setCurrentTeamName('');
+            setError(null);
         }
-    }, [isOpen, kid, t]);
+    }, [isOpen, kid]);
+
+    const fetchCurrentTeamName = async () => {
+        if (kid?.teamId) {
+            try {
+                console.log('🔍 Fetching current team name for teamId:', kid.teamId);
+                const { getTeamById } = await import('../../services/teamService');
+                const team = await getTeamById(kid.teamId);
+                const teamName = team?.name || t('teamChange.unknownTeam', 'Unknown Team');
+                setCurrentTeamName(teamName);
+                console.log('✅ Current team name:', teamName);
+            } catch (error) {
+                console.error('❌ Error fetching current team:', error);
+                setCurrentTeamName(t('teamChange.unknownTeam', 'Unknown Team'));
+            }
+        } else {
+            setCurrentTeamName('');
+            console.log('ℹ️ Kid has no current team');
+        }
+    };
 
     const loadTeams = async () => {
         try {
             setIsLoading(true);
             setError(null);
+            console.log('🔄 Loading all teams...');
 
             const teamsData = await getAllTeams();
+            console.log('📊 Raw teams data:', teamsData);
+
+            // Filter only active teams but don't filter by capacity here
             const activeTeams = teamsData.filter(team => team.active !== false);
+            console.log('✅ Active teams:', activeTeams);
+
             setTeams(activeTeams);
 
         } catch (err) {
-            console.error(t('debug.errorLoadingTeams', 'Error loading teams:'), err);
+            console.error('❌ Error loading teams:', err);
             setError(t('teamChange.failedToLoadTeams', 'Failed to load teams: {error}', { error: err.message }));
         } finally {
             setIsLoading(false);
@@ -65,7 +88,11 @@ const TeamChangeModal = ({ kid, isOpen, onClose, onTeamChanged }) => {
     };
 
     const handleSave = async () => {
-        if (selectedTeamId === (kid?.teamId || '')) {
+        const currentTeamId = kid?.teamId || '';
+
+        // If no change, just close
+        if (selectedTeamId === currentTeamId) {
+            console.log('ℹ️ No team change needed');
             onClose();
             return;
         }
@@ -73,14 +100,18 @@ const TeamChangeModal = ({ kid, isOpen, onClose, onTeamChanged }) => {
         try {
             setIsSaving(true);
             setError(null);
+            console.log('💾 Saving team change:', { from: currentTeamId, to: selectedTeamId });
 
             await updateKidTeam(kid.id, selectedTeamId || null);
+            console.log('✅ Team updated successfully');
 
             if (onTeamChanged) {
                 onTeamChanged(kid.id, selectedTeamId || null);
             }
+
+            onClose();
         } catch (err) {
-            console.error(t('debug.errorUpdatingTeam', 'Error updating team:'), err);
+            console.error('❌ Error updating team:', err);
             setError(t('teamChange.failedToUpdateTeam', 'Failed to update team: {error}', { error: err.message }));
             setIsSaving(false);
         }
@@ -90,21 +121,35 @@ const TeamChangeModal = ({ kid, isOpen, onClose, onTeamChanged }) => {
         try {
             setIsSaving(true);
             setError(null);
+            console.log('🗑️ Removing kid from current team');
 
             await updateKidTeam(kid.id, null);
+            console.log('✅ Kid removed from team successfully');
 
             if (onTeamChanged) {
                 onTeamChanged(kid.id, null);
             }
+
+            onClose();
         } catch (err) {
-            console.error(t('debug.errorRemovingTeam', 'Error removing team:'), err);
+            console.error('❌ Error removing team:', err);
             setError(t('teamChange.failedToRemoveFromTeam', 'Failed to remove from team: {error}', { error: err.message }));
             setIsSaving(false);
         }
     };
 
     const handleTeamCardClick = (teamId) => {
+        console.log('🎯 Team card clicked:', teamId);
         setSelectedTeamId(teamId);
+    };
+
+    // Check if a team is full (but allow if kid is already in this team)
+    const isTeamFull = (team) => {
+        const currentMembers = team.kidIds?.length || 0;
+        const maxCapacity = team.maxCapacity || 15;
+        const isCurrentTeam = team.id === kid?.teamId;
+
+        return currentMembers >= maxCapacity && !isCurrentTeam;
     };
 
     if (!isOpen || !kid) {
@@ -113,6 +158,7 @@ const TeamChangeModal = ({ kid, isOpen, onClose, onTeamChanged }) => {
 
     const selectedTeam = teams.find(t => t.id === selectedTeamId);
     const kidName = kid?.personalInfo?.firstName || kid?.name || t('common.unnamedKid', 'Unnamed Kid');
+    const hasTeamChange = selectedTeamId !== (kid?.teamId || '');
 
     return (
         <div className="team-modal-overlay" onClick={onClose} dir={isRTL ? 'rtl' : 'ltr'}>
@@ -209,45 +255,64 @@ const TeamChangeModal = ({ kid, isOpen, onClose, onTeamChanged }) => {
                                     </div>
                                 ) : (
                                     <div className="team-modal-teams-grid">
-                                        {teams.map(team => (
-                                            <div
-                                                key={team.id}
-                                                className={`team-modal-team-card ${selectedTeamId === team.id ? 'team-modal-selected' : ''}`}
-                                                onClick={() => handleTeamCardClick(team.id)}
-                                            >
-                                                <div className="team-modal-team-header">
-                                                    <Users className="team-modal-team-icon" size={18} />
-                                                    <span className="team-modal-team-name">{team.name}</span>
-                                                    {selectedTeamId === team.id && (
-                                                        <Check className="team-modal-selected-icon" size={16} />
-                                                    )}
-                                                </div>
-                                                <div className="team-modal-team-details">
-                                                    <div className="team-modal-team-members">
-                                                        <Users size={14} />
-                                                        <span>
-                                                            {team.kidIds?.length || 0} / {team.maxCapacity || 15} {t('teamChange.members', 'members')}
+                                        {teams.map(team => {
+                                            const isFull = isTeamFull(team);
+                                            const isSelected = selectedTeamId === team.id;
+                                            const currentMembers = team.kidIds?.length || 0;
+                                            const maxCapacity = team.maxCapacity || 15;
+
+                                            return (
+                                                <div
+                                                    key={team.id}
+                                                    className={`team-modal-team-card ${isSelected ? 'team-modal-selected' : ''} ${isFull ? 'team-modal-team-full' : ''}`}
+                                                    onClick={() => !isFull && handleTeamCardClick(team.id)}
+                                                    style={{
+                                                        opacity: isFull ? 0.6 : 1,
+                                                        cursor: isFull ? 'not-allowed' : 'pointer'
+                                                    }}
+                                                >
+                                                    <div className="team-modal-team-header">
+                                                        <Users className="team-modal-team-icon" size={18} />
+                                                        <span className="team-modal-team-name">
+                                                            {team.name}
+                                                            {isFull && ' (מלא)'}
                                                         </span>
+                                                        {isSelected && (
+                                                            <Check className="team-modal-selected-icon" size={16} />
+                                                        )}
                                                     </div>
-                                                    {team.description && (
-                                                        <div className="team-modal-team-description">
-                                                            {team.description}
-                                                        </div>
-                                                    )}
-                                                    {team.instructorIds && team.instructorIds.length > 0 && (
-                                                        <div className="team-modal-team-instructors">
-                                                            <User size={12} />
+                                                    <div className="team-modal-team-details">
+                                                        <div className="team-modal-team-members">
+                                                            <Users size={14} />
                                                             <span>
-                                                                {team.instructorIds.length} {team.instructorIds.length !== 1
-                                                                ? t('teamChange.instructors', 'instructors')
-                                                                : t('teamChange.instructor', 'instructor')
-                                                            }
+                                                                {currentMembers} / {maxCapacity} {t('teamChange.members', 'members')}
                                                             </span>
                                                         </div>
-                                                    )}
+                                                        {team.description && (
+                                                            <div className="team-modal-team-description">
+                                                                {team.description}
+                                                            </div>
+                                                        )}
+                                                        {team.instructorIds && team.instructorIds.length > 0 && (
+                                                            <div className="team-modal-team-instructors">
+                                                                <User size={12} />
+                                                                <span>
+                                                                    {team.instructorIds.length} {team.instructorIds.length !== 1
+                                                                    ? t('teamChange.instructors', 'instructors')
+                                                                    : t('teamChange.instructor', 'instructor')
+                                                                }
+                                                                </span>
+                                                            </div>
+                                                        )}
+                                                        {isFull && (
+                                                            <div className="team-modal-team-full-notice">
+                                                                🔒 {t('teamChange.teamFull', 'Team is full')}
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        ))}
+                                            );
+                                        })}
                                     </div>
                                 )}
                             </div>
@@ -297,7 +362,7 @@ const TeamChangeModal = ({ kid, isOpen, onClose, onTeamChanged }) => {
 
                 {/* Modal Actions */}
                 <div className="team-modal-actions">
-                    {/* Remove Button */}
+                    {/* Remove Button - Only show if kid currently has a team */}
                     {kid?.teamId && (
                         <button
                             className="team-modal-btn team-modal-btn-danger"
@@ -329,11 +394,11 @@ const TeamChangeModal = ({ kid, isOpen, onClose, onTeamChanged }) => {
                             {t('common.cancel', 'Cancel')}
                         </button>
 
-                        {/* Save Button */}
+                        {/* Save Button - Only enabled if there's a change */}
                         <button
-                            className={`team-modal-btn team-modal-btn-primary ${selectedTeamId === (kid?.teamId || '') ? 'team-modal-btn-disabled' : ''}`}
+                            className={`team-modal-btn team-modal-btn-primary ${!hasTeamChange ? 'team-modal-btn-disabled' : ''}`}
                             onClick={handleSave}
-                            disabled={isSaving || isLoading || selectedTeamId === (kid?.teamId || '')}
+                            disabled={isSaving || isLoading || !hasTeamChange}
                         >
                             {isSaving ? (
                                 <>

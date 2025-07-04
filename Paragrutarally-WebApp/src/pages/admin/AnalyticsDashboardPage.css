@@ -877,7 +877,8 @@
    EVENTS LIST - SUBTLE
    ======================================== */
 
-.events-list {
+.analytics-page .events-list,
+.participation-panel .events-list {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 16px;
