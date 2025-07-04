@@ -1,12 +1,13 @@
-// src/components/modals/FormSubmissionModal.jsx - Fixed UI Issues
+// src/components/modals/EditSubmissionModal.jsx
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { usePermissions } from '../../hooks/usePermissions';
-import { createFormSubmission, uploadDeclarationFile } from '../../services/formService';
-import { getUserData, getUserKids } from '../../services/userService';
-import { getKidsByParent } from '../../services/kidService';
-import ViewSubmissionModal from './ViewSubmissionModal';
-import EditSubmissionModal from './EditSubmissionModal';
+import {
+    updateFormSubmission,
+    uploadDeclarationFile
+} from '@/services/formService.js';
+import { getUserData, getUserKids } from '@/services/userService.js';
+import { getKidsByParent } from '@/services/kidService.js';
 import {
     IconX as X,
     IconUser as User,
@@ -16,19 +17,20 @@ import {
     IconUpload as Upload,
     IconAlertTriangle as AlertTriangle,
     IconFileText as FileText,
-    IconPhone as Phone,
     IconCalendar as Calendar,
     IconMapPin as MapPin,
     IconClock as Clock,
     IconCheck as Check,
-    IconExternalLink as ExternalLink
+    IconExternalLink as ExternalLink,
+    IconEdit as Edit
 } from '@tabler/icons-react';
 import './FormSubmissionModal.css';
 
-const FormSubmissionModal = ({
+const EditSubmissionModal = ({
                                  isOpen,
                                  onClose,
                                  form,
+                                 submission,
                                  userType = 'parent',
                                  onSubmit
                              }) => {
@@ -64,21 +66,21 @@ const FormSubmissionModal = ({
         }
     }, [isOpen, user]);
 
-    // Reset form when modal opens/closes
+    // Populate form with existing submission data
     useEffect(() => {
-        if (isOpen) {
+        if (isOpen && submission) {
             setFormData({
-                confirmationStatus: 'needs to decide',
-                attendeesCount: 1,
-                kidIds: [],
-                extraAttendees: [],
-                shirts: ['', '', '', '', ''],
-                extraShirts: ['', '', '', '', ''],
-                declarationFile: null,
-                motoForLife: ''
+                confirmationStatus: submission.confirmationStatus || 'needs to decide',
+                attendeesCount: submission.attendeesCount || 1,
+                kidIds: submission.kidIds || [],
+                extraAttendees: submission.extraAttendees || [],
+                shirts: submission.shirts ? [...submission.shirts, ...Array(5 - submission.shirts.length).fill('')] : ['', '', '', '', ''],
+                extraShirts: submission.extraShirts ? [...submission.extraShirts, ...Array(5 - submission.extraShirts.length).fill('')] : ['', '', '', '', ''],
+                declarationFile: null, // Don't pre-populate file
+                motoForLife: submission.motoForLife || ''
             });
         }
-    }, [isOpen]);
+    }, [isOpen, submission]);
 
     // Check for declaration requirements when kids are selected
     useEffect(() => {
@@ -90,13 +92,12 @@ const FormSubmissionModal = ({
     // Update extra attendees based on count
     useEffect(() => {
         if (formData.confirmationStatus === 'attending') {
-            const baseCount = 1 + formData.kidIds.length; // Parent + selected kids
+            const baseCount = 1 + formData.kidIds.length;
             const extraCount = Math.max(0, formData.attendeesCount - baseCount);
 
             setFormData(prev => ({
                 ...prev,
                 extraAttendees: Array(extraCount).fill('').map((_, index) => {
-                    // Preserve existing data if available
                     const existing = prev.extraAttendees[index] || '';
                     return existing;
                 })
@@ -107,18 +108,16 @@ const FormSubmissionModal = ({
     const loadCompleteUserData = async () => {
         setIsLoadingUserData(true);
         try {
-            // Get complete user data from Firestore
+
             const userData = await getUserData(user.uid);
             setCompleteUserData(userData);
 
-            // If this is a parent, also load their kids using the userService
             if (userType === 'parent') {
                 try {
                     const kids = await getUserKids(user.uid);
                     setUserKids(kids || []);
                 } catch (kidsError) {
                     console.warn('⚠️ Failed to load kids from userService, trying fallback method');
-                    // Fallback to the original kidService method if needed
                     try {
                         const kids = await getKidsByParent(user.uid);
                         setUserKids(kids || []);
@@ -148,7 +147,8 @@ const FormSubmissionModal = ({
         const kidsNeedingDeclaration = selectedKids.filter(kid => !kid.signedDeclaration);
 
         setKidsWithoutDeclaration(kidsNeedingDeclaration);
-        setShowDeclarationWarning(kidsNeedingDeclaration.length > 0);
+        // Only show warning if no existing declaration and kids need one
+        setShowDeclarationWarning(kidsNeedingDeclaration.length > 0 && !submission?.declarationUploaded);
     };
 
     const handleInputChange = (field, value) => {
@@ -164,7 +164,6 @@ const FormSubmissionModal = ({
                 ? [...prev.kidIds, kidId]
                 : prev.kidIds.filter(id => id !== kidId);
 
-            // Auto-adjust attendee count when kids are selected/deselected
             const newAttendeeCount = Math.max(prev.attendeesCount, 1 + newKidIds.length);
 
             return {
@@ -233,7 +232,6 @@ const FormSubmissionModal = ({
                 return false;
             }
 
-            // Validate extra attendees
             const requiredExtraAttendees = Math.max(0, formData.attendeesCount - 1 - formData.kidIds.length);
             for (let i = 0; i < requiredExtraAttendees; i++) {
                 const attendee = formData.extraAttendees[i] || '';
@@ -253,9 +251,9 @@ const FormSubmissionModal = ({
 
         setIsSubmitting(true);
         try {
-            let declarationUrl = null;
+            let declarationUrl = submission?.declarationUploaded; // Keep existing declaration
 
-            // Upload declaration file if provided
+            // Upload new declaration file if provided
             if (formData.declarationFile) {
                 declarationUrl = await uploadDeclarationFile(
                     formData.declarationFile,
@@ -264,11 +262,9 @@ const FormSubmissionModal = ({
                 );
             }
 
-            // Prepare submission data (without timestamp fields)
-            const submissionData = {
-                formId: form.id,
+            // Prepare updated submission data
+            const updateData = {
                 confirmationStatus: formData.confirmationStatus,
-                submitterId: user.uid,
                 attendeesCount: formData.attendeesCount,
                 formType: userType
             };
@@ -276,57 +272,67 @@ const FormSubmissionModal = ({
 
             // Add optional fields based on form data
             if (formData.kidIds.length > 0) {
-                submissionData.kidIds = formData.kidIds;
+                updateData.kidIds = formData.kidIds;
+            } else {
+                updateData.kidIds = []; // Clear if no kids selected
             }
 
             if (formData.extraAttendees.some(a => a && a.trim())) {
-                submissionData.extraAttendees = formData.extraAttendees.filter(a => a && a.trim());
+                updateData.extraAttendees = formData.extraAttendees.filter(a => a && a.trim());
+            } else {
+                updateData.extraAttendees = []; // Clear if no extra attendees
             }
 
             if (formData.shirts.some(s => s)) {
-                submissionData.shirts = formData.shirts.filter(s => s);
+                updateData.shirts = formData.shirts.filter(s => s);
+            } else {
+                updateData.shirts = []; // Clear if no shirts
             }
 
             if (formData.extraShirts.some(s => s)) {
-                submissionData.extraShirts = formData.extraShirts.filter(s => s);
+                updateData.extraShirts = formData.extraShirts.filter(s => s);
+            } else {
+                updateData.extraShirts = []; // Clear if no extra shirts
             }
 
             if (declarationUrl) {
-                submissionData.declarationUploaded = declarationUrl;
+                updateData.declarationUploaded = declarationUrl;
             }
 
             if (formData.motoForLife.trim()) {
-                submissionData.motoForLife = formData.motoForLife.trim();
+                updateData.motoForLife = formData.motoForLife.trim();
+            } else {
+                updateData.motoForLife = ''; // Clear if empty
             }
 
 
-            // Submit to database
-            const submissionId = await createFormSubmission(submissionData);
+            // Update submission in database
+            await updateFormSubmission(submission.id, updateData);
 
             // Call success callback
             try {
-                onSubmit(submissionData);
+                onSubmit({ ...submission, ...updateData });
             } catch (callbackError) {
-                console.warn('⚠️ Callback error (submission succeeded):', callbackError);
+                console.warn('⚠️ Callback error (update succeeded):', callbackError);
             }
 
             onClose();
 
         } catch (error) {
-            console.error('❌ Error submitting form:', error);
+            console.error('❌ Error updating form:', error);
             console.error('❌ Error details:', {
                 message: error.message,
                 code: error.code,
                 stack: error.stack,
                 fullError: error
             });
-            alert(t('forms.error.submissionFailed', 'Failed to submit form. Please try again.'));
+            alert(t('forms.error.updateFailed', 'Failed to update form. Please try again.'));
         } finally {
             setIsSubmitting(false);
         }
     };
 
-    if (!isOpen || !form) {
+    if (!isOpen || !form || !submission) {
         return null;
     }
 
@@ -343,7 +349,6 @@ const FormSubmissionModal = ({
         return '';
     };
 
-    // Calculate required extra attendees
     const requiredExtraAttendees = Math.max(0, formData.attendeesCount - 1 - formData.kidIds.length);
 
     return (
@@ -351,8 +356,8 @@ const FormSubmissionModal = ({
             <div className="form-submission-modal-content">
                 <div className="form-submission-modal-header">
                     <h3>
-                        <FileText size={24} />
-                        {form.title}
+                        <Edit size={24} />
+                        {t('forms.editSubmission', 'Edit Submission')} - {form.title}
                     </h3>
                     <button className="form-submission-modal-close" onClick={onClose}>
                         <X size={20} />
@@ -388,63 +393,7 @@ const FormSubmissionModal = ({
                                     <span>{form.eventDetails.location}</span>
                                 </div>
                             )}
-
-                            {form.eventDetails?.googleMapsLink && (
-                                <div className="event-info-item">
-                                    <a
-                                        href={form.eventDetails.googleMapsLink}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="link-button"
-                                    >
-                                        <MapPin size={16} />
-                                        {t('forms.googleMaps', 'Google Maps')}
-                                        <ExternalLink size={12} />
-                                    </a>
-                                </div>
-                            )}
-
-                            {form.eventDetails?.wazeLink && (
-                                <div className="event-info-item">
-                                    <a
-                                        href={form.eventDetails.wazeLink}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="link-button"
-                                    >
-                                        <MapPin size={16} />
-                                        {t('forms.waze', 'Waze')}
-                                        <ExternalLink size={12} />
-                                    </a>
-                                </div>
-                            )}
                         </div>
-
-                        {form.eventDetails?.notes && (
-                            <div className="event-notes">
-                                <p>{form.eventDetails.notes}</p>
-                            </div>
-                        )}
-
-                        {form.eventDetails?.paymentLink && (
-                            <div className="payment-section">
-                                <a
-                                    href={form.eventDetails.paymentLink}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="payment-button"
-                                >
-                                    {t('forms.paymentLink', 'Payment Link')}
-                                    <ExternalLink size={16} />
-                                </a>
-                            </div>
-                        )}
-
-                        {form.eventDetails?.closingNotes && (
-                            <div className="closing-notes">
-                                <p>{form.eventDetails.closingNotes}</p>
-                            </div>
-                        )}
                     </div>
 
                     {/* Attendance Confirmation */}
@@ -548,7 +497,6 @@ const FormSubmissionModal = ({
                                             </div>
                                         ) : userKids.length > 0 ? (
                                             userKids.map(kid => {
-                                                // Extract firstName from the kid data
                                                 const kidFirstName = kid.personalInfo?.firstName ||
                                                     kid.firstName ||
                                                     kid.name?.split(' ')[0] ||
@@ -719,47 +667,65 @@ const FormSubmissionModal = ({
                             )}
 
                             {/* Declaration Upload */}
-                            {showDeclarationWarning && (
+                            {(showDeclarationWarning || submission?.declarationUploaded) && (
                                 <div className="form-section declaration-section">
                                     <h4>
                                         <AlertTriangle size={18} />
-                                        {t('forms.parentDeclaration', 'Parent Declaration Required')}
+                                        {t('forms.parentDeclaration', 'Parent Declaration')}
                                     </h4>
 
-                                    <div className="declaration-warning">
-                                        <div className="warning-content">
-                                            <AlertTriangle size={24} className="warning-icon" />
-                                            <div>
-                                                <p>{t('forms.declarationWarning', 'Please attach parent declaration')}</p>
-                                                <p className="warning-details">
-                                                    {t('forms.declarationDetails', 'The following kids need a signed declaration:')}
-                                                </p>
-                                                <ul>
-                                                    {kidsWithoutDeclaration.map(kid => (
-                                                        <li key={kid.id}>
-                                                            {kid.personalInfo?.firstName || kid.firstName || `Kid ${kid.participantNumber}`}
-                                                        </li>
-                                                    ))}
-                                                </ul>
+                                    {submission?.declarationUploaded && (
+                                        <div className="existing-declaration">
+                                            <p>{t('forms.existingDeclaration', 'Current declaration file:')}</p>
+                                            <a
+                                                href={submission.declarationUploaded}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="declaration-link"
+                                            >
+                                                <FileText size={16} />
+                                                {t('forms.viewCurrentDeclaration', 'View Current Declaration')}
+                                                <ExternalLink size={12} />
+                                            </a>
+                                        </div>
+                                    )}
+
+                                    {showDeclarationWarning && (
+                                        <div className="declaration-warning">
+                                            <div className="warning-content">
+                                                <AlertTriangle size={24} className="warning-icon" />
+                                                <div>
+                                                    <p>{t('forms.declarationWarning', 'Please attach parent declaration')}</p>
+                                                    <p className="warning-details">
+                                                        {t('forms.declarationDetails', 'The following kids need a signed declaration:')}
+                                                    </p>
+                                                    <ul>
+                                                        {kidsWithoutDeclaration.map(kid => (
+                                                            <li key={kid.id}>
+                                                                {kid.personalInfo?.firstName || kid.firstName || `Kid ${kid.participantNumber}`}
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
                                             </div>
                                         </div>
+                                    )}
 
-                                        <div className="file-upload">
-                                            <input
-                                                type="file"
-                                                id="declaration-file"
-                                                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                                                onChange={handleFileUpload}
-                                                style={{ display: 'none' }}
-                                            />
-                                            <label htmlFor="declaration-file" className="upload-button">
-                                                <Upload size={16} />
-                                                {formData.declarationFile
-                                                    ? formData.declarationFile.name
-                                                    : t('forms.uploadDeclaration', 'Upload Declaration')
-                                                }
-                                            </label>
-                                        </div>
+                                    <div className="file-upload">
+                                        <input
+                                            type="file"
+                                            id="declaration-file"
+                                            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                                            onChange={handleFileUpload}
+                                            style={{ display: 'none' }}
+                                        />
+                                        <label htmlFor="declaration-file" className="upload-button">
+                                            <Upload size={16} />
+                                            {formData.declarationFile
+                                                ? formData.declarationFile.name
+                                                : t('forms.uploadNewDeclaration', 'Upload New Declaration (Optional)')
+                                            }
+                                        </label>
                                     </div>
                                 </div>
                             )}
@@ -786,12 +752,12 @@ const FormSubmissionModal = ({
                         {isSubmitting ? (
                             <>
                                 <Clock size={16} className="spinning" />
-                                {t('forms.submitting', 'Submitting...')}
+                                {t('forms.updating', 'Updating...')}
                             </>
                         ) : (
                             <>
                                 <Check size={16} />
-                                {t('forms.submitForm', 'Submit Form')}
+                                {t('forms.updateSubmission', 'Update Submission')}
                             </>
                         )}
                     </button>
@@ -801,4 +767,4 @@ const FormSubmissionModal = ({
     );
 };
 
-export default FormSubmissionModal;
+export default EditSubmissionModal;

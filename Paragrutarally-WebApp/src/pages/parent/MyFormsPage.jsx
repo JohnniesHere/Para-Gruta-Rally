@@ -1,4 +1,4 @@
-// src/pages/parent/MyFormsPage.jsx - Updated with Better Error Handling
+// src/pages/parent/MyFormsPage.jsx - Updated with Full Translations and RTL Support
 import React, { useState, useEffect } from 'react';
 import Dashboard from '../../components/layout/Dashboard';
 import FormSubmissionModal from '../../components/modals/FormSubmissionModal';
@@ -6,6 +6,8 @@ import FormViewModal from '../../components/modals/FormViewModal';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { usePermissions } from '../../hooks/usePermissions';
+import ViewSubmissionModal from '../../components/modals/ViewSubmissionModal';
+import EditSubmissionModal from '../../components/modals/EditSubmissionModal';
 import {
     getFormSubmissions,
     getActiveForms,
@@ -27,13 +29,17 @@ import {
     IconAlertTriangle as AlertTriangle,
     IconRefresh as Refresh,
     IconSparkles as Sparkles,
-    IconTarget as Target
+    IconTarget as Target,
+    IconEdit as Edit
 } from '@tabler/icons-react';
 
 const MyFormsPage = () => {
     const { appliedTheme } = useTheme();
-    const { t } = useLanguage();
+    const { t, currentLanguage } = useLanguage();
     const { userData, user } = usePermissions();
+
+    // Determine if RTL based on language
+    const isRTL = currentLanguage === 'he' || currentLanguage === 'ar';
 
     // State management
     const [submissions, setSubmissions] = useState([]);
@@ -44,6 +50,9 @@ const MyFormsPage = () => {
     const [showViewModal, setShowViewModal] = useState(false);
     const [selectedForm, setSelectedForm] = useState(null);
     const [viewSubmission, setViewSubmission] = useState(null);
+    const [showViewSubmissionModal, setShowViewSubmissionModal] = useState(false);
+    const [showEditSubmissionModal, setShowEditSubmissionModal] = useState(false);
+    const [selectedSubmission, setSelectedSubmission] = useState(null);
 
     // Load data
     useEffect(() => {
@@ -55,24 +64,19 @@ const MyFormsPage = () => {
     const loadFormsData = async () => {
         setIsLoading(true);
         setError(null);
-        console.log('🔍 Starting to load forms data...');
 
         try {
             // Load submissions first (less likely to fail)
-            console.log('🔍 Loading form submissions...');
             const submissionsData = await getFormSubmissions({ submitterId: user.uid });
-            console.log('✅ Submissions loaded:', submissionsData.length);
             setSubmissions(submissionsData);
 
             // Load available forms
-            console.log('🔍 Loading available forms...');
             const availableFormsData = await getActiveForms('parent');
-            console.log('✅ Forms loaded:', availableFormsData.length);
             setAvailableForms(availableFormsData);
 
         } catch (error) {
             console.error('❌ Error loading forms data:', error);
-            setError(error.message || 'Failed to load forms data');
+            setError(error.message || t('forms.loadError', 'Failed to load forms data'));
             // Set empty arrays so page doesn't break
             setSubmissions([]);
             setAvailableForms([]);
@@ -85,19 +89,24 @@ const MyFormsPage = () => {
     const getStatusInfo = (status) => {
         const statusMap = {
             'attending': {
-                label: t('forms.attending', 'Attending'),
+                label: t('forms.status.attending', 'Attending'),
                 color: '#10B981',
                 icon: Check
             },
             'not attending': {
-                label: t('forms.notAttending', 'Not Attending'),
+                label: t('forms.status.notAttending', 'Not Attending'),
                 color: '#EF4444',
                 icon: X
             },
             'needs to decide': {
-                label: t('forms.needsToDecide', 'Needs to Decide'),
+                label: t('forms.status.needsToDecide', 'Needs to Decide'),
                 color: '#F59E0B',
                 icon: AlertTriangle
+            },
+            'submitted': {
+                label: t('forms.status.submitted', 'Submitted'),
+                color: '#10B981',
+                icon: Check
             }
         };
 
@@ -150,9 +159,16 @@ const MyFormsPage = () => {
         setShowViewModal(true);
     };
 
-    // Handle view submission details
+    // For viewing submissions
     const handleViewSubmission = (submission) => {
-        setViewSubmission(submission);
+        setSelectedSubmission(submission);
+        setShowViewSubmissionModal(true);
+    };
+
+    // For editing submissions
+    const handleEditSubmission = (submission) => {
+        setSelectedSubmission(submission);
+        setShowEditSubmissionModal(true);
     };
 
     // Check if user has submitted a form
@@ -189,28 +205,107 @@ const MyFormsPage = () => {
         return '';
     };
 
+    // State for kid names - similar to ViewSubmissionModal
+    const [kidNames, setKidNames] = useState({});
+    const [loadingKids, setLoadingKids] = useState(false);
+
+    // Load kid names when submissions change
+    useEffect(() => {
+        if (submissions.length > 0) {
+            loadAllKidNames();
+        }
+    }, [submissions]);
+
+    const loadAllKidNames = async () => {
+        const allKidIds = new Set();
+
+        // Collect all unique kid IDs from all submissions
+        submissions.forEach(submission => {
+            if (submission.kidIds && Array.isArray(submission.kidIds)) {
+                submission.kidIds.forEach(kidId => {
+                    const cleanKidId = typeof kidId === 'string' ? kidId.replace(/[^\w-]/g, '') : kidId;
+                    if (cleanKidId) allKidIds.add(kidId); // Store original for mapping, but clean for lookup
+                });
+            }
+        });
+
+        if (allKidIds.size === 0) return;
+
+        setLoadingKids(true);
+        const names = {};
+
+        try {
+            // Import kidService
+            const { getKidById } = await import('../../services/kidService');
+
+            // Load each kid's data from the database
+            for (const kidId of allKidIds) {
+                try {
+                    // Clean the kidId first
+                    const cleanKidId = typeof kidId === 'string' ? kidId.replace(/[^\w-]/g, '') : kidId;
+
+                    const kidData = await getKidById(cleanKidId);
+                    // Use the proper schema to get the full name
+                    names[kidId] = kidData.personalInfo?.firstName ||
+                        kidData.firstName ||
+                        `Kid ${cleanKidId.slice(-4)}`;
+                } catch (error) {
+                    console.warn(`Failed to load kid ${kidId}:`, error);
+                    // Clean the kidId for fallback display
+                    const cleanKidId = typeof kidId === 'string' ? kidId.replace(/[^\w-]/g, '') : kidId;
+                    names[kidId] = `Kid ${cleanKidId.slice(-4)}`;
+                }
+            }
+        } catch (error) {
+            console.error('Error loading kid names:', error);
+        } finally {
+            setKidNames(names);
+            setLoadingKids(false);
+        }
+    };
+
+    // Helper function to get kid display name using loaded names
+    const getKidDisplayName = (kidIds = []) => {
+        if (!Array.isArray(kidIds) || kidIds.length === 0) {
+            return '';
+        }
+
+        if (loadingKids) {
+            return t('forms.loading.kid', 'Loading...');
+        }
+
+        if (kidIds.length === 1) {
+            const kidName = kidNames[kidIds[0]];
+            return kidName || t('forms.kidDisplay', 'Kid {{id}}', {
+                id: (typeof kidIds[0] === 'string' ? kidIds[0].replace(/[^\w-]/g, '') : kidIds[0]).slice(-4)
+            });
+        }
+
+        return t('forms.kidsCount', '{{count}} kids', { count: kidIds.length });
+    };
+
     // Error boundary component
     const ErrorDisplay = ({ error, onRetry }) => (
         <div className="error-state">
             <div className="error-icon">
                 <AlertTriangle size={60} />
             </div>
-            <h3>{t('forms.errorTitle', 'Unable to Load Forms')}</h3>
+            <h3>{t('forms.error.title', 'Unable to Load Forms')}</h3>
             <p>{error}</p>
             <button className="btn btn-primary" onClick={onRetry}>
                 <Refresh size={16} />
-                {t('forms.retry', 'Try Again')}
+                {t('forms.actions.retry', 'Try Again')}
             </button>
         </div>
     );
 
     return (
         <Dashboard requiredRole="parent">
-            <div className={`parent-forms-page ${appliedTheme}-mode`}>
+            <div className={`parent-forms-page ${appliedTheme}-mode ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                 {/* Page Title - Matching Admin Style */}
                 <h1 className="page-title">
                     <FileText size={32} className="page-title-icon" />
-                    {t('forms.myForms', 'My Forms')}
+                    {t('forms.pageTitle', 'My Forms')}
                     <Sparkles size={24} className="sparkle-icon" />
                 </h1>
 
@@ -219,7 +314,7 @@ const MyFormsPage = () => {
                     <div className="quick-actions">
                         <div className="quick-actions-title">
                             <Target size={20} className="section-icon" />
-                            {t('forms.quickActions', 'Quick Actions')}
+                            {t('forms.quickActions.title', 'Quick Actions')}
                         </div>
                         <div className="quick-actions-grid">
                             <button
@@ -228,38 +323,14 @@ const MyFormsPage = () => {
                                 disabled={isLoading}
                             >
                                 <Refresh size={16} />
-                                {t('forms.refreshData', 'Refresh Data')}
+                                {t('forms.actions.refreshData', 'Refresh Data')}
                             </button>
                         </div>
                     </div>
+
                     {/* Error Display */}
                     {error && !isLoading && (
                         <ErrorDisplay error={error} onRetry={loadFormsData} />
-                    )}
-
-                    {/* Debug Information - Only in development */}
-                    {process.env.NODE_ENV === 'development' && !error && (
-                        <div style={{
-                            background: '#f0f0f0',
-                            padding: '16px',
-                            margin: '16px 0',
-                            borderRadius: '8px',
-                            border: '2px solid #ccc'
-                        }}>
-                            <h4>🔍 DEBUG INFO</h4>
-                            <p><strong>User ID:</strong> {user?.uid || 'No user'}</p>
-                            <p><strong>User Role:</strong> {userData?.role || 'No role'}</p>
-                            <p><strong>Is Loading:</strong> {isLoading.toString()}</p>
-                            <p><strong>Error:</strong> {error || 'None'}</p>
-                            <p><strong>Available Forms Count:</strong> {availableForms.length}</p>
-                            <p><strong>Submissions Count:</strong> {submissions.length}</p>
-                            <details>
-                                <summary>Raw Forms Data</summary>
-                                <pre style={{ background: '#fff', padding: '8px', overflow: 'auto', maxHeight: '200px' }}>
-                                    {JSON.stringify(availableForms, null, 2)}
-                                </pre>
-                            </details>
-                        </div>
                     )}
 
                     {/* Main Content - Only show if no error */}
@@ -270,14 +341,14 @@ const MyFormsPage = () => {
                                 <div className="section-header">
                                     <h3>
                                         <FileText size={20} className="section-icon" />
-                                        {t('forms.mySubmissions', '📝 My Submissions')}
+                                        {t('forms.sections.mySubmissions', 'My Submissions')}
                                     </h3>
                                 </div>
 
                                 {isLoading ? (
                                     <div className="loading-state">
                                         <Clock className="loading-spinner" size={30} />
-                                        <p>{t('forms.loadingForms', 'Loading forms...')}</p>
+                                        <p>{t('forms.loading.forms', 'Loading forms...')}</p>
                                     </div>
                                 ) : submissions.length > 0 ? (
                                     <div className="submissions-grid">
@@ -288,48 +359,88 @@ const MyFormsPage = () => {
                                             return (
                                                 <div key={submission.id} className="submission-card">
                                                     <div className="card-header">
-                                                        <div className="form-info">
-                                                            <h4>{submission.formTitle || t('forms.eventRegistration', 'Event Registration')}</h4>
-                                                            <span className="submission-date">
-                                                                {submission.submittedAt?.toLocaleDateString()}
-                                                            </span>
-                                                        </div>
-                                                        <span
-                                                            className="status-badge"
-                                                            style={{
-                                                                borderColor: statusInfo.color,
-                                                                color: statusInfo.color
-                                                            }}
-                                                        >
-                                                            <StatusIcon size={12} />
-                                                            {statusInfo.label}
-                                                        </span>
+                                                        {/* Conditional rendering based on RTL */}
+                                                        {isRTL ? (
+                                                            <>
+                                                                {/* RTL: Status badge first, then form info */}
+                                                                <span
+                                                                    className="status-badge"
+                                                                    style={{
+                                                                        borderColor: statusInfo.color,
+                                                                        color: statusInfo.color
+                                                                    }}
+                                                                >
+                                                                    <StatusIcon size={12} />
+                                                                    {statusInfo.label}
+                                                                </span>
+                                                                <div className="form-info" style={{ textAlign: 'right', direction: 'rtl' }}>
+                                                                    <h4 style={{ flexDirection: 'row-reverse', textAlign: 'right' }}>
+                                                                        {submission.formTitle || t('forms.defaultTitle', 'Event Registration')}
+                                                                    </h4>
+                                                                    <span className="submission-date" style={{ textAlign: 'right', direction: 'ltr' }}>
+                                                                        {submission.submittedAt?.toLocaleDateString()}
+                                                                    </span>
+                                                                </div>
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                {/* LTR: Form info first, then status badge */}
+                                                                <div className="form-info">
+                                                                    <h4>{submission.formTitle || t('forms.defaultTitle', 'Event Registration')}</h4>
+                                                                    <span className="submission-date">
+                                                                        {submission.submittedAt?.toLocaleDateString()}
+                                                                    </span>
+                                                                </div>
+                                                                <span
+                                                                    className="status-badge"
+                                                                    style={{
+                                                                        borderColor: statusInfo.color,
+                                                                        color: statusInfo.color
+                                                                    }}
+                                                                >
+                                                                    <StatusIcon size={12} />
+                                                                    {statusInfo.label}
+                                                                </span>
+                                                            </>
+                                                        )}
                                                     </div>
 
                                                     <div className="card-body">
                                                         <div className="submission-summary">
-                                                            <div className="summary-item">
+                                                            <div className="summary-item" style={isRTL ? {
+                                                                flexDirection: 'row-reverse',
+                                                                textAlign: 'right'
+                                                            } : {}}>
                                                                 <Users size={16} />
-                                                                <span>{submission.attendeesCount || 0} {t('forms.attendees', 'attendees')}</span>
+                                                                <span>{submission.attendeesCount || 0} {t('forms.labels.attendees', 'attendees')}</span>
                                                             </div>
                                                             {submission.kidIds && submission.kidIds.length > 0 && (
-                                                                <div className="summary-item">
+                                                                <div className="summary-item" style={isRTL ? {
+                                                                    flexDirection: 'row-reverse',
+                                                                    textAlign: 'right'
+                                                                } : {}}>
                                                                     <Users size={16} />
-                                                                    <span>{submission.kidIds.length} {t('forms.kids', 'kids')}</span>
+                                                                    <span>{getKidDisplayName(submission.kidIds)}</span>
                                                                 </div>
                                                             )}
                                                             {(submission.shirts?.length > 0 || submission.extraShirts?.length > 0) && (
-                                                                <div className="summary-item">
+                                                                <div className="summary-item" style={isRTL ? {
+                                                                    flexDirection: 'row-reverse',
+                                                                    textAlign: 'right'
+                                                                } : {}}>
                                                                     <Shirt size={16} />
                                                                     <span>
-                                                                        {(submission.shirts?.length || 0) + (submission.extraShirts?.length || 0)} {t('forms.shirts', 'shirts')}
+                                                                        {(submission.shirts?.length || 0) + (submission.extraShirts?.length || 0)} {t('forms.labels.shirts', 'shirts')}
                                                                     </span>
                                                                 </div>
                                                             )}
                                                             {submission.declarationUploaded && (
-                                                                <div className="summary-item">
+                                                                <div className="summary-item" style={isRTL ? {
+                                                                    flexDirection: 'row-reverse',
+                                                                    textAlign: 'right'
+                                                                } : {}}>
                                                                     <FileIcon size={16} />
-                                                                    <span>{t('forms.declarationUploaded', 'Declaration uploaded')}</span>
+                                                                    <span>{t('forms.labels.declarationUploaded', 'Declaration uploaded')}</span>
                                                                 </div>
                                                             )}
                                                         </div>
@@ -339,10 +450,19 @@ const MyFormsPage = () => {
                                                         <button
                                                             className="btn-action view"
                                                             onClick={() => handleViewSubmission(submission)}
-                                                            title={t('forms.viewDetails', 'View Details')}
+                                                            title={t('forms.actions.viewDetails', 'View Details')}
                                                         >
                                                             <Eye size={16} />
-                                                            {t('forms.viewDetails', 'View Details')}
+                                                            {t('forms.actions.view', 'View')}
+                                                        </button>
+
+                                                        <button
+                                                            className="btn-action edit"
+                                                            onClick={() => handleEditSubmission(submission)}
+                                                            title={t('forms.actions.editSubmission', 'Edit Submission')}
+                                                        >
+                                                            <Edit size={16} />
+                                                            {t('forms.actions.edit', 'Edit')}
                                                         </button>
                                                     </div>
                                                 </div>
@@ -354,8 +474,8 @@ const MyFormsPage = () => {
                                         <div className="empty-icon">
                                             <FileText size={60} />
                                         </div>
-                                        <h3>{t('forms.noSubmissions', 'No Submissions Yet')}</h3>
-                                        <p>{t('forms.noSubmissionsDesc', 'You haven\'t submitted any forms yet. Check the available forms below!')}</p>
+                                        <h3>{t('forms.empty.noSubmissions.title', 'No Submissions Yet')}</h3>
+                                        <p>{t('forms.empty.noSubmissions.description', 'You haven\'t submitted any forms yet. Check the available forms below!')}</p>
                                     </div>
                                 )}
                             </div>
@@ -365,14 +485,14 @@ const MyFormsPage = () => {
                                 <div className="section-header">
                                     <h3>
                                         <Calendar size={20} className="section-icon" />
-                                        {t('forms.availableForms', '📋 Available Forms')}
+                                        {t('forms.sections.availableForms', 'Available Forms')}
                                     </h3>
                                 </div>
 
                                 {isLoading ? (
                                     <div className="loading-state">
                                         <Clock className="loading-spinner" size={30} />
-                                        <p>{t('forms.loadingForms', 'Loading forms...')}</p>
+                                        <p>{t('forms.loading.forms', 'Loading forms...')}</p>
                                     </div>
                                 ) : availableForms.length > 0 ? (
                                     <div className="available-forms-grid">
@@ -383,37 +503,104 @@ const MyFormsPage = () => {
                                             return (
                                                 <div key={form.id} className="available-form-card">
                                                     <div className="card-header">
-                                                        <div className="form-title-section">
-                                                            <h4>{form.title}</h4>
-                                                            {formatEventDate(form.eventDetails) && (
-                                                                <div className="event-date">
-                                                                    <Calendar size={14} />
-                                                                    {formatEventDate(form.eventDetails)}
+                                                        {/* Conditional rendering based on RTL */}
+                                                        {isRTL ? (
+                                                            <>
+                                                                {/* RTL: Badge first, then title section */}
+                                                                {hasSubmitted && (
+                                                                    (() => {
+                                                                        const submittedStatusInfo = getStatusInfo('submitted');
+                                                                        const SubmittedIcon = submittedStatusInfo.icon;
+                                                                        return (
+                                                                            <span
+                                                                                className="status-badge"
+                                                                                style={{
+                                                                                    borderColor: submittedStatusInfo.color,
+                                                                                    color: submittedStatusInfo.color
+                                                                                }}
+                                                                            >
+                                                                                <SubmittedIcon size={12} />
+                                                                                {submittedStatusInfo.label}
+                                                                            </span>
+                                                                        );
+                                                                    })()
+                                                                )}
+                                                                <div className="form-title-section" style={{ textAlign: 'right', direction: 'rtl' }}>
+                                                                    <h4 style={{ flexDirection: 'row-reverse', textAlign: 'right' }}>
+                                                                        {form.title}
+                                                                    </h4>
+                                                                    {formatEventDate(form.eventDetails) && (
+                                                                        <div className="event-date" style={{ flexDirection: 'row-reverse', justifyContent: 'flex-end' }}>
+                                                                            <span style={{ direction: 'ltr' }}>{formatEventDate(form.eventDetails)}</span>
+                                                                            <Calendar size={14} />
+                                                                        </div>
+                                                                    )}
                                                                 </div>
-                                                            )}
-                                                        </div>
-                                                        {hasSubmitted && (
-                                                            <span className="submitted-badge">
-                                                                <Check size={12} />
-                                                                {t('forms.submitted', 'Submitted')}
-                                                            </span>
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                {/* LTR: Title section first, then badge */}
+                                                                <div className="form-title-section">
+                                                                    <h4>{form.title}</h4>
+                                                                    {formatEventDate(form.eventDetails) && (
+                                                                        <div className="event-date">
+                                                                            <Calendar size={14} />
+                                                                            {formatEventDate(form.eventDetails)}
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                                {hasSubmitted && (
+                                                                    (() => {
+                                                                        const submittedStatusInfo = getStatusInfo('submitted');
+                                                                        const SubmittedIcon = submittedStatusInfo.icon;
+                                                                        return (
+                                                                            <span
+                                                                                className="status-badge"
+                                                                                style={{
+                                                                                    borderColor: submittedStatusInfo.color,
+                                                                                    color: submittedStatusInfo.color
+                                                                                }}
+                                                                            >
+                                                                                <SubmittedIcon size={12} />
+                                                                                {submittedStatusInfo.label}
+                                                                            </span>
+                                                                        );
+                                                                    })()
+                                                                )}
+                                                            </>
                                                         )}
                                                     </div>
 
                                                     <div className="card-body">
-                                                        <p>{form.description}</p>
+                                                        <p style={isRTL ? {
+                                                            textAlign: 'right',
+                                                            direction: 'rtl'
+                                                        } : {}}>{form.description}</p>
 
                                                         {/* Event details preview */}
                                                         {form.eventDetails && (
-                                                            <div className="event-preview">
+                                                            <div className="event-preview" style={isRTL ? {
+                                                                borderLeft: 'none',
+                                                                borderRight: '4px solid var(--racing-lilach)',
+                                                                textAlign: 'right',
+                                                                direction: 'rtl'
+                                                            } : {}}>
                                                                 {form.eventDetails.location && (
-                                                                    <div className="event-detail">
+                                                                    <div className="event-detail" style={isRTL ? {
+                                                                        flexDirection: 'row-reverse',
+                                                                        textAlign: 'right',
+                                                                        direction: 'rtl'
+                                                                    } : {}}>
                                                                         <MapPin size={14} />
                                                                         <span>{form.eventDetails.location}</span>
                                                                     </div>
                                                                 )}
                                                                 {form.eventDetails.hours && (
-                                                                    <div className="event-detail">
+                                                                    <div className="event-detail" style={isRTL ? {
+                                                                        flexDirection: 'row-reverse',
+                                                                        textAlign: 'right',
+                                                                        direction: 'ltr' // Keep time LTR but align right
+                                                                    } : {}}>
                                                                         <Clock size={14} />
                                                                         <span>{form.eventDetails.hours}</span>
                                                                     </div>
@@ -421,38 +608,82 @@ const MyFormsPage = () => {
                                                             </div>
                                                         )}
 
-                                                        <div className="form-meta">
-                                                            <span className="meta-label">{t('forms.views', 'Views')}:</span>
-                                                            <span className="meta-value">{form.viewCount || 0}</span>
+                                                        <div className="form-meta" style={isRTL ? {
+                                                            textAlign: 'right'
+                                                        } : {}}>
+                                                            <span className="meta-label" style={isRTL ? { textAlign: 'right' } : {}}>
+                                                                {t('forms.labels.views', 'Views')}:
+                                                            </span>
+                                                            <span className="meta-value" style={isRTL ? { direction: 'ltr' } : {}}>
+                                                                {form.viewCount || 0}
+                                                            </span>
                                                         </div>
                                                     </div>
 
                                                     <div className="card-footer">
-                                                        <button
-                                                            className="btn-action view"
-                                                            onClick={() => handleViewForm(form)}
-                                                            title={t('forms.viewForm', 'View Form')}
-                                                        >
-                                                            <Eye size={16} />
-                                                            {t('forms.viewForm', 'View')}
-                                                        </button>
-
-                                                        {hasSubmitted ? (
-                                                            <button
-                                                                className="btn-action view"
-                                                                onClick={() => handleViewSubmission(userSubmission)}
-                                                            >
-                                                                <FileIcon size={16} />
-                                                                {t('forms.viewSubmission', 'View Submission')}
-                                                            </button>
+                                                        {/* Conditional rendering for RTL button order */}
+                                                        {isRTL ? (
+                                                            <>
+                                                                {/* RTL: Second button first, then view button */}
+                                                                {hasSubmitted ? (
+                                                                    <button
+                                                                        className="btn-action edit"
+                                                                        onClick={() => handleEditSubmission(userSubmission)}
+                                                                        title={t('forms.actions.editSubmission', 'Edit Submission')}
+                                                                    >
+                                                                        <Edit size={16} />
+                                                                        {t('forms.actions.edit', 'Edit')}
+                                                                    </button>
+                                                                ) : (
+                                                                    <button
+                                                                        className="btn-action register"
+                                                                        onClick={() => handleFormSubmission(form)}
+                                                                        title={t('forms.actions.fillForm', 'Fill Form')}
+                                                                    >
+                                                                        <FileText size={16} />
+                                                                        {t('forms.actions.fillForm', 'Fill Form')}
+                                                                    </button>
+                                                                )}
+                                                                <button
+                                                                    className="btn-action view"
+                                                                    onClick={() => handleViewForm(form)}
+                                                                    title={t('forms.actions.viewForm', 'View Form')}
+                                                                >
+                                                                    <Eye size={16} />
+                                                                    {t('forms.actions.view', 'View')}
+                                                                </button>
+                                                            </>
                                                         ) : (
-                                                            <button
-                                                                className="btn-action register"
-                                                                onClick={() => handleFormSubmission(form)}
-                                                            >
-                                                                <FileText size={16} />
-                                                                {t('forms.fillForm', 'Fill Form')}
-                                                            </button>
+                                                            <>
+                                                                {/* LTR: View button first, then action button */}
+                                                                <button
+                                                                    className="btn-action view"
+                                                                    onClick={() => handleViewForm(form)}
+                                                                    title={t('forms.actions.viewForm', 'View Form')}
+                                                                >
+                                                                    <Eye size={16} />
+                                                                    {t('forms.actions.view', 'View')}
+                                                                </button>
+                                                                {hasSubmitted ? (
+                                                                    <button
+                                                                        className="btn-action edit"
+                                                                        onClick={() => handleEditSubmission(userSubmission)}
+                                                                        title={t('forms.actions.editSubmission', 'Edit Submission')}
+                                                                    >
+                                                                        <Edit size={16} />
+                                                                        {t('forms.actions.edit', 'Edit')}
+                                                                    </button>
+                                                                ) : (
+                                                                    <button
+                                                                        className="btn-action register"
+                                                                        onClick={() => handleFormSubmission(form)}
+                                                                        title={t('forms.actions.fillForm', 'Fill Form')}
+                                                                    >
+                                                                        <FileText size={16} />
+                                                                        {t('forms.actions.fillForm', 'Fill Form')}
+                                                                    </button>
+                                                                )}
+                                                            </>
                                                         )}
                                                     </div>
                                                 </div>
@@ -464,8 +695,8 @@ const MyFormsPage = () => {
                                         <div className="empty-icon">
                                             <Calendar size={60} />
                                         </div>
-                                        <h3>{t('forms.noFormsAvailable', 'No Forms Available')}</h3>
-                                        <p>{t('forms.noFormsDesc', 'There are no active forms available at the moment.')}</p>
+                                        <h3>{t('forms.empty.noForms.title', 'No Forms Available')}</h3>
+                                        <p>{t('forms.empty.noForms.description', 'There are no active forms available at the moment.')}</p>
                                     </div>
                                 )}
                             </div>
@@ -496,12 +727,42 @@ const MyFormsPage = () => {
                         }}
                     />
 
+                    {/* View Submission Modal - REMOVED EDIT BUTTON */}
+                    <ViewSubmissionModal
+                        isOpen={showViewSubmissionModal}
+                        submission={selectedSubmission}
+                        form={availableForms.find(f => f.id === selectedSubmission?.formId)}
+                        onClose={() => {
+                            setShowViewSubmissionModal(false);
+                            setSelectedSubmission(null);
+                        }}
+                        userKids={submissions.kidIds}
+                    />
+
+                    {/* Edit Submission Modal */}
+                    <EditSubmissionModal
+                        isOpen={showEditSubmissionModal}
+                        submission={selectedSubmission}
+                        form={availableForms.find(f => f.id === selectedSubmission?.formId)}
+                        onClose={() => {
+                            setShowEditSubmissionModal(false);
+                            setSelectedSubmission(null);
+                        }}
+                        onSubmit={(updatedSubmission) => {
+                            // Refresh the forms data to show updated submission
+                            loadFormsData();
+                            setShowEditSubmissionModal(false);
+                            setSelectedSubmission(null);
+                        }}
+                        userType="parent"
+                    />
+
                     {/* Submission Details Modal */}
                     {viewSubmission && (
                         <div className="modal-overlay">
                             <div className="modal-content submission-details-modal">
                                 <div className="modal-header">
-                                    <h3>{t('forms.submissionDetails', 'Submission Details')}</h3>
+                                    <h3>{t('forms.modal.submissionDetails', 'Submission Details')}</h3>
                                     <button
                                         className="modal-close"
                                         onClick={() => setViewSubmission(null)}
@@ -514,22 +775,22 @@ const MyFormsPage = () => {
                                     <div className="submission-details">
                                         {/* Basic Info */}
                                         <div className="details-section">
-                                            <h4>{t('forms.basicInformation', 'Basic Information')}</h4>
+                                            <h4>{t('forms.sections.basicInformation', 'Basic Information')}</h4>
                                             <div className="details-grid">
                                                 <div className="detail-item">
-                                                    <label>{t('forms.submittedAt', 'Submitted At')}</label>
+                                                    <label>{t('forms.labels.submittedAt', 'Submitted At')}</label>
                                                     <span>
                                                         {viewSubmission.submittedAt?.toLocaleDateString()} {viewSubmission.submittedAt?.toLocaleTimeString()}
                                                     </span>
                                                 </div>
                                                 <div className="detail-item">
-                                                    <label>{t('forms.confirmationStatus', 'Status')}</label>
+                                                    <label>{t('forms.labels.confirmationStatus', 'Status')}</label>
                                                     <span className="status-value">
                                                         {getStatusInfo(viewSubmission.confirmationStatus).label}
                                                     </span>
                                                 </div>
                                                 <div className="detail-item">
-                                                    <label>{t('forms.totalAttendees', 'Total Attendees')}</label>
+                                                    <label>{t('forms.labels.totalAttendees', 'Total Attendees')}</label>
                                                     <span>{viewSubmission.attendeesCount || 0}</span>
                                                 </div>
                                             </div>
@@ -538,12 +799,12 @@ const MyFormsPage = () => {
                                         {/* Kids Info */}
                                         {viewSubmission.kidIds && viewSubmission.kidIds.length > 0 && (
                                             <div className="details-section">
-                                                <h4>{t('forms.selectedKids', 'Selected Kids')}</h4>
+                                                <h4>{t('forms.sections.selectedKids', 'Selected Kids')}</h4>
                                                 <div className="kids-list">
                                                     {viewSubmission.kidIds.map((kidId, index) => (
                                                         <div key={kidId} className="kid-item">
                                                             <span className="kid-info">
-                                                                {t('forms.kid', 'Kid')} #{index + 1} (ID: {kidId})
+                                                                {getKidDisplayName([kidId])}
                                                             </span>
                                                         </div>
                                                     ))}
@@ -554,7 +815,7 @@ const MyFormsPage = () => {
                                         {/* Extra Attendees */}
                                         {viewSubmission.extraAttendees && viewSubmission.extraAttendees.length > 0 && (
                                             <div className="details-section">
-                                                <h4>{t('forms.extraAttendees', 'Extra Attendees')}</h4>
+                                                <h4>{t('forms.sections.extraAttendees', 'Extra Attendees')}</h4>
                                                 <div className="extra-attendees-list">
                                                     {viewSubmission.extraAttendees.map((attendee, index) => (
                                                         <div key={index} className="extra-attendee-item">
@@ -570,12 +831,12 @@ const MyFormsPage = () => {
                                             <div className="details-section">
                                                 <h4>
                                                     <Shirt size={20} />
-                                                    {t('forms.shirtInformation', 'Shirt Information')}
+                                                    {t('forms.sections.shirtInformation', 'Shirt Information')}
                                                 </h4>
                                                 <div className="shirts-details">
                                                     {viewSubmission.shirts?.length > 0 && (
                                                         <div className="shirts-group">
-                                                            <label>{t('forms.requiredShirts', 'Required Shirts')}</label>
+                                                            <label>{t('forms.labels.requiredShirts', 'Required Shirts')}</label>
                                                             <div className="shirts-list">
                                                                 {viewSubmission.shirts.map((shirt, index) => (
                                                                     <span key={index} className="shirt-size">
@@ -588,7 +849,7 @@ const MyFormsPage = () => {
 
                                                     {viewSubmission.extraShirts?.length > 0 && (
                                                         <div className="shirts-group">
-                                                            <label>{t('forms.extraShirts', 'Extra Shirts')}</label>
+                                                            <label>{t('forms.labels.extraShirts', 'Extra Shirts')}</label>
                                                             <div className="shirts-list">
                                                                 {viewSubmission.extraShirts.map((shirt, index) => (
                                                                     <span key={index} className="shirt-size extra">
@@ -607,7 +868,7 @@ const MyFormsPage = () => {
                                             <div className="details-section">
                                                 <h4>
                                                     <FileIcon size={20} />
-                                                    {t('forms.signedDeclaration', 'Signed Declaration')}
+                                                    {t('forms.sections.signedDeclaration', 'Signed Declaration')}
                                                 </h4>
                                                 <div className="declaration-file">
                                                     <a
@@ -617,7 +878,7 @@ const MyFormsPage = () => {
                                                         className="file-link"
                                                     >
                                                         <FileIcon size={16} />
-                                                        {t('forms.viewDeclaration', 'View Declaration File')}
+                                                        {t('forms.actions.viewDeclaration', 'View Declaration File')}
                                                         <ExternalLink size={12} />
                                                     </a>
                                                 </div>

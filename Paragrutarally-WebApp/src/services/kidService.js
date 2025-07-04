@@ -1,26 +1,20 @@
 // src/services/kidService.js - FIXED VERSION with Enhanced updateKid function
 import {
-    collection,
     addDoc,
-    getDocs,
+    collection,
+    deleteDoc,
     doc,
     getDoc,
-    updateDoc,
-    deleteDoc,
-    query,
-    orderBy,
-    where,
+    getDocs,
     limit,
-    Timestamp
+    orderBy,
+    query,
+    Timestamp,
+    updateDoc,
+    where
 } from 'firebase/firestore';
-import { db } from '../firebase/config';
-import {
-    createEmptyKid,
-    validateKid,
-    prepareKidForFirestore,
-    convertFirestoreToKid,
-    getKidFullName
-} from '../schemas/kidSchema';
+import {db} from '../firebase/config';
+import {convertFirestoreToKid, getKidFullName, prepareKidForFirestore, validateKid} from '../schemas/kidSchema';
 
 /**
  * Get the next available participant number
@@ -111,8 +105,7 @@ export const getKidById = async (kidId) => {
             throw new Error('Kid not found');
         }
 
-        const kidData = convertFirestoreToKid(kidDoc);
-        return kidData;
+        return convertFirestoreToKid(kidDoc);
     } catch (error) {
         console.error('❌ Error getting kid:', error);
         throw new Error(`Failed to get kid: ${error.message}`);

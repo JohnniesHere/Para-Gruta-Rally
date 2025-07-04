@@ -1,4 +1,4 @@
-/* src/pages/parent/MyFormsPage.css - Updated to Match Admin Styling */
+/* src/pages/parent/MyFormsPage.css - Updated with Complete RTL and Layout Fixes */
 @import url('../../styles/global.css');
 
 /* ========================================
@@ -279,35 +279,35 @@
 }
 
 /* ========================================
-   CARD HEADERS - MATCHING ADMIN
+   CARD HEADERS - SIMPLIFIED (NO RTL CONFLICTS)
    ======================================== */
 
 .card-header {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
     gap: 12px;
     margin-bottom: 15px;
+    flex-wrap: wrap;
 }
 
-.form-info h4 {
-    color: var(--text-primary);
-    font-weight: 700;
-    font-size: 18px;
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+/* Form info and title sections */
+.parent-forms-page .form-info,
+.parent-forms-page .form-title-section {
+    flex: 1;
+    min-width: 0; /* Allow text truncation */
 }
 
+.form-info h4,
 .form-title-section h4 {
     color: var(--text-primary);
     font-weight: 700;
     font-size: 18px;
-    margin: 0;
+    margin: 0 0 4px 0;
     display: flex;
     align-items: center;
     gap: 8px;
+    word-wrap: break-word;
 }
 
 .form-info h4::before,
@@ -337,29 +337,16 @@
 }
 
 /* ========================================
-   STATUS BADGES - MATCHING ADMIN
+   STATUS BADGES - PROPER RTL POSITIONING
    ======================================== */
-
-.status-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 14px;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    border: 2px solid;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
 
 .submitted-badge {
     background: linear-gradient(135deg, #10B981, #059669);
     color: white;
     box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
     animation: pulse 2s infinite;
+    flex-shrink: 0;
+    align-self: flex-start;
 }
 
 @keyframes pulse {
@@ -422,6 +409,16 @@
     overflow: hidden;
 }
 
+/* RTL adjustment for event preview border */
+.rtl .event-preview,
+[dir="rtl"] .event-preview,
+html[lang="he"] .event-preview,
+html[lang="ar"] .event-preview,
+.parent-forms-page.rtl .event-preview {
+    border-left: none;
+    border-right: 4px solid var(--racing-lilach);
+}
+
 .event-preview::before {
     content: '';
     position: absolute;
@@ -431,6 +428,17 @@
     height: 100%;
     background: linear-gradient(90deg, transparent, rgba(191, 148, 255, 0.1));
     pointer-events: none;
+}
+
+/* RTL adjustment for event preview gradient */
+.rtl .event-preview::before,
+[dir="rtl"] .event-preview::before,
+html[lang="he"] .event-preview::before,
+html[lang="ar"] .event-preview::before,
+.parent-forms-page.rtl .event-preview::before {
+    right: auto;
+    left: 0;
+    background: linear-gradient(270deg, transparent, rgba(191, 148, 255, 0.1));
 }
 
 .event-detail {
@@ -524,7 +532,7 @@
 }
 
 /* ========================================
-   CARD FOOTER - MATCHING ADMIN
+   CARD FOOTER - SIMPLIFIED (NO RTL CONFLICTS)
    ======================================== */
 
 .card-footer {
@@ -534,6 +542,7 @@
     padding-top: 16px;
     border-top: 1px solid var(--border-color);
     margin-top: 15px;
+    align-items: center;
 }
 
 .btn-action {
@@ -556,12 +565,6 @@
     flex-shrink: 0;
 }
 
-.parent-forms-page .rtl .card-footer,
-.rtl .parent-forms-page .card-footer {
-    flex-direction: row;
-    justify-content: space-between;
-}
-
 .btn-action.view:hover {
     background: rgba(59, 130, 246, 0.1);
     border-color: #3B82F6;
@@ -573,6 +576,13 @@
     background: rgba(191, 148, 255, 0.1);
     border-color: var(--racing-lilach);
     color: var(--racing-lilach);
+    transform: translateY(-1px);
+}
+
+.btn-action.edit:hover {
+    background: rgba(245, 158, 11, 0.1);
+    border-color: #F59E0B;
+    color: #F59E0B;
     transform: translateY(-1px);
 }
 
@@ -734,6 +744,174 @@
 }
 
 /* ========================================
+   RTL SPECIFIC OVERRIDES FOR MYFORMS PAGE - ENHANCED
+   ======================================== */
+
+/* Override global RTL for MyForms specific needs */
+.parent-forms-page.rtl,
+.parent-forms-page[dir="rtl"],
+html[lang="he"] .parent-forms-page,
+html[lang="ar"] .parent-forms-page {
+    direction: rtl;
+}
+
+/* RTL Page Title - ENHANCED */
+.parent-forms-page.rtl .page-title,
+.parent-forms-page[dir="rtl"] .page-title,
+html[lang="he"] .parent-forms-page .page-title,
+html[lang="ar"] .parent-forms-page .page-title {
+    flex-direction: row-reverse;
+    text-align: right;
+    direction: rtl;
+}
+
+/* RTL Quick Actions */
+.parent-forms-page.rtl .quick-actions-title,
+.parent-forms-page[dir="rtl"] .quick-actions-title,
+html[lang="he"] .parent-forms-page .quick-actions-title,
+html[lang="ar"] .parent-forms-page .quick-actions-title {
+    flex-direction: row-reverse;
+    text-align: right;
+    direction: rtl;
+}
+
+/* RTL Section Headers - ENHANCED */
+.parent-forms-page.rtl .section-header,
+.parent-forms-page[dir="rtl"] .section-header,
+html[lang="he"] .parent-forms-page .section-header,
+html[lang="ar"] .parent-forms-page .section-header {
+    flex-direction: row-reverse;
+    text-align: right;
+    direction: rtl;
+}
+
+.parent-forms-page.rtl .section-header h3,
+.parent-forms-page[dir="rtl"] .section-header h3,
+html[lang="he"] .parent-forms-page .section-header h3,
+html[lang="ar"] .parent-forms-page .section-header h3 {
+    flex-direction: row-reverse;
+    text-align: right;
+    direction: rtl;
+}
+
+/* RTL Summary Items */
+.parent-forms-page.rtl .summary-item,
+.parent-forms-page[dir="rtl"] .summary-item,
+html[lang="he"] .parent-forms-page .summary-item,
+html[lang="ar"] .parent-forms-page .summary-item {
+    flex-direction: row-reverse;
+}
+
+/* RTL Event Details */
+.parent-forms-page.rtl .event-detail,
+.parent-forms-page[dir="rtl"] .event-detail,
+html[lang="he"] .parent-forms-page .event-detail,
+html[lang="ar"] .parent-forms-page .event-detail {
+    flex-direction: row-reverse;
+}
+
+/* RTL Form Meta */
+.parent-forms-page.rtl .form-meta,
+.parent-forms-page[dir="rtl"] .form-meta,
+html[lang="he"] .parent-forms-page .form-meta,
+html[lang="ar"] .parent-forms-page .form-meta {
+    /*flex-direction: row-reverse;*/
+    direction: rtl;
+}
+
+/* RTL Button Actions */
+.parent-forms-page.rtl .btn-action,
+.parent-forms-page[dir="rtl"] .btn-action,
+html[lang="he"] .parent-forms-page .btn-action,
+html[lang="ar"] .parent-forms-page .btn-action {
+    flex-direction: row-reverse;
+}
+
+/* RTL Modal Header */
+.parent-forms-page.rtl .modal-header,
+.parent-forms-page[dir="rtl"] .modal-header,
+html[lang="he"] .parent-forms-page .modal-header,
+html[lang="ar"] .parent-forms-page .modal-header {
+    flex-direction: row-reverse;
+}
+
+/* RTL Modal Footer */
+.parent-forms-page.rtl .modal-footer,
+.parent-forms-page[dir="rtl"] .modal-footer,
+html[lang="he"] .parent-forms-page .modal-footer,
+html[lang="ar"] .parent-forms-page .modal-footer {
+    flex-direction: row-reverse;
+    justify-content: flex-start;
+}
+
+/* RTL Text Direction for All Headings and Content */
+.parent-forms-page.rtl h1,
+.parent-forms-page.rtl h2,
+.parent-forms-page.rtl h3,
+.parent-forms-page.rtl h4,
+.parent-forms-page.rtl h5,
+.parent-forms-page.rtl h6,
+.parent-forms-page[dir="rtl"] h1,
+.parent-forms-page[dir="rtl"] h2,
+.parent-forms-page[dir="rtl"] h3,
+.parent-forms-page[dir="rtl"] h4,
+.parent-forms-page[dir="rtl"] h5,
+.parent-forms-page[dir="rtl"] h6,
+html[lang="he"] .parent-forms-page h1,
+html[lang="he"] .parent-forms-page h2,
+html[lang="he"] .parent-forms-page h3,
+html[lang="he"] .parent-forms-page h4,
+html[lang="he"] .parent-forms-page h5,
+html[lang="he"] .parent-forms-page h6,
+html[lang="ar"] .parent-forms-page h1,
+html[lang="ar"] .parent-forms-page h2,
+html[lang="ar"] .parent-forms-page h3,
+html[lang="ar"] .parent-forms-page h4,
+html[lang="ar"] .parent-forms-page h5,
+html[lang="ar"] .parent-forms-page h6 {
+    direction: rtl;
+    text-align: right;
+}
+
+/* RTL Paragraph and Span Text */
+.parent-forms-page.rtl p,
+.parent-forms-page.rtl span:not(.count-display):not(.meta-value):not(.stat-value),
+.parent-forms-page[dir="rtl"] p,
+.parent-forms-page[dir="rtl"] span:not(.count-display):not(.meta-value):not(.stat-value),
+html[lang="he"] .parent-forms-page p,
+html[lang="he"] .parent-forms-page span:not(.count-display):not(.meta-value):not(.stat-value),
+html[lang="ar"] .parent-forms-page p,
+html[lang="ar"] .parent-forms-page span:not(.count-display):not(.meta-value):not(.stat-value) {
+    direction: rtl;
+    text-align: right;
+}
+
+/* Keep numbers and dates LTR even in RTL */
+.parent-forms-page.rtl .meta-value,
+.parent-forms-page.rtl .count-display,
+.parent-forms-page.rtl .stat-value,
+.parent-forms-page.rtl .submission-date,
+.parent-forms-page.rtl .event-date,
+.parent-forms-page[dir="rtl"] .meta-value,
+.parent-forms-page[dir="rtl"] .count-display,
+.parent-forms-page[dir="rtl"] .stat-value,
+.parent-forms-page[dir="rtl"] .submission-date,
+.parent-forms-page[dir="rtl"] .event-date,
+html[lang="he"] .parent-forms-page .meta-value,
+html[lang="he"] .parent-forms-page .count-display,
+html[lang="he"] .parent-forms-page .stat-value,
+html[lang="he"] .parent-forms-page .submission-date,
+html[lang="he"] .parent-forms-page .event-date,
+html[lang="ar"] .parent-forms-page .meta-value,
+html[lang="ar"] .parent-forms-page .count-display,
+html[lang="ar"] .parent-forms-page .stat-value,
+html[lang="ar"] .parent-forms-page .submission-date,
+html[lang="ar"] .parent-forms-page .event-date {
+    direction: ltr;
+    display: inline-block;
+}
+
+/* ========================================
    RESPONSIVE DESIGN - MATCHING ADMIN
    ======================================== */
 
@@ -773,6 +951,22 @@
         width: 95vw;
         margin: 10px;
     }
+
+    /* RTL adjustments for mobile */
+    .parent-forms-page.rtl .page-title,
+    .parent-forms-page[dir="rtl"] .page-title,
+    html[lang="he"] .parent-forms-page .page-title,
+    html[lang="ar"] .parent-forms-page .page-title {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .parent-forms-page.rtl .card-footer,
+    .parent-forms-page[dir="rtl"] .card-footer,
+    html[lang="he"] .parent-forms-page .card-footer,
+    html[lang="ar"] .parent-forms-page .card-footer {
+        flex-direction: column;
+    }
 }
 
 @media (max-width: 480px) {
@@ -794,7 +988,24 @@
         gap: 8px;
     }
 
+    /* RTL: Keep card header behavior consistent on mobile */
+    .parent-forms-page.rtl .card-header,
+    .parent-forms-page[dir="rtl"] .card-header,
+    html[lang="he"] .parent-forms-page .card-header,
+    html[lang="ar"] .parent-forms-page .card-header {
+        flex-direction: column;
+        align-items: flex-end;
+    }
+
     .submitted-badge {
         align-self: flex-end;
+    }
+
+    /* RTL: Align badge to the left on mobile */
+    .parent-forms-page.rtl .submitted-badge,
+    .parent-forms-page[dir="rtl"] .submitted-badge,
+    html[lang="he"] .parent-forms-page .submitted-badge,
+    html[lang="ar"] .parent-forms-page .submitted-badge {
+        align-self: flex-start;
     }
 }

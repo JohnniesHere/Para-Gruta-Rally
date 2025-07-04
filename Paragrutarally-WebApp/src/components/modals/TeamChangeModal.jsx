@@ -26,12 +26,10 @@ const TeamChangeModal = ({ kid, isOpen, onClose, onTeamChanged }) => {
     // Initialize modal data when it opens
     useEffect(() => {
         if (isOpen && kid) {
-            console.log('🔄 Modal opened for kid:', kid);
 
             // Set current selection to kid's current team
             const currentTeam = kid?.teamId || '';
             setSelectedTeamId(currentTeam);
-            console.log('🎯 Setting initial selected team:', currentTeam);
 
             // Load teams and current team info
             loadTeams();
@@ -48,19 +46,16 @@ const TeamChangeModal = ({ kid, isOpen, onClose, onTeamChanged }) => {
     const fetchCurrentTeamName = async () => {
         if (kid?.teamId) {
             try {
-                console.log('🔍 Fetching current team name for teamId:', kid.teamId);
                 const { getTeamById } = await import('../../services/teamService');
                 const team = await getTeamById(kid.teamId);
                 const teamName = team?.name || t('teamChange.unknownTeam', 'Unknown Team');
                 setCurrentTeamName(teamName);
-                console.log('✅ Current team name:', teamName);
             } catch (error) {
                 console.error('❌ Error fetching current team:', error);
                 setCurrentTeamName(t('teamChange.unknownTeam', 'Unknown Team'));
             }
         } else {
             setCurrentTeamName('');
-            console.log('ℹ️ Kid has no current team');
         }
     };
 
@@ -68,14 +63,11 @@ const TeamChangeModal = ({ kid, isOpen, onClose, onTeamChanged }) => {
         try {
             setIsLoading(true);
             setError(null);
-            console.log('🔄 Loading all teams...');
 
             const teamsData = await getAllTeams();
-            console.log('📊 Raw teams data:', teamsData);
 
             // Filter only active teams but don't filter by capacity here
             const activeTeams = teamsData.filter(team => team.active !== false);
-            console.log('✅ Active teams:', activeTeams);
 
             setTeams(activeTeams);
 
@@ -92,7 +84,6 @@ const TeamChangeModal = ({ kid, isOpen, onClose, onTeamChanged }) => {
 
         // If no change, just close
         if (selectedTeamId === currentTeamId) {
-            console.log('ℹ️ No team change needed');
             onClose();
             return;
         }
@@ -100,10 +91,8 @@ const TeamChangeModal = ({ kid, isOpen, onClose, onTeamChanged }) => {
         try {
             setIsSaving(true);
             setError(null);
-            console.log('💾 Saving team change:', { from: currentTeamId, to: selectedTeamId });
 
             await updateKidTeam(kid.id, selectedTeamId || null);
-            console.log('✅ Team updated successfully');
 
             if (onTeamChanged) {
                 onTeamChanged(kid.id, selectedTeamId || null);
@@ -121,10 +110,8 @@ const TeamChangeModal = ({ kid, isOpen, onClose, onTeamChanged }) => {
         try {
             setIsSaving(true);
             setError(null);
-            console.log('🗑️ Removing kid from current team');
 
             await updateKidTeam(kid.id, null);
-            console.log('✅ Kid removed from team successfully');
 
             if (onTeamChanged) {
                 onTeamChanged(kid.id, null);
@@ -139,7 +126,6 @@ const TeamChangeModal = ({ kid, isOpen, onClose, onTeamChanged }) => {
     };
 
     const handleTeamCardClick = (teamId) => {
-        console.log('🎯 Team card clicked:', teamId);
         setSelectedTeamId(teamId);
     };
 

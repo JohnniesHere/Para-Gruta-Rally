@@ -376,7 +376,6 @@ export const getUserKids = async (userId) => {
             });
         });
 
-        console.log(`✅ Retrieved ${kids.length} kids for user ${userId}`);
         return kids;
     } catch (error) {
         console.error('❌ Error getting user kids:', error);

@@ -62,7 +62,6 @@ export const getActiveForms = async (userType) => {
             }
         });
 
-        console.log(`✅ Retrieved ${forms.length} active forms for ${userType}`);
         return forms;
     } catch (error) {
         console.error('❌ Error getting active forms:', error);
@@ -116,7 +115,6 @@ export const getAllForms = async (options = {}) => {
  */
 export const getFormsForRole = async (userRole, options = {}) => {
     try {
-        console.log('🔍 DEBUG: getFormsForRole called with userRole:', userRole);
         let formsQuery = query(
             collection(db, FORMS_COLLECTION),
             where('targetUsers', 'array-contains', userRole),
@@ -127,12 +125,9 @@ export const getFormsForRole = async (userRole, options = {}) => {
         formsQuery = query(formsQuery, orderBy('title', 'asc'));
 
         const querySnapshot = await getDocs(formsQuery);
-        console.log('🔍 DEBUG: getFormsForRole query executed, docs found:', querySnapshot.size);
 
         return querySnapshot.docs.map(doc => {
             const data = doc.data();
-            console.log('🔍 DEBUG: Processing getFormsForRole document:', doc.id, data);
-
             // Just return the data as-is, no date processing
             return {
                 id: doc.id,
@@ -189,7 +184,6 @@ export const incrementFormViewCount = async (formId) => {
             updatedAt: serverTimestamp()
         });
 
-        console.log(`✅ Incremented view count for form ${formId}`);
     } catch (error) {
         console.error('❌ Error incrementing view count:', error);
         throw error;
@@ -212,7 +206,6 @@ export const createForm = async (formData) => {
             submissionCount: 0
         });
 
-        console.log(`✅ Created form with ID: ${docRef.id}`);
         return docRef.id;
     } catch (error) {
         console.error('❌ Error creating form:', error);
@@ -234,7 +227,6 @@ export const updateForm = async (formId, updateData) => {
             updatedAt: serverTimestamp()
         });
 
-        console.log(`✅ Updated form ${formId}`);
     } catch (error) {
         console.error('❌ Error updating form:', error);
         throw error;
@@ -251,7 +243,6 @@ export const deleteForm = async (formId) => {
         const formRef = doc(db, FORMS_COLLECTION, formId);
         await deleteDoc(formRef);
 
-        console.log(`✅ Deleted form ${formId}`);
     } catch (error) {
         console.error('❌ Error deleting form:', error);
         throw error;
@@ -269,7 +260,6 @@ export const deleteForm = async (formId) => {
  */
 export const createFormSubmission = async (submissionData) => {
     try {
-        console.log('🔥 createFormSubmission called with:', submissionData);
 
         const submissionsRef = collection(db, FORM_SUBMISSIONS_COLLECTION);
 
@@ -280,23 +270,18 @@ export const createFormSubmission = async (submissionData) => {
             updatedAt: serverTimestamp()
         };
 
-        console.log('🔥 Data to submit:', dataToSubmit);
 
         const docRef = await addDoc(submissionsRef, dataToSubmit);
-        console.log('🔥 Document added with ID:', docRef.id);
 
         // Increment form submission count
         if (submissionData.formId) {
-            console.log('🔥 Incrementing form submission count...');
             const formRef = doc(db, FORMS_COLLECTION, submissionData.formId);
             await updateDoc(formRef, {
                 submissionCount: increment(1),
                 updatedAt: serverTimestamp()
             });
-            console.log('🔥 Form count incremented');
         }
 
-        console.log(`✅ Created form submission with ID: ${docRef.id}`);
         return docRef.id;
     } catch (error) {
         console.error('❌ Error creating form submission:', error);
@@ -393,7 +378,6 @@ export const getFormSubmissions = async (filters = {}) => {
             });
         });
 
-        console.log(`✅ Retrieved ${submissions.length} form submissions`);
         return submissions;
     } catch (error) {
         console.error('❌ Error getting form submissions:', error);
@@ -408,7 +392,6 @@ export const getFormSubmissions = async (filters = {}) => {
  */
 export const getUserFormAssignments = async (userId) => {
     // For now, return empty array as this might not be used in the new system
-    console.log(`📝 Getting form assignments for user ${userId}`);
     return [];
 };
 
@@ -420,13 +403,18 @@ export const getUserFormAssignments = async (userId) => {
  */
 export const updateFormSubmission = async (submissionId, updateData) => {
     try {
+
         const submissionRef = doc(db, FORM_SUBMISSIONS_COLLECTION, submissionId);
-        await updateDoc(submissionRef, {
+
+        // Prepare data with server timestamps
+        const dataToUpdate = {
             ...updateData,
             updatedAt: serverTimestamp()
-        });
+        };
 
-        console.log(`✅ Updated form submission ${submissionId}`);
+
+        await updateDoc(submissionRef, dataToUpdate);
+
     } catch (error) {
         console.error('❌ Error updating form submission:', error);
         throw error;
@@ -443,7 +431,6 @@ export const deleteFormSubmission = async (submissionId) => {
         const submissionRef = doc(db, FORM_SUBMISSIONS_COLLECTION, submissionId);
         await deleteDoc(submissionRef);
 
-        console.log(`✅ Deleted form submission ${submissionId}`);
     } catch (error) {
         console.error('❌ Error deleting form submission:', error);
         throw error;
@@ -477,7 +464,6 @@ export const uploadDeclarationFile = async (file, userId, formId) => {
         // Get download URL
         const downloadURL = await getDownloadURL(uploadResult.ref);
 
-        console.log(`✅ Uploaded declaration file: ${fileName}`);
         return downloadURL;
     } catch (error) {
         console.error('❌ Error uploading declaration file:', error);
@@ -516,7 +502,6 @@ export const deleteDeclarationFile = async (fileUrl) => {
         const storageRef = ref(storage, fileUrl);
         await deleteObject(storageRef);
 
-        console.log(`✅ Deleted declaration file: ${fileUrl}`);
     } catch (error) {
         console.error('❌ Error deleting declaration file:', error);
         throw error;
@@ -553,7 +538,6 @@ export const getFormStatistics = async (formId) => {
             submissionsWithDeclarations: submissions.filter(s => s.declarationUploaded).length
         };
 
-        console.log(`✅ Retrieved statistics for form ${formId}`);
         return stats;
     } catch (error) {
         console.error('❌ Error getting form statistics:', error);
@@ -578,7 +562,6 @@ export const getUserSubmissionSummary = async (userId) => {
             totalAttendees: submissions.reduce((sum, s) => sum + (s.attendeesCount || 0), 0)
         };
 
-        console.log(`✅ Retrieved submission summary for user ${userId}`);
         return summary;
     } catch (error) {
         console.error('❌ Error getting user submission summary:', error);
@@ -738,6 +721,8 @@ export const markAssignmentCompleted = async (assignmentId) => {
         throw new Error(`Failed to mark assignment completed: ${error.message}`);
     }
 };
+
+
 
 // Export all functions
 export default {

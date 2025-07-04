@@ -72,11 +72,11 @@ service cloud.firestore {
       allow read: if isAuthenticated();
     }
 
-    // Helper function to check if user can update view count
-    function canUpdateViewCount() {
+    // Helper function to check if user can update view count OR submission count
+    function canUpdateCounters() {
       return isAuthenticated() &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in resource.data.targetUsers &&
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewCount', 'updatedAt']);
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewCount', 'updatedAt', 'submissionCount']);
     }
 
     // Forms - admin can create/edit, users can read forms assigned to their role
@@ -85,17 +85,18 @@ service cloud.firestore {
       allow create: if isAdmin();
       allow update: if isAdmin() ||
         (isAuthenticated() && resource.data.createdBy == request.auth.uid) ||
-        canUpdateViewCount();
+        canUpdateCounters(); // ✅ Updated function name
       allow delete: if isAdmin();
     }
 
-    // FIXED: Form submissions - users can create their own, admin can read all
+    // Form submissions - users can create and update their own, admin can read all
     match /form_submissions/{submissionId} {
       allow read: if isAuthenticated() &&
         (resource.data.submitterId == request.auth.uid || isAdmin());
       allow create: if isAuthenticated() &&
         request.resource.data.submitterId == request.auth.uid;
-      allow update: if isAdmin();
+      allow update: if isAuthenticated() &&
+        (resource.data.submitterId == request.auth.uid || isAdmin());
       allow delete: if isAdmin();
     }
 
