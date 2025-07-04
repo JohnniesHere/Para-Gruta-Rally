@@ -269,26 +269,42 @@ export const deleteForm = async (formId) => {
  */
 export const createFormSubmission = async (submissionData) => {
     try {
+        console.log('🔥 createFormSubmission called with:', submissionData);
+
         const submissionsRef = collection(db, FORM_SUBMISSIONS_COLLECTION);
-        const docRef = await addDoc(submissionsRef, {
+
+        // Prepare data with server timestamps
+        const dataToSubmit = {
             ...submissionData,
             submittedAt: serverTimestamp(),
             updatedAt: serverTimestamp()
-        });
+        };
+
+        console.log('🔥 Data to submit:', dataToSubmit);
+
+        const docRef = await addDoc(submissionsRef, dataToSubmit);
+        console.log('🔥 Document added with ID:', docRef.id);
 
         // Increment form submission count
         if (submissionData.formId) {
+            console.log('🔥 Incrementing form submission count...');
             const formRef = doc(db, FORMS_COLLECTION, submissionData.formId);
             await updateDoc(formRef, {
                 submissionCount: increment(1),
                 updatedAt: serverTimestamp()
             });
+            console.log('🔥 Form count incremented');
         }
 
         console.log(`✅ Created form submission with ID: ${docRef.id}`);
         return docRef.id;
     } catch (error) {
         console.error('❌ Error creating form submission:', error);
+        console.error('❌ Error details:', {
+            message: error.message,
+            code: error.code,
+            stack: error.stack
+        });
         throw error;
     }
 };

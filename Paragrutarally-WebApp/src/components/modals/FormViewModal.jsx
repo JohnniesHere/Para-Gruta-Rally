@@ -1,6 +1,7 @@
-// src/components/modals/FormViewModal.jsx - Fixed Version
+// src/components/modals/FormViewModal.jsx - Fixed Version (Hide Stats for Parents)
 import React from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { usePermissions } from '../../hooks/usePermissions';
 import {
     IconX as X,
     IconCalendar as Calendar,
@@ -20,10 +21,14 @@ const FormViewModal = ({
                            onClose
                        }) => {
     const { t, isRTL } = useLanguage();
+    const { userData } = usePermissions();
 
     if (!isOpen || !form) {
         return null;
     }
+
+    // Check if user is admin/instructor to show statistics
+    const showStatistics = userData?.role === 'admin' || userData?.role === 'instructor';
 
     // Enhanced date formatting with proper translation support
     const formatDateTime = () => {
@@ -134,21 +139,25 @@ const FormViewModal = ({
                                 <div className="view-value">{getTypeLabel(form.type)}</div>
                             </div>
 
-                            <div className="view-item">
-                                <label>{t('forms.status', 'Status')}</label>
-                                <div className="view-value">
-                                    <span className={`status-badge ${form.status}`}>
-                                        {getStatusLabel(form.status)}
-                                    </span>
+                            {showStatistics && (
+                                <div className="view-item">
+                                    <label>{t('forms.status', 'Status')}</label>
+                                    <div className="view-value">
+                                        <span className={`status-badge ${form.status}`}>
+                                            {getStatusLabel(form.status)}
+                                        </span>
+                                    </div>
                                 </div>
-                            </div>
+                            )}
 
-                            <div className="view-item">
-                                <label>{t('forms.created', 'Created')}</label>
-                                <div className="view-value">
-                                    {form.createdAt?.toLocaleDateString(isRTL ? 'he-IL' : 'en-US') || 'Unknown'}
+                            {showStatistics && (
+                                <div className="view-item">
+                                    <label>{t('forms.created', 'Created')}</label>
+                                    <div className="view-value">
+                                        {form.createdAt?.toLocaleDateString(isRTL ? 'he-IL' : 'en-US') || 'Unknown'}
+                                    </div>
                                 </div>
-                            </div>
+                            )}
 
                             {form.description && (
                                 <div className="view-item full-width">
@@ -159,21 +168,23 @@ const FormViewModal = ({
                         </div>
                     </div>
 
-                    {/* Target Users */}
-                    <div className="form-section">
-                        <h4>
-                            <Users size={18} />
-                            {t('forms.targetUsers', 'Target Users')}
-                        </h4>
+                    {/* Target Users - Only show for admins/instructors */}
+                    {showStatistics && (
+                        <div className="form-section">
+                            <h4>
+                                <Users size={18} />
+                                {t('forms.targetUsers', 'Target Users')}
+                            </h4>
 
-                        <div className="target-users-display">
-                            {form.targetUsers?.map(userType => (
-                                <span key={userType} className="user-type-badge">
-                                    {userType === 'parent' ? t('forms.parents', 'Parents') : t('forms.instructors', 'Instructors')}
-                                </span>
-                            ))}
+                            <div className="target-users-display">
+                                {form.targetUsers?.map(userType => (
+                                    <span key={userType} className="user-type-badge">
+                                        {userType === 'parent' ? t('forms.parents', 'Parents') : t('forms.instructors', 'Instructors')}
+                                    </span>
+                                ))}
+                            </div>
                         </div>
-                    </div>
+                    )}
 
                     {/* Event Details */}
                     {form.eventDetails && (
@@ -316,21 +327,23 @@ const FormViewModal = ({
                         </div>
                     )}
 
-                    {/* Form Statistics */}
-                    <div className="form-section">
-                        <h4>{t('forms.formStatistics', 'Form Statistics')}</h4>
+                    {/* Form Statistics - Only show for admins/instructors */}
+                    {showStatistics && (
+                        <div className="form-section">
+                            <h4>{t('forms.formStatistics', 'Form Statistics')}</h4>
 
-                        <div className="stats-display">
-                            <div className="stat-item">
-                                <label>{t('forms.views', 'Views')}</label>
-                                <div className="stat-value">{form.viewCount || 0}</div>
-                            </div>
-                            <div className="stat-item">
-                                <label>{t('forms.submissions', 'Submissions')}</label>
-                                <div className="stat-value">{form.submissionCount || 0}</div>
+                            <div className="stats-display">
+                                <div className="stat-item">
+                                    <label>{t('forms.views', 'Views')}</label>
+                                    <div className="stat-value">{form.viewCount || 0}</div>
+                                </div>
+                                <div className="stat-item">
+                                    <label>{t('forms.submissions', 'Submissions')}</label>
+                                    <div className="stat-value">{form.submissionCount || 0}</div>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    )}
                 </div>
 
                 <div className="form-creation-modal-footer">

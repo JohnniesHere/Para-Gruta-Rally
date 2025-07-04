@@ -1,11 +1,9 @@
-// src/components/modals/FormSubmissionModal.jsx - Complete Implementation
+// src/components/modals/FormSubmissionModal.jsx - Fixed UI Issues
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { usePermissions } from '../../hooks/usePermissions';
-import {
-    createFormSubmission,
-    uploadDeclarationFile
-} from '../../services/formService';
+import { createFormSubmission, uploadDeclarationFile } from '../../services/formService';
+import { getUserData, getUserKids } from '../../services/userService';
 import { getKidsByParent } from '../../services/kidService';
 import {
     IconX as X,
@@ -33,7 +31,7 @@ const FormSubmissionModal = ({
                                  onSubmit
                              }) => {
     const { t } = useLanguage();
-    const { userData, user } = usePermissions();
+    const { user } = usePermissions();
 
     // Form state
     const [formData, setFormData] = useState({
@@ -48,22 +46,21 @@ const FormSubmissionModal = ({
     });
 
     const [userKids, setUserKids] = useState([]);
+    const [completeUserData, setCompleteUserData] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isLoadingUserData, setIsLoadingUserData] = useState(false);
     const [kidsWithoutDeclaration, setKidsWithoutDeclaration] = useState([]);
     const [showDeclarationWarning, setShowDeclarationWarning] = useState(false);
 
     // Shirt size options
     const shirtSizes = ['2', '4', '6', '8', '10', '12', '14', '16', '18', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', 'XXXXL'];
 
-    // Load user's kids if parent
+    // Load user's complete data and kids if parent
     useEffect(() => {
-        if (isOpen && userType === 'parent' && user?.uid) {
-            loadUserKids();
-            // Debug user data
-            console.log('🔍 DEBUG: Full userData object:', userData);
-            console.log('🔍 DEBUG: userData keys:', Object.keys(userData || {}));
+        if (isOpen && user?.uid) {
+            loadCompleteUserData();
         }
-    }, [isOpen, userType, user, userData]);
+    }, [isOpen, user]);
 
     // Reset form when modal opens/closes
     useEffect(() => {
@@ -105,15 +102,42 @@ const FormSubmissionModal = ({
         }
     }, [formData.attendeesCount, formData.kidIds, formData.confirmationStatus]);
 
-    const loadUserKids = async () => {
+    const loadCompleteUserData = async () => {
+        setIsLoadingUserData(true);
         try {
-            console.log('🔍 Loading kids for parent:', user.uid);
-            const kids = await getKidsByParent(user.uid);
-            console.log('✅ Loaded kids:', kids);
-            setUserKids(kids || []);
+            console.log('🔍 Loading complete user data for:', user.uid);
+
+            // Get complete user data from Firestore
+            const userData = await getUserData(user.uid);
+            console.log('✅ Complete user data loaded:', userData);
+            setCompleteUserData(userData);
+
+            // If this is a parent, also load their kids using the userService
+            if (userType === 'parent') {
+                try {
+                    console.log('🔍 Loading kids for parent using userService...');
+                    const kids = await getUserKids(user.uid);
+                    console.log('✅ Kids loaded from userService:', kids);
+                    setUserKids(kids || []);
+                } catch (kidsError) {
+                    console.warn('⚠️ Failed to load kids from userService, trying fallback method');
+                    // Fallback to the original kidService method if needed
+                    try {
+                        const kids = await getKidsByParent(user.uid);
+                        console.log('✅ Kids loaded from kidService fallback:', kids);
+                        setUserKids(kids || []);
+                    } catch (fallbackError) {
+                        console.error('❌ Both kids loading methods failed:', fallbackError);
+                        setUserKids([]);
+                    }
+                }
+            }
         } catch (error) {
-            console.error('❌ Error loading user kids:', error);
+            console.error('❌ Error loading complete user data:', error);
+            setCompleteUserData(null);
             setUserKids([]);
+        } finally {
+            setIsLoadingUserData(false);
         }
     };
 
@@ -233,64 +257,90 @@ const FormSubmissionModal = ({
 
         setIsSubmitting(true);
         try {
+            console.log('🚀 Starting form submission...');
             let declarationUrl = null;
 
             // Upload declaration file if provided
             if (formData.declarationFile) {
+                console.log('📁 Uploading declaration file...');
                 declarationUrl = await uploadDeclarationFile(
                     formData.declarationFile,
                     user.uid,
                     form.id
                 );
+                console.log('✅ Declaration file uploaded:', declarationUrl);
             }
 
-            // Prepare submission data
+            // Prepare submission data (without timestamp fields)
             const submissionData = {
                 formId: form.id,
                 confirmationStatus: formData.confirmationStatus,
-                submittedAt: new Date(),
                 submitterId: user.uid,
-                updatedAt: new Date(),
                 attendeesCount: formData.attendeesCount,
                 formType: userType
             };
 
+            console.log('📝 Base submission data prepared:', submissionData);
+
             // Add optional fields based on form data
             if (formData.kidIds.length > 0) {
                 submissionData.kidIds = formData.kidIds;
+                console.log('👶 Added kidIds:', formData.kidIds);
             }
 
             if (formData.extraAttendees.some(a => a && a.trim())) {
                 submissionData.extraAttendees = formData.extraAttendees.filter(a => a && a.trim());
+                console.log('👥 Added extraAttendees:', submissionData.extraAttendees);
             }
 
             if (formData.shirts.some(s => s)) {
                 submissionData.shirts = formData.shirts.filter(s => s);
+                console.log('👕 Added shirts:', submissionData.shirts);
             }
 
             if (formData.extraShirts.some(s => s)) {
                 submissionData.extraShirts = formData.extraShirts.filter(s => s);
+                console.log('👕 Added extraShirts:', submissionData.extraShirts);
             }
 
             if (declarationUrl) {
                 submissionData.declarationUploaded = declarationUrl;
+                console.log('📄 Added declaration URL');
             }
 
             if (formData.motoForLife.trim()) {
                 submissionData.motoForLife = formData.motoForLife.trim();
+                console.log('💭 Added motto:', submissionData.motoForLife);
             }
 
+            console.log('📋 Final submission data:', submissionData);
+
             // Submit to database
-            await createFormSubmission(submissionData);
+            console.log('💾 Calling createFormSubmission...');
+            const submissionId = await createFormSubmission(submissionData);
+            console.log('✅ Form submitted successfully with ID:', submissionId);
 
             // Call success callback
-            onSubmit(submissionData);
+            console.log('📞 Calling onSubmit callback...');
+            try {
+                onSubmit(submissionData);
+                console.log('✅ onSubmit callback completed');
+            } catch (callbackError) {
+                console.warn('⚠️ Callback error (submission succeeded):', callbackError);
+            }
 
-            // Close modal
+            console.log('🚪 Closing modal...');
             onClose();
+            console.log('✅ Form submission process completed successfully');
 
         } catch (error) {
             console.error('❌ Error submitting form:', error);
+            console.error('❌ Error details:', {
+                message: error.message,
+                code: error.code,
+                stack: error.stack,
+                fullError: error
+            });
             alert(t('forms.error.submissionFailed', 'Failed to submit form. Please try again.'));
         } finally {
             setIsSubmitting(false);
@@ -483,46 +533,28 @@ const FormSubmissionModal = ({
                                 <div className="user-info-display">
                                     <div className="info-item">
                                         <label>{t('forms.name', 'Name')}</label>
-                                        <span>{userData?.displayName || `${userData?.firstName || ''} ${userData?.lastName || ''}`.trim() || userData?.name || 'N/A'}</span>
+                                        <span>
+                                            {isLoadingUserData ? 'Loading...' :
+                                                completeUserData?.displayName ||
+                                                completeUserData?.name ||
+                                                `${completeUserData?.firstName || ''} ${completeUserData?.lastName || ''}`.trim() ||
+                                                'N/A'}
+                                        </span>
                                     </div>
                                     <div className="info-item">
                                         <label>{t('forms.phoneNumber', 'Phone Number')}</label>
                                         <span>
-                                            {(() => {
-                                                // Try different phone field combinations
-                                                const phoneFields = [
-                                                    userData?.phoneNumber,
-                                                    userData?.phone,
-                                                    userData?.mobile,
-                                                    userData?.cellphone,
-                                                    userData?.contactInfo?.phone,
-                                                    userData?.personalInfo?.phone,
-                                                    userData?.parentInfo?.phone,
-                                                    // Check if it's nested deeper
-                                                    userData?.profile?.phone,
-                                                    userData?.profile?.phoneNumber
-                                                ];
-
-                                                const phone = phoneFields.find(field => field && field.toString().trim() !== '');
-
-                                                // Debug log
-                                                if (process.env.NODE_ENV === 'development') {
-                                                    console.log('🔍 DEBUG: Phone search result:', {
-                                                        found: phone,
-                                                        phoneFields: phoneFields,
-                                                        userData: userData
-                                                    });
-                                                }
-
-                                                return phone || 'N/A';
-                                            })()}
+                                            {isLoadingUserData ? 'Loading...' :
+                                                completeUserData?.phone ||
+                                                completeUserData?.phoneNumber ||
+                                                'N/A'}
                                         </span>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Kids Selection - Only for parents */}
-                            {userType === 'parent' && userKids.length > 0 && (
+                            {userType === 'parent' && (
                                 <div className="form-section">
                                     <h4>
                                         <Users size={18} />
@@ -530,22 +562,50 @@ const FormSubmissionModal = ({
                                     </h4>
 
                                     <div className="kids-selection">
-                                        {userKids.map(kid => (
-                                            <label key={kid.id} className="checkbox-option">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={formData.kidIds.includes(kid.id)}
-                                                    onChange={(e) => handleKidSelection(kid.id, e.target.checked)}
-                                                />
-                                                <span className="checkbox-label">
-                                                    <Users size={14} />
-                                                    {kid.firstName} {kid.lastName}
-                                                    {!kid.signedDeclaration && (
-                                                        <AlertTriangle size={14} className="warning-icon" />
-                                                    )}
-                                                </span>
-                                            </label>
-                                        ))}
+                                        {isLoadingUserData ? (
+                                            <div className="loading-kids">
+                                                <Clock size={16} />
+                                                <span>Loading kids...</span>
+                                            </div>
+                                        ) : userKids.length > 0 ? (
+                                            userKids.map(kid => {
+                                                // Extract firstName from the kid data
+                                                const kidFirstName = kid.personalInfo?.firstName ||
+                                                    kid.firstName ||
+                                                    kid.name?.split(' ')[0] ||
+                                                    `Kid ${kid.participantNumber || kid.id?.slice(-4)}`;
+
+                                                console.log('🔍 DEBUG: Rendering kid:', {
+                                                    id: kid.id,
+                                                    firstName: kid.firstName,
+                                                    personalInfo: kid.personalInfo,
+                                                    extractedName: kidFirstName,
+                                                    fullKidObject: kid
+                                                });
+
+                                                return (
+                                                    <label key={kid.id} className="checkbox-option">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={formData.kidIds.includes(kid.id)}
+                                                            onChange={(e) => handleKidSelection(kid.id, e.target.checked)}
+                                                        />
+                                                        <span className="checkbox-label">
+                                                            <Users size={14} />
+                                                            {kidFirstName}
+                                                            {!kid.signedDeclaration && (
+                                                                <AlertTriangle size={14} className="warning-icon" />
+                                                            )}
+                                                        </span>
+                                                    </label>
+                                                );
+                                            })
+                                        ) : (
+                                            <div className="no-kids-message">
+                                                <Users size={20} />
+                                                <span>No kids found for this parent</span>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             )}
@@ -705,7 +765,9 @@ const FormSubmissionModal = ({
                                                 </p>
                                                 <ul>
                                                     {kidsWithoutDeclaration.map(kid => (
-                                                        <li key={kid.id}>{kid.firstName} {kid.lastName}</li>
+                                                        <li key={kid.id}>
+                                                            {kid.personalInfo?.firstName || kid.firstName || `Kid ${kid.participantNumber}`}
+                                                        </li>
                                                     ))}
                                                 </ul>
                                             </div>

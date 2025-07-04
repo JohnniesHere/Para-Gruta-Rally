@@ -530,7 +530,7 @@
 .card-footer {
     display: flex;
     gap: 8px;
-    justify-content: flex-end;
+    justify-content: space-between;
     padding-top: 16px;
     border-top: 1px solid var(--border-color);
     margin-top: 15px;
@@ -548,11 +548,18 @@
     align-items: center;
     justify-content: center;
     gap: 6px;
-    min-width: 36px;
-    height: 36px;
     font-weight: 600;
     font-size: 0.9rem;
     text-decoration: none;
+    white-space: nowrap;
+    min-width: fit-content;
+    flex-shrink: 0;
+}
+
+.parent-forms-page .rtl .card-footer,
+.rtl .parent-forms-page .card-footer {
+    flex-direction: row;
+    justify-content: space-between;
 }
 
 .btn-action.view:hover {

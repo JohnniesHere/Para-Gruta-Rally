@@ -330,17 +330,18 @@ export const testCloudFunctions = async () => {
 };
 
 /**
- * Get user's kids from the database
+ * Get user's kids from the database (FIXED VERSION)
  * @param {string} userId - Parent user ID
  * @returns {Promise<Array>} List of kids belonging to the user
  */
 export const getUserKids = async (userId) => {
     try {
         const kidsRef = collection(db, 'kids');
+        // Fixed: Query by parentInfo.parentId instead of parentId
         const q = query(
             kidsRef,
-            where('parentId', '==', userId),
-            orderBy('firstName', 'asc')
+            where('parentInfo.parentId', '==', userId),
+            orderBy('participantNumber', 'asc')
         );
 
         const querySnapshot = await getDocs(q);
@@ -348,13 +349,30 @@ export const getUserKids = async (userId) => {
 
         querySnapshot.forEach((doc) => {
             const data = doc.data();
+
+            // Helper function to safely convert Firestore timestamps
+            const convertTimestamp = (timestamp) => {
+                if (!timestamp) return null;
+
+                // If it's already a Date object, return as is
+                if (timestamp instanceof Date) return timestamp;
+
+                // If it's a Firestore Timestamp (has seconds/nanoseconds), convert it
+                if (timestamp && typeof timestamp.toDate === 'function') {
+                    return timestamp.toDate();
+                }
+
+                return null;
+            };
+
             kids.push({
                 id: doc.id,
                 ...data,
                 // Convert any Firestore timestamps if they exist
-                createdAt: data.createdAt?.toDate(),
-                updatedAt: data.updatedAt?.toDate(),
-                birthDate: data.birthDate?.toDate()
+                createdAt: convertTimestamp(data.createdAt),
+                updatedAt: convertTimestamp(data.updatedAt),
+                // Handle different date fields that might exist
+                dateOfBirth: convertTimestamp(data.personalInfo?.dateOfBirth) || convertTimestamp(data.dateOfBirth)
             });
         });
 
