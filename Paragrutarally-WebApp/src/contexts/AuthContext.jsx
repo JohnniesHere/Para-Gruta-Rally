@@ -13,7 +13,7 @@ import { doc, getDoc, setDoc, serverTimestamp, collection, query, where, getDocs
 import { auth, db } from '../firebase/config';
 
 // Create the authentication context
-const AuthContext = createContext();
+ const AuthContext = createContext();
 
 // Custom hook to use the auth context
 export function useAuth() {

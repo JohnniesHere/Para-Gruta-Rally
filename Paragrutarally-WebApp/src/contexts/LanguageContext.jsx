@@ -2738,10 +2738,18 @@ export const LANGUAGES = {
         'analytics.maintenance.maintenanceScheduleAction': 'Schedule regular maintenance checks',
         'analytics.tooltip.priorityRecommendation.description': 'This recommendation is based on system performance and maintenance data.',
         'analytics.tooltip.priorityRecommendation.action': 'Take recommended actions to improve system performance and prevent future issues.',
+        'instructor.vehicle.noTeamAssigned': 'No team assigned',
+        'instructor.vehicle.noVehicleAssigned': 'No vehicle assigned',
+        'instructor.vehicle.noVehicleAssignedDesc': 'This instructor does not have a vehicle assigned to them.',
+        'instructor.vehicles.noTeamAssigned': 'You are not assigned to any team. Please contact an administrator.',
     },
 
 
     he: {
+        'instructor.vehicles.noTeamAssigned': 'אתה לא משויך לצוות כלשהו. אנא צור קשר עם מנהל המערכת.',
+        'instructor.vehicle.noTeamAssigned': 'אין צוות מוקצה',
+        'instructor.vehicle.noVehicleAssigned': 'אין רכב מוקצה',
+        'instructor.vehicle.noVehicleAssignedDesc': 'למדריך זה לא מוקצה רכב.',
         'analytics.tooltip.priorityRecommendation.action': 'בצע את הפעולות המומלצות כדי לשפר את ביצועי המערכת ולמנוע תקלות עתידיות.',
         'analytics.tooltip.priorityRecommendation.description': 'המלצה זו מבוססת על נתוני ביצועים ותחזוקה של המערכת.',
         'analytics.tooltip.priorityRecommendationGeneric.description': 'ההמלצה מבוססת על נתוני ביצועים ותחזוקה של המערכת.',

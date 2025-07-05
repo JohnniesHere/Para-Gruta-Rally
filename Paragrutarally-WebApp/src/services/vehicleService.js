@@ -1,4 +1,4 @@
-// src/services/vehicleService.js - Vehicle Management Service with Schema Integration
+// src/services/vehicleService.js - Updated for Team-Based Vehicle Assignment
 import {
     collection,
     doc,
@@ -26,11 +26,9 @@ const VEHICLES_COLLECTION = 'vehicles';
  */
 export const getAllVehicles = async () => {
     try {
-
         // Simple query without ordering to avoid index issues
         const vehiclesRef = collection(db, VEHICLES_COLLECTION);
         const snapshot = await getDocs(vehiclesRef);
-
 
         if (snapshot.empty) {
             return [];
@@ -72,11 +70,10 @@ export const getAllVehicles = async () => {
 };
 
 /**
- * Get vehicles by team (Team Leaders) - Updated to use teamId
+ * Get vehicles by team (Team Leaders/Instructors)
  */
 export const getVehiclesByTeam = async (teamId) => {
     try {
-
         const vehiclesRef = collection(db, VEHICLES_COLLECTION);
         const vehiclesQuery = query(vehiclesRef, where('teamId', '==', teamId));
         const snapshot = await getDocs(vehiclesQuery);
@@ -140,7 +137,7 @@ export const getVehiclesByKids = async (kidIds) => {
 };
 
 /**
- * Get a single vehicle by ID - FIXED
+ * Get a single vehicle by ID
  */
 export const getVehicleById = async (vehicleId) => {
     try {
@@ -165,13 +162,11 @@ export const getVehicleById = async (vehicleId) => {
     }
 };
 
-
 /**
  * Create a new vehicle with schema validation
  */
 export const addVehicle = async (vehicleData) => {
     try {
-
         // Step 1: Validate the data against schema
         const validation = validateVehicle(vehicleData, false);
         if (!validation.success) {
@@ -193,6 +188,7 @@ export const addVehicle = async (vehicleData) => {
             ...validatedData,
             active: validatedData.active !== undefined ? validatedData.active : true,
             history: validatedData.history || [],
+            currentKidId: null, // Always start unassigned to kids
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp()
         };
@@ -211,7 +207,6 @@ export const addVehicle = async (vehicleData) => {
  */
 export const updateVehicle = async (vehicleId, updates) => {
     try {
-
         // Step 1: Validate the update data against schema
         const validation = validateVehicle(updates, true);
         if (!validation.success) {
@@ -248,9 +243,10 @@ export const updateVehicle = async (vehicleId, updates) => {
 };
 
 /**
- * Assign vehicle to a kid
+ * Assign vehicle to a team (Admin function)
+ * UPDATED: Now uses team-based assignment
  */
-export const assignVehicleToKid = async (vehicleId, kidId) => {
+export const assignVehicleToTeam = async (vehicleId, teamId) => {
     try {
         const vehicleRef = doc(db, VEHICLES_COLLECTION, vehicleId);
         const vehicleDoc = await getDoc(vehicleRef);
@@ -259,31 +255,24 @@ export const assignVehicleToKid = async (vehicleId, kidId) => {
             throw new Error('Vehicle not found');
         }
 
-        const vehicleData = vehicleDoc.data();
-        const currentHistory = vehicleData.history || [];
-
-        // Add previous kid to history if there was one
-        const updatedHistory = vehicleData.currentKidId
-            ? [...currentHistory, vehicleData.currentKidId]
-            : currentHistory;
-
         await updateDoc(vehicleRef, {
-            currentKidId: kidId,
-            history: updatedHistory,
+            teamId: teamId,
+            currentKidId: null, // Clear any kid assignment when reassigning teams
             updatedAt: serverTimestamp()
         });
 
         return vehicleId;
     } catch (error) {
-        console.error('Error assigning vehicle:', error);
-        throw new Error('Failed to assign vehicle');
+        console.error('Error assigning vehicle to team:', error);
+        throw new Error('Failed to assign vehicle to team');
     }
 };
 
 /**
- * Unassign vehicle from current kid
+ * Assign vehicle to a kid within a team (Instructor function)
+ * UPDATED: Now requires team verification
  */
-export const unassignVehicle = async (vehicleId) => {
+export const assignVehicleToKidInTeam = async (vehicleId, kidId, teamId) => {
     try {
         const vehicleRef = doc(db, VEHICLES_COLLECTION, vehicleId);
         const vehicleDoc = await getDoc(vehicleRef);
@@ -293,23 +282,79 @@ export const unassignVehicle = async (vehicleId) => {
         }
 
         const vehicleData = vehicleDoc.data();
-        const currentHistory = vehicleData.history || [];
 
-        // Add current kid to history
-        const updatedHistory = vehicleData.currentKidId
-            ? [...currentHistory, vehicleData.currentKidId]
-            : currentHistory;
+        // Verify vehicle belongs to the team
+        if (vehicleData.teamId !== teamId) {
+            throw new Error('Vehicle is not assigned to your team');
+        }
 
         await updateDoc(vehicleRef, {
-            currentKidId: null,
-            history: updatedHistory,
+            currentKidId: kidId,
             updatedAt: serverTimestamp()
         });
 
         return vehicleId;
     } catch (error) {
-        console.error('Error unassigning vehicle:', error);
-        throw new Error('Failed to unassign vehicle');
+        console.error('Error assigning vehicle to kid:', error);
+        throw new Error('Failed to assign vehicle to kid');
+    }
+};
+
+/**
+ * Unassign vehicle from current kid (Instructor function)
+ * UPDATED: Keeps team assignment
+ */
+export const unassignVehicleFromKid = async (vehicleId, teamId) => {
+    try {
+        const vehicleRef = doc(db, VEHICLES_COLLECTION, vehicleId);
+        const vehicleDoc = await getDoc(vehicleRef);
+
+        if (!vehicleDoc.exists()) {
+            throw new Error('Vehicle not found');
+        }
+
+        const vehicleData = vehicleDoc.data();
+
+        // Verify vehicle belongs to the team
+        if (vehicleData.teamId !== teamId) {
+            throw new Error('Vehicle is not assigned to your team');
+        }
+
+        await updateDoc(vehicleRef, {
+            currentKidId: null,
+            updatedAt: serverTimestamp()
+        });
+
+        return vehicleId;
+    } catch (error) {
+        console.error('Error unassigning vehicle from kid:', error);
+        throw new Error('Failed to unassign vehicle from kid');
+    }
+};
+
+/**
+ * Unassign vehicle from team (Admin function)
+ * UPDATED: Clears both team and kid assignments
+ */
+export const unassignVehicleFromTeam = async (vehicleId) => {
+    try {
+        const vehicleRef = doc(db, VEHICLES_COLLECTION, vehicleId);
+        const vehicleDoc = await getDoc(vehicleRef);
+
+        if (!vehicleDoc.exists()) {
+            throw new Error('Vehicle not found');
+        }
+
+        await updateDoc(vehicleRef, {
+            teamId: null,
+            currentKidId: null,
+            updatedAt: serverTimestamp()
+        });
+
+        return vehicleId;
+    } catch (error) {
+        console.error('Error unassigning vehicle from team:', error);
+        throw new Error('Failed to unassign vehicle from team');
     }
 };
 
@@ -327,26 +372,16 @@ export const deleteVehicle = async (vehicleId) => {
 };
 
 /**
- * Get available vehicles (not assigned to any kid) - Updated to use teamId
+ * Get available vehicles for team assignment (Admin function)
+ * UPDATED: Returns vehicles not assigned to any team
  */
-export const getAvailableVehicles = async (teamId = null) => {
+export const getAvailableVehiclesForTeams = async () => {
     try {
-        let vehiclesQuery;
-
-        if (teamId) {
-            vehiclesQuery = query(
-                collection(db, VEHICLES_COLLECTION),
-                where('active', '==', true),
-                where('teamId', '==', teamId),
-                where('currentKidId', '==', null)
-            );
-        } else {
-            vehiclesQuery = query(
-                collection(db, VEHICLES_COLLECTION),
-                where('active', '==', true),
-                where('currentKidId', '==', null)
-            );
-        }
+        const vehiclesQuery = query(
+            collection(db, VEHICLES_COLLECTION),
+            where('active', '==', true),
+            where('teamId', '==', null)
+        );
 
         const snapshot = await getDocs(vehiclesQuery);
 
@@ -360,8 +395,38 @@ export const getAvailableVehicles = async (teamId = null) => {
             };
         });
     } catch (error) {
-        console.error('Error fetching available vehicles:', error);
-        throw new Error('Failed to fetch available vehicles');
+        console.error('Error fetching available vehicles for teams:', error);
+        throw new Error('Failed to fetch available vehicles for teams');
+    }
+};
+
+/**
+ * Get available vehicles within a team for kid assignment (Instructor function)
+ * UPDATED: Returns team vehicles not assigned to any kid
+ */
+export const getAvailableVehiclesInTeam = async (teamId) => {
+    try {
+        const vehiclesQuery = query(
+            collection(db, VEHICLES_COLLECTION),
+            where('active', '==', true),
+            where('teamId', '==', teamId),
+            where('currentKidId', '==', null)
+        );
+
+        const snapshot = await getDocs(vehiclesQuery);
+
+        return snapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                id: doc.id,
+                ...data,
+                createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : (data.createdAt || null),
+                updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : (data.updatedAt || null)
+            };
+        });
+    } catch (error) {
+        console.error('Error fetching available vehicles in team:', error);
+        throw new Error('Failed to fetch available vehicles in team');
     }
 };
 
@@ -399,11 +464,11 @@ export const updateVehicleBattery = async (vehicleId, batteryType, batteryDate) 
 };
 
 /**
- * Get vehicles statistics - Updated to use teamId
+ * Get vehicles statistics
+ * UPDATED: Now includes team-based statistics
  */
 export const getVehicleStats = async (teamId = null) => {
     try {
-
         let vehicles;
         if (teamId) {
             vehicles = await getVehiclesByTeam(teamId);
@@ -415,8 +480,10 @@ export const getVehicleStats = async (teamId = null) => {
             total: vehicles.length,
             active: vehicles.filter(v => v.active === true).length,
             inactive: vehicles.filter(v => v.active === false).length,
-            inUse: vehicles.filter(v => v.currentKidId && v.active === true).length,
-            available: vehicles.filter(v => !v.currentKidId && v.active === true).length,
+            assignedToTeams: vehicles.filter(v => v.teamId && v.active === true).length,
+            unassignedToTeams: vehicles.filter(v => !v.teamId && v.active === true).length,
+            inUseByKids: vehicles.filter(v => v.currentKidId && v.active === true).length,
+            availableInTeams: vehicles.filter(v => v.teamId && !v.currentKidId && v.active === true).length,
             needsMaintenance: vehicles.filter(v => {
                 if (!v.batteryDate) return false;
                 try {
@@ -438,15 +505,18 @@ export const getVehicleStats = async (teamId = null) => {
             total: 0,
             active: 0,
             inactive: 0,
-            inUse: 0,
-            available: 0,
+            assignedToTeams: 0,
+            unassignedToTeams: 0,
+            inUseByKids: 0,
+            availableInTeams: 0,
             needsMaintenance: 0
         };
     }
 };
 
 /**
- * Search vehicles by various criteria - Updated to use teamId
+ * Search vehicles by various criteria
+ * UPDATED: Now includes team-based filtering
  */
 export const searchVehicles = async (searchTerm, filters = {}) => {
     try {
@@ -471,8 +541,16 @@ export const searchVehicles = async (searchTerm, filters = {}) => {
             vehicles = vehicles.filter(v => v.active === filters.active);
         }
 
-        if (filters.inUse !== undefined) {
-            if (filters.inUse) {
+        if (filters.assignedToTeam !== undefined) {
+            if (filters.assignedToTeam) {
+                vehicles = vehicles.filter(v => v.teamId);
+            } else {
+                vehicles = vehicles.filter(v => !v.teamId);
+            }
+        }
+
+        if (filters.assignedToKid !== undefined) {
+            if (filters.assignedToKid) {
                 vehicles = vehicles.filter(v => v.currentKidId);
             } else {
                 vehicles = vehicles.filter(v => !v.currentKidId);
@@ -484,4 +562,69 @@ export const searchVehicles = async (searchTerm, filters = {}) => {
         console.error('Error searching vehicles:', error);
         throw new Error('Failed to search vehicles');
     }
+};
+
+// DEPRECATED FUNCTIONS - Kept for backward compatibility but will show warnings
+
+/**
+ * @deprecated Use assignVehicleToTeam instead
+ */
+export const assignVehicleToKid = async (vehicleId, kidId) => {
+    console.warn('⚠️ assignVehicleToKid is deprecated. Use assignVehicleToTeam and assignVehicleToKidInTeam instead.');
+    throw new Error('Direct kid assignment is no longer supported. Vehicles must be assigned to teams first.');
+};
+
+/**
+ * @deprecated Use unassignVehicleFromKid or unassignVehicleFromTeam instead
+ */
+export const unassignVehicle = async (vehicleId) => {
+    console.warn('⚠️ unassignVehicle is deprecated. Use unassignVehicleFromKid or unassignVehicleFromTeam instead.');
+    throw new Error('Generic vehicle unassignment is no longer supported. Use specific team-based unassignment.');
+};
+
+/**
+ * @deprecated Use getAvailableVehiclesForTeams or getAvailableVehiclesInTeam instead
+ */
+export const getAvailableVehicles = async (teamId = null) => {
+    console.warn('⚠️ getAvailableVehicles is deprecated. Use getAvailableVehiclesForTeams or getAvailableVehiclesInTeam instead.');
+    if (teamId) {
+        return getAvailableVehiclesInTeam(teamId);
+    } else {
+        return getAvailableVehiclesForTeams();
+    }
+};
+
+// Export all functions
+export default {
+    // Core CRUD operations
+    getAllVehicles,
+    getVehicleById,
+    addVehicle,
+    updateVehicle,
+    deleteVehicle,
+
+    // Team-based assignment (NEW)
+    getVehiclesByTeam,
+    assignVehicleToTeam,
+    unassignVehicleFromTeam,
+    getAvailableVehiclesForTeams,
+
+    // Kid assignment within teams (UPDATED)
+    assignVehicleToKidInTeam,
+    unassignVehicleFromKid,
+    getAvailableVehiclesInTeam,
+
+    // Parent view (unchanged)
+    getVehiclesByKids,
+
+    // Utility functions
+    getVehicleHistory,
+    updateVehicleBattery,
+    getVehicleStats,
+    searchVehicles,
+
+    // Deprecated functions (for backward compatibility)
+    assignVehicleToKid,
+    unassignVehicle,
+    getAvailableVehicles
 };
