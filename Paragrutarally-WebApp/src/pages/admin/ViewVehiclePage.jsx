@@ -1,13 +1,14 @@
-// src/pages/admin/ViewVehiclePage.jsx - Individual Vehicle Details with Schema Integration and Full Translation Support
+// src/pages/admin/ViewVehiclePage.jsx - UPDATED: Team-based Vehicle Assignment System
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { usePermissions } from '../../hooks/usePermissions.jsx';
-import { getVehicleById, assignVehicleToKid, unassignVehicle } from '../../services/vehicleService';
+import { getVehicleById } from '../../services/vehicleService'; // UPDATED: Removed vehicle assignment imports
 import { getKidById } from '../../services/kidService';
 import { getTeamById } from '../../services/teamService';
+import { getVehiclePhotoInfo } from '../../services/vehiclePhotoService'; // NEW: For vehicle photos
 import {
     IconCar as Car,
     IconArrowLeft as ArrowLeft,
@@ -28,7 +29,9 @@ import {
     IconTool as Tool,
     IconCircle as CheckCircle,
     IconCircle as XCircle,
-    IconInfoCircle as InfoCircle, IconArrowRight as ArrowRight
+    IconInfoCircle as InfoCircle,
+    IconArrowRight as ArrowRight,
+    IconUserCircle as Baby
 } from '@tabler/icons-react';
 import './ViewVehiclePage.css';
 
@@ -41,7 +44,7 @@ const ViewVehiclePage = () => {
     const { permissions, userRole, userData } = usePermissions();
 
     const [vehicle, setVehicle] = useState(null);
-    const [currentKid, setCurrentKid] = useState(null);
+    const [assignedKids, setAssignedKids] = useState([]); // UPDATED: Array of kids instead of single kid
     const [assignedTeam, setAssignedTeam] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -62,24 +65,27 @@ const ViewVehiclePage = () => {
             const vehicleData = await getVehicleById(id);
             setVehicle(vehicleData);
 
-            // Load current kid info if assigned - WITH BETTER ERROR HANDLING
-            if (vehicleData.currentKidId) {
+            // UPDATED: Load multiple assigned kids (currentKidIds array)
+            if (vehicleData.currentKidIds && vehicleData.currentKidIds.length > 0) {
                 try {
-                    const kidData = await getKidById(vehicleData.currentKidId);
-                    if (kidData) {
-                        setCurrentKid(kidData);
-                    } else {
-                        console.warn(`⚠️ Kid not found for ID: ${vehicleData.currentKidId}`);
-                        setCurrentKid(null);
+                    const kidPromises = vehicleData.currentKidIds.map(kidId => getKidById(kidId));
+                    const kidResults = await Promise.all(kidPromises);
+                    // Filter out any null results in case some kids weren't found
+                    const validKids = kidResults.filter(kid => kid !== null);
+                    setAssignedKids(validKids);
+
+                    if (validKids.length !== vehicleData.currentKidIds.length) {
+                        console.warn(`⚠️ Some kids not found. Expected: ${vehicleData.currentKidIds.length}, Found: ${validKids.length}`);
                     }
                 } catch (kidError) {
-                    console.error('❌ Error loading kid data:', kidError);
-                    // Don't fail the whole page if kid loading fails
-                    setCurrentKid(null);
+                    console.error('❌ Error loading kids data:', kidError);
+                    setAssignedKids([]);
                 }
+            } else {
+                setAssignedKids([]);
             }
 
-            // Load assigned team info if teamId exists
+            // UPDATED: Load assigned team info (now required since vehicles are team-based)
             if (vehicleData.teamId) {
                 try {
                     const teamData = await getTeamById(vehicleData.teamId);
@@ -88,6 +94,8 @@ const ViewVehiclePage = () => {
                     console.error('Error loading team data:', teamError);
                     setAssignedTeam(null);
                 }
+            } else {
+                setAssignedTeam(null);
             }
 
         } catch (error) {
@@ -108,6 +116,7 @@ const ViewVehiclePage = () => {
         navigate('/admin/vehicles');
     };
 
+    // UPDATED: Can edit logic for team-based system
     const canEdit = () => {
         if (userRole === 'admin') return true;
         if (userRole === 'instructor' && userData?.teamId === vehicle?.teamId) return true;
@@ -121,17 +130,17 @@ const ViewVehiclePage = () => {
     const formatDate = (dateString) => {
         if (!dateString) return t('viewVehicle.notSpecified', 'Not specified');
         try {
-            return new Date(dateString).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
+            // Handle Firestore timestamp objects
+            if (dateString.seconds) {
+                return new Date(dateString.seconds * 1000).toLocaleDateString();
+            }
+            return new Date(dateString).toLocaleDateString();
         } catch {
             return dateString;
         }
     };
 
-    // Status info function - TRANSLATED
+    // UPDATED: Status info function for team-based assignments
     const getStatusInfo = () => {
         if (!vehicle?.active) {
             return {
@@ -142,12 +151,13 @@ const ViewVehiclePage = () => {
             };
         }
 
-        if (vehicle.currentKidId) {
+        // UPDATED: Check if vehicle has any assigned kids
+        if (assignedKids.length > 0) {
             return {
-                status: t('viewVehicle.status.inUse', 'In Use'),
+                status: t('viewVehicle.status.inUse', 'In Use ({count} kids)', { count: assignedKids.length }),
                 className: 'status-in-use',
-                icon: <User size={20} />,
-                description: t('viewVehicle.status.inUseDescription', 'Currently assigned to a racer')
+                icon: <Baby size={20} />,
+                description: t('viewVehicle.status.inUseDescription', 'Currently assigned to {count} racer(s)', { count: assignedKids.length })
             };
         }
 
@@ -159,7 +169,7 @@ const ViewVehiclePage = () => {
         };
     };
 
-    // Battery status function - TRANSLATED
+    // Battery status function - same as before
     const getBatteryStatus = () => {
         if (!vehicle?.batteryDate) {
             return {
@@ -208,61 +218,28 @@ const ViewVehiclePage = () => {
         }
     };
 
-    // Vehicle history rendering function - TRANSLATED
-    const renderVehicleHistory = () => {
-        if (!vehicle.history || vehicle.history.length === 0) {
+    // Get vehicle photo display
+    const getVehiclePhotoDisplay = () => {
+        if (!vehicle) return null;
+
+        const photoInfo = getVehiclePhotoInfo(vehicle);
+
+        if (photoInfo.hasPhoto) {
             return (
-                <div className="no-history">
-                    <History size={40} className="no-history-icon" />
-                    <p>{t('viewVehicle.noUsageHistory', 'No usage history recorded')}</p>
+                <img
+                    src={photoInfo.url}
+                    alt={`${vehicle.make} ${vehicle.model}`}
+                    className="vehicle-photo-large"
+                />
+            );
+        } else {
+            return (
+                <div className="vehicle-photo-placeholder-large">
+                    <Car size={80} />
+                    <p>{t('viewVehicle.noPhotoAvailable', 'No photo available')}</p>
                 </div>
             );
         }
-
-        return (
-            <div className="history-list">
-                {vehicle.history.map((historyItem, index) => {
-                    // Handle both old format (string kidId) and new format (object)
-                    if (typeof historyItem === 'string') {
-                        // Old format: just kidId as string
-                        return (
-                            <div key={index} className="history-item">
-                                <User size={16} />
-                                <span>{t('viewVehicle.kidId', 'Kid ID:')} {historyItem}</span>
-                            </div>
-                        );
-                    } else if (typeof historyItem === 'object' && historyItem !== null) {
-                        // New format: object with kidId, kidName, assignedAt, assignedBy
-                        return (
-                            <div key={index} className="history-item enhanced">
-                                <User size={16} />
-                                <div className="history-item-details">
-                                    <div className="history-kid-info">
-                                        <span className="kid-name">{historyItem.kidName || `${t('viewVehicle.kidId', 'Kid ID:')} ${historyItem.kidId}`}</span>
-                                        {historyItem.assignedAt && (
-                                            <span className="assignment-date">
-                                                {t('viewVehicle.assigned', 'Assigned:')} {formatDate(historyItem.assignedAt)}
-                                            </span>
-                                        )}
-                                    </div>
-                                    {historyItem.assignedBy && (
-                                        <span className="assigned-by">{t('viewVehicle.assignedBy', 'by {assignedBy}', { assignedBy: historyItem.assignedBy })}</span>
-                                    )}
-                                </div>
-                            </div>
-                        );
-                    } else {
-                        // Fallback for any unexpected format
-                        return (
-                            <div key={index} className="history-item">
-                                <User size={16} />
-                                <span>{t('viewVehicle.unknownAssignment', 'Unknown assignment')}</span>
-                            </div>
-                        );
-                    }
-                })}
-            </div>
-        );
     };
 
     if (isLoading) {
@@ -311,7 +288,7 @@ const ViewVehiclePage = () => {
     return (
         <Dashboard requiredRole={userRole}>
             <div className={`admin-page view-vehicle-page ${appliedTheme}-mode`}>
-                {/* Page Title - TRANSLATED */}
+                {/* Page Title */}
                 <button onClick={handleBack}
                         className={`back-button ${appliedTheme}-back-button ${isRTL ? 'rtl' : ''}`}>
                     {isHebrew ? (
@@ -337,11 +314,11 @@ const ViewVehiclePage = () => {
                 </div>
 
                 <div className="admin-container">
-                    {/* Header - TRANSLATED */}
+                    {/* Header */}
                     <div className="racing-header">
                         <div className="header-content">
                             <div className="title-section">
-                            <h1>{vehicle.make} {vehicle.model}</h1>
+                                <h1>{vehicle.make} {vehicle.model}</h1>
                                 <p className="subtitle">{t('viewVehicle.licensePlateLabel', 'License Plate:')} {vehicle.licensePlate}</p>
                             </div>
                             <div className="header-actions">
@@ -365,29 +342,18 @@ const ViewVehiclePage = () => {
 
                     {/* Vehicle Details */}
                     <div className="vehicle-details-grid">
-                        {/* Vehicle Photo and Basic Info - TRANSLATED */}
+                        {/* Vehicle Photo and Basic Info */}
                         <div className="form-section vehicle-photo-section">
                             <div className="section-header">
                                 <Photo className="section-icon" size={24} />
                                 <h2>{t('viewVehicle.vehiclePhoto', 'Vehicle Photo')}</h2>
                             </div>
                             <div className="vehicle-photo-container">
-                                {vehicle.photo ? (
-                                    <img
-                                        src={vehicle.photo}
-                                        alt={`${vehicle.make} ${vehicle.model}`}
-                                        className="vehicle-photo-large"
-                                    />
-                                ) : (
-                                    <div className="vehicle-photo-placeholder-large">
-                                        <Car size={80} />
-                                        <p>{t('viewVehicle.noPhotoAvailable', 'No photo available')}</p>
-                                    </div>
-                                )}
+                                {getVehiclePhotoDisplay()}
                             </div>
                         </div>
 
-                        {/* Status Information - TRANSLATED */}
+                        {/* Status Information */}
                         <div className="form-section status-section">
                             <div className="section-header">
                                 <Settings className="section-icon" size={24} />
@@ -412,13 +378,27 @@ const ViewVehiclePage = () => {
                             </div>
                         </div>
 
-                        {/* Basic Vehicle Information - TRANSLATED */}
+                        {/* Basic Vehicle Information */}
                         <div className="form-section basic-info-section">
                             <div className="section-header">
                                 <Car className="section-icon" size={24} />
                                 <h2>{t('viewVehicle.vehicleInformation', 'Vehicle Information')}</h2>
                             </div>
                             <div className="info-grid">
+                                <div className="info-item">
+                                    <label>
+                                        <Engine size={16} />
+                                        {t('viewVehicle.driveType', 'Drive Type')}
+                                    </label>
+                                    <span>{vehicle.driveType || t('viewVehicle.notSpecified', 'Not specified')}</span>
+                                </div>
+                                <div className="info-item">
+                                    <label>
+                                        <Steering size={16} />
+                                        {t('viewVehicle.steeringType', 'Steering Type')}
+                                    </label>
+                                    <span>{vehicle.steeringType || t('viewVehicle.notSpecified', 'Not specified')}</span>
+                                </div>
                                 <div className="info-item">
                                     <label>
                                         <Battery size={16} />
@@ -436,51 +416,119 @@ const ViewVehiclePage = () => {
                             </div>
                         </div>
 
-                        {/* Current Assignment - TRANSLATED - IMPROVED ERROR HANDLING */}
-                        <div className="form-section assignment-section">
+                        {/* NEW: Team Assignment Section */}
+                        <div className="form-section team-assignment-section">
                             <div className="section-header">
-                                <User className="section-icon" size={24} />
-                                <h2>{t('viewVehicle.currentAssignment', 'Current Assignment')}</h2>
+                                <Users className="section-icon" size={24} />
+                                <h2>{t('viewVehicle.teamAssignment', 'Team Assignment')}</h2>
                             </div>
-                            <div className="assignment-content">
-                                {vehicle.currentKidId ? (
-                                    <div className="current-assignment">
-                                        {currentKid ? (
-                                            <div className="kid-info">
-                                                <div className="kid-details">
-                                                    <h4>{currentKid.personalInfo?.firstName} {currentKid.personalInfo?.lastName}</h4>
-                                                    {canViewSensitiveInfo() && (
-                                                        <button
-                                                            onClick={() => navigate(`/admin/kids/view/${currentKid.id}`)}
-                                                            className="btn-secondary btn-sm"
-                                                        >
-                                                            {t('viewVehicle.viewKidProfile', 'View Kid\'s Profile')}
-                                                        </button>
-                                                    )}
-                                                </div>
+                            <div className="team-assignment-content">
+                                {assignedTeam ? (
+                                    <div className="team-info">
+                                        <div className="team-details">
+                                            <h4
+                                                className="team-name clickable"
+                                                onClick={() => navigate(`/admin/teams/view/${assignedTeam.id}`)}
+                                            >
+                                                {assignedTeam.name}
+                                            </h4>
+                                            <p>{assignedTeam.description || t('viewVehicle.teamDescription', 'Racing team')}</p>
+                                            <div className="team-stats">
+                                                <span className="team-stat">
+                                                    <Baby size={14} />
+                                                    {assignedTeam.kids?.length || 0} {t('viewVehicle.racers', 'racers')}
+                                                </span>
+                                                <span className="team-stat">
+                                                    <Car size={14} />
+                                                    {assignedTeam.vehicleIds?.length || 0} {t('viewVehicle.vehicles', 'vehicles')}
+                                                </span>
                                             </div>
-                                        ) : (
-                                            <div className="assignment-error">
-                                                <AlertTriangle size={20} />
-                                                <div>
-                                                    <p><strong>{t('viewVehicle.assignmentIssue', 'Assignment Issue:')}</strong> {t('viewVehicle.vehicleAssignedTo', 'Vehicle is assigned to kid ID: {kidId}', { kidId: vehicle.currentKidId })}</p>
-                                                    <p>{t('viewVehicle.racerProfileNotLoaded', 'However, the racer profile could not be loaded. The racer may have been deleted or there\'s a data inconsistency.')}</p>
-                                                    <p className="suggestion">{t('viewVehicle.suggestionReassign', '💡 Consider reassigning this vehicle to resolve the issue.')}</p>
-                                                </div>
-                                            </div>
-                                        )}
+                                            <button
+                                                onClick={() => navigate(`/admin/teams/view/${assignedTeam.id}`)}
+                                                className="btn-secondary btn-sm"
+                                            >
+                                                {t('viewVehicle.viewTeamDetails', 'View Team Details')}
+                                            </button>
+                                        </div>
                                     </div>
                                 ) : (
-                                    <div className="no-assignment">
-                                        <Users size={40} className="no-assignment-icon" />
-                                        <h4>{t('viewVehicle.availableForAssignment', 'Available for Assignment')}</h4>
-                                        <p>{t('viewVehicle.notAssignedToRacer', 'This vehicle is not currently assigned to any racer')}</p>
+                                    <div className="no-team-assignment">
+                                        <AlertTriangle size={40} className="no-assignment-icon" />
+                                        <h4>{t('viewVehicle.notAssignedToTeam', 'Not Assigned to Team')}</h4>
+                                        <p>{t('viewVehicle.vehicleNeedsTeam', 'This vehicle needs to be assigned to a team before it can be used by racers.')}</p>
+                                        {userRole === 'admin' && (
+                                            <button
+                                                onClick={() => navigate(`/admin/vehicles/edit/${id}`)}
+                                                className="btn-primary btn-sm"
+                                            >
+                                                {t('viewVehicle.assignToTeam', 'Assign to Team')}
+                                            </button>
+                                        )}
                                     </div>
                                 )}
                             </div>
                         </div>
 
-                        {/* Modifications and Notes - Only for admins and instructors - TRANSLATED */}
+                        {/* UPDATED: Current Kid Assignments Section */}
+                        <div className="form-section assignment-section">
+                            <div className="section-header">
+                                <Baby className="section-icon" size={24} />
+                                <h2>{t('viewVehicle.currentRacerAssignments', 'Current Racer Assignments')}</h2>
+                            </div>
+                            <div className="assignment-content">
+                                {assignedKids.length > 0 ? (
+                                    <div className="current-assignments">
+                                        <div className="assignments-header">
+                                            <h4>{t('viewVehicle.assignedRacers', 'Assigned Racers')} ({assignedKids.length})</h4>
+                                        </div>
+                                        <div className="kids-grid">
+                                            {assignedKids.map(kid => (
+                                                <div key={kid.id} className="kid-assignment-card">
+                                                    <div className="kid-info">
+                                                        <div className="kid-header">
+                                                            <Baby size={18} />
+                                                            <span className="race-number">#{kid.participantNumber}</span>
+                                                        </div>
+                                                        <div className="kid-details">
+                                                            <h5>{kid.personalInfo?.firstName} {kid.personalInfo?.lastName}</h5>
+                                                            {kid.parentInfo?.name && (
+                                                                <p className="parent-info">
+                                                                    👨‍👩‍👧‍👦 {kid.parentInfo.name}
+                                                                </p>
+                                                            )}
+                                                            <span className={`status-badge ${kid.signedFormStatus?.toLowerCase() || 'pending'}`}>
+                                                                {kid.signedFormStatus || t('viewVehicle.pending', 'Pending')}
+                                                            </span>
+                                                        </div>
+                                                        {canViewSensitiveInfo() && (
+                                                            <button
+                                                                onClick={() => navigate(`/admin/kids/view/${kid.id}`)}
+                                                                className="btn-secondary btn-sm"
+                                                            >
+                                                                {t('viewVehicle.viewProfile', 'View Profile')}
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="no-assignment">
+                                        <Users size={40} className="no-assignment-icon" />
+                                        <h4>{t('viewVehicle.availableForAssignment', 'Available for Assignment')}</h4>
+                                        <p>{t('viewVehicle.notAssignedToRacers', 'This vehicle is not currently assigned to any racers')}</p>
+                                        {assignedTeam && (
+                                            <p className="assignment-note">
+                                                {t('viewVehicle.assignmentNote', 'Racers can be assigned to this vehicle through the team management interface.')}
+                                            </p>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Modifications and Notes - Only for admins and instructors */}
                         {canViewSensitiveInfo() && (
                             <div className="form-section notes-section">
                                 <div className="section-header">
@@ -500,21 +548,7 @@ const ViewVehiclePage = () => {
                             </div>
                         )}
 
-                        {/* Vehicle History - Only for admins and instructors - TRANSLATED */}
-                        {canViewSensitiveInfo() && vehicle.history && vehicle.history.length > 0 && (
-                            <div className="form-section history-section">
-                                <div className="section-header">
-                                    <History className="section-icon" size={24} />
-                                    <h2>{t('viewVehicle.usageHistory', 'Usage History')}</h2>
-                                </div>
-                                <div className="history-content">
-                                    <p>{t('viewVehicle.previousRacersUsed', 'Previous racers who used this vehicle:')}</p>
-                                    {renderVehicleHistory()}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Timestamps - Only for admins - TRANSLATED */}
+                        {/* Timestamps - Only for admins */}
                         {userRole === 'admin' && (
                             <div className="form-section timestamps-section">
                                 <div className="section-header">

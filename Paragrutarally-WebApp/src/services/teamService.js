@@ -1,4 +1,4 @@
-// src/services/teamService.js - Complete version with all functions
+// src/services/teamService.js - Updated with Vehicle Assignment Support
 import {
     collection,
     doc,
@@ -25,7 +25,6 @@ import { createEmptyTeam, validateTeam } from '../schemas/teamSchema';
  */
 export const getAllTeams = async (filters = {}) => {
     try {
-
         // Start with basic collection reference
         let teamsQuery = collection(db, 'teams');
 
@@ -55,7 +54,6 @@ export const getAllTeams = async (filters = {}) => {
 
         } catch (orderError) {
             // If ordering fails (likely because collection is empty), try without ordering
-
             const querySnapshot = await getDocs(collection(db, 'teams'));
             const teams = [];
 
@@ -70,7 +68,6 @@ export const getAllTeams = async (filters = {}) => {
         }
 
     } catch (error) {
-
         // If collection doesn't exist, return empty array
         if (error.code === 'not-found' || error.message.includes('collection')) {
             return [];
@@ -131,33 +128,56 @@ const getUserById = async (userId) => {
 };
 
 /**
- * Get a team with detailed information (kids, instructors, team leader)
- * FIXED VERSION - Properly fetches kids by IDs instead of teamId
+ * Get vehicle by ID from vehicles collection
+ * @param {string} vehicleId - The vehicle's document ID
+ * @returns {Promise<Object|null>} Vehicle data formatted for team display
+ */
+const getVehicleById = async (vehicleId) => {
+    try {
+        const vehicleDoc = await getDoc(doc(db, 'vehicles', vehicleId));
+        if (vehicleDoc.exists()) {
+            const vehicleData = vehicleDoc.data();
+            return {
+                id: vehicleDoc.id,
+                ...vehicleData,
+                // Safe timestamp conversion
+                createdAt: vehicleData.createdAt?.toDate ? vehicleData.createdAt.toDate() : (vehicleData.createdAt || null),
+                updatedAt: vehicleData.updatedAt?.toDate ? vehicleData.updatedAt.toDate() : (vehicleData.updatedAt || null)
+            };
+        }
+        return null;
+    } catch (error) {
+        console.error('❌ Error fetching vehicle:', error);
+        return null;
+    }
+};
+
+/**
+ * Get a team with detailed information (kids, instructors, team leader, vehicles)
+ * UPDATED VERSION - Now includes vehicle details
  * @param {string} teamId - The team's document ID
  * @returns {Promise<Object|null>} Team data with details or null if not found
  */
 export const getTeamWithDetails = async (teamId) => {
     try {
-
         // Get the basic team data
         const team = await getTeamById(teamId);
         if (!team) {
             return null;
         }
 
-
         // Initialize the detailed team object
         const teamWithDetails = {
             ...team,
             kids: [],
             instructors: [],
-            teamLeader: null
+            teamLeader: null,
+            vehicles: [] // NEW: Include vehicles array
         };
 
         // Fetch kids assigned to this team by kidIds array
         if (team.kidIds && team.kidIds.length > 0) {
             try {
-                // Fetch kids by their IDs (more reliable than teamId filter)
                 const kidsPromises = team.kidIds.map(async (kidId) => {
                     try {
                         const kidDoc = await getDoc(doc(db, 'kids', kidId));
@@ -177,21 +197,18 @@ export const getTeamWithDetails = async (teamId) => {
 
                 const kidsResults = await Promise.all(kidsPromises);
                 teamWithDetails.kids = kidsResults.filter(kid => kid !== null);
-
-                teamWithDetails.kids.forEach(kid => {
-                });
             } catch (kidError) {
                 console.warn('⚠️ Could not load kids:', kidError);
                 teamWithDetails.kids = [];
             }
         }
+
         // Fetch instructors from users collection (based on instructorIds array)
         if (team.instructorIds && team.instructorIds.length > 0) {
             try {
                 const instructorsPromises = team.instructorIds.map(instructorId => getUserById(instructorId));
                 const instructorsResults = await Promise.all(instructorsPromises);
                 teamWithDetails.instructors = instructorsResults.filter(instructor => instructor !== null);
-
             } catch (instructorError) {
                 console.warn('⚠️ Could not load instructors:', instructorError);
                 teamWithDetails.instructors = [];
@@ -207,6 +224,18 @@ export const getTeamWithDetails = async (teamId) => {
                 }
             } catch (leaderError) {
                 console.warn('⚠️ Could not load team leader:', leaderError);
+            }
+        }
+
+        // NEW: Fetch vehicles assigned to this team
+        if (team.vehicleIds && team.vehicleIds.length > 0) {
+            try {
+                const vehiclesPromises = team.vehicleIds.map(vehicleId => getVehicleById(vehicleId));
+                const vehiclesResults = await Promise.all(vehiclesPromises);
+                teamWithDetails.vehicles = vehiclesResults.filter(vehicle => vehicle !== null);
+            } catch (vehicleError) {
+                console.warn('⚠️ Could not load vehicles:', vehicleError);
+                teamWithDetails.vehicles = [];
             }
         }
 
@@ -253,7 +282,6 @@ export const getTeamsByInstructor = async (instructorId) => {
  */
 export const getAllInstructors = async () => {
     try {
-
         const instructorsQuery = query(
             collection(db, 'users'),
             where('role', '==', 'instructor')
@@ -291,7 +319,6 @@ export const getAllInstructors = async () => {
  */
 export const addTeam = async (teamData) => {
     try {
-
         // Validate team data using schema
         const validation = validateTeam(teamData, false); // false = not an update
 
@@ -307,9 +334,19 @@ export const addTeam = async (teamData) => {
             updatedAt: serverTimestamp()
         };
 
-
         // This will create the collection if it doesn't exist
         const docRef = await addDoc(collection(db, 'teams'), newTeam);
+
+        // Handle vehicle assignments if any were specified
+        if (newTeam.vehicleIds && newTeam.vehicleIds.length > 0) {
+            try {
+                const { updateTeamVehicleAssignments } = await import('./vehicleAssignmentService');
+                await updateTeamVehicleAssignments(docRef.id, newTeam.vehicleIds, []);
+            } catch (vehicleError) {
+                console.warn('⚠️ Failed to assign vehicles during team creation:', vehicleError);
+                // Don't fail team creation if vehicle assignment fails
+            }
+        }
 
         return docRef.id;
 
@@ -321,12 +358,18 @@ export const addTeam = async (teamData) => {
 
 /**
  * Update an existing team with schema validation
+ * UPDATED VERSION - Now handles vehicle assignment changes
  * @param {string} teamId - The team's document ID
  * @param {Object} updateData - The data to update
  * @returns {Promise<void>}
  */
 export const updateTeam = async (teamId, updateData) => {
     try {
+        // Get current team data to compare vehicle assignments
+        const currentTeam = await getTeamById(teamId);
+        if (!currentTeam) {
+            throw new Error('Team not found');
+        }
 
         // Validate team data using schema
         const validation = validateTeam(updateData, true); // true = is an update
@@ -343,7 +386,24 @@ export const updateTeam = async (teamId, updateData) => {
             updatedAt: serverTimestamp()
         };
 
+        // Update the team document
         await updateDoc(teamRef, updatedData);
+
+        // Handle vehicle assignment changes if vehicleIds were updated
+        if ('vehicleIds' in updatedData) {
+            const oldVehicleIds = currentTeam.vehicleIds || [];
+            const newVehicleIds = updatedData.vehicleIds || [];
+
+            if (JSON.stringify(oldVehicleIds.sort()) !== JSON.stringify(newVehicleIds.sort())) {
+                try {
+                    const { updateTeamVehicleAssignments } = await import('./vehicleAssignmentService');
+                    await updateTeamVehicleAssignments(teamId, newVehicleIds, oldVehicleIds);
+                } catch (vehicleError) {
+                    console.warn('⚠️ Failed to update vehicle assignments during team update:', vehicleError);
+                    // Don't fail team update if vehicle assignment fails
+                }
+            }
+        }
 
     } catch (error) {
         console.error('❌ Error updating team:', error);
@@ -353,16 +413,52 @@ export const updateTeam = async (teamId, updateData) => {
 
 /**
  * Delete a team
+ * UPDATED VERSION - Now handles vehicle cleanup
  * @param {string} teamId - The team's document ID
  * @returns {Promise<void>}
  */
 export const deleteTeam = async (teamId) => {
     try {
+        // Get team data before deletion to handle cleanup
+        const team = await getTeamById(teamId);
+
+        if (team) {
+            // Handle vehicle assignment cleanup
+            if (team.vehicleIds && team.vehicleIds.length > 0) {
+                try {
+                    const { updateTeamVehicleAssignments } = await import('./vehicleAssignmentService');
+                    await updateTeamVehicleAssignments(teamId, [], team.vehicleIds);
+                } catch (vehicleError) {
+                    console.warn('⚠️ Failed to clean up vehicle assignments during team deletion:', vehicleError);
+                }
+            }
+
+            // Reset team assignment for all kids in this team
+            if (team.kidIds && team.kidIds.length > 0) {
+                try {
+                    const kidUpdatePromises = team.kidIds.map(async (kidId) => {
+                        try {
+                            const kidRef = doc(db, 'kids', kidId);
+                            await updateDoc(kidRef, {
+                                teamId: null,
+                                vehicleId: null, // Also reset vehicle assignment
+                                updatedAt: serverTimestamp()
+                            });
+                        } catch (error) {
+                            console.warn(`⚠️ Failed to reset team assignment for kid ${kidId}:`, error);
+                        }
+                    });
+                    await Promise.all(kidUpdatePromises);
+                } catch (kidError) {
+                    console.warn('⚠️ Failed to reset kid team assignments during team deletion:', kidError);
+                }
+            }
+        }
+
+        // Delete the team document
         const teamRef = doc(db, 'teams', teamId);
         await deleteDoc(teamRef);
 
-        // TODO: Update kids that were in this team to remove teamId
-        // This would require a separate function to update all kids with this teamId
     } catch (error) {
         console.error('❌ Error deleting team:', error);
         throw new Error(`Failed to delete team: ${error.message}`);
@@ -410,6 +506,46 @@ export const removeKidFromTeam = async (teamId, kidId) => {
 };
 
 /**
+ * Add a vehicle to a team (used by vehicleAssignmentService)
+ * @param {string} teamId - The team's document ID
+ * @param {string} vehicleId - The vehicle's document ID
+ * @returns {Promise<void>}
+ */
+export const addVehicleToTeam = async (teamId, vehicleId) => {
+    try {
+        const teamRef = doc(db, 'teams', teamId);
+
+        await updateDoc(teamRef, {
+            vehicleIds: arrayUnion(vehicleId),
+            updatedAt: serverTimestamp()
+        });
+    } catch (error) {
+        console.error('❌ Error adding vehicle to team:', error);
+        throw new Error(`Failed to add vehicle to team: ${error.message}`);
+    }
+};
+
+/**
+ * Remove a vehicle from a team (used by vehicleAssignmentService)
+ * @param {string} teamId - The team's document ID
+ * @param {string} vehicleId - The vehicle's document ID
+ * @returns {Promise<void>}
+ */
+export const removeVehicleFromTeam = async (teamId, vehicleId) => {
+    try {
+        const teamRef = doc(db, 'teams', teamId);
+
+        await updateDoc(teamRef, {
+            vehicleIds: arrayRemove(vehicleId),
+            updatedAt: serverTimestamp()
+        });
+    } catch (error) {
+        console.error('❌ Error removing vehicle from team:', error);
+        throw new Error(`Failed to remove vehicle from team: ${error.message}`);
+    }
+};
+
+/**
  * Update a kid's team assignment (for the TeamChangeModal and EditKidPage)
  * This function ONLY handles team array management, NOT the kid document
  * The kid document should be updated separately
@@ -420,7 +556,6 @@ export const removeKidFromTeam = async (teamId, kidId) => {
  */
 export const updateKidTeam = async (kidId, newTeamId, currentTeamId = null) => {
     try {
-
         // If we don't know the current team, get it from the kid document
         let oldTeamId = currentTeamId;
         if (oldTeamId === null) {
@@ -429,7 +564,6 @@ export const updateKidTeam = async (kidId, newTeamId, currentTeamId = null) => {
                 oldTeamId = kidDoc.data().teamId || null;
             }
         }
-
 
         // Skip if no change
         if (oldTeamId === newTeamId) {
@@ -455,7 +589,6 @@ export const updateKidTeam = async (kidId, newTeamId, currentTeamId = null) => {
                 throw addError; // This is more critical - throw the error
             }
         }
-
 
     } catch (error) {
         console.error('❌ Error updating kid team assignments:', error);
@@ -503,8 +636,11 @@ export const getTeamsSummary = async () => {
             total: teams.length,
             active: teams.filter(t => t.active !== false).length,
             withInstructors: teams.filter(t => t.instructorIds && t.instructorIds.length > 0).length,
+            withVehicles: teams.filter(t => t.vehicleIds && t.vehicleIds.length > 0).length, // NEW: Count teams with vehicles
             averageKidsPerTeam: teams.length > 0 ?
-                Math.round(teams.reduce((sum, t) => sum + (t.kidIds?.length || 0), 0) / teams.length) : 0
+                Math.round(teams.reduce((sum, t) => sum + (t.kidIds?.length || 0), 0) / teams.length) : 0,
+            averageVehiclesPerTeam: teams.length > 0 ?
+                Math.round(teams.reduce((sum, t) => sum + (t.vehicleIds?.length || 0), 0) / teams.length) : 0 // NEW: Average vehicles per team
         };
     } catch (error) {
         console.error('❌ Error getting teams summary:', error);

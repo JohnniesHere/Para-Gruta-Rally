@@ -1,4 +1,4 @@
-// src/pages/admin/AddKidPage.jsx - Fixed with Proper Instructor Loading
+// src/pages/admin/AddKidPage.jsx - Updated without Vehicle Assignment
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
@@ -6,7 +6,7 @@ import CreateUserModal from '../../components/modals/CreateUserModal';
 import { useTheme } from '../../contexts/ThemeContext';
 import { usePermissions } from '../../hooks/usePermissions.jsx';
 import { addKid, getNextParticipantNumber } from '../../services/kidService';
-import { getAllInstructors } from '../../services/teamService'; // Added import for instructor service
+import { getAllInstructors } from '../../services/teamService';
 import { uploadKidPhoto, validatePhotoFile, resizeImage, getKidPhotoInfo } from '@/services/kidPhotoService.js';
 import { createEmptyKid, validateKid, getFormStatusOptions } from '@/schemas/kidSchema.js';
 import { getDocs, collection, query, where } from 'firebase/firestore';
@@ -34,9 +34,9 @@ import {
     IconCamera as Camera,
     IconUpload as Upload,
     IconX as X,
-    IconTrash as Trash2  // ADDED: Import Trash2 for consistency with EditKidPage
+    IconTrash as Trash2
 } from '@tabler/icons-react';
-import './AddKidPage.css'; // CHANGED: Use EditKidPage.css instead of AddKidPage.css
+import './AddKidPage.css';
 
 const AddKidPage = () => {
     const navigate = useNavigate();
@@ -80,7 +80,7 @@ const AddKidPage = () => {
             setSelectedTeamInstructor('');
             setFormData(prev => ({
                 ...prev,
-                instructorId: '' // Clear instructor ID as well
+                instructorId: ''
             }));
             return;
         }
@@ -89,7 +89,6 @@ const AddKidPage = () => {
         try {
             setLoadingTeamInstructor(true);
 
-            // Import the team service function
             const { getTeamWithDetails } = await import('../../services/teamService');
             const teamDetails = await getTeamWithDetails(teamId);
 
@@ -97,7 +96,6 @@ const AddKidPage = () => {
                 // Check if team has a team leader (primary instructor)
                 if (teamDetails.teamLeader) {
                     setSelectedTeamInstructor(teamDetails.teamLeader.name || teamDetails.teamLeader.displayName || t('addKid.unknownInstructor', 'Unknown Instructor'));
-                    // Set the instructor ID in form data
                     setFormData(prev => ({
                         ...prev,
                         instructorId: teamDetails.teamLeader.id
@@ -105,9 +103,8 @@ const AddKidPage = () => {
                 }
                 // If no team leader, check if there are instructors in the array
                 else if (teamDetails.instructors && teamDetails.instructors.length > 0) {
-                    const primaryInstructor = teamDetails.instructors[0]; // Use first instructor
+                    const primaryInstructor = teamDetails.instructors[0];
                     setSelectedTeamInstructor(primaryInstructor.name || primaryInstructor.displayName || t('addKid.unknownInstructor', 'Unknown Instructor'));
-                    // Set the instructor ID in form data
                     setFormData(prev => ({
                         ...prev,
                         instructorId: primaryInstructor.id
@@ -238,7 +235,7 @@ const AddKidPage = () => {
         }
     };
 
-    // Handle photo upload - UPDATED to match EditKidPage
+    // Handle photo upload
     const handlePhotoSelection = async (event) => {
         const file = event.target.files[0];
         if (!file) return;
@@ -246,7 +243,7 @@ const AddKidPage = () => {
         setPhotoError('');
 
         try {
-            // Basic validation - matching EditKidPage
+            // Basic validation
             const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
             if (!allowedTypes.includes(file.type)) {
                 setPhotoError(t('addKid.photoError.invalidType', 'Please upload a JPEG, PNG, or WebP image file.'));
@@ -268,14 +265,13 @@ const AddKidPage = () => {
             };
             reader.readAsDataURL(file);
 
-
         } catch (error) {
             console.error('Error processing photo:', error);
             setPhotoError(t('addKid.photoError.processingFailed', 'Failed to process photo. Please try again.'));
         }
     };
 
-    // UPDATED: Remove photo function to match EditKidPage
+    // Remove photo function
     const handleRemovePhoto = () => {
         setSelectedPhoto(null);
         setPhotoPreview(null);
@@ -365,21 +361,14 @@ const AddKidPage = () => {
 
         setIsSubmitting(true);
         try {
-
-
             // First, create the kid
             const kidId = await addKid(formData);
-
 
             // Upload photo if one was selected
             if (selectedPhoto) {
                 try {
                     setIsUploadingPhoto(true);
-
-
                     const photoUrl = await uploadKidPhoto(kidId, selectedPhoto);
-
-
                 } catch (photoError) {
                     console.error('⚠️ Photo upload failed:', photoError);
                     // Don't fail the entire operation, just show a warning
@@ -429,7 +418,7 @@ const AddKidPage = () => {
         return fieldErrors[fieldPath] || false;
     };
 
-    // Get photo display info - MATCHES EditKidPage
+    // Get photo display info
     const getPhotoDisplay = () => {
         if (photoPreview) {
             return {
@@ -484,7 +473,6 @@ const AddKidPage = () => {
                             {t('addKid.backToKids', 'Back to Kids')}
                         </>
                     )}
-
                 </button>
                 <div className="page-header">
                     <div className="title-section">
@@ -521,14 +509,14 @@ const AddKidPage = () => {
                     )}
 
                     <form onSubmit={handleSubmit} className="add-kid-form">
-                        {/* Basic Info Section with Photo - UPDATED TO MATCH EditKidPage */}
+                        {/* Basic Info Section with Photo */}
                         <div className="form-section racing-section">
                             <div className="section-header">
                                 <Baby className="section-icon" size={24} />
                                 <h2>{getSectionTitle()}</h2>
                             </div>
                             <div className="form-grid">
-                                {/* Enhanced Photo Upload Section - MATCHING EditKidPage */}
+                                {/* Enhanced Photo Upload Section */}
                                 <div className="form-group full-width">
                                     <label className="form-label">{t('addKid.racingPhoto', '📸 Racing Photo')}</label>
                                     <div className="photo-upload-section">
@@ -548,7 +536,7 @@ const AddKidPage = () => {
                                                 )}
                                             </div>
 
-                                            {/* Action Buttons Below Photo - MATCHING EditKidPage */}
+                                            {/* Action Buttons Below Photo */}
                                             <div className="photo-action-buttons">
                                                 <button
                                                     type="button"
@@ -848,11 +836,11 @@ const AddKidPage = () => {
                             </div>
                         </div>
 
-                        {/* Team Assignment */}
+                        {/* Team Assignment - UPDATED: Removed Vehicle Assignment */}
                         <div className="form-section team-section">
                             <div className="section-header">
                                 <Car className="section-icon" size={24} />
-                                <h2>{t('addKid.teamVehicleAssignment', '🏎️ Racing Team Assignment')}</h2>
+                                <h2>{t('addKid.teamAssignment', '🏎️ Racing Team Assignment')}</h2>
                             </div>
                             <div className="form-grid">
                                 <div className="form-group">
@@ -891,9 +879,9 @@ const AddKidPage = () => {
                                                 </div>
                                             ) : (
                                                 <div className={`instructor-info ${!selectedTeamInstructor ? 'empty' : ''}`}>
-                            <span>
-                                {selectedTeamInstructor || t('addKid.selectTeamFirst', 'Select a team to see instructor')}
-                            </span>
+                                                    <span>
+                                                        {selectedTeamInstructor || t('addKid.selectTeamFirst', 'Select a team to see instructor')}
+                                                    </span>
                                                 </div>
                                             )}
                                         </div>

@@ -1,4 +1,4 @@
-// src/services/kidService.js - FIXED VERSION with Enhanced updateKid function
+// src/services/kidService.js - Updated without Vehicle Assignment Logic
 import {
     addDoc,
     collection,
@@ -77,9 +77,11 @@ export const addKid = async (kidData, t = null) => {
             console.warn(`Participant number was taken, assigned new number: ${nextNumber}`);
         }
 
-        // Prepare data for Firestore
-        const preparedData = prepareKidForFirestore(kidData, false);
-
+        // Prepare data for Firestore (ensure vehicleId is set to null/empty for new kids)
+        const preparedData = {
+            ...prepareKidForFirestore(kidData, false),
+            vehicleId: null // Ensure new kids start with no vehicle assignment
+        };
 
         // Add to Firestore
         const docRef = await addDoc(collection(db, 'kids'), preparedData);
@@ -113,7 +115,7 @@ export const getKidById = async (kidId) => {
 };
 
 /**
- * Update a kid - ENHANCED VERSION with better error handling
+ * Update a kid - UPDATED VERSION without vehicle assignment logic
  * @param {string} kidId - The kid's document ID
  * @param {Object} updates - Updated kid data
  * @param {Function} t - Translation function (optional)
@@ -121,7 +123,6 @@ export const getKidById = async (kidId) => {
  */
 export const updateKid = async (kidId, updates, t = null) => {
     try {
-
         // Validate the updated data with translation support
         const validation = validateKid(updates, t);
 
@@ -131,14 +132,12 @@ export const updateKid = async (kidId, updates, t = null) => {
             throw new Error(`Validation failed: ${errorMessages}`);
         }
 
-
         // Prepare data for Firestore
         const preparedData = prepareKidForFirestore(updates, true);
 
         // Update in Firestore
         const kidRef = doc(db, 'kids', kidId);
         await updateDoc(kidRef, preparedData);
-
 
         // Fetch and return the updated document to verify
         const updatedDoc = await getDoc(kidRef);
@@ -171,16 +170,14 @@ export const updateKid = async (kidId, updates, t = null) => {
 };
 
 /**
- * Update a kid's team assignment with team membership management
- * This function handles BOTH the kid document AND team arrays
- * Use this when you only want to change the team (not other kid data)
+ * Update a kid's team assignment with team membership management and vehicle reset
+ * This function handles BOTH the kid document AND team arrays, plus vehicle cleanup
  * @param {string} kidId - The kid's document ID
  * @param {string|null} newTeamId - The new team ID (null to remove team)
  * @returns {Promise<void>}
  */
 export const updateKidTeamAssignment = async (kidId, newTeamId) => {
     try {
-
         // First, get the current kid data to find the old team
         const kidDoc = await getDoc(doc(db, 'kids', kidId));
         if (!kidDoc.exists()) {
@@ -190,6 +187,17 @@ export const updateKidTeamAssignment = async (kidId, newTeamId) => {
         const currentKidData = kidDoc.data();
         const oldTeamId = currentKidData.teamId;
 
+        // Handle vehicle assignment reset when changing teams
+        if (oldTeamId !== newTeamId) {
+            try {
+                // Import and use the vehicle assignment service to handle team change
+                const { handleKidTeamChange } = await import('./vehicleAssignmentService');
+                await handleKidTeamChange(kidId, newTeamId, oldTeamId);
+            } catch (vehicleError) {
+                console.warn('⚠️ Failed to handle vehicle assignment during team change:', vehicleError.message);
+                // Continue with team assignment even if vehicle reset fails
+            }
+        }
 
         // Update the team arrays first
         try {
@@ -203,11 +211,11 @@ export const updateKidTeamAssignment = async (kidId, newTeamId) => {
         // Then update the kid document
         const updateData = {
             teamId: newTeamId || null,
+            vehicleId: null, // Reset vehicle assignment when changing teams
             updatedAt: Timestamp.now()
         };
 
         await updateDoc(doc(db, 'kids', kidId), updateData);
-
 
     } catch (error) {
         console.error('❌ Error updating kid team:', error);
@@ -232,6 +240,15 @@ export const updateKidTeamAssignment = async (kidId, newTeamId) => {
  */
 export const deleteKid = async (kidId) => {
     try {
+        // Before deleting, handle vehicle assignment cleanup
+        try {
+            const { removeKidFromVehicle } = await import('./vehicleAssignmentService');
+            await removeKidFromVehicle(kidId);
+        } catch (vehicleError) {
+            console.warn('⚠️ Failed to clean up vehicle assignment during kid deletion:', vehicleError);
+            // Continue with deletion even if vehicle cleanup fails
+        }
+
         await deleteDoc(doc(db, 'kids', kidId));
     } catch (error) {
         console.error('Error deleting kid:', error);
@@ -348,7 +365,6 @@ export const searchKids = async (searchTerm, t = null) => {
  */
 export const updateKidTeam = async (kidId, newTeamId) => {
     try {
-
         // First, get the current kid data to find the old team
         const kidDoc = await getDoc(doc(db, 'kids', kidId));
         if (!kidDoc.exists()) {
@@ -358,15 +374,25 @@ export const updateKidTeam = async (kidId, newTeamId) => {
         const currentKidData = kidDoc.data();
         const oldTeamId = currentKidData.teamId;
 
-
         // Prepare the kid update data
         const updateData = {
             teamId: newTeamId || null,
+            vehicleId: null, // Reset vehicle assignment when changing teams
             updatedAt: Timestamp.now()
         };
 
         // Update the kid document
         await updateDoc(doc(db, 'kids', kidId), updateData);
+
+        // Handle vehicle assignment cleanup
+        if (oldTeamId !== newTeamId) {
+            try {
+                const { handleKidTeamChange } = await import('./vehicleAssignmentService');
+                await handleKidTeamChange(kidId, newTeamId, oldTeamId);
+            } catch (vehicleError) {
+                console.warn('⚠️ Failed to handle vehicle assignment during team change:', vehicleError);
+            }
+        }
 
         // Now handle team membership updates
         try {
@@ -395,7 +421,6 @@ export const updateKidTeam = async (kidId, newTeamId) => {
             console.warn('⚠️ Team service operations failed, but kid was updated:', teamServiceError.message);
             // Don't throw here - the main kid update succeeded
         }
-
 
     } catch (error) {
         console.error('❌ Error updating kid team:', error);

@@ -1,15 +1,14 @@
-// src/pages/admin/ViewKidPage.jsx - TRANSLATED VERSION
+// src/pages/admin/ViewKidPage.jsx - UPDATED: Removed vehicle display, added team vehicle context
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
 import { useTheme } from '../../contexts/ThemeContext';
-import { useLanguage } from '../../contexts/LanguageContext'; // Add this import
+import { useLanguage } from '../../contexts/LanguageContext';
 import { usePermissions } from '../../hooks/usePermissions.jsx';
 import { getKidById, deleteKid } from '@/services/kidService.js';
 import { getTeamById } from '@/services/teamService.js';
 import { getKidPhotoInfo } from '@/services/kidPhotoService.js';
-import { getVehicleById } from '@/services/vehicleService.js';
-import { getVehiclePhotoInfo } from '@/services/vehiclePhotoService.js';
+import { getVehicleById } from '@/services/vehicleService.js'; // Still needed for team vehicle display
 import {
     IconUserCircle as Baby,
     IconEdit as Edit,
@@ -27,7 +26,9 @@ import {
     IconChevronRight as ChevronRight,
     IconCamera as Camera,
     IconSettings as Settings,
-    IconBattery as Battery, IconArrowRight as ArrowRight
+    IconBattery as Battery,
+    IconArrowRight as ArrowRight,
+    IconUsers as Users
 } from '@tabler/icons-react';
 import './ViewKidPage.css';
 
@@ -36,12 +37,12 @@ const ViewKidPage = () => {
     const { id } = useParams();
     const location = useLocation();
     const { appliedTheme } = useTheme();
-    const { t } = useLanguage(); // Add this hook
+    const { t } = useLanguage();
     const { userRole } = usePermissions();
     const {isHebrew, isRTL } = useLanguage();
     const [kidData, setKidData] = useState(null);
     const [teamData, setTeamData] = useState(null);
-    const [vehicleData, setVehicleData] = useState(null);
+    const [teamVehicles, setTeamVehicles] = useState([]); // NEW: Team vehicles instead of kid vehicle
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [successMessage, setSuccessMessage] = useState('');
@@ -90,19 +91,15 @@ const ViewKidPage = () => {
                 try {
                     const team = await getTeamById(kid.teamId);
                     setTeamData(team);
+
+                    // NEW: Load team vehicles instead of kid vehicles
+                    if (team.vehicleIds && team.vehicleIds.length > 0) {
+                        const vehiclePromises = team.vehicleIds.map(vehicleId => getVehicleById(vehicleId));
+                        const vehicles = await Promise.all(vehiclePromises);
+                        setTeamVehicles(vehicles.filter(vehicle => vehicle !== null));
+                    }
                 } catch (teamError) {
                     console.warn('Could not load team data:', teamError);
-                }
-            }
-
-            // Load vehicle data if assigned
-            if (kid.vehicleIds && kid.vehicleIds.length > 0) {
-                try {
-                    // For now, load the first vehicle (kids typically have one primary vehicle)
-                    const vehicle = await getVehicleById(kid.vehicleIds[0]);
-                    setVehicleData(vehicle);
-                } catch (vehicleError) {
-                    console.warn('Could not load vehicle data:', vehicleError);
                 }
             }
 
@@ -207,84 +204,104 @@ const ViewKidPage = () => {
         }
     };
 
-    // Get vehicle display component - UPDATED: Photo moved to bottom
-    const getVehicleDisplay = () => {
-        if (!vehicleData) {
+    // NEW: Get current vehicle for this kid (from team vehicles)
+    const getCurrentVehicle = () => {
+        if (!kidData.vehicleId || !teamVehicles.length) return null;
+        return teamVehicles.find(vehicle => vehicle.id === kidData.vehicleId);
+    };
+
+    // NEW: Team vehicle context display
+    const getTeamVehicleContext = () => {
+        if (!teamData) {
             return (
-                <div className="vehicle-assignment">
-                    <div className="no-vehicle">
-                        <Car size={40} className="no-vehicle-icon" />
-                        <div className="no-vehicle-text">
-                            <p>{t('viewKid.noVehicleAssigned', 'No Vehicle Assigned')}</p>
-                            <span>{t('viewKid.readyForAssignment', 'Ready for assignment!')}</span>
+                <div className="team-vehicle-context">
+                    <div className="no-team">
+                        <Users size={40} className="no-team-icon" />
+                        <div className="no-team-text">
+                            <p>{t('viewKid.noTeamAssigned', 'No Team Assigned')}</p>
+                            <span>{t('viewKid.assignToTeamFirst', 'Assign to a team to access vehicles!')}</span>
                         </div>
                     </div>
                 </div>
             );
         }
 
-        const vehiclePhotoInfo = getVehiclePhotoInfo(vehicleData);
+        const currentVehicle = getCurrentVehicle();
 
         return (
-            <div className="vehicle-assignment">
-                <div className="vehicle-card">
-                    <div className="vehicle-details">
-                        <h4 className="vehicle-name">
-                            {vehicleData.make} {vehicleData.model}
-                        </h4>
-                        <div className="vehicle-info-grid">
-                            <div className="vehicle-detail">
-                                <span className="detail-label">{t('viewKid.licensePlate', 'License Plate:')}</span>
-                                <span className="license-plate">{vehicleData.licensePlate}</span>
-                            </div>
-                            <div className="vehicle-detail">
-                                <span className="detail-label">{t('viewKid.type', 'Type:')}</span>
-                                <span>{vehicleData.driveType} • {vehicleData.steeringType}</span>
-                            </div>
-                            <div className="vehicle-detail">
-                                <span className="detail-label">{t('viewKid.battery', 'Battery:')}</span>
-                                <div className="battery-info">
-                                    <Battery size={16} />
-                                    <span>{vehicleData.batteryType || 'N/A'}</span>
-                                </div>
-                            </div>
-                            <div className="vehicle-detail">
-                                <span className="detail-label">{t('viewKid.status', 'Status:')}</span>
-                                <span className={`vehicle-status ${vehicleData.active ? 'active' : 'inactive'}`}>
-                                    {vehicleData.active ? t('viewKid.vehicleActive', '✅ Active') : t('viewKid.vehicleInactive', '❌ Inactive')}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* UPDATED: Actions and photo together at bottom */}
-                    <div className="vehicle-actions">
-                        <div className="vehicle-actions-buttons">
-                            <button
-                                onClick={() => navigate(`/admin/vehicles/view/${vehicleData.id}`)}
-                                className="btn-vehicle-view"
-                            >
-                                <Settings size={16} />
-                                {t('viewKid.viewVehicle', 'View Vehicle')}
-                            </button>
-                        </div>
-
-                        {/* UPDATED: Photo moved here without border */}
-                        <div className="vehicle-photo-section-bottom">
-                            {vehiclePhotoInfo.hasPhoto ? (
-                                <img
-                                    src={vehiclePhotoInfo.url}
-                                    alt={`${vehicleData.make} ${vehicleData.model}`}
-                                    className="vehicle-photo-bottom"
-                                />
-                            ) : (
-                                <div className="vehicle-photo-placeholder-bottom">
-                                    <Car size={24} />
-                                </div>
-                            )}
-                        </div>
-                    </div>
+            <div className="team-vehicle-context">
+                <div className="team-info-header">
+                    <h4 className="team-name">
+                        <span
+                            className="team-link"
+                            onClick={() => navigate(`/admin/teams/view/${teamData.id}`)}
+                            style={{ cursor: 'pointer' }}
+                        >
+                            {teamData.name}
+                        </span>
+                    </h4>
+                    <span className="vehicle-count">
+                        {teamVehicles.length} {t('viewKid.vehiclesAvailable', 'vehicles available')}
+                    </span>
                 </div>
+
+                {/* Current Vehicle Assignment */}
+                <div className="current-vehicle-section">
+                    <h5>{t('viewKid.currentVehicle', 'Current Vehicle Assignment')}</h5>
+                    {currentVehicle ? (
+                        <div className="current-vehicle-card" onClick={() => navigate(`/admin/vehicles/view/${currentVehicle.id}`)}>
+                            <div className="vehicle-basic-info">
+                                <Car size={20} className="vehicle-icon" />
+                                <div className="vehicle-details">
+                                    <span className="vehicle-name">{currentVehicle.make} {currentVehicle.model}</span>
+                                    <span className="license-plate">{currentVehicle.licensePlate}</span>
+                                </div>
+                                <span className="assigned-badge">{t('viewKid.assigned', 'Assigned')}</span>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="no-vehicle-assigned">
+                            <Car size={24} className="no-vehicle-icon" />
+                            <span>{t('viewKid.noVehicleCurrentlyAssigned', 'No vehicle currently assigned')}</span>
+                        </div>
+                    )}
+                </div>
+
+                {/* Team Fleet Overview */}
+                {teamVehicles.length > 0 && (
+                    <div className="team-fleet-section">
+                        <h5>{t('viewKid.teamFleet', 'Team Fleet')} ({teamVehicles.length})</h5>
+                        <div className="fleet-summary">
+                            {teamVehicles.map(vehicle => {
+                                const isAssignedToThisKid = vehicle.id === kidData.vehicleId;
+                                const isAssignedToOther = vehicle.currentKidIds && vehicle.currentKidIds.length > 0 && !isAssignedToThisKid;
+
+                                return (
+                                    <div
+                                        key={vehicle.id}
+                                        className={`fleet-vehicle ${isAssignedToThisKid ? 'assigned-to-me' : isAssignedToOther ? 'assigned-to-other' : 'available'}`}
+                                        onClick={() => navigate(`/admin/vehicles/view/${vehicle.id}`)}
+                                    >
+                                        <Car size={16} />
+                                        <span className="vehicle-name">{vehicle.make} {vehicle.model}</span>
+                                        <span className={`status-indicator ${isAssignedToThisKid ? 'mine' : isAssignedToOther ? 'other' : 'available'}`}>
+                                            {isAssignedToThisKid ? t('viewKid.mine', 'Mine') :
+                                                isAssignedToOther ? t('viewKid.inUse', 'In Use') :
+                                                    t('viewKid.available', 'Available')}
+                                        </span>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                        <button
+                            onClick={() => navigate(`/admin/teams/view/${teamData.id}`)}
+                            className="view-team-button"
+                        >
+                            <Users size={16} />
+                            {t('viewKid.viewTeamDetails', 'View Team Details')}
+                        </button>
+                    </div>
+                )}
             </div>
         );
     };
@@ -312,18 +329,18 @@ const ViewKidPage = () => {
                         <button
                             onClick={handleBack}
                             className={`back-button ${appliedTheme}-back-button ${isRTL ? 'rtl' : ''}`}>
-                        {isHebrew ? (
-                        <>
-                            {t('editKid.backToKids', 'Back to Kids')}
-                            <ArrowRight className="btn-icon" size={20} />
-                        </>
-                         ) : (
-                        <>
-                            <ArrowLeft className="btn-icon" size={20} />
-                            {t('editKid.backToKids', 'Back to Kids')}
-                        </>
-                    )}
-                </button>
+                            {isHebrew ? (
+                                <>
+                                    {t('editKid.backToKids', 'Back to Kids')}
+                                    <ArrowRight className="btn-icon" size={20} />
+                                </>
+                            ) : (
+                                <>
+                                    <ArrowLeft className="btn-icon" size={20} />
+                                    {t('editKid.backToKids', 'Back to Kids')}
+                                </>
+                            )}
+                        </button>
                     </div>
                 </div>
             </Dashboard>
@@ -331,6 +348,7 @@ const ViewKidPage = () => {
     }
 
     const firstName = kidData.personalInfo?.firstName;
+    const currentVehicle = getCurrentVehicle();
 
     return (
         <Dashboard requiredRole={userRole}>
@@ -361,7 +379,7 @@ const ViewKidPage = () => {
                             <p className="subtitle">{t('viewKid.meetOurRacer', 'Meet our amazing racer! 🏁')}</p>
                         </div>
                         <div className="header-actions">
-                        {userRole === 'admin' && (
+                            {userRole === 'admin' && (
                                 <button onClick={handleEdit} className="edit-button">
                                     <Edit className="btn-icon" size={18} />
                                     {t('general.edit', 'Edit')}
@@ -408,14 +426,14 @@ const ViewKidPage = () => {
                                     </div>
                                     {teamData && (
                                         <div className="stat-item">
-                                            <Car className="stat-icon" size={16} />
+                                            <Users className="stat-icon" size={16} />
                                             <span>{t('viewKid.teamLabel', 'Team: {teamName}', { teamName: teamData.name })}</span>
                                         </div>
                                     )}
-                                    {vehicleData && (
+                                    {currentVehicle && (
                                         <div className="stat-item">
-                                            <Settings className="stat-icon" size={16} />
-                                            <span>{t('viewKid.vehicleLabel', 'Vehicle: {make} {model}', { make: vehicleData.make, model: vehicleData.model })}</span>
+                                            <Car className="stat-icon" size={16} />
+                                            <span>{t('viewKid.vehicleLabel', 'Vehicle: {make} {model}', { make: currentVehicle.make, model: currentVehicle.model })}</span>
                                         </div>
                                     )}
                                 </div>
@@ -457,7 +475,6 @@ const ViewKidPage = () => {
                                         </div>
                                     </div>
 
-                                    {/* ADD: Photo section in personal info */}
                                     <div className="info-item">
                                         <label>{t('viewKid.racingPhoto', '📸 Racing Photo')}</label>
                                         <div className="info-value">
@@ -559,7 +576,7 @@ const ViewKidPage = () => {
                             )}
                         </div>
 
-                        {/* UPDATED: Team & Vehicle Info */}
+                        {/* UPDATED: Team & Vehicle Context - REPLACED vehicle assignment with team context */}
                         <div className="info-section team-section">
                             <div
                                 className="section-header clickable"
@@ -567,8 +584,8 @@ const ViewKidPage = () => {
                                 style={{ cursor: 'pointer', userSelect: 'none' }}
                             >
                                 <div className="section-header-content">
-                                    <Car className="section-icon" size={24} />
-                                    <h3>{t('viewKid.teamVehicleInfo', '🏎️ {firstName}\'s Team & Vehicle', { firstName: firstName || 'Racer' })}</h3>
+                                    <Users className="section-icon" size={24} />
+                                    <h3>{t('viewKid.teamVehicleInfo', '🏎️ {firstName}\'s Team & Vehicle Access', { firstName: firstName || 'Racer' })}</h3>
                                 </div>
                                 <div className="collapse-indicator">
                                     {collapsedSections.team ?
@@ -613,13 +630,13 @@ const ViewKidPage = () => {
                                         </div>
                                     </div>
 
-                                    {/* Vehicle Assignment Section */}
+                                    {/* NEW: Team Vehicle Context Section */}
                                     <div className="vehicle-section">
                                         <div className="vehicle-header">
-                                            <Settings size={20} />
-                                            <h4>{t('viewKid.racingVehicleAssignment', 'Racing Vehicle Assignment')}</h4>
+                                            <Car size={20} />
+                                            <h4>{t('viewKid.teamVehicleAccess', 'Team Vehicle Access')}</h4>
                                         </div>
-                                        {getVehicleDisplay()}
+                                        {getTeamVehicleContext()}
                                     </div>
                                 </div>
                             )}
@@ -674,7 +691,7 @@ const ViewKidPage = () => {
                                         </div>
                                     </div>
 
-                                    {/* ADD: Instructor Comments Timeline */}
+                                    {/* Instructor Comments Timeline */}
                                     {kidData.instructorsComments && kidData.instructorsComments.length > 0 && (
                                         <div className="comment-item full-width">
                                             <label>{t('viewKid.teamNotesHistory', '👨‍🏫 Team Notes History')}</label>

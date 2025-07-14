@@ -1,4 +1,4 @@
-// src/pages/admin/AddTeamPage.jsx - Updated with Schema Integration
+// src/pages/admin/AddTeamPage.jsx - Updated with Vehicle Assignment Support
 import React, {useState, useEffect} from 'react';
 import {useNavigate} from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
@@ -7,7 +7,8 @@ import {usePermissions} from '../../hooks/usePermissions.jsx';
 import {useLanguage} from '../../contexts/LanguageContext';
 import {addTeam, getAllInstructors} from '@/services/teamService.js';
 import {getAllKids} from '@/services/kidService.js';
-import {createEmptyTeam, validateTeam} from '@/schemas/teamSchema.js'; // Fixed import path
+import {getAvailableVehicles} from '@/services/vehicleService.js'; // NEW: Import for vehicles
+import {createEmptyTeam, validateTeam} from '@/schemas/teamSchema.js';
 import {
     IconUsers as UsersGroup,
     IconPlus as Plus,
@@ -22,7 +23,8 @@ import {
     IconNotes as FileText,
     IconSparkles as Sparkles,
     IconTrophy as Trophy,
-    IconTarget as Target
+    IconTarget as Target,
+    IconSettings as Settings // NEW: Import for vehicle section
 } from '@tabler/icons-react';
 import './AddTeamPage.css';
 
@@ -35,7 +37,8 @@ const AddTeamPage = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [instructors, setInstructors] = useState([]);
     const [availableKids, setAvailableKids] = useState([]);
-    const [formData, setFormData] = useState(createEmptyTeam()); // Use schema function
+    const [availableVehicles, setAvailableVehicles] = useState([]); // NEW: Available vehicles
+    const [formData, setFormData] = useState(createEmptyTeam());
     const [errors, setErrors] = useState({});
     const [fieldErrors, setFieldErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -56,6 +59,10 @@ const AddTeamPage = () => {
             const allKids = await getAllKids();
             const kidsWithoutTeams = allKids.filter(kid => !kid.teamId);
             setAvailableKids(kidsWithoutTeams);
+
+            // NEW: Load available vehicles (not assigned to any team)
+            const vehiclesData = await getAvailableVehicles();
+            setAvailableVehicles(vehiclesData);
 
         } catch (error) {
             console.error('❌ Error loading initial data:', error);
@@ -104,8 +111,17 @@ const AddTeamPage = () => {
         }));
     };
 
-    const validateForm = () => {
+    // NEW: Handle vehicle toggle
+    const handleVehicleToggle = (vehicleId) => {
+        setFormData(prev => ({
+            ...prev,
+            vehicleIds: prev.vehicleIds.includes(vehicleId)
+                ? prev.vehicleIds.filter(id => id !== vehicleId)
+                : [...prev.vehicleIds, vehicleId]
+        }));
+    };
 
+    const validateForm = () => {
         // Use schema validation
         const validation = validateTeam(formData, false); // false = not an update
 
@@ -172,6 +188,11 @@ const AddTeamPage = () => {
         return fieldErrors[fieldPath] || false;
     };
 
+    // NEW: Helper function to get vehicle display name
+    const getVehicleDisplayName = (vehicle) => {
+        return `${vehicle.make} ${vehicle.model} (${vehicle.licensePlate})`;
+    };
+
     if (isLoading) {
         return (
             <Dashboard requiredRole={userRole}>
@@ -214,13 +235,11 @@ const AddTeamPage = () => {
                     </div>
                 </div>
 
-
                 {/* Main Container */}
                 <div className="admin-container add-team-container">
                     {/* Racing Theme Header */}
                     <div className="racing-header">
                         <div className="header-content">
-
                             <div className="title-section">
                                 <p className="subtitle">{t('addTeam.subtitle', 'Let\'s build the ultimate racing squad! 🏁')}</p>
                             </div>
@@ -378,6 +397,67 @@ const AddTeamPage = () => {
                                         <small className="field-hint">
                                             {t('addTeam.teamLeaderHint', 'The team leader will be the main instructor responsible for this team.')}
                                         </small>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* NEW: Vehicles Assignment Section */}
+                        <div className="form-section vehicles-section">
+                            <div className="section-header">
+                                <Settings className="section-icon" size={24}/>
+                                <h2>🏎️ {t('teams.racingVehicles', 'Racing Vehicles')}</h2>
+                            </div>
+
+                            <div className="vehicles-grid">
+                                {availableVehicles.length === 0 ? (
+                                    <div className="empty-state">
+                                        <Car className="empty-icon" size={40}/>
+                                        <p>{t('teams.noVehiclesAvailable', 'No vehicles available for assignment!')}</p>
+                                        <small>{t('addTeam.allVehiclesAssigned', 'All vehicles are already assigned to teams or inactive.')}</small>
+                                    </div>
+                                ) : (
+                                    availableVehicles.map(vehicle => (
+                                        <div
+                                            key={vehicle.id}
+                                            className={`vehicle-card card selectable ${formData.vehicleIds.includes(vehicle.id) ? 'selected' : ''}`}
+                                            onClick={() => handleVehicleToggle(vehicle.id)}
+                                        >
+                                            <div className="card-header">
+                                                <Car className="card-icon" size={20}/>
+                                                <span className="vehicle-name card-title">
+                                                    {vehicle.make} {vehicle.model}
+                                                </span>
+                                                {formData.vehicleIds.includes(vehicle.id) && (
+                                                    <Check className="selected-icon" size={16}/>
+                                                )}
+                                            </div>
+                                            <div className="vehicle-details card-body">
+                                                <div>🏁 {vehicle.licensePlate}</div>
+                                                {vehicle.driveType && (
+                                                    <div>⚙️ {vehicle.driveType}</div>
+                                                )}
+                                                {vehicle.batteryType && (
+                                                    <div>🔋 {vehicle.batteryType}</div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+
+                            {formData.vehicleIds.length > 0 && (
+                                <div className="selected-vehicles-summary">
+                                    <h4>{t('teams.selectedVehicles', 'Selected Vehicles: {count}', { count: formData.vehicleIds.length })}</h4>
+                                    <div className="selected-vehicles-list">
+                                        {formData.vehicleIds.map(vehicleId => {
+                                            const vehicle = availableVehicles.find(v => v.id === vehicleId);
+                                            return vehicle ? (
+                                                <span key={vehicleId} className="selected-vehicle-tag">
+                                                    🏎️ {getVehicleDisplayName(vehicle)}
+                                                </span>
+                                            ) : null;
+                                        })}
                                     </div>
                                 </div>
                             )}

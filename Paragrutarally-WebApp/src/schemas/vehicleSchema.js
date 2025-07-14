@@ -1,4 +1,4 @@
-// src/schemas/vehicleSchema.js
+// src/schemas/vehicleSchema.js - Updated for Team-based Assignment
 import { z } from 'zod';
 
 export const vehicleSchema = z.object({
@@ -45,13 +45,8 @@ export const vehicleSchema = z.object({
             'Invalid battery date format'
         ),
 
-    // Current assignment
-    currentKidId: z.string()
-        .optional()
-        .nullable(),
-
-    // History and tracking (no validation on array items)
-    history: z.array(z.string())
+    // Current kid assignments within the team (multiple kids can use same vehicle)
+    currentKidIds: z.array(z.string())
         .default([]),
 
     // Notes and modifications

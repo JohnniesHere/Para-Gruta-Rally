@@ -1,4 +1,4 @@
-// src/pages/admin/ViewTeamPage.jsx - FIXED VERSION
+// src/pages/admin/ViewTeamPage.jsx - UPDATED: Added team vehicles section
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
@@ -6,6 +6,8 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { usePermissions } from '../../hooks/usePermissions.jsx';
 import { getTeamWithDetails, deleteTeam } from '@/services/teamService.js';
+import { getVehicleById } from '@/services/vehicleService.js'; // NEW: Import for loading team vehicles
+import { getVehiclePhotoInfo } from '@/services/vehiclePhotoService.js'; // NEW: Import for vehicle photos
 import {
     IconUsers as UsersGroup,
     IconEdit as Edit,
@@ -22,7 +24,13 @@ import {
     IconFlag as Flag,
     IconCrown as Crown,
     IconPhone as Phone,
-    IconMail as Mail
+    IconMail as Mail,
+    IconCar as Car, // NEW: Import for vehicles
+    IconBattery as Battery, // NEW: Import for battery info
+    IconSettings as Settings, // NEW: Import for vehicle settings
+    IconEngine as Engine, // NEW: Import for engine/drive type
+    IconSteeringWheel as Steering, // NEW: Import for steering type
+    IconEye as Eye // NEW: Import for view actions
 } from '@tabler/icons-react';
 import './ViewTeamPage.css';
 
@@ -35,6 +43,7 @@ const ViewTeamPage = () => {
     const { userRole } = usePermissions();
 
     const [teamData, setTeamData] = useState(null);
+    const [teamVehicles, setTeamVehicles] = useState([]); // NEW: Team vehicles state
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [successMessage, setSuccessMessage] = useState('');
@@ -51,6 +60,20 @@ const ViewTeamPage = () => {
             }
 
             setTeamData(team);
+
+            // NEW: Load team vehicles
+            if (team.vehicleIds && team.vehicleIds.length > 0) {
+                try {
+                    const vehiclePromises = team.vehicleIds.map(vehicleId => getVehicleById(vehicleId));
+                    const vehicles = await Promise.all(vehiclePromises);
+                    setTeamVehicles(vehicles.filter(vehicle => vehicle !== null));
+                } catch (vehicleError) {
+                    console.warn('Could not load team vehicles:', vehicleError);
+                    setTeamVehicles([]);
+                }
+            } else {
+                setTeamVehicles([]);
+            }
 
         } catch (error) {
             console.error('❌ Error loading team data:', error);
@@ -108,6 +131,11 @@ const ViewTeamPage = () => {
         navigate(`/admin/kids/view/${kidId}`);
     };
 
+    // NEW: Handle vehicle click
+    const handleVehicleClick = (vehicleId) => {
+        navigate(`/admin/vehicles/view/${vehicleId}`);
+    };
+
     const getStatusColor = (active) => {
         return active ? 'success' : 'secondary';
     };
@@ -122,7 +150,6 @@ const ViewTeamPage = () => {
         let pending = 0;
 
         teamData.kids.forEach(kid => {
-
             // Check various possible status values that indicate "ready"
             const status = kid.signedFormStatus;
             if (status === 'Completed' || status === 'completed' || status === 'Complete' || status === 'complete') {
@@ -133,6 +160,36 @@ const ViewTeamPage = () => {
         });
 
         return { total, ready, pending };
+    };
+
+    // NEW: Get team vehicle statistics
+    const getVehicleStats = () => {
+        const total = teamVehicles.length;
+        const active = teamVehicles.filter(v => v.active).length;
+        const inUse = teamVehicles.filter(v => v.currentKidIds && v.currentKidIds.length > 0).length;
+        const available = teamVehicles.filter(v => v.active && (!v.currentKidIds || v.currentKidIds.length === 0)).length;
+
+        return { total, active, inUse, available };
+    };
+
+    // NEW: Get vehicle status badge
+    const getVehicleStatusBadge = (vehicle) => {
+        if (!vehicle.active) {
+            return <span className="badge danger">{t('vehicles.status.inactive', 'Inactive')}</span>;
+        }
+        if (vehicle.currentKidIds && vehicle.currentKidIds.length > 0) {
+            return <span className="badge warning">{t('vehicles.status.inUse', 'In Use')}</span>;
+        }
+        return <span className="badge success">{t('vehicles.status.available', 'Available')}</span>;
+    };
+
+    // NEW: Get assigned kids for a vehicle
+    const getAssignedKidsForVehicle = (vehicle) => {
+        if (!vehicle.currentKidIds || !teamData?.kids) return [];
+
+        return teamData.kids.filter(kid =>
+            vehicle.currentKidIds.includes(kid.id) || kid.vehicleId === vehicle.id
+        );
     };
 
     if (isLoading) {
@@ -175,6 +232,7 @@ const ViewTeamPage = () => {
     }
 
     const performance = getTeamPerformance();
+    const vehicleStats = getVehicleStats(); // NEW: Get vehicle statistics
 
     return (
         <Dashboard requiredRole={userRole}>
@@ -260,6 +318,11 @@ const ViewTeamPage = () => {
                                         <Users className="stat-icon" size={16} />
                                         <span>{t('teams.instructorsCount', '{count} Instructors', { count: teamData.instructors?.length || 0 })}</span>
                                     </div>
+                                    {/* NEW: Vehicle count in hero stats */}
+                                    <div className="stat-item">
+                                        <Car className="stat-icon" size={16} />
+                                        <span>{t('teams.vehiclesCount', '{count} Vehicles', { count: vehicleStats.total })}</span>
+                                    </div>
                                     <div className="stat-item">
                                         <Target className="stat-icon" size={16} />
                                         <span>{t('teams.maxCapacity', 'Max: {capacity}', { capacity: teamData.maxCapacity || teamData.maxMembers || 15 })}</span>
@@ -284,11 +347,9 @@ const ViewTeamPage = () => {
 
                                 <div className="info-item">
                                     <label>{t('teams.statusLabel', '📊 Status')}</label>
-                                    {/*<div className="info-value">*/}
-                                        <span className={`status-badge info-value ${getStatusColor(teamData.active)}` }>
-                                            {teamData.active ? t('teams.activeAndRacing', '✅ Active & Racing') : t('teams.inactiveTeam', '⏸️ Inactive')}
-                                        </span>
-                                    {/*</div>*/}
+                                    <span className={`status-badge info-value ${getStatusColor(teamData.active)}` }>
+                                        {teamData.active ? t('teams.activeAndRacing', '✅ Active & Racing') : t('teams.inactiveTeam', '⏸️ Inactive')}
+                                    </span>
                                 </div>
 
                                 <div className="info-item">
@@ -399,7 +460,146 @@ const ViewTeamPage = () => {
                                     )}
                                 </div>
                             </div>
+                        </div>
 
+                        {/* NEW: Team Vehicles Section */}
+                        <div className="info-section vehicles-section full-width">
+                            <div className="section-header">
+                                <Car className="section-icon" size={24} />
+                                <h3>{t('teams.teamVehiclesWithCount', '🏎️ Team Fleet ({total} vehicles)', {
+                                    total: vehicleStats.total
+                                })}</h3>
+                            </div>
+
+                            <div className="vehicles-stats">
+                                <div className="stat-card total">
+                                    <Car className="stat-icon" size={20} />
+                                    <div className="stat-info">
+                                        <span className="stat-number">{vehicleStats.total}</span>
+                                        <span className="stat-label">{t('teams.totalVehicles', 'Total Vehicles')}</span>
+                                    </div>
+                                </div>
+
+                                <div className="stat-card active">
+                                    <Settings className="stat-icon" size={20} />
+                                    <div className="stat-info">
+                                        <span className="stat-number">{vehicleStats.active}</span>
+                                        <span className="stat-label">{t('teams.activeVehicles', 'Active')}</span>
+                                    </div>
+                                </div>
+
+                                <div className="stat-card in-use">
+                                    <Battery className="stat-icon" size={20} />
+                                    <div className="stat-info">
+                                        <span className="stat-number">{vehicleStats.inUse}</span>
+                                        <span className="stat-label">{t('teams.vehiclesInUse', 'In Use')}</span>
+                                    </div>
+                                </div>
+
+                                <div className="stat-card available">
+                                    <Check className="stat-icon" size={20} />
+                                    <div className="stat-info">
+                                        <span className="stat-number">{vehicleStats.available}</span>
+                                        <span className="stat-label">{t('teams.vehiclesAvailable', 'Available')}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="vehicles-grid">
+                                {teamVehicles?.length > 0 ? (
+                                    teamVehicles.map(vehicle => {
+                                        const vehiclePhotoInfo = getVehiclePhotoInfo(vehicle);
+                                        const assignedKids = getAssignedKidsForVehicle(vehicle);
+
+                                        return (
+                                            <div
+                                                key={vehicle.id}
+                                                className="vehicle-card"
+                                                onClick={() => handleVehicleClick(vehicle.id)}
+                                            >
+                                                <div className="vehicle-header">
+                                                    {vehiclePhotoInfo.hasPhoto ? (
+                                                        <img
+                                                            src={vehiclePhotoInfo.url}
+                                                            alt={`${vehicle.make} ${vehicle.model}`}
+                                                            className="vehicle-photo"
+                                                        />
+                                                    ) : (
+                                                        <div className="vehicle-photo-placeholder">
+                                                            <Car size={24} />
+                                                        </div>
+                                                    )}
+                                                    <div className="vehicle-status-indicator">
+                                                        {getVehicleStatusBadge(vehicle)}
+                                                    </div>
+                                                </div>
+                                                <div className="vehicle-info">
+                                                    <h4 className="vehicle-name">
+                                                        {vehicle.make} {vehicle.model}
+                                                    </h4>
+                                                    <div className="vehicle-details">
+                                                        <div className="license-info">
+                                                            🏷️ {vehicle.licensePlate}
+                                                        </div>
+                                                        <div className="vehicle-specs">
+                                                            <span className="drive-type">{vehicle.driveType}</span>
+                                                            <span className="steering-type">{vehicle.steeringType}</span>
+                                                        </div>
+                                                        {vehicle.batteryType && (
+                                                            <div className="battery-info">
+                                                                <Battery size={14} />
+                                                                {vehicle.batteryType}
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Current assignment info */}
+                                                    <div className="assignment-info">
+                                                        {assignedKids.length > 0 ? (
+                                                            <div className="assigned-kids">
+                                                                <span className="assignment-label">{t('teams.currentlyUsedBy', 'Currently used by:')}</span>
+                                                                <div className="assigned-kids-list">
+                                                                    {assignedKids.map(kid => (
+                                                                        <span
+                                                                            key={kid.id}
+                                                                            className="assigned-kid"
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation();
+                                                                                handleKidClick(kid.id);
+                                                                            }}
+                                                                        >
+                                                                            #{kid.participantNumber} {kid.personalInfo?.firstName || 'Racer'}
+                                                                        </span>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                        ) : (
+                                                            <div className="no-assignment">
+                                                                <span className="available-status">{t('teams.availableForAssignment', '✅ Available for assignment')}</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })
+                                ) : (
+                                    <div className="empty-state">
+                                        <Car className="empty-icon" size={40} />
+                                        <h4>{t('teams.noVehiclesAssignedYet', 'No vehicles assigned yet!')}</h4>
+                                        <p>{t('teams.assignVehiclesToTeam', 'This team needs some awesome vehicles to race with! 🏎️')}</p>
+                                        {(userRole === 'admin' || userRole === 'instructor') && (
+                                            <button
+                                                onClick={() => navigate(`/admin/teams/edit/${id}`, { state: { focusVehicles: true } })}
+                                                className="assign-vehicles-button"
+                                            >
+                                                <Car className="btn-icon" size={16} />
+                                                {t('teams.assignVehicles', 'Assign Vehicles')}
+                                            </button>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         {/* Team Racers */}
@@ -440,36 +640,56 @@ const ViewTeamPage = () => {
 
                             <div className="racers-grid">
                                 {teamData.kids?.length > 0 ? (
-                                    teamData.kids.map(kid => (
-                                        <div
-                                            key={kid.id}
-                                            className="racer-card"
-                                            onClick={() => handleKidClick(kid.id)}
-                                        >
-                                            <div className="racer-header">
-                                                <Baby className="racer-icon" size={18} />
-                                                <span className="race-number">#{kid.participantNumber || 'N/A'}</span>
-                                                <span className={`status-dot ${(kid.signedFormStatus || 'pending').toLowerCase()}`}></span>
-                                            </div>
-                                            <div className="racer-info">
-                                                <h4 className="racer-name">
-                                                    {`${kid.personalInfo?.firstName || ''} ${kid.personalInfo?.lastName || ''}`.trim() || t('teams.racingStar', 'Racing Star')}
-                                                </h4>
-                                                <div className="racer-details">
-                                                    {kid.parentInfo?.name && (
-                                                        <div className="parent-info">
-                                                            👨‍👩‍👧‍👦 {kid.parentInfo.name}
+                                    teamData.kids.map(kid => {
+                                        // Find the vehicle assigned to this kid
+                                        const assignedVehicle = teamVehicles.find(vehicle => vehicle.id === kid.vehicleId);
+
+                                        return (
+                                            <div
+                                                key={kid.id}
+                                                className="racer-card"
+                                                onClick={() => handleKidClick(kid.id)}
+                                            >
+                                                <div className="racer-header">
+                                                    <Baby className="racer-icon" size={18} />
+                                                    <span className="race-number">#{kid.participantNumber || 'N/A'}</span>
+                                                    <span className={`status-dot ${(kid.signedFormStatus || 'pending').toLowerCase()}`}></span>
+                                                </div>
+                                                <div className="racer-info">
+                                                    <h4 className="racer-name">
+                                                        {`${kid.personalInfo?.firstName || ''} ${kid.personalInfo?.lastName || ''}`.trim() || t('teams.racingStar', 'Racing Star')}
+                                                    </h4>
+                                                    <div className="racer-details">
+                                                        {kid.parentInfo?.name && (
+                                                            <div className="parent-info">
+                                                                👨‍👩‍👧‍👦 {kid.parentInfo.name}
+                                                            </div>
+                                                        )}
+                                                        <div className="status-info">
+                                                            {t('teams.statusInfo', 'Status: {status}', {
+                                                                status: kid.signedFormStatus || t('status.pending', 'Pending')
+                                                            })}
                                                         </div>
-                                                    )}
-                                                    <div className="status-info">
-                                                        {t('teams.statusInfo', 'Status: {status}', {
-                                                            status: kid.signedFormStatus || t('status.pending', 'Pending')
-                                                        })}
+                                                        {/* NEW: Show assigned vehicle info */}
+                                                        {assignedVehicle && (
+                                                            <div className="vehicle-assignment-info">
+                                                                <Car size={14} />
+                                                                <span
+                                                                    className="assigned-vehicle-link"
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        handleVehicleClick(assignedVehicle.id);
+                                                                    }}
+                                                                >
+                                                                    {assignedVehicle.make} {assignedVehicle.model}
+                                                                </span>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    ))
+                                        );
+                                    })
                                 ) : (
                                     <div className="empty-state">
                                         <Baby className="empty-icon" size={40} />

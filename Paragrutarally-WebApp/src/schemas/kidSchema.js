@@ -1,9 +1,9 @@
-// src/schemas/kidSchema.js - Final fixes
+// src/schemas/kidSchema.js - Updated for Team-based Vehicle Assignment
 import { Timestamp } from 'firebase/firestore';
 
 /**
  * Kid Schema Definition
- * Based on the Firestore structure and AddKidPage form
+ * Updated to use single vehicle assignment (vehicleId) instead of array (vehicleIds)
  */
 
 // Default/empty kid object
@@ -45,7 +45,7 @@ export const createEmptyKid = () => ({
     // Assignments
     instructorId: '', // Reference to instructor document
     teamId: '', // Reference to team document
-    vehicleIds: [], // Array of vehicle document references
+    vehicleId: '', // Single vehicle assignment from team's available vehicles
 
     // Status and Forms
     signedDeclaration: false,

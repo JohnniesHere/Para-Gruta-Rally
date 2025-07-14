@@ -1,14 +1,13 @@
-// src/pages/admin/VehiclesPage.jsx - OPTIMIZED VERSION with single-row stats
+// src/pages/admin/VehiclesPage.jsx - UPDATED: Team-based assignments instead of kid-based
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { usePermissions } from '../../hooks/usePermissions.jsx';
-import { getAllVehicles, getVehiclesByTeam, getVehiclesByKids, deleteVehicle } from '../../services/vehicleService';
-import { unassignVehicleFromKid } from '../../services/vehicleAssignmentService'; // Import for cleanup
-import { getAllTeams } from '../../services/teamService';
-import { getKidsByParent } from '../../services/kidService';
+import { getAllVehicles, getVehiclesByTeam, deleteVehicle } from '@/services/vehicleService.js';
+import { unassignVehicleFromTeam} from '@/services/vehicleAssignmentService.js'; // UPDATED: Import team unassignment
+import { getAllTeams } from '@/services/teamService.js';
 import {
     IconCar as Car,
     IconPlus as Plus,
@@ -25,7 +24,8 @@ import {
     IconCalendar as Calendar,
     IconPhoto as Photo,
     IconAlertTriangle as AlertTriangle,
-    IconSettings as Settings
+    IconSettings as Settings,
+    IconUserCircle as Baby
 } from '@tabler/icons-react';
 import './VehiclePage.css';
 
@@ -41,7 +41,7 @@ const VehiclesPage = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isDeleting, setIsDeleting] = useState(null); // Track which vehicle is being deleted
-    const [activeCardFilter, setActiveCardFilter] = useState('total'); // NEW: Track active card
+    const [activeCardFilter, setActiveCardFilter] = useState('total'); // Track active card
 
     // Search and filter states
     const [searchTerm, setSearchTerm] = useState('');
@@ -79,14 +79,8 @@ const VehiclesPage = () => {
                     }
                     break;
                 case 'parent':
-                    try {
-                        const parentKids = await getKidsByParent(userData.uid);
-                        const kidIds = parentKids.map(kid => kid.id);
-                        vehiclesData = await getVehiclesByKids(kidIds);
-                    } catch (error) {
-                        console.error('Error loading parent vehicles:', error);
-                        vehiclesData = [];
-                    }
+                    // UPDATED: Parents see vehicles through their kids' teams
+                    vehiclesData = []; // Parents typically don't need direct vehicle access
                     break;
                 case 'guest':
                     vehiclesData = [];
@@ -120,7 +114,11 @@ const VehiclesPage = () => {
 
         // Team filter
         if (teamFilter) {
-            filtered = filtered.filter(vehicle => vehicle.teamId === teamFilter);
+            if (teamFilter === 'unassigned') {
+                filtered = filtered.filter(vehicle => !vehicle.teamId);
+            } else {
+                filtered = filtered.filter(vehicle => vehicle.teamId === teamFilter);
+            }
         }
 
         // Status filter
@@ -130,25 +128,32 @@ const VehiclesPage = () => {
             } else if (statusFilter === 'inactive') {
                 filtered = filtered.filter(vehicle => !vehicle.active);
             } else if (statusFilter === 'in-use') {
-                filtered = filtered.filter(vehicle => vehicle.currentKidId);
+                // UPDATED: Check if vehicle has assigned kids (currentKidIds array)
+                filtered = filtered.filter(vehicle => vehicle.currentKidIds && vehicle.currentKidIds.length > 0);
             } else if (statusFilter === 'available') {
-                filtered = filtered.filter(vehicle => !vehicle.currentKidId && vehicle.active);
+                // UPDATED: Available means active and no kids assigned
+                filtered = filtered.filter(vehicle => vehicle.active && (!vehicle.currentKidIds || vehicle.currentKidIds.length === 0));
             }
         }
 
         setFilteredVehicles(filtered);
     };
 
-    // Helper function to get team name from team ID - TRANSLATED
+    // Helper function to get team name from team ID
     const getTeamName = (teamId) => {
         if (!teamId) return t('vehicles.unassigned', 'Unassigned');
         const team = teams.find(t => t.id === teamId);
         return team ? team.name : t('vehicles.unknownTeam', 'Unknown Team');
     };
 
-    // Handle stat card clicks to filter vehicles - UPDATED WITH ACTIVE CARD TRACKING
+    // UPDATED: Get kids count for vehicle (from currentKidIds)
+    const getVehicleKidsCount = (vehicle) => {
+        return vehicle.currentKidIds ? vehicle.currentKidIds.length : 0;
+    };
+
+    // Handle stat card clicks to filter vehicles
     const handleStatCardClick = (filterType) => {
-        setActiveCardFilter(filterType); // NEW: Set active card
+        setActiveCardFilter(filterType);
 
         switch (filterType) {
             case 'total':
@@ -177,7 +182,7 @@ const VehiclesPage = () => {
         setSearchTerm('');
         setTeamFilter('');
         setStatusFilter('');
-        setActiveCardFilter('total'); // NEW: Reset to total
+        setActiveCardFilter('total');
     };
 
     const handleViewVehicle = (vehicleId) => {
@@ -196,7 +201,7 @@ const VehiclesPage = () => {
         }
     };
 
-    // Handle delete vehicle - TRANSLATED
+    // UPDATED: Handle delete vehicle with team unassignment
     const handleDeleteVehicle = async (vehicle) => {
         if (userRole !== 'admin') {
             alert(t('vehicles.delete.noPermission', 'You do not have permission to delete vehicles.'));
@@ -204,12 +209,19 @@ const VehiclesPage = () => {
         }
 
         const vehicleName = `${vehicle.make} ${vehicle.model} (${vehicle.licensePlate})`;
+        const kidCount = getVehicleKidsCount(vehicle);
 
-        // Extra confirmation if vehicle is currently assigned - TRANSLATED
+        // UPDATED: Extra confirmation if vehicle is assigned to team or has kids
         let confirmMessage = t('vehicles.delete.confirm', 'Are you sure you want to delete {vehicleName}?', { vehicleName });
-        if (vehicle.currentKidId) {
-            confirmMessage += '\n\n' + t('vehicles.delete.warningAssigned', 'WARNING: This vehicle is currently assigned to a racer. Deleting it will remove the assignment.');
+
+        if (vehicle.teamId) {
+            confirmMessage += '\n\n' + t('vehicles.delete.warningTeamAssigned', 'WARNING: This vehicle is assigned to team "{teamName}".', { teamName: getTeamName(vehicle.teamId) });
         }
+
+        if (kidCount > 0) {
+            confirmMessage += '\n\n' + t('vehicles.delete.warningKidsAssigned', 'WARNING: This vehicle is currently used by {count} racer(s).', { count: kidCount });
+        }
+
         confirmMessage += '\n\n' + t('vehicles.delete.cannotUndo', 'This action cannot be undone.');
 
         if (!window.confirm(confirmMessage)) {
@@ -219,9 +231,9 @@ const VehiclesPage = () => {
         try {
             setIsDeleting(vehicle.id);
 
-            // If vehicle is assigned, unassign it first
-            if (vehicle.currentKidId) {
-                await unassignVehicleFromKid(vehicle.id);
+            // UPDATED: If vehicle is assigned to team, unassign it first
+            if (vehicle.teamId) {
+                await unassignVehicleFromTeam(vehicle.id);
             }
 
             // Delete the vehicle
@@ -250,127 +262,148 @@ const VehiclesPage = () => {
         return userRole === 'admin';
     };
 
-    // Status badge function - TRANSLATED
+    // UPDATED: Status badge function to reflect team-based assignments
     const getStatusBadge = (vehicle) => {
         if (!vehicle.active) {
             return <span className="badge danger">{t('vehicles.status.inactive', 'Inactive')}</span>;
         }
-        if (vehicle.currentKidId) {
-            return <span className="badge warning">{t('vehicles.status.inUse', 'In Use')}</span>;
+
+        const kidCount = getVehicleKidsCount(vehicle);
+        if (kidCount > 0) {
+            return <span className="badge warning">{t('vehicles.status.inUseWithCount', 'In Use ({count})', { count: kidCount })}</span>;
         }
+
         return <span className="badge success">{t('vehicles.status.available', 'Available')}</span>;
     };
 
     const getVehicleStats = () => {
         const total = vehicles.length;
         const active = vehicles.filter(v => v.active).length;
-        const inUse = vehicles.filter(v => v.currentKidId && v.active).length;
-        const available = vehicles.filter(v => !v.currentKidId && v.active).length;
+        // UPDATED: Count vehicles with assigned kids
+        const inUse = vehicles.filter(v => v.currentKidIds && v.currentKidIds.length > 0).length;
+        const available = vehicles.filter(v => v.active && (!v.currentKidIds || v.currentKidIds.length === 0)).length;
 
         return { total, active, inUse, available };
     };
 
-    // Mobile card component - TRANSLATED
-    const VehicleMobileCard = ({ vehicle }) => (
-        <div className="vehicle-mobile-card">
-            <div className="vehicle-mobile-header">
-                {vehicle.photo ? (
-                    <img
-                        src={vehicle.photo}
-                        alt={`${vehicle.make} ${vehicle.model}`}
-                        className="vehicle-mobile-photo"
-                    />
-                ) : (
-                    <div className="vehicle-mobile-photo-placeholder">
-                        <Car size={24} />
-                    </div>
-                )}
-                <div className="vehicle-mobile-info">
-                    <div className="vehicle-mobile-name">
-                        {vehicle.make} {vehicle.model}
-                    </div>
-                    <div className="vehicle-mobile-type">
-                        {vehicle.driveType} • {vehicle.steeringType}
-                    </div>
-                </div>
-            </div>
+    // UPDATED: Mobile card component with team-based info
+    const VehicleMobileCard = ({ vehicle }) => {
+        const kidCount = getVehicleKidsCount(vehicle);
 
-            <div className="vehicle-mobile-details">
-                <div className="vehicle-mobile-detail">
-                    <div className="vehicle-mobile-detail-label">{t('vehicles.mobile.team', 'Team')}</div>
-                    <div className="vehicle-mobile-detail-value">
-                        <span className="team-name">{getTeamName(vehicle.teamId)}</span>
-                    </div>
-                </div>
-                <div className="vehicle-mobile-detail">
-                    <div className="vehicle-mobile-detail-label">{t('vehicles.mobile.licensePlate', 'License Plate')}</div>
-                    <div className="vehicle-mobile-detail-value">
-                        <span className="license-plate">{vehicle.licensePlate}</span>
-                    </div>
-                </div>
-                <div className="vehicle-mobile-detail">
-                    <div className="vehicle-mobile-detail-label">{t('vehicles.mobile.currentUser', 'Current User')}</div>
-                    <div className="vehicle-mobile-detail-value">
-                        {vehicle.currentKidId ? (
-                            <span className="current-user">{t('vehicles.status.assigned', 'Assigned')}</span>
-                        ) : (
-                            <span className="no-user">{t('vehicles.status.available', 'Available')}</span>
-                        )}
-                    </div>
-                </div>
-                <div className="vehicle-mobile-detail">
-                    <div className="vehicle-mobile-detail-label">{t('vehicles.mobile.battery', 'Battery')}</div>
-                    <div className="vehicle-mobile-detail-value">
-                        <div className="battery-info">
-                            <Battery size={16} />
-                            <span>{vehicle.batteryType || t('vehicles.notAvailable', 'N/A')}</span>
+        return (
+            <div className="vehicle-mobile-card">
+                <div className="vehicle-mobile-header">
+                    {vehicle.photo ? (
+                        <img
+                            src={vehicle.photo}
+                            alt={`${vehicle.make} ${vehicle.model}`}
+                            className="vehicle-mobile-photo"
+                        />
+                    ) : (
+                        <div className="vehicle-mobile-photo-placeholder">
+                            <Car size={24} />
+                        </div>
+                    )}
+                    <div className="vehicle-mobile-info">
+                        <div className="vehicle-mobile-name">
+                            {vehicle.make} {vehicle.model}
+                        </div>
+                        <div className="vehicle-mobile-type">
+                            {vehicle.driveType} • {vehicle.steeringType}
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div className="vehicle-mobile-actions">
-                <div className="vehicle-mobile-status">
-                    {getStatusBadge(vehicle)}
-                </div>
-                <div className="vehicle-mobile-buttons">
-                    <button
-                        onClick={() => handleViewVehicle(vehicle.id)}
-                        className="btn-mobile-action btn-mobile-view"
-                        title={t('vehicles.actions.viewVehicle', 'View Vehicle')}
-                    >
-                        <Eye size={14} />
-                        {t('vehicles.actions.view', 'View')}
-                    </button>
-                    {canEdit(vehicle) && (
-                        <button
-                            onClick={() => handleEditVehicle(vehicle.id)}
-                            className="btn-mobile-action btn-mobile-edit"
-                            title={t('vehicles.actions.editVehicle', 'Edit Vehicle')}
-                        >
-                            <Edit size={14} />
-                            {t('vehicles.actions.edit', 'Edit')}
-                        </button>
-                    )}
-                    {canDelete(vehicle) && (
-                        <button
-                            onClick={() => handleDeleteVehicle(vehicle)}
-                            className="btn-mobile-action btn-mobile-delete"
-                            title={t('vehicles.actions.deleteVehicle', 'Delete Vehicle')}
-                            disabled={isDeleting === vehicle.id}
-                        >
-                            {isDeleting === vehicle.id ? (
-                                <div className="loading-spinner-mini"></div>
+                <div className="vehicle-mobile-details">
+                    <div className="vehicle-mobile-detail">
+                        <div className="vehicle-mobile-detail-label">{t('vehicles.mobile.team', 'Team')}</div>
+                        <div className="vehicle-mobile-detail-value">
+                            <span
+                                className="team-name clickable"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (vehicle.teamId) {
+                                        navigate(`/admin/teams/view/${vehicle.teamId}`);
+                                    }
+                                }}
+                            >
+                                {getTeamName(vehicle.teamId)}
+                            </span>
+                        </div>
+                    </div>
+                    <div className="vehicle-mobile-detail">
+                        <div className="vehicle-mobile-detail-label">{t('vehicles.mobile.licensePlate', 'License Plate')}</div>
+                        <div className="vehicle-mobile-detail-value">
+                            <span className="license-plate">{vehicle.licensePlate}</span>
+                        </div>
+                    </div>
+                    <div className="vehicle-mobile-detail">
+                        <div className="vehicle-mobile-detail-label">{t('vehicles.mobile.currentUsers', 'Current Users')}</div>
+                        <div className="vehicle-mobile-detail-value">
+                            {kidCount > 0 ? (
+                                <span className="current-users">
+                                    <Baby size={14} />
+                                    {t('vehicles.kidsAssigned', '{count} kids assigned', { count: kidCount })}
+                                </span>
                             ) : (
-                                <Trash2 size={14} />
+                                <span className="no-users">{t('vehicles.status.available', 'Available')}</span>
                             )}
-                            {isDeleting === vehicle.id ? t('vehicles.deleting', 'Deleting...') : t('vehicles.actions.delete', 'Delete')}
+                        </div>
+                    </div>
+                    <div className="vehicle-mobile-detail">
+                        <div className="vehicle-mobile-detail-label">{t('vehicles.mobile.battery', 'Battery')}</div>
+                        <div className="vehicle-mobile-detail-value">
+                            <div className="battery-info">
+                                <Battery size={16} />
+                                <span>{vehicle.batteryType || t('vehicles.notAvailable', 'N/A')}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="vehicle-mobile-actions">
+                    <div className="vehicle-mobile-status">
+                        {getStatusBadge(vehicle)}
+                    </div>
+                    <div className="vehicle-mobile-buttons">
+                        <button
+                            onClick={() => handleViewVehicle(vehicle.id)}
+                            className="btn-mobile-action btn-mobile-view"
+                            title={t('vehicles.actions.viewVehicle', 'View Vehicle')}
+                        >
+                            <Eye size={14} />
+                            {t('vehicles.actions.view', 'View')}
                         </button>
-                    )}
+                        {canEdit(vehicle) && (
+                            <button
+                                onClick={() => handleEditVehicle(vehicle.id)}
+                                className="btn-mobile-action btn-mobile-edit"
+                                title={t('vehicles.actions.editVehicle', 'Edit Vehicle')}
+                            >
+                                <Edit size={14} />
+                                {t('vehicles.actions.edit', 'Edit')}
+                            </button>
+                        )}
+                        {canDelete(vehicle) && (
+                            <button
+                                onClick={() => handleDeleteVehicle(vehicle)}
+                                className="btn-mobile-action btn-mobile-delete"
+                                title={t('vehicles.actions.deleteVehicle', 'Delete Vehicle')}
+                                disabled={isDeleting === vehicle.id}
+                            >
+                                {isDeleting === vehicle.id ? (
+                                    <div className="loading-spinner-mini"></div>
+                                ) : (
+                                    <Trash2 size={14} />
+                                )}
+                                {isDeleting === vehicle.id ? t('vehicles.deleting', 'Deleting...') : t('vehicles.actions.delete', 'Delete')}
+                            </button>
+                        )}
+                    </div>
                 </div>
             </div>
-        </div>
-    );
+        );
+    };
 
     if (isLoading) {
         return (
@@ -390,7 +423,7 @@ const VehiclesPage = () => {
     return (
         <Dashboard requiredRole={userRole}>
             <div className={`vehicles-page ${appliedTheme}-mode`}>
-                {/* Page Title - TRANSLATED */}
+                {/* Page Title */}
                 <h1 className="page-title">
                     <Car size={32} className="page-title-icon" />
                     {t('vehicles.title', 'Racing Vehicles')}
@@ -407,7 +440,7 @@ const VehiclesPage = () => {
                     </div>
                 </div>
                 <div className="vehicle-management-container">
-                    {/* OPTIMIZED Stats Cards - Single Row Layout */}
+                    {/* Stats Cards - Single Row Layout */}
                     <div className="stats-grid-optimized">
                         <div
                             className={`stat-card total ${activeCardFilter === 'total' ? 'active' : ''}`}
@@ -438,7 +471,7 @@ const VehiclesPage = () => {
                             onClick={() => handleStatCardClick('in-use')}
                             style={{ cursor: 'pointer' }}
                         >
-                            <User className="stat-icon" size={40} />
+                            <Baby className="stat-icon" size={40} />
                             <div className="stat-content">
                                 <h3>{t('vehicles.inUse', 'In Use')}</h3>
                                 <div className="stat-value">{stats.inUse}</div>
@@ -458,7 +491,7 @@ const VehiclesPage = () => {
                         </div>
                     </div>
 
-                    {/* Search and Filters - TRANSLATED */}
+                    {/* Search and Filters */}
                     <div className="search-filter-section">
                         <div className="search-container">
                             <label className="search-label">
@@ -496,7 +529,7 @@ const VehiclesPage = () => {
                                 className="filter-select"
                             >
                                 <option value="">{t('vehicles.allTeams', 'All Teams')}</option>
-                                <option value="">{t('vehicles.unassigned', 'Unassigned')}</option>
+                                <option value="unassigned">{t('vehicles.unassigned', 'Unassigned')}</option>
                                 {teams.map(team => (
                                     <option key={team.id} value={team.id}>{team.name}</option>
                                 ))}
@@ -527,7 +560,7 @@ const VehiclesPage = () => {
                         </button>
                     </div>
 
-                    {/* Results Summary - TRANSLATED */}
+                    {/* Results Summary */}
                     {(searchTerm || teamFilter || statusFilter) && (
                         <div className="results-summary">
                             <Car className="results-icon" size={18} />
@@ -566,7 +599,7 @@ const VehiclesPage = () => {
                         </div>
                     ) : (
                         <>
-                            {/* Desktop Table View - TRANSLATED */}
+                            {/* Desktop Table View - UPDATED with team-based columns */}
                             <div className="table-container">
                                 <table className="data-table">
                                     <thead>
@@ -575,95 +608,112 @@ const VehiclesPage = () => {
                                         <th>{t('vehicles.table.team', 'Team')}</th>
                                         <th>{t('vehicles.table.licensePlate', 'License Plate')}</th>
                                         <th>{t('vehicles.table.status', 'Status')}</th>
-                                        <th>{t('vehicles.table.currentUser', 'Current User')}</th>
+                                        <th>{t('vehicles.table.assignedKids', 'Assigned Kids')}</th>
                                         <th>{t('vehicles.table.battery', 'Battery')}</th>
                                         <th>{t('vehicles.table.actions', 'Actions')}</th>
                                     </tr>
                                     </thead>
                                     <tbody>
-                                    {filteredVehicles.map(vehicle => (
-                                        <tr key={vehicle.id}>
-                                            <td>
-                                                <div className="vehicle-info">
-                                                    {vehicle.photo ? (
-                                                        <img
-                                                            src={vehicle.photo}
-                                                            alt={`${vehicle.make} ${vehicle.model}`}
-                                                            className="vehicle-photo-small"
-                                                        />
-                                                    ) : (
-                                                        <div className="vehicle-photo-placeholder">
-                                                            <Car size={20} />
-                                                        </div>
-                                                    )}
-                                                    <div className="vehicle-details">
-                                                        <div className="vehicle-name">
-                                                            {vehicle.make} {vehicle.model}
-                                                        </div>
-                                                        <div className="vehicle-type">
-                                                            {vehicle.driveType} • {vehicle.steeringType}
+                                    {filteredVehicles.map(vehicle => {
+                                        const kidCount = getVehicleKidsCount(vehicle);
+
+                                        return (
+                                            <tr key={vehicle.id}>
+                                                <td>
+                                                    <div className="vehicle-info">
+                                                        {vehicle.photo ? (
+                                                            <img
+                                                                src={vehicle.photo}
+                                                                alt={`${vehicle.make} ${vehicle.model}`}
+                                                                className="vehicle-photo-small"
+                                                            />
+                                                        ) : (
+                                                            <div className="vehicle-photo-placeholder">
+                                                                <Car size={20} />
+                                                            </div>
+                                                        )}
+                                                        <div className="vehicle-details">
+                                                            <div className="vehicle-name">
+                                                                {vehicle.make} {vehicle.model}
+                                                            </div>
+                                                            <div className="vehicle-type">
+                                                                {vehicle.driveType} • {vehicle.steeringType}
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <span className="team-name">{getTeamName(vehicle.teamId)}</span>
-                                            </td>
-                                            <td>
-                                                <span className="license-plate">{vehicle.licensePlate}</span>
-                                            </td>
-                                            <td>
-                                                {getStatusBadge(vehicle)}
-                                            </td>
-                                            <td>
-                                                {vehicle.currentKidId ? (
-                                                    <span className="current-user">{t('vehicles.status.assigned', 'Assigned')}</span>
-                                                ) : (
-                                                    <span className="no-user">{t('vehicles.status.available', 'Available')}</span>
-                                                )}
-                                            </td>
-                                            <td>
-                                                <div className="battery-info">
-                                                    <Battery size={16} />
-                                                    <span>{vehicle.batteryType || t('vehicles.notAvailable', 'N/A')}</span>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div className="action-buttons">
-                                                    <button
-                                                        onClick={() => handleViewVehicle(vehicle.id)}
-                                                        className="btn-action view"
-                                                        title={t('vehicles.actions.viewVehicle', 'View Vehicle')}
+                                                </td>
+                                                <td>
+                                                    <span
+                                                        className="team-name clickable"
+                                                        onClick={() => {
+                                                            if (vehicle.teamId) {
+                                                                navigate(`/admin/teams/view/${vehicle.teamId}`);
+                                                            }
+                                                        }}
+                                                        style={{ cursor: vehicle.teamId ? 'pointer' : 'default' }}
                                                     >
-                                                        <Eye size={14} />
-                                                    </button>
-                                                    {canEdit(vehicle) && (
-                                                        <button
-                                                            onClick={() => handleEditVehicle(vehicle.id)}
-                                                            className="btn-action edit"
-                                                            title={t('vehicles.actions.editVehicle', 'Edit Vehicle')}
-                                                        >
-                                                            <Edit size={14} />
-                                                        </button>
+                                                        {getTeamName(vehicle.teamId)}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <span className="license-plate">{vehicle.licensePlate}</span>
+                                                </td>
+                                                <td>
+                                                    {getStatusBadge(vehicle)}
+                                                </td>
+                                                <td>
+                                                    {kidCount > 0 ? (
+                                                        <div className="assigned-kids-info">
+                                                            <Baby size={16} />
+                                                            <span className="kids-count">{kidCount} {t('vehicles.kids', 'kids')}</span>
+                                                        </div>
+                                                    ) : (
+                                                        <span className="no-kids">{t('vehicles.noKidsAssigned', 'No kids assigned')}</span>
                                                     )}
-                                                    {canDelete(vehicle) && (
+                                                </td>
+                                                <td>
+                                                    <div className="battery-info">
+                                                        <Battery size={16} />
+                                                        <span>{vehicle.batteryType || t('vehicles.notAvailable', 'N/A')}</span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div className="action-buttons">
                                                         <button
-                                                            onClick={() => handleDeleteVehicle(vehicle)}
-                                                            className="btn-action delete"
-                                                            title={t('vehicles.actions.deleteVehicle', 'Delete Vehicle')}
-                                                            disabled={isDeleting === vehicle.id}
+                                                            onClick={() => handleViewVehicle(vehicle.id)}
+                                                            className="btn-action view"
+                                                            title={t('vehicles.actions.viewVehicle', 'View Vehicle')}
                                                         >
-                                                            {isDeleting === vehicle.id ? (
-                                                                <div className="loading-spinner-tiny"></div>
-                                                            ) : (
-                                                                <Trash2 size={14} />
-                                                            )}
+                                                            <Eye size={14} />
                                                         </button>
-                                                    )}
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))}
+                                                        {canEdit(vehicle) && (
+                                                            <button
+                                                                onClick={() => handleEditVehicle(vehicle.id)}
+                                                                className="btn-action edit"
+                                                                title={t('vehicles.actions.editVehicle', 'Edit Vehicle')}
+                                                            >
+                                                                <Edit size={14} />
+                                                            </button>
+                                                        )}
+                                                        {canDelete(vehicle) && (
+                                                            <button
+                                                                onClick={() => handleDeleteVehicle(vehicle)}
+                                                                className="btn-action delete"
+                                                                title={t('vehicles.actions.deleteVehicle', 'Delete Vehicle')}
+                                                                disabled={isDeleting === vehicle.id}
+                                                            >
+                                                                {isDeleting === vehicle.id ? (
+                                                                    <div className="loading-spinner-tiny"></div>
+                                                                ) : (
+                                                                    <Trash2 size={14} />
+                                                                )}
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
                                     </tbody>
                                 </table>
                             </div>

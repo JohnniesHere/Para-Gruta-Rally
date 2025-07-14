@@ -1,4 +1,4 @@
-// src/schemas/teamSchema.js
+// src/schemas/teamSchema.js - Updated with Vehicle Assignment Support
 import { z } from 'zod';
 
 export const teamSchema = z.object({
@@ -30,6 +30,15 @@ export const teamSchema = z.object({
 
     kidIds: z.array(z.string())
         .default([]),
+
+    // Vehicle assignments (NEW: vehicles assigned to this team)
+    vehicleIds: z.array(z.string())
+        .default([]),
+
+    // Team leader (optional - one of the instructors can be the leader)
+    teamLeaderId: z.string()
+        .optional()
+        .nullable(),
 
     // Additional information
     notes: z.string()
@@ -70,6 +79,8 @@ export const createEmptyTeam = () => {
         active: true,
         instructorIds: [],
         kidIds: [],
+        vehicleIds: [], // NEW: Empty array for vehicle assignments
+        teamLeaderId: '',
         notes: ''
     };
 };
@@ -86,6 +97,13 @@ export const validateTeam = (data, isUpdate = false) => {
         // Check if team has more kids than max capacity
         if (validatedData.kidIds && validatedData.kidIds.length > validatedData.maxCapacity) {
             errors.kidIds = `Cannot assign more kids (${validatedData.kidIds.length}) than max capacity (${validatedData.maxCapacity})`;
+        }
+
+        // Validate team leader is one of the instructors (if specified)
+        if (validatedData.teamLeaderId &&
+            validatedData.instructorIds &&
+            !validatedData.instructorIds.includes(validatedData.teamLeaderId)) {
+            errors.teamLeaderId = 'Team leader must be one of the assigned instructors';
         }
 
         if (Object.keys(errors).length > 0) {

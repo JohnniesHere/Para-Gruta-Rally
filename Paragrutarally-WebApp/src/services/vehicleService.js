@@ -1,4 +1,4 @@
-// src/services/vehicleService.js - Vehicle Management Service with Schema Integration
+// src/services/vehicleService.js - Updated for Team-based Assignment
 import {
     collection,
     doc,
@@ -26,11 +26,9 @@ const VEHICLES_COLLECTION = 'vehicles';
  */
 export const getAllVehicles = async () => {
     try {
-
         // Simple query without ordering to avoid index issues
         const vehiclesRef = collection(db, VEHICLES_COLLECTION);
         const snapshot = await getDocs(vehiclesRef);
-
 
         if (snapshot.empty) {
             return [];
@@ -72,11 +70,10 @@ export const getAllVehicles = async () => {
 };
 
 /**
- * Get vehicles by team (Team Leaders) - Updated to use teamId
+ * Get vehicles by team (Team Leaders and for team management)
  */
 export const getVehiclesByTeam = async (teamId) => {
     try {
-
         const vehiclesRef = collection(db, VEHICLES_COLLECTION);
         const vehiclesQuery = query(vehiclesRef, where('teamId', '==', teamId));
         const snapshot = await getDocs(vehiclesQuery);
@@ -110,7 +107,8 @@ export const getVehiclesByTeam = async (teamId) => {
 };
 
 /**
- * Get vehicles assigned to specific kids (Parents)
+ * Get vehicles assigned to specific kids (Parents - now gets vehicles through team)
+ * UPDATED: Gets vehicles by looking up kid's team, then team's vehicles
  */
 export const getVehiclesByKids = async (kidIds) => {
     try {
@@ -118,21 +116,37 @@ export const getVehiclesByKids = async (kidIds) => {
             return [];
         }
 
-        const vehiclesQuery = query(
-            collection(db, VEHICLES_COLLECTION),
-            where('currentKidId', 'in', kidIds)
-        );
-        const snapshot = await getDocs(vehiclesQuery);
-
-        return snapshot.docs.map(doc => {
-            const data = doc.data();
-            return {
-                id: doc.id,
-                ...data,
-                createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : (data.createdAt || null),
-                updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : (data.updatedAt || null)
-            };
+        // Get kids to find their teams
+        const kidsPromises = kidIds.map(async (kidId) => {
+            try {
+                const kidDoc = await getDoc(doc(db, 'kids', kidId));
+                return kidDoc.exists() ? { id: kidDoc.id, ...kidDoc.data() } : null;
+            } catch (error) {
+                console.warn(`⚠️ Error fetching kid ${kidId}:`, error);
+                return null;
+            }
         });
+
+        const kids = (await Promise.all(kidsPromises)).filter(kid => kid !== null);
+
+        // Get unique team IDs
+        const teamIds = [...new Set(kids.map(kid => kid.teamId).filter(teamId => teamId))];
+
+        if (teamIds.length === 0) {
+            return [];
+        }
+
+        // Get vehicles for these teams
+        const vehiclesPromises = teamIds.map(teamId => getVehiclesByTeam(teamId));
+        const teamVehicles = await Promise.all(vehiclesPromises);
+
+        // Flatten and deduplicate vehicles
+        const allVehicles = teamVehicles.flat();
+        const uniqueVehicles = allVehicles.filter((vehicle, index, self) =>
+            index === self.findIndex(v => v.id === vehicle.id)
+        );
+
+        return uniqueVehicles;
     } catch (error) {
         console.error('Error fetching vehicles by kids:', error);
         throw new Error('Failed to fetch assigned vehicles');
@@ -140,7 +154,7 @@ export const getVehiclesByKids = async (kidIds) => {
 };
 
 /**
- * Get a single vehicle by ID - FIXED
+ * Get a single vehicle by ID
  */
 export const getVehicleById = async (vehicleId) => {
     try {
@@ -165,13 +179,11 @@ export const getVehicleById = async (vehicleId) => {
     }
 };
 
-
 /**
  * Create a new vehicle with schema validation
  */
 export const addVehicle = async (vehicleData) => {
     try {
-
         // Step 1: Validate the data against schema
         const validation = validateVehicle(vehicleData, false);
         if (!validation.success) {
@@ -192,13 +204,25 @@ export const addVehicle = async (vehicleData) => {
         const vehicleWithTimestamps = {
             ...validatedData,
             active: validatedData.active !== undefined ? validatedData.active : true,
-            history: validatedData.history || [],
+            currentKidIds: validatedData.currentKidIds || [], // Initialize as empty array
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp()
         };
 
         // Step 4: Add to Firestore
         const docRef = await addDoc(collection(db, VEHICLES_COLLECTION), vehicleWithTimestamps);
+
+        // Step 5: If vehicle was assigned to a team, update team's vehicle list
+        if (validatedData.teamId) {
+            try {
+                const { assignVehicleToTeam } = await import('./vehicleAssignmentService');
+                await assignVehicleToTeam(docRef.id, validatedData.teamId);
+            } catch (teamError) {
+                console.warn('⚠️ Failed to assign vehicle to team during creation:', teamError);
+                // Don't fail vehicle creation if team assignment fails
+            }
+        }
+
         return docRef.id;
     } catch (error) {
         console.error('💥 Error adding vehicle:', error);
@@ -208,9 +232,12 @@ export const addVehicle = async (vehicleData) => {
 
 /**
  * Update an existing vehicle with schema validation
+ * UPDATED: Handles team assignment changes
  */
 export const updateVehicle = async (vehicleId, updates) => {
     try {
+        // Get current vehicle data to compare team assignments
+        const currentVehicle = await getVehicleById(vehicleId);
 
         // Step 1: Validate the update data against schema
         const validation = validateVehicle(updates, true);
@@ -230,14 +257,37 @@ export const updateVehicle = async (vehicleId, updates) => {
             }
         }
 
-        // Step 3: Prepare the update document
+        // Step 3: Handle team assignment changes
+        const oldTeamId = currentVehicle.teamId;
+        const newTeamId = validatedData.teamId;
+
+        if (oldTeamId !== newTeamId) {
+            try {
+                const { assignVehicleToTeam, removeVehicleFromTeam } = await import('./vehicleAssignmentService');
+
+                // Remove from old team if it existed
+                if (oldTeamId) {
+                    await removeVehicleFromTeam(vehicleId, oldTeamId);
+                }
+
+                // Assign to new team if specified
+                if (newTeamId) {
+                    await assignVehicleToTeam(vehicleId, newTeamId);
+                }
+            } catch (teamError) {
+                console.warn('⚠️ Failed to update team assignment during vehicle update:', teamError);
+                // Continue with vehicle update even if team assignment fails
+            }
+        }
+
+        // Step 4: Prepare the update document
         const vehicleRef = doc(db, VEHICLES_COLLECTION, vehicleId);
         const updateData = {
             ...validatedData,
             updatedAt: serverTimestamp()
         };
 
-        // Step 4: Update in Firestore
+        // Step 5: Update in Firestore
         await updateDoc(vehicleRef, updateData);
 
         return vehicleId;
@@ -248,76 +298,34 @@ export const updateVehicle = async (vehicleId, updates) => {
 };
 
 /**
- * Assign vehicle to a kid
- */
-export const assignVehicleToKid = async (vehicleId, kidId) => {
-    try {
-        const vehicleRef = doc(db, VEHICLES_COLLECTION, vehicleId);
-        const vehicleDoc = await getDoc(vehicleRef);
-
-        if (!vehicleDoc.exists()) {
-            throw new Error('Vehicle not found');
-        }
-
-        const vehicleData = vehicleDoc.data();
-        const currentHistory = vehicleData.history || [];
-
-        // Add previous kid to history if there was one
-        const updatedHistory = vehicleData.currentKidId
-            ? [...currentHistory, vehicleData.currentKidId]
-            : currentHistory;
-
-        await updateDoc(vehicleRef, {
-            currentKidId: kidId,
-            history: updatedHistory,
-            updatedAt: serverTimestamp()
-        });
-
-        return vehicleId;
-    } catch (error) {
-        console.error('Error assigning vehicle:', error);
-        throw new Error('Failed to assign vehicle');
-    }
-};
-
-/**
- * Unassign vehicle from current kid
- */
-export const unassignVehicle = async (vehicleId) => {
-    try {
-        const vehicleRef = doc(db, VEHICLES_COLLECTION, vehicleId);
-        const vehicleDoc = await getDoc(vehicleRef);
-
-        if (!vehicleDoc.exists()) {
-            throw new Error('Vehicle not found');
-        }
-
-        const vehicleData = vehicleDoc.data();
-        const currentHistory = vehicleData.history || [];
-
-        // Add current kid to history
-        const updatedHistory = vehicleData.currentKidId
-            ? [...currentHistory, vehicleData.currentKidId]
-            : currentHistory;
-
-        await updateDoc(vehicleRef, {
-            currentKidId: null,
-            history: updatedHistory,
-            updatedAt: serverTimestamp()
-        });
-
-        return vehicleId;
-    } catch (error) {
-        console.error('Error unassigning vehicle:', error);
-        throw new Error('Failed to unassign vehicle');
-    }
-};
-
-/**
  * Delete a vehicle (Admin only)
+ * UPDATED: Handles team and kid assignment cleanup
  */
 export const deleteVehicle = async (vehicleId) => {
     try {
+        // Get vehicle data before deletion for cleanup
+        const vehicle = await getVehicleById(vehicleId);
+
+        // Clean up team assignment
+        if (vehicle.teamId) {
+            try {
+                const { removeVehicleFromTeam } = await import('./vehicleAssignmentService');
+                await removeVehicleFromTeam(vehicleId, vehicle.teamId);
+            } catch (teamError) {
+                console.warn('⚠️ Failed to clean up team assignment during vehicle deletion:', teamError);
+            }
+        }
+
+        // Clean up kid assignments
+        if (vehicle.currentKidIds && vehicle.currentKidIds.length > 0) {
+            try {
+                const { resetKidsVehicleAssignments } = await import('./vehicleAssignmentService');
+                await resetKidsVehicleAssignments(vehicle.currentKidIds, vehicleId);
+            } catch (kidError) {
+                console.warn('⚠️ Failed to clean up kid assignments during vehicle deletion:', kidError);
+            }
+        }
+
         await deleteDoc(doc(db, VEHICLES_COLLECTION, vehicleId));
         return vehicleId;
     } catch (error) {
@@ -327,26 +335,15 @@ export const deleteVehicle = async (vehicleId) => {
 };
 
 /**
- * Get available vehicles (not assigned to any kid) - Updated to use teamId
+ * Get available vehicles (not assigned to any team)
  */
-export const getAvailableVehicles = async (teamId = null) => {
+export const getAvailableVehicles = async () => {
     try {
-        let vehiclesQuery;
-
-        if (teamId) {
-            vehiclesQuery = query(
-                collection(db, VEHICLES_COLLECTION),
-                where('active', '==', true),
-                where('teamId', '==', teamId),
-                where('currentKidId', '==', null)
-            );
-        } else {
-            vehiclesQuery = query(
-                collection(db, VEHICLES_COLLECTION),
-                where('active', '==', true),
-                where('currentKidId', '==', null)
-            );
-        }
+        const vehiclesQuery = query(
+            collection(db, VEHICLES_COLLECTION),
+            where('active', '==', true),
+            where('teamId', '==', null)
+        );
 
         const snapshot = await getDocs(vehiclesQuery);
 
@@ -366,44 +363,10 @@ export const getAvailableVehicles = async (teamId = null) => {
 };
 
 /**
- * Get vehicle history (kids who used this vehicle)
- */
-export const getVehicleHistory = async (vehicleId) => {
-    try {
-        const vehicle = await getVehicleById(vehicleId);
-        return vehicle.history || [];
-    } catch (error) {
-        console.error('Error fetching vehicle history:', error);
-        throw new Error('Failed to fetch vehicle history');
-    }
-};
-
-/**
- * Update vehicle battery information
- */
-export const updateVehicleBattery = async (vehicleId, batteryType, batteryDate) => {
-    try {
-        const vehicleRef = doc(db, VEHICLES_COLLECTION, vehicleId);
-
-        await updateDoc(vehicleRef, {
-            batteryType,
-            batteryDate,
-            updatedAt: serverTimestamp()
-        });
-
-        return vehicleId;
-    } catch (error) {
-        console.error('Error updating vehicle battery:', error);
-        throw new Error('Failed to update battery information');
-    }
-};
-
-/**
- * Get vehicles statistics - Updated to use teamId
+ * Get vehicles statistics - UPDATED for team-based system
  */
 export const getVehicleStats = async (teamId = null) => {
     try {
-
         let vehicles;
         if (teamId) {
             vehicles = await getVehiclesByTeam(teamId);
@@ -415,8 +378,9 @@ export const getVehicleStats = async (teamId = null) => {
             total: vehicles.length,
             active: vehicles.filter(v => v.active === true).length,
             inactive: vehicles.filter(v => v.active === false).length,
-            inUse: vehicles.filter(v => v.currentKidId && v.active === true).length,
-            available: vehicles.filter(v => !v.currentKidId && v.active === true).length,
+            assigned: vehicles.filter(v => v.teamId && v.active === true).length, // UPDATED: assigned to teams
+            available: vehicles.filter(v => !v.teamId && v.active === true).length, // UPDATED: not assigned to any team
+            inUse: vehicles.filter(v => v.currentKidIds && v.currentKidIds.length > 0 && v.active === true).length, // UPDATED: being used by kids
             needsMaintenance: vehicles.filter(v => {
                 if (!v.batteryDate) return false;
                 try {
@@ -438,15 +402,16 @@ export const getVehicleStats = async (teamId = null) => {
             total: 0,
             active: 0,
             inactive: 0,
-            inUse: 0,
+            assigned: 0,
             available: 0,
+            inUse: 0,
             needsMaintenance: 0
         };
     }
 };
 
 /**
- * Search vehicles by various criteria - Updated to use teamId
+ * Search vehicles by various criteria
  */
 export const searchVehicles = async (searchTerm, filters = {}) => {
     try {
@@ -471,11 +436,19 @@ export const searchVehicles = async (searchTerm, filters = {}) => {
             vehicles = vehicles.filter(v => v.active === filters.active);
         }
 
+        if (filters.assigned !== undefined) {
+            if (filters.assigned) {
+                vehicles = vehicles.filter(v => v.teamId);
+            } else {
+                vehicles = vehicles.filter(v => !v.teamId);
+            }
+        }
+
         if (filters.inUse !== undefined) {
             if (filters.inUse) {
-                vehicles = vehicles.filter(v => v.currentKidId);
+                vehicles = vehicles.filter(v => v.currentKidIds && v.currentKidIds.length > 0);
             } else {
-                vehicles = vehicles.filter(v => !v.currentKidId);
+                vehicles = vehicles.filter(v => !v.currentKidIds || v.currentKidIds.length === 0);
             }
         }
 
