@@ -1,7 +1,7 @@
-/* Updated Login.css - Top Controls Container */
+/* Updated Login.css - Contact Us Modal Removed */
 
 /* ========================================
-   TOP CONTROLS CONTAINER - THEME, CONTACT, LANGUAGE
+   TOP CONTROLS CONTAINER - THEME AND LANGUAGE
    ======================================== */
 
 .top-controls-container {
@@ -31,31 +31,6 @@
     top: auto;
     right: auto;
     z-index: auto;
-}
-
-/* Update contact container for top positioning */
-.contact-container {
-    margin-top: 0;
-    margin-bottom: 0;
-    text-align: center;
-}
-
-.contact-us-btn {
-    padding: 8px 16px;
-    background-color: transparent;
-    border: 1px solid var(--accent-color);
-    border-radius: 8px;
-    font-size: 13px;
-    cursor: pointer;
-    transition: all 0.3s;
-    color: var(--accent-color);
-    white-space: nowrap;
-}
-
-.contact-us-btn:hover {
-    background-color: rgba(52, 152, 219, 0.1);
-    transform: translateY(-1px);
-    box-shadow: 0 2px 8px var(--shadow-color);
 }
 
 /* Update language selector for top positioning */
@@ -592,11 +567,6 @@ html, body {
         right: auto;
     }
 
-    .contact-us-btn {
-        padding: 6px 12px;
-        font-size: 12px;
-    }
-
     .login-language-selector .language-button {
         padding: 6px 10px;
         min-width: 70px;
@@ -631,11 +601,6 @@ html, body {
         left: 8px;
         right: auto;
         align-items: flex-start;
-    }
-
-    .contact-us-btn {
-        padding: 5px 10px;
-        font-size: 11px;
     }
 
     .login-language-selector .language-button {

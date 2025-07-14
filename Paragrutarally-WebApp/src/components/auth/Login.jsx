@@ -1,4 +1,4 @@
-// src/components/auth/Login.jsx - UPDATED with Legal Modal Trigger
+// src/components/auth/Login.jsx - UPDATED with Contact Us Modal Removed
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -6,7 +6,6 @@ import { useTheme } from '../../contexts/ThemeContext.jsx';
 import { useLanguage } from '../../contexts/LanguageContext.jsx';
 import DarkModeToggle from '../common/DarkModeToggle.jsx';
 import LanguageSelector from '../common/LanguageSelector.jsx';
-import ContactUsModal from '../layout/ContactUsModal';
 import LegalTrigger from '../ui/LegalTrigger';
 import GoogleIconLight from '../../assets/icons/GoogleIconLight';
 import GoogleIconDark from '../../assets/icons/GoogleIconDark';
@@ -19,7 +18,6 @@ const Login = () => {
     const [loading, setLoading] = useState(false);
     const [googleLoading, setGoogleLoading] = useState(false);
     const [error, setError] = useState('');
-    const [isContactModalOpen, setIsContactModalOpen] = useState(false);
     const [isRedirecting, setIsRedirecting] = useState(false);
 
     const {
@@ -238,20 +236,10 @@ const Login = () => {
     // Show the login form
     return (
         <div className={`login-page ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
-            {/* Top Controls Container - Theme, Contact, Language */}
+            {/* Top Controls Container - Theme and Language */}
             <div className="top-controls-container">
                 <div className="theme-toggle-container">
                     <DarkModeToggle />
-                </div>
-
-                <div className="contact-container">
-                    <button
-                        className="contact-us-btn"
-                        onClick={() => setIsContactModalOpen(true)}
-                        disabled={loading || googleLoading}
-                    >
-                        {t('login.contactUs', 'Contact Us')}
-                    </button>
                 </div>
 
                 <div className="login-language-selector">
@@ -383,11 +371,6 @@ const Login = () => {
                     </div>
                 </div>
             </div>
-
-            <ContactUsModal
-                isOpen={isContactModalOpen}
-                onClose={() => setIsContactModalOpen(false)}
-            />
         </div>
     );
 };
