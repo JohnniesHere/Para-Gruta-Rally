@@ -1,22 +1,14 @@
-// src/pages/admin/VehiclesPage.jsx - UPDATED FOR TEAM-BASED ASSIGNMENT
+// src/pages/admin/VehiclesPage.jsx - OPTIMIZED VERSION with single-row stats
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { usePermissions } from '../../hooks/usePermissions.jsx';
-import {
-    getAllVehicles,
-    assignVehicleToTeam,
-    getAvailableVehiclesForTeams,
-    unassignVehicleFromTeam,
-    deleteVehicle,
-    getVehiclesByTeam,
-    getVehiclesByKids
-} from '@/services/vehicleService.js';
-// REMOVE: import { unassignVehicleFromKid } from '@/services/vehicleAssignmentService.js';
-import { getAllTeams } from '@/services/teamService.js';
-import { getKidsByParent } from '@/services/kidService.js';
+import { getAllVehicles, getVehiclesByTeam, getVehiclesByKids, deleteVehicle } from '../../services/vehicleService';
+import { unassignVehicleFromKid } from '../../services/vehicleAssignmentService'; // Import for cleanup
+import { getAllTeams } from '../../services/teamService';
+import { getKidsByParent } from '../../services/kidService';
 import {
     IconCar as Car,
     IconPlus as Plus,
@@ -48,9 +40,8 @@ const VehiclesPage = () => {
     const [teams, setTeams] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [isDeleting, setIsDeleting] = useState(null);
-    const [activeCardFilter, setActiveCardFilter] = useState('total');
-    const [isAssigning, setIsAssigning] = useState(null); // NEW: Track assignment loading
+    const [isDeleting, setIsDeleting] = useState(null); // Track which vehicle is being deleted
+    const [activeCardFilter, setActiveCardFilter] = useState('total'); // NEW: Track active card
 
     // Search and filter states
     const [searchTerm, setSearchTerm] = useState('');
@@ -70,7 +61,7 @@ const VehiclesPage = () => {
             setIsLoading(true);
             setError(null);
 
-            // Load teams for filter dropdown and assignment
+            // Load teams for filter dropdown
             const teamsData = await getAllTeams();
             setTeams(teamsData);
 
@@ -129,11 +120,7 @@ const VehiclesPage = () => {
 
         // Team filter
         if (teamFilter) {
-            if (teamFilter === 'unassigned') {
-                filtered = filtered.filter(vehicle => !vehicle.teamId);
-            } else {
-                filtered = filtered.filter(vehicle => vehicle.teamId === teamFilter);
-            }
+            filtered = filtered.filter(vehicle => vehicle.teamId === teamFilter);
         }
 
         // Status filter
@@ -146,26 +133,22 @@ const VehiclesPage = () => {
                 filtered = filtered.filter(vehicle => vehicle.currentKidId);
             } else if (statusFilter === 'available') {
                 filtered = filtered.filter(vehicle => !vehicle.currentKidId && vehicle.active);
-            } else if (statusFilter === 'assigned-to-teams') {
-                filtered = filtered.filter(vehicle => vehicle.teamId);
-            } else if (statusFilter === 'unassigned-to-teams') {
-                filtered = filtered.filter(vehicle => !vehicle.teamId);
             }
         }
 
         setFilteredVehicles(filtered);
     };
 
-    // Helper function to get team name from team ID
+    // Helper function to get team name from team ID - TRANSLATED
     const getTeamName = (teamId) => {
         if (!teamId) return t('vehicles.unassigned', 'Unassigned');
         const team = teams.find(t => t.id === teamId);
         return team ? team.name : t('vehicles.unknownTeam', 'Unknown Team');
     };
 
-    // UPDATED: Handle stat card clicks with new team-based filters
+    // Handle stat card clicks to filter vehicles - UPDATED WITH ACTIVE CARD TRACKING
     const handleStatCardClick = (filterType) => {
-        setActiveCardFilter(filterType);
+        setActiveCardFilter(filterType); // NEW: Set active card
 
         switch (filterType) {
             case 'total':
@@ -184,14 +167,6 @@ const VehiclesPage = () => {
                 setStatusFilter('available');
                 setTeamFilter('');
                 break;
-            case 'assigned-to-teams':
-                setStatusFilter('assigned-to-teams');
-                setTeamFilter('');
-                break;
-            case 'unassigned-to-teams':
-                setStatusFilter('unassigned-to-teams');
-                setTeamFilter('');
-                break;
             default:
                 break;
         }
@@ -202,7 +177,7 @@ const VehiclesPage = () => {
         setSearchTerm('');
         setTeamFilter('');
         setStatusFilter('');
-        setActiveCardFilter('total');
+        setActiveCardFilter('total'); // NEW: Reset to total
     };
 
     const handleViewVehicle = (vehicleId) => {
@@ -221,62 +196,7 @@ const VehiclesPage = () => {
         }
     };
 
-    // NEW: Handle team assignment
-    const handleAssignToTeam = async (vehicleId, teamId) => {
-        if (userRole !== 'admin') {
-            alert(t('vehicles.assign.noPermission', 'You do not have permission to assign vehicles to teams.'));
-            return;
-        }
-
-        if (!teamId) return;
-
-        try {
-            setIsAssigning(vehicleId);
-            const team = teams.find(t => t.id === teamId);
-            await assignVehicleToTeam(vehicleId, teamId, team.name, userData.uid);
-
-            // Reload vehicles
-            await loadData();
-
-            alert(t('vehicles.assign.success', 'Vehicle assigned to team successfully!'));
-
-        } catch (error) {
-            console.error('Error assigning vehicle to team:', error);
-            alert(t('vehicles.assign.error', 'Failed to assign vehicle to team: ') + error.message);
-        } finally {
-            setIsAssigning(null);
-        }
-    };
-
-    // NEW: Handle team unassignment
-    const handleUnassignFromTeam = async (vehicleId) => {
-        if (userRole !== 'admin') {
-            alert(t('vehicles.unassign.noPermission', 'You do not have permission to unassign vehicles from teams.'));
-            return;
-        }
-
-        if (!window.confirm(t('vehicles.unassign.confirm', 'Are you sure you want to unassign this vehicle from its team? This will also unassign it from any kid using it.'))) {
-            return;
-        }
-
-        try {
-            setIsAssigning(vehicleId);
-            await unassignVehicleFromTeam(vehicleId, userData.uid);
-
-            // Reload vehicles
-            await loadData();
-
-            alert(t('vehicles.unassign.success', 'Vehicle unassigned from team successfully!'));
-
-        } catch (error) {
-            console.error('Error unassigning vehicle from team:', error);
-            alert(t('vehicles.unassign.error', 'Failed to unassign vehicle: ') + error.message);
-        } finally {
-            setIsAssigning(null);
-        }
-    };
-
-    // UPDATED: Handle delete vehicle
+    // Handle delete vehicle - TRANSLATED
     const handleDeleteVehicle = async (vehicle) => {
         if (userRole !== 'admin') {
             alert(t('vehicles.delete.noPermission', 'You do not have permission to delete vehicles.'));
@@ -285,13 +205,10 @@ const VehiclesPage = () => {
 
         const vehicleName = `${vehicle.make} ${vehicle.model} (${vehicle.licensePlate})`;
 
-        // Extra confirmation if vehicle is currently assigned
+        // Extra confirmation if vehicle is currently assigned - TRANSLATED
         let confirmMessage = t('vehicles.delete.confirm', 'Are you sure you want to delete {vehicleName}?', { vehicleName });
-        if (vehicle.teamId) {
-            confirmMessage += '\n\n' + t('vehicles.delete.warningTeamAssigned', 'WARNING: This vehicle is currently assigned to a team. Deleting it will remove the assignment.');
-        }
         if (vehicle.currentKidId) {
-            confirmMessage += '\n\n' + t('vehicles.delete.warningKidAssigned', 'WARNING: This vehicle is currently being used by a racer. Deleting it will remove the assignment.');
+            confirmMessage += '\n\n' + t('vehicles.delete.warningAssigned', 'WARNING: This vehicle is currently assigned to a racer. Deleting it will remove the assignment.');
         }
         confirmMessage += '\n\n' + t('vehicles.delete.cannotUndo', 'This action cannot be undone.');
 
@@ -302,7 +219,12 @@ const VehiclesPage = () => {
         try {
             setIsDeleting(vehicle.id);
 
-            // No need to manually unassign - the service will handle cleanup
+            // If vehicle is assigned, unassign it first
+            if (vehicle.currentKidId) {
+                await unassignVehicleFromKid(vehicle.id);
+            }
+
+            // Delete the vehicle
             await deleteVehicle(vehicle.id);
 
             // Update local state
@@ -328,11 +250,7 @@ const VehiclesPage = () => {
         return userRole === 'admin';
     };
 
-    const canAssignToTeam = () => {
-        return userRole === 'admin';
-    };
-
-    // Status badge function
+    // Status badge function - TRANSLATED
     const getStatusBadge = (vehicle) => {
         if (!vehicle.active) {
             return <span className="badge danger">{t('vehicles.status.inactive', 'Inactive')}</span>;
@@ -343,19 +261,16 @@ const VehiclesPage = () => {
         return <span className="badge success">{t('vehicles.status.available', 'Available')}</span>;
     };
 
-    // UPDATED: Get vehicle stats with team-based metrics
     const getVehicleStats = () => {
         const total = vehicles.length;
         const active = vehicles.filter(v => v.active).length;
         const inUse = vehicles.filter(v => v.currentKidId && v.active).length;
         const available = vehicles.filter(v => !v.currentKidId && v.active).length;
-        const assignedToTeams = vehicles.filter(v => v.teamId && v.active).length;
-        const unassignedToTeams = vehicles.filter(v => !v.teamId && v.active).length;
 
-        return { total, active, inUse, available, assignedToTeams, unassignedToTeams };
+        return { total, active, inUse, available };
     };
 
-    // UPDATED: Mobile card component with team assignment
+    // Mobile card component - TRANSLATED
     const VehicleMobileCard = ({ vehicle }) => (
         <div className="vehicle-mobile-card">
             <div className="vehicle-mobile-header">
@@ -475,7 +390,7 @@ const VehiclesPage = () => {
     return (
         <Dashboard requiredRole={userRole}>
             <div className={`vehicles-page ${appliedTheme}-mode`}>
-                {/* Page Title */}
+                {/* Page Title - TRANSLATED */}
                 <h1 className="page-title">
                     <Car size={32} className="page-title-icon" />
                     {t('vehicles.title', 'Racing Vehicles')}
@@ -492,7 +407,7 @@ const VehiclesPage = () => {
                     </div>
                 </div>
                 <div className="vehicle-management-container">
-                    {/* UPDATED Stats Cards - Now includes team assignment stats */}
+                    {/* OPTIMIZED Stats Cards - Single Row Layout */}
                     <div className="stats-grid-optimized">
                         <div
                             className={`stat-card total ${activeCardFilter === 'total' ? 'active' : ''}`}
@@ -519,25 +434,13 @@ const VehiclesPage = () => {
                         </div>
 
                         <div
-                            className={`stat-card assigned-to-teams ${activeCardFilter === 'assigned-to-teams' ? 'active' : ''}`}
-                            onClick={() => handleStatCardClick('assigned-to-teams')}
-                            style={{ cursor: 'pointer' }}
-                        >
-                            <Users className="stat-icon" size={40} />
-                            <div className="stat-content">
-                                <h3>{t('vehicles.assignedToTeams', 'Assigned to Teams')}</h3>
-                                <div className="stat-value">{stats.assignedToTeams}</div>
-                            </div>
-                        </div>
-
-                        <div
                             className={`stat-card in-use ${activeCardFilter === 'in-use' ? 'active' : ''}`}
                             onClick={() => handleStatCardClick('in-use')}
                             style={{ cursor: 'pointer' }}
                         >
                             <User className="stat-icon" size={40} />
                             <div className="stat-content">
-                                <h3>{t('vehicles.inUse', 'In Use by Kids')}</h3>
+                                <h3>{t('vehicles.inUse', 'In Use')}</h3>
                                 <div className="stat-value">{stats.inUse}</div>
                             </div>
                         </div>
@@ -555,7 +458,7 @@ const VehiclesPage = () => {
                         </div>
                     </div>
 
-                    {/* Search and Filters */}
+                    {/* Search and Filters - TRANSLATED */}
                     <div className="search-filter-section">
                         <div className="search-container">
                             <label className="search-label">
@@ -593,7 +496,7 @@ const VehiclesPage = () => {
                                 className="filter-select"
                             >
                                 <option value="">{t('vehicles.allTeams', 'All Teams')}</option>
-                                <option value="unassigned">{t('vehicles.unassigned', 'Unassigned')}</option>
+                                <option value="">{t('vehicles.unassigned', 'Unassigned')}</option>
                                 {teams.map(team => (
                                     <option key={team.id} value={team.id}>{team.name}</option>
                                 ))}
@@ -613,8 +516,6 @@ const VehiclesPage = () => {
                                 <option value="">{t('vehicles.allStatus', 'All Status')}</option>
                                 <option value="active">{t('vehicles.active', 'Active')}</option>
                                 <option value="inactive">{t('vehicles.inactive', 'Inactive')}</option>
-                                <option value="assigned-to-teams">{t('vehicles.assignedToTeams', 'Assigned to Teams')}</option>
-                                <option value="unassigned-to-teams">{t('vehicles.unassignedToTeams', 'Unassigned to Teams')}</option>
                                 <option value="in-use">{t('vehicles.inUse', 'In Use')}</option>
                                 <option value="available">{t('vehicles.available', 'Available')}</option>
                             </select>
@@ -626,7 +527,7 @@ const VehiclesPage = () => {
                         </button>
                     </div>
 
-                    {/* Results Summary */}
+                    {/* Results Summary - TRANSLATED */}
                     {(searchTerm || teamFilter || statusFilter) && (
                         <div className="results-summary">
                             <Car className="results-icon" size={18} />
@@ -665,7 +566,7 @@ const VehiclesPage = () => {
                         </div>
                     ) : (
                         <>
-                            {/* Desktop Table View - UPDATED with team assignment actions */}
+                            {/* Desktop Table View - TRANSLATED */}
                             <div className="table-container">
                                 <table className="data-table">
                                     <thead>
@@ -706,44 +607,7 @@ const VehiclesPage = () => {
                                                 </div>
                                             </td>
                                             <td>
-                                                {/* UPDATED: Team assignment interface */}
-                                                {canAssignToTeam() && !vehicle.teamId ? (
-                                                    <div className="team-assignment-cell">
-                                                        <select
-                                                            onChange={(e) => e.target.value && handleAssignToTeam(vehicle.id, e.target.value)}
-                                                            defaultValue=""
-                                                            className="team-select-mini"
-                                                            disabled={isAssigning === vehicle.id}
-                                                        >
-                                                            <option value="">
-                                                                {isAssigning === vehicle.id ? t('vehicles.assigning', 'Assigning...') : t('vehicles.selectTeam', 'Select Team...')}
-                                                            </option>
-                                                            {teams.filter(team => team.active !== false).map(team => (
-                                                                <option key={team.id} value={team.id}>
-                                                                    {team.name}
-                                                                </option>
-                                                            ))}
-                                                        </select>
-                                                    </div>
-                                                ) : (
-                                                    <div className="team-display-cell">
-                                                        <span className="team-name">{getTeamName(vehicle.teamId)}</span>
-                                                        {canAssignToTeam() && vehicle.teamId && (
-                                                            <button
-                                                                onClick={() => handleUnassignFromTeam(vehicle.id)}
-                                                                className="btn-unassign-team"
-                                                                title={t('vehicles.unassignFromTeam', 'Unassign from Team')}
-                                                                disabled={isAssigning === vehicle.id}
-                                                            >
-                                                                {isAssigning === vehicle.id ? (
-                                                                    <div className="loading-spinner-tiny"></div>
-                                                                ) : (
-                                                                    '×'
-                                                                )}
-                                                            </button>
-                                                        )}
-                                                    </div>
-                                                )}
+                                                <span className="team-name">{getTeamName(vehicle.teamId)}</span>
                                             </td>
                                             <td>
                                                 <span className="license-plate">{vehicle.licensePlate}</span>
