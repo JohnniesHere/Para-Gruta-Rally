@@ -2738,6 +2738,78 @@ export const LANGUAGES = {
         'analytics.maintenance.maintenanceScheduleAction': 'Schedule regular maintenance checks',
         'analytics.tooltip.priorityRecommendation.description': 'This recommendation is based on system performance and maintenance data.',
         'analytics.tooltip.priorityRecommendation.action': 'Take recommended actions to improve system performance and prevent future issues.',
+
+        // Teams
+        'teams.vehiclesCount': '{count} Vehicles',
+        'teams.teamVehiclesWithCount': '🏎️ Team Fleet ({total} vehicles)',
+        'teams.totalVehicles': 'Total Vehicles',
+        'teams.activeVehicles': 'Active',
+        'teams.vehiclesInUse': 'In Use',
+        'teams.vehiclesAvailable': 'Available',
+        'teams.noVehiclesAssignedYet': 'No vehicles assigned yet!',
+        'teams.assignVehiclesToTeam': 'This team needs some awesome vehicles to race with! 🏎️',
+        'teams.assignVehicles': 'Assign Vehicles',
+        'teams.currentlyUsedBy': 'Currently used by:',
+        'teams.availableForAssignment': '✅ Available for assignment',
+
+        // Add Team
+        'addTeam.allVehiclesAssigned': 'All vehicles are already assigned to teams or inactive.',
+
+        // Teams General
+        'teams.racingVehicles': 'Racing Vehicles',
+        'teams.noVehiclesAvailable': 'No vehicles available for assignment!',
+        'teams.selectedVehicles': 'Selected Vehicles: {count}',
+
+        // Edit Team
+        'teams.someInstructorsAssigned': '{count} instructor(s) are assigned to other teams.',
+        'teams.removedFromTeam': 'Being removed from team',
+        'teams.allVehiclesAssigned': 'All vehicles are already assigned to other teams or inactive.',
+
+        // Kids/ViewKid
+        'viewKid.teamVehicleAccess': 'Team Vehicle Access',
+        'viewKid.assignToTeamFirst': 'Assign to a team to access vehicles!',
+        'viewKid.vehiclesAvailable': 'vehicles available',
+        'viewKid.currentVehicle': 'Current Vehicle Assignment',
+        'viewKid.assigned': 'Assigned',
+        'viewKid.noVehicleCurrentlyAssigned': 'No vehicle currently assigned',
+        'viewKid.teamFleet': 'Team Fleet',
+        'viewKid.mine': 'Mine',
+        'viewKid.inUse': 'In Use',
+        'viewKid.available': 'Available',
+        'viewKid.viewTeamDetails': 'View Team Details',
+
+        // Add Kid
+        'addKid.teamAssignment': '🏎️ Racing Team Assignment',
+
+        // Edit Kid
+        'editKid.teamAssignment': '🏎️ Team Assignment',
+        'editKid.teamAssignmentWarning': 'Warning: Team assignment may not have updated correctly. Please check the team page to verify.',
+
+        // Vehicles
+        'vehicles.kidsAssigned': '{count} kids assigned',
+        'vehicles.noKidsAssigned': 'No kids assigned',
+        'vehicles.kids': 'kids',
+        'vehicles.status.inUseWithCount': 'In Use ({count})',
+        'vehicles.mobile.currentUsers': 'Current Users',
+        'vehicles.table.assignedKids': 'Assigned Kids',
+        'vehicles.delete.warningTeamAssigned': 'WARNING: This vehicle is assigned to team "{teamName}".',
+        'vehicles.delete.warningKidsAssigned': 'WARNING: This vehicle is currently used by {count} racer(s).',
+
+        // View Vehicle
+        'viewVehicle.teamAssignment': 'Team Assignment',
+        'viewVehicle.teamDescription': 'Racing team',
+        'viewVehicle.racers': 'racers',
+        'viewVehicle.vehicles': 'vehicles',
+        'viewVehicle.viewTeamDetails': 'View Team Details',
+        'viewVehicle.notAssignedToTeam': 'Not Assigned to Team',
+        'viewVehicle.vehicleNeedsTeam': 'This vehicle needs to be assigned to a team before it can be used by racers.',
+        'viewVehicle.assignToTeam': 'Assign to Team',
+        'viewVehicle.currentRacerAssignments': 'Current Racer Assignments',
+        'viewVehicle.assignedRacers': 'Assigned Racers',
+        'viewVehicle.pending': 'Pending',
+        'viewVehicle.viewProfile': 'View Profile',
+        'viewVehicle.notAssignedToRacers': 'This vehicle is not currently assigned to any racers',
+        'viewVehicle.assignmentNote': 'Racers can be assigned to this vehicle through the team management interface.',
     },
 
 
@@ -5617,6 +5689,77 @@ export const LANGUAGES = {
     "forms.phone": "טלפון",
     "common.back": "חזור",
 
+        // Teams
+        'teams.vehiclesCount': '{count} רכבים',
+        'teams.teamVehiclesWithCount': 'רכבי הקבוצה ({total} רכבים) 🏎️',
+        'teams.totalVehicles': 'סך הכל רכבים',
+        'teams.activeVehicles': 'פעילים',
+        'teams.vehiclesInUse': 'בשימוש',
+        'teams.vehiclesAvailable': 'זמינים',
+        'teams.noVehiclesAssignedYet': 'עדיין לא הוקצו רכבים!',
+        'teams.assignVehiclesToTeam': 'הקבוצה הזו זקוקה לכמה רכבים מגניבים להתחרות איתם! 🏎️',
+        'teams.assignVehicles': 'הקצאת רכבים',
+        'teams.currentlyUsedBy': 'נמצא כעת בשימוש של:',
+        'teams.availableForAssignment': '✅ זמין להקצאה',
+
+        // Add Team
+        'addTeam.allVehiclesAssigned': 'כל הרכבים כבר מוקצים לצוותים או לא פעילים.',
+
+        // Teams General
+        'teams.racingVehicles': 'רכבי המירוץ',
+        'teams.noVehiclesAvailable': 'אין רכבים זמינים להקצאה!',
+        'teams.selectedVehicles': 'רכבים נבחרים: {count}',
+
+        // Edit Team
+        'teams.someInstructorsAssigned': '{count} מדריך(ים) מוקצים לצוותים אחרים.',
+        'teams.removedFromTeam': 'מוסר מהקבוצה',
+        'teams.allVehiclesAssigned': 'כל הרכבים כבר מוקצים לצוותים אחרים או לא פעילים.',
+
+        // Kids/ViewKid
+        'viewKid.teamVehicleAccess': 'גישה לרכבי הקבוצה',
+        'viewKid.assignToTeamFirst': 'הקצה לצוות כדי לקבל גישה לרכבים!',
+        'viewKid.vehiclesAvailable': 'רכבים זמינים',
+        'viewKid.currentVehicle': 'הקצאת רכב נוכחית',
+        'viewKid.assigned': 'מוקצה',
+        'viewKid.noVehicleCurrentlyAssigned': 'כרגע לא מוקצה רכב',
+        'viewKid.teamFleet': 'רכבי הצוות',
+        'viewKid.mine': 'שלי',
+        'viewKid.inUse': 'בשימוש',
+        'viewKid.available': 'זמין',
+        'viewKid.viewTeamDetails': 'צפה בפרטי הצוות',
+
+        // Add Kid
+        'addKid.teamAssignment': 'הקצאת צוות 🏎️',
+
+        // Edit Kid
+        'editKid.teamAssignment': 'הקצאת צוות 🏎️',
+        'editKid.teamAssignmentWarning': 'אזהרה: הקצאת הצוות עלולה לא להתעדכן כראוי. אנא בדוק את דף הצוות כדי לוודא.',
+
+        // Vehicles
+        'vehicles.kidsAssigned': '{count} ילדים מוקצים',
+        'vehicles.noKidsAssigned': 'אין ילדים מוקצים',
+        'vehicles.kids': 'ילדים',
+        'vehicles.status.inUseWithCount': 'בשימוש ({count})',
+        'vehicles.mobile.currentUsers': 'משתמשים נוכחיים',
+        'vehicles.table.assignedKids': 'ילדים מוקצים',
+        'vehicles.delete.warningTeamAssigned': 'אזהרה: הרכב הזה מוקצה לצוות "{teamName}".',
+        'vehicles.delete.warningKidsAssigned': 'אזהרה: הרכב הזה נמצא כעת בשימוש של {count} רוכב(ים).',
+
+        // View Vehicle
+        'viewVehicle.teamAssignment': 'הקצאת צוות',
+        'viewVehicle.teamDescription': 'צוות מירוץ',
+        'viewVehicle.racers': 'רוכבים',
+        'viewVehicle.vehicles': 'רכבים',
+        'viewVehicle.viewTeamDetails': 'צפה בפרטי הצוות',
+        'viewVehicle.notAssignedToTeam': 'לא מוקצה לצוות',
+        'viewVehicle.vehicleNeedsTeam': 'רכב זה צריך להיות מוקצה לצוות לפני שהוא יוכל לשמש ילדים.',
+        'viewVehicle.assignToTeam': 'הקצה לצוות',
+        'viewVehicle.currentRacerAssignments': 'הקצאות ילדים נוכחיות',
+        'viewVehicle.assignedRacers': 'ילדים מוקצים',
+        'viewVehicle.pending': 'ממתין',
+        'viewVehicle.viewProfile': 'צפה בפרופיל',
+        'viewVehicle.notAssignedToRacers': 'רכב זה כרגע לא מוקצה לאף ילד',
+        'viewVehicle.assignmentNote': 'ניתן להקצות ילדים לרכב זה דרך ממשק ניהול הקבוצה.',
             }
         };
 
