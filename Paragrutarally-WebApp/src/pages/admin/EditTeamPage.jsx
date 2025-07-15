@@ -33,9 +33,9 @@ const EditTeamPage = () => {
     const navigate = useNavigate();
     const { id } = useParams();
     const location = useLocation();
-    const { isDarkMode, appliedTheme } = useTheme();
+    const {  appliedTheme } = useTheme();
     const { t, isHebrew, isRTL } = useLanguage();
-    const { permissions, userRole } = usePermissions();
+    const {  userRole } = usePermissions();
 
     const [isLoading, setIsLoading] = useState(true);
     const [instructors, setInstructors] = useState([]);
@@ -223,8 +223,34 @@ const EditTeamPage = () => {
         setIsSubmitting(true);
         try {
             await updateTeam(id, formData);
+            // Update kids' team assignments to maintain a bidirectional relationship
+            if (formData.kidIds && formData.kidIds.length > 0) {
+                try {
+                    const { updateKidTeamAssignment } = await import('@/services/kidService.js');
 
-            // Navigate back with success message
+                    // Update each selected kid's teamId
+                    const kidUpdatePromises = formData.kidIds.map(kidId =>
+                        updateKidTeamAssignment(kidId, id)
+                    );
+
+                    await Promise.all(kidUpdatePromises);
+
+                    // Also handle kids that were removed from the team
+                    const originalKidIds = originalData?.kidIds || [];
+                    const removedKidIds = originalKidIds.filter(kidId => !formData.kidIds.includes(kidId));
+
+                    if (removedKidIds.length > 0) {
+                        const removePromises = removedKidIds.map(kidId =>
+                            updateKidTeamAssignment(kidId, null)
+                        );
+                        await Promise.all(removePromises);
+                    }
+                } catch (kidError) {
+                    console.warn('⚠️ Failed to update some kid assignments:', kidError);
+                    // Don't fail the entire operation
+                }
+            }
+            // Navigate back with a success message
             navigate(`/admin/teams/view/${id}`, {
                 state: {
                     message: t('teams.updateSuccess', '🏁 Team "{teamName}" has been updated successfully! 🏎️', { teamName: formData.name }),

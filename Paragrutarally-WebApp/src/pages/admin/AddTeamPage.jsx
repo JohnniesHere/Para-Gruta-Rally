@@ -153,8 +153,23 @@ const AddTeamPage = () => {
         setIsSubmitting(true);
         try {
             const teamId = await addTeam(formData);
+            // Update kids' team assignments to maintain a bidirectional relationship
+            if (formData.kidIds && formData.kidIds.length > 0) {
+                try {
+                    const { updateKidTeamAssignment } = await import('@/services/kidService.js');
 
-            // Navigate to the new team's view page with success message
+                    // Update each selected kid's teamId
+                    const kidUpdatePromises = formData.kidIds.map(kidId =>
+                        updateKidTeamAssignment(kidId, teamId)
+                    );
+
+                    await Promise.all(kidUpdatePromises);
+                } catch (kidError) {
+                    console.warn('⚠️ Failed to update some kid assignments:', kidError);
+                    // Don't fail the entire operation since a team was created successfully
+                }
+            }
+            // Navigate to the new team's view page with a success message
             navigate(`/admin/teams/view/${teamId}`, {
                 state: {
                     message: t('addTeam.teamCreatedSuccess', 'Team "{teamName}" is ready for action! Let the racing begin! 🏎️', { teamName: formData.name }),

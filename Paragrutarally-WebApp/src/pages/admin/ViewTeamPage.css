@@ -438,12 +438,19 @@
 }
 
 .race-number {
-    background: linear-gradient(135deg, var(--racing-light-purple) 0%, #7C3AED 100%);
+    position: relative;
+    right: 8px;
+    top: 8px;
+    background: linear-gradient(135deg, #8B5CF6, #A855F7);
     color: white;
-    padding: 4px 12px;
+    padding: 4px 10px;
     border-radius: 12px;
+    font-size: 12px;
     font-weight: 700;
-    font-size: 14px;
+    min-width: 45px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(139, 92, 246, 0.2);
+    z-index: 10;
 }
 
 .status-dot {
