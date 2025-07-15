@@ -60,6 +60,7 @@ const EditTeamPage = () => {
     const [focusInstructor, setFocusInstructor] = useState(false);
     const [focusKids, setFocusKids] = useState(false);
     const [focusVehicles, setFocusVehicles] = useState(false); // NEW: Focus state for vehicles
+    const [focusVehicleAssignment, setFocusVehicleAssignment] = useState(false);
 
     useEffect(() => {
         // Check if we should focus on specific sections
@@ -71,6 +72,9 @@ const EditTeamPage = () => {
         }
         if (location.state?.focusVehicles) { // NEW: Focus vehicles
             setFocusVehicles(true);
+        }
+        if (location.state?.focusVehicleAssignment) {
+            setFocusVehicleAssignment(true);
         }
         loadTeamData();
     }, [id]);
@@ -189,6 +193,42 @@ const EditTeamPage = () => {
                 ? prev.vehicleIds.filter(id => id !== vehicleId)
                 : [...prev.vehicleIds, vehicleId]
         }));
+    };
+
+// Handle individual kid vehicle assignment
+    const handleKidVehicleAssignment = async (kidId, vehicleId) => {
+        try {
+            // Get current kid data first
+            const { getKidById } = await import('@/services/kidService.js');
+            const currentKid = await getKidById(kidId);
+
+            if (!currentKid) {
+                throw new Error('Kid not found');
+            }
+
+            // Update only the vehicleId while preserving all other data
+            const { updateKid } = await import('@/services/kidService.js');
+            await updateKid(kidId, {
+                ...currentKid,
+                vehicleId: vehicleId || null
+            });
+
+            // Update local state to reflect the change
+            setAllKids(prev => prev.map(kid =>
+                kid.id === kidId
+                    ? { ...kid, vehicleId: vehicleId || null }
+                    : kid
+            ));
+
+            console.log(`✅ Vehicle assignment updated: Kid ${kidId} → Vehicle ${vehicleId}`);
+
+        } catch (error) {
+            console.error('❌ Failed to assign vehicle:', error);
+            setErrors(prev => ({
+                ...prev,
+                vehicleAssignment: t('teams.vehicleAssignmentError', 'Failed to assign vehicle. Please try again.')
+            }));
+        }
     };
 
     const validateForm = () => {
@@ -646,6 +686,97 @@ const EditTeamPage = () => {
                                 )}
                             </div>
                         </div>
+
+                        {/* Vehicle Assignment Section */}
+                        {formData.kidIds.length > 0 && formData.vehicleIds.length > 0 && (
+                            <div className={`form-section vehicle-assignment-section ${focusVehicleAssignment ? 'highlight-section' : ''}`}>
+                                <div className="section-header">
+                                    <Car className="section-icon" size={24} />
+                                    <h2>
+                                        {t('teams.vehicleAssignment', '🏎️ Vehicle Assignment')}
+                                        <span className="assignment-count">
+                    ({formData.kidIds.filter(kidId => {
+                                            const kid = allKids.find(k => k.id === kidId);
+                                            return kid?.vehicleId;
+                                        }).length}/{formData.kidIds.length})
+                </span>
+                                    </h2>
+                                </div>
+
+                                <div className="vehicle-assignment-grid">
+                                    {formData.kidIds.map(kidId => {
+                                        const kid = allKids.find(k => k.id === kidId);
+                                        if (!kid) return null;
+
+                                        const kidName = `${kid.personalInfo?.firstName || 'Unknown'} ${kid.personalInfo?.lastName || ''}`;
+                                        const assignedVehicle = formData.vehicleIds.find(vId => {
+                                            const vehicle = allVehicles.find(v => v.id === vId);
+                                            return vehicle && kid.vehicleId === vId;
+                                        });
+
+                                        return (
+                                            <div key={kidId} className="kid-vehicle-assignment">
+                                                <div className="kid-info">
+                                                    <Baby className="kid-icon" size={18} />
+                                                    <span className="kid-name">{kidName}</span>
+                                                    <span className="participant-number">#{kid.participantNumber}</span>
+                                                </div>
+
+                                                <div className="vehicle-selector">
+                                                    <select
+                                                        value={kid.vehicleId || ''}
+                                                        onChange={(e) => handleKidVehicleAssignment(kidId, e.target.value)}
+                                                        className="vehicle-select"
+                                                    >
+                                                        <option value="">{t('teams.noVehicleAssigned', '🚫 No Vehicle Assigned')}</option>
+                                                        {formData.vehicleIds.map(vehicleId => {
+                                                            const vehicle = allVehicles.find(v => v.id === vehicleId);
+                                                            if (!vehicle) return null;
+
+                                                            // Check if vehicle is already assigned to another kid in this team
+                                                            const isAssignedToOther = formData.kidIds.some(otherKidId => {
+                                                                if (otherKidId === kidId) return false;
+                                                                const otherKid = allKids.find(k => k.id === otherKidId);
+                                                                return otherKid?.vehicleId === vehicleId;
+                                                            });
+
+                                                            return (
+                                                                <option
+                                                                    key={vehicleId}
+                                                                    value={vehicleId}
+                                                                    disabled={isAssignedToOther}
+                                                                >
+                                                                    {isAssignedToOther ? '🚫 ' : '🏎️ '}
+                                                                    {vehicle.make} {vehicle.model} ({vehicle.licensePlate})
+                                                                    {isAssignedToOther ? ' - Assigned' : ''}
+                                                                </option>
+                                                            );
+                                                        })}
+                                                    </select>
+                                                </div>
+
+                                                {assignedVehicle && (
+                                                    <div className="assignment-status assigned">
+                                                        <Check size={16} />
+                                                        {t('teams.vehicleAssigned', 'Assigned')}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+
+                                {formData.kidIds.some(kidId => {
+                                    const kid = allKids.find(k => k.id === kidId);
+                                    return !kid?.vehicleId;
+                                }) && (
+                                    <div className="assignment-warning">
+                                        <AlertTriangle size={16} />
+                                        {t('teams.someKidsNeedVehicles', 'Some kids still need vehicle assignments!')}
+                                    </div>
+                                )}
+                            </div>
+                        )}
 
                         {/* Additional Notes */}
                         <div className="form-section notes-section">

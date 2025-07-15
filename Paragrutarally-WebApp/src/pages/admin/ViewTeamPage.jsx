@@ -589,13 +589,22 @@ const ViewTeamPage = () => {
                                         <h4>{t('teams.noVehiclesAssignedYet', 'No vehicles assigned yet!')}</h4>
                                         <p>{t('teams.assignVehiclesToTeam', 'This team needs some awesome vehicles to race with! 🏎️')}</p>
                                         {(userRole === 'admin' || userRole === 'instructor') && (
-                                            <button
-                                                onClick={() => navigate(`/admin/teams/edit/${id}`, { state: { focusVehicles: true } })}
-                                                className="assign-vehicles-button"
-                                            >
-                                                <Car className="btn-icon" size={16} />
-                                                {t('teams.assignVehicles', 'Assign Vehicles')}
-                                            </button>
+                                            <div className="button-group">
+                                                <button
+                                                    onClick={() => navigate(`/admin/teams/edit/${id}`, { state: { focusVehicles: true } })}
+                                                    className="assign-vehicles-button"
+                                                >
+                                                    <Car className="btn-icon" size={16} />
+                                                    {t('teams.assignVehicles', 'Assign Vehicles')}
+                                                </button>
+                                                <button
+                                                    onClick={() => navigate(`/admin/teams/edit/${id}`, { state: { focusVehicleAssignment: true } })}
+                                                    className="manage-assignments-button"
+                                                >
+                                                    <Settings className="btn-icon" size={16} />
+                                                    {t('teams.manageIndividualAssignments', 'Manage Individual Assignments')}
+                                                </button>
+                                            </div>
                                         )}
                                     </div>
                                 )}
@@ -674,7 +683,7 @@ const ViewTeamPage = () => {
                                                         {assignedVehicle && (
                                                             <div className="vehicle-assignment-info">
                                                                 <Car size={14} />
-                                                                <span
+                                                                <div
                                                                     className="assigned-vehicle-link"
                                                                     onClick={(e) => {
                                                                         e.stopPropagation();
@@ -682,7 +691,7 @@ const ViewTeamPage = () => {
                                                                     }}
                                                                 >
                                                                     {assignedVehicle.make} {assignedVehicle.model}
-                                                                </span>
+                                                                </div>
                                                             </div>
                                                         )}
                                                     </div>
@@ -696,13 +705,22 @@ const ViewTeamPage = () => {
                                         <h4>{t('teams.noRacersAssignedYet', 'No racers assigned yet!')}</h4>
                                         <p>{t('teams.waitingForKidsToJoin', 'This team is waiting for some amazing kids to join the race! 🏎️')}</p>
                                         {(userRole === 'admin' || userRole === 'instructor') && (
-                                            <button
-                                                onClick={() => navigate(`/admin/teams/edit/${id}`, { state: { focusKids: true } })}
-                                                className="assign-kids-button"
-                                            >
-                                                <Baby className="btn-icon" size={16} />
-                                                {t('teams.assignRacers', 'Assign Racers')}
-                                            </button>
+                                            <div className="button-group">
+                                                <button
+                                                    onClick={() => navigate(`/admin/teams/edit/${id}`, { state: { focusKids: true } })}
+                                                    className="assign-kids-button"
+                                                >
+                                                    <Baby className="btn-icon" size={16} />
+                                                    {t('teams.assignRacers', 'Assign Racers')}
+                                                </button>
+                                                <button
+                                                    onClick={() => navigate(`/admin/teams/edit/${id}`, { state: { focusVehicleAssignment: true } })}
+                                                    className="manage-vehicles-button"
+                                                >
+                                                    <Car className="btn-icon" size={16} />
+                                                    {t('teams.manageVehicleAssignments', 'Manage Vehicle Assignments')}
+                                                </button>
+                                            </div>
                                         )}
                                     </div>
                                 )}

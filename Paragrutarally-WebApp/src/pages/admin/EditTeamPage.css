@@ -12,7 +12,7 @@
 
 /* Form container uses .admin-container from global.css */
 .admin-form-container {
-    max-width: 4xl;
+    max-width: 4px;
     margin: 0 auto;
     padding: 1.5rem;
 }
@@ -22,6 +22,70 @@
     /* No additional styles needed - inherits from .form-section */
 }
 
+.vehicle-assignment-section {
+    border: 2px solid var(--primary-color);
+    background: var(--bg-secondary);
+}
+
+.vehicle-assignment-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.kid-vehicle-assignment {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+    background: var(--bg-primary);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+
+.kid-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+}
+
+.vehicle-selector {
+    flex: 2;
+    margin: 0 16px;
+}
+
+.vehicle-select {
+    width: 100%;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.assignment-status.assigned {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--success-color);
+    font-weight: bold;
+}
+
+.assignment-warning {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px;
+    background: var(--warning-light);
+    color: var(--warning-color);
+    border-radius: 8px;
+    margin-top: 16px;
+}
+
+.assignment-count {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-left: 8px;
+}
 
 /* Ensure proper contrast in dark mode for kid cards */
 
