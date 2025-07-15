@@ -6,6 +6,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { usePermissions } from '../../hooks/usePermissions.jsx';
 import { getAllVehicles, getVehiclesByTeam, deleteVehicle } from '@/services/vehicleService.js';
+import { unassignVehicleFromTeam} from '@/services/vehicleAssignmentService.js'; // UPDATED: Import team unassignment
 import { getAllTeams } from '@/services/teamService.js';
 import {
     IconCar as Car,
