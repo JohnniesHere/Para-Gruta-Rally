@@ -42,7 +42,6 @@ const EditTeamPage = () => {
     const [allKids, setAllKids] = useState([]);
     const [allTeams, setAllTeams] = useState([]);
     const [allVehicles, setAllVehicles] = useState([]); // NEW: All vehicles
-    const [availableVehicles, setAvailableVehicles] = useState([]); // NEW: Available vehicles
     const [originalData, setOriginalData] = useState(null);
     const [formData, setFormData] = useState({
         name: '',
@@ -136,7 +135,6 @@ const EditTeamPage = () => {
             const availableVehiclesForTeam = allVehiclesData.filter(vehicle =>
                 !vehicle.teamId || vehicle.teamId === id
             );
-            setAvailableVehicles(availableVehiclesForTeam);
 
         } catch (error) {
             console.error('❌ Error loading team data:', error);
@@ -195,32 +193,109 @@ const EditTeamPage = () => {
         }));
     };
 
-// Handle individual kid vehicle assignment
+// Handle individual kid vehicle assignment with conflict detection and history logging
     const handleKidVehicleAssignment = async (kidId, vehicleId) => {
         try {
-            // Get current kid data first
-            const { getKidById } = await import('@/services/kidService.js');
+            // Get current kid data to track previous state
+            const { getKidById, updateKid } = await import('@/services/kidService.js');
             const currentKid = await getKidById(kidId);
 
             if (!currentKid) {
                 throw new Error('Kid not found');
             }
 
-            // Update only the vehicleId while preserving all other data
-            const { updateKid } = await import('@/services/kidService.js');
+            const previousVehicleId = currentKid.vehicleId;
+
+            // If unassigning (vehicleId is empty), proceed without conflict check
+            if (!vehicleId) {
+                await updateKid(kidId, {
+                    ...currentKid,
+                    vehicleId: null
+                });
+
+                setAllKids(prev => prev.map(kid =>
+                    kid.id === kidId ? { ...kid, vehicleId: null } : kid
+                ));
+
+                // Log unassignment history
+                if (previousVehicleId) {
+                    try {
+                        const { logAssignmentChange, createAssignmentLogData } = await import('@/services/assignmentHistoryService.js');
+                        const logData = await createAssignmentLogData({
+                            action: 'unassigned',
+                            kidId,
+                            vehicleId: previousVehicleId,
+                            teamId: id,
+                            userId: 'current_user' // TODO: Get actual user ID
+                        });
+                        await logAssignmentChange(logData);
+                    } catch (historyError) {
+                        console.warn('⚠️ Failed to log assignment history:', historyError);
+                    }
+                }
+
+                console.log(`✅ Vehicle unassigned from kid ${kidId}`);
+                return;
+            }
+
+            // Check for conflicts before assignment
+            const { checkVehicleConflicts, getConflictSummary } = await import('@/services/conflictDetectionService.js');
+            const conflicts = await checkVehicleConflicts(vehicleId, id);
+            const summary = getConflictSummary(conflicts);
+
+            // Handle critical conflicts (block assignment)
+            if (summary.severity === 'critical') {
+                alert(`${summary.title}\n\n${summary.message}\n\n${summary.suggestion}`);
+                return;
+            }
+
+            // Handle warnings (allow with confirmation)
+            if (summary.severity === 'warning') {
+                const userConfirmed = window.confirm(
+                    `${summary.title}\n\n${summary.message}\n\n${summary.suggestion}\n\nProceed anyway?`
+                );
+                if (!userConfirmed) {
+                    return;
+                }
+            }
+
+            // Proceed with assignment
             await updateKid(kidId, {
                 ...currentKid,
-                vehicleId: vehicleId || null
+                vehicleId: vehicleId
             });
 
-            // Update local state to reflect the change
             setAllKids(prev => prev.map(kid =>
                 kid.id === kidId
-                    ? { ...kid, vehicleId: vehicleId || null }
+                    ? { ...kid, vehicleId: vehicleId }
                     : kid
             ));
 
+            // Log assignment history
+            try {
+                const { logAssignmentChange, createAssignmentLogData } = await import('@/services/assignmentHistoryService.js');
+
+                const action = previousVehicleId ? 'swapped' : 'assigned';
+                const logData = await createAssignmentLogData({
+                    action,
+                    kidId,
+                    vehicleId,
+                    teamId: id,
+                    previousVehicleId,
+                    userId: 'current_user' // TODO: Get actual user ID
+                });
+
+                await logAssignmentChange(logData);
+            } catch (historyError) {
+                console.warn('⚠️ Failed to log assignment history:', historyError);
+            }
+
             console.log(`✅ Vehicle assignment updated: Kid ${kidId} → Vehicle ${vehicleId}`);
+
+            // Show a success message if there were warnings
+            if (summary.severity === 'warning') {
+                alert('✅ Vehicle assigned successfully!\n\nNote: Vehicle has been moved from the other team.');
+            }
 
         } catch (error) {
             console.error('❌ Failed to assign vehicle:', error);
@@ -733,12 +808,13 @@ const EditTeamPage = () => {
                                                             const vehicle = allVehicles.find(v => v.id === vehicleId);
                                                             if (!vehicle) return null;
 
-                                                            // Check if vehicle is already assigned to another kid in this team
                                                             const isAssignedToOther = formData.kidIds.some(otherKidId => {
                                                                 if (otherKidId === kidId) return false;
                                                                 const otherKid = allKids.find(k => k.id === otherKidId);
                                                                 return otherKid?.vehicleId === vehicleId;
                                                             });
+
+                                                            const isCurrentVehicle = kid.vehicleId === vehicleId;
 
                                                             return (
                                                                 <option
@@ -746,9 +822,10 @@ const EditTeamPage = () => {
                                                                     value={vehicleId}
                                                                     disabled={isAssignedToOther}
                                                                 >
-                                                                    {isAssignedToOther ? '🚫 ' : '🏎️ '}
+                                                                    {isCurrentVehicle ? '✅ ' : isAssignedToOther ? '🚫 ' : '🏎️ '}
                                                                     {vehicle.make} {vehicle.model} ({vehicle.licensePlate})
-                                                                    {isAssignedToOther ? ' - Assigned' : ''}
+                                                                    {isCurrentVehicle ? ` - ${t('teams.current', 'Current')}` : ''}
+                                                                    {isAssignedToOther ? ` - ${t('teams.assigned', 'Assigned')}` : ''}
                                                                 </option>
                                                             );
                                                         })}
