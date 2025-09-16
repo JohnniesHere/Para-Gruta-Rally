@@ -1,4 +1,3 @@
-// src/pages/admin/FormsManagementPage.jsx - Updated with Improvements
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Dashboard from '../../components/layout/Dashboard';
@@ -11,9 +10,9 @@ import { usePermissions } from '../../hooks/usePermissions.jsx';
 import {
     getAllForms,
     getFormSubmissions,
-    getFormsAnalytics,
     deleteForm
 } from '@/services/formService.js';
+import { exportSubmissionsToCSV } from '@/utils/formatUtils.js';
 import {
     IconNotes as FileText,
     IconPlus as Plus,
@@ -21,7 +20,6 @@ import {
     IconEdit as Edit,
     IconTrash as Trash2,
     IconDownload as Download,
-    IconUpload as Upload,
     IconCheck as Check,
     IconClock as Clock,
     IconAlertTriangle as AlertTriangle,
@@ -29,13 +27,10 @@ import {
     IconChartBar as BarChart3,
     IconTarget as Target,
     IconSparkles as Sparkles,
-    IconTrophy as Trophy,
     IconRefresh as RefreshCw,
     IconSearch as Search,
     IconFilter as Filter,
-    IconCopy as Copy,
-    IconSettings as Settings,
-    IconSend as Send
+    IconCopy as Copy
 } from '@tabler/icons-react';
 import './FormsManagementPage.css';
 
@@ -66,6 +61,9 @@ const FormsManagementPage = () => {
         pendingReviews: 0,
         completionRate: 0
     });
+    const [isExporting, setIsExporting] = useState(false);
+    const [error, setError] = useState(null);
+
 
     // Load forms data
     useEffect(() => {
@@ -74,26 +72,46 @@ const FormsManagementPage = () => {
 
     const loadFormsData = async () => {
         setIsLoading(true);
+        setError(null); // Clear any previous errors
+
         try {
-            // Load forms
-            const formsData = await getAllForms();
-
-            // Load submissions
-            const submissionsData = await getFormSubmissions();
-
-            setForms(formsData);
-            setSubmissions(submissionsData);
-
-            // Calculate analytics
-            const pendingSubmissions = submissionsData.filter(s => s.confirmationStatus === 'needs to decide').length;
-            setAnalytics({
-                totalForms: formsData.length,
-                totalSubmissions: submissionsData.length,
-                pendingReviews: pendingSubmissions,
-                completionRate: formsData.length > 0 ? Math.round((submissionsData.length / formsData.length) * 100) : 0
+            // Load forms and submissions with error handling
+            const formsData = await getAllForms().catch(err => {
+                console.error('Error loading forms:', err);
+                return []; // Return empty array if forms fail to load
             });
+
+            const submissionsData = await getFormSubmissions().catch(err => {
+                console.error('Error loading submissions:', err);
+                return []; // Return empty array if submissions fail to load
+            });
+
+            setForms(formsData || []);
+            setSubmissions(submissionsData || []);
+
+            // Calculate analytics with safe data
+            const pendingSubmissions = (submissionsData || []).filter(s => s.confirmationStatus === 'needs to decide').length;
+            setAnalytics({
+                totalForms: (formsData || []).length,
+                totalSubmissions: (submissionsData || []).length,
+                pendingReviews: pendingSubmissions,
+                completionRate: (formsData || []).length > 0 ?
+                    Math.round(((submissionsData || []).length / (formsData || []).length) * 100) : 0
+            });
+
         } catch (error) {
-            console.error('Error loading forms data:', error);
+            console.error('Critical error loading forms data:', error);
+            setError('Unable to load forms data. Please check your connection and try again.');
+
+            // Set empty data to prevent crashes
+            setForms([]);
+            setSubmissions([]);
+            setAnalytics({
+                totalForms: 0,
+                totalSubmissions: 0,
+                pendingReviews: 0,
+                completionRate: 0
+            });
         } finally {
             setIsLoading(false);
         }
@@ -165,6 +183,17 @@ const FormsManagementPage = () => {
         });
     }, [forms, searchTerm, statusFilter]);
 
+    const handleExportSubmissions = async () => {
+        setIsExporting(true);
+        try {
+            exportSubmissionsToCSV(submissions, 'all_form_submissions');
+        } catch (error) {
+            console.error('Export error:', error);
+        } finally {
+            setIsExporting(false);
+        }
+    };
+
     if (!permissions) {
         return (
             <Dashboard requiredRole={userRole}>
@@ -187,6 +216,27 @@ const FormsManagementPage = () => {
                     {t('forms.title', 'Forms Management')}
                     <Sparkles size={24} className="sparkle-icon" />
                 </h1>
+                {error && (
+                    <div className="error-message">
+                        <AlertTriangle size={20} />
+                        <span>{error}</span>
+                        <button
+                            onClick={() => setError(null)}
+                            style={{
+                                marginLeft: 'auto',
+                                background: 'none',
+                                border: 'none',
+                                color: 'inherit',
+                                cursor: 'pointer',
+                                padding: '4px 8px',
+                                borderRadius: '4px'
+                            }}
+                            title="Dismiss error"
+                        >
+                            ×
+                        </button>
+                    </div>
+                )}
 
                 {/* Main Container */}
                 <div className="forms-management-container">
@@ -220,9 +270,13 @@ const FormsManagementPage = () => {
                                 <Eye size={16} />
                                 {t('forms.viewAllSubmissions', 'View All Submissions')}
                             </button>
-                            <button className="quick-action-btn">
+                            <button
+                                className="quick-action-btn"
+                                onClick={handleExportSubmissions}
+                                disabled={isExporting || submissions.length === 0}
+                            >
                                 <Download size={16} />
-                                {t('forms.exportSubmissions', 'Export Submissions')}
+                                {isExporting ? 'Exporting...' : t('forms.exportSubmissions', 'Export Submissions')}
                             </button>
                         </div>
                     </div>
@@ -325,13 +379,39 @@ const FormsManagementPage = () => {
                                             <div className="form-meta">
                                                 <div className="meta-item">
                                                     <span className="meta-label">{t('forms.type', 'Type')}:</span>
-                                                    <span className="meta-value">{form.type || 'event_registration'}</span>
+                                                    <span className="meta-value">
+                                                        {(() => {
+                                                            switch(form.type) {
+                                                                case 'event_registration':
+                                                                    return t('forms.types.eventRegistration', 'רישום לאירוע');
+                                                                case 'training_registration':
+                                                                    return t('forms.types.trainingRegistration', 'רישום להכשרה');
+                                                                case 'feedback':
+                                                                    return t('forms.types.feedback', 'משוב');
+                                                                case 'survey':
+                                                                    return t('forms.types.survey', 'סקר');
+                                                                default:
+                                                                    return form.type || t('forms.types.eventRegistration', 'רישום לאירוע');
+                                                            }
+                                                        })()}
+                                                    </span>
                                                 </div>
                                                 <div className="meta-item">
                                                     <span className="meta-label">{t('forms.targetUsers', 'Target Users')}:</span>
                                                     <span className="meta-value">
-                                                        {form.targetUsers?.join(', ') || t('forms.none', 'None')}
-                                                    </span>
+                                                    {form.targetUsers?.map(userType => {
+                                                        switch(userType) {
+                                                            case 'parent':
+                                                                return t('forms.parents', 'Parents');
+                                                            case 'instructor':
+                                                                return t('forms.instructors', 'Instructors');
+                                                            case 'host':
+                                                                return t('forms.hosts', 'Hosts');
+                                                            default:
+                                                                return userType;
+                                                        }
+                                                    }).join(', ') || t('forms.none', 'None')}
+                                                                        </span>
                                                 </div>
                                                 <div className="meta-item">
                                                     <span className="meta-label">{t('forms.created', 'Created')}:</span>

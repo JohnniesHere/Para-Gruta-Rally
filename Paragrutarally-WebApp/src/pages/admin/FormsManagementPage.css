@@ -71,6 +71,42 @@
 /* ========================================
    FORMS GRID
    ======================================== */
+.quick-action-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.quick-action-btn:disabled:hover {
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.error-message {
+    background: rgba(239, 68, 68, 0.1);
+    border: 2px solid #EF4444;
+    color: #EF4444;
+    padding: 16px 20px;
+    border-radius: 12px;
+    margin: 0 24px 20px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 500;
+}
+
+.error-message button:hover {
+    background: rgba(239, 68, 68, 0.1) !important;
+    border-radius: 4px;
+}
+
+/* Dark mode support */
+[data-theme="dark"] .error-message,
+.dark-mode .error-message {
+    background: rgba(239, 68, 68, 0.15);
+    border-color: #F87171;
+    color: #FCA5A5;
+}
 
 .forms-grid {
     display: grid;

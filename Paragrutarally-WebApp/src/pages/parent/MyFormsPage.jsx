@@ -1,4 +1,3 @@
-// src/pages/parent/MyFormsPage.jsx - Updated with Full Translations and RTL Support
 import React, { useState, useEffect } from 'react';
 import Dashboard from '../../components/layout/Dashboard';
 import FormSubmissionModal from '../../components/modals/FormSubmissionModal';
@@ -8,11 +7,13 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import { usePermissions } from '../../hooks/usePermissions';
 import ViewSubmissionModal from '../../components/modals/ViewSubmissionModal';
 import EditSubmissionModal from '../../components/modals/EditSubmissionModal';
+import { getUserFormSubmission } from '@/services/formService.js';
+
 import {
     getFormSubmissions,
     getActiveForms,
     incrementFormViewCount
-} from '../../services/formService';
+} from '@/services/formService.js';
 import './MyFormsPage.css';
 import {
     IconForms as FileText,
@@ -34,6 +35,17 @@ import {
 } from '@tabler/icons-react';
 
 const MyFormsPage = () => {
+    const getErrorMessage = (error, t) => {
+        if (typeof error === 'string') {
+            if (error.includes('Missing or insufficient permissions') || error.includes('permission-denied')) {
+                return t('errors.insufficientPermissions', 'אין הרשאות מספיקות לצפייה בתוכן זה');
+            }
+            if (error.includes('network-request-failed')) {
+                return t('errors.networkError', 'שגיאת רשת - בדוק את החיבור לאינטרנט');
+            }
+        }
+        return error || t('errors.unknownError', 'שגיאה לא ידועה');
+    };
     const { appliedTheme } = useTheme();
     const { t, currentLanguage } = useLanguage();
     const { userData, user } = usePermissions();
@@ -66,18 +78,47 @@ const MyFormsPage = () => {
         setError(null);
 
         try {
-            // Load submissions first (less likely to fail)
-            const submissionsData = await getFormSubmissions({ submitterId: user.uid });
-            setSubmissions(submissionsData);
+            console.log('Loading forms for parent user:', user?.uid);
 
-            // Load available forms
-            const availableFormsData = await getActiveForms('parent');
+            // Try to load active forms - this should work with updated rules
+            let availableFormsData = [];
+            try {
+                availableFormsData = await getActiveForms('parent');
+                console.log('✅ Loaded', availableFormsData.length, 'forms');
+            } catch (formsError) {
+                console.error('❌ Error loading forms:', formsError);
+                throw new Error('Failed to load available forms');
+            }
+
             setAvailableForms(availableFormsData);
 
+            // Try to load user submissions - but don't fail if it doesn't work
+            let userSubmissions = [];
+            try {
+                // Use the individual form checking approach for better compatibility
+                for (const form of availableFormsData) {
+                    try {
+                        const userSubmission = await getUserFormSubmission(user.uid, form.id);
+                        if (userSubmission) {
+                            userSubmission.formTitle = form.title;
+                            userSubmissions.push(userSubmission);
+                        }
+                    } catch (submissionError) {
+                        // It's OK if no submission exists
+                        console.log(`No submission found for form ${form.id}`);
+                    }
+                }
+                console.log('✅ Loaded', userSubmissions.length, 'user submissions');
+            } catch (submissionsError) {
+                console.warn('⚠️ Could not load submissions:', submissionsError);
+                // Don't fail - just show empty submissions
+            }
+
+            setSubmissions(userSubmissions);
+
         } catch (error) {
-            console.error('❌ Error loading forms data:', error);
-            setError(error.message || t('forms.loadError', 'Failed to load forms data'));
-            // Set empty arrays so page doesn't break
+            console.error('❌ Critical error loading forms data:', error);
+            setError(error.message || 'Failed to load forms data');
             setSubmissions([]);
             setAvailableForms([]);
         } finally {
@@ -291,7 +332,7 @@ const MyFormsPage = () => {
                 <AlertTriangle size={60} />
             </div>
             <h3>{t('forms.error.title', 'Unable to Load Forms')}</h3>
-            <p>{error}</p>
+            <p>{getErrorMessage(error,t)}</p>
             <button className="btn btn-primary" onClick={onRetry}>
                 <Refresh size={16} />
                 {t('forms.actions.retry', 'Try Again')}

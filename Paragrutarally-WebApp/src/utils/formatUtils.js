@@ -203,3 +203,59 @@ export const formatAddress = (address) => {
 
     return parts.join(', ');
 };
+
+/**
+ * Simple CSV export for form submissions
+ */
+export const exportSubmissionsToCSV = (submissions, filename = 'form_submissions') => {
+    if (!submissions || submissions.length === 0) {
+        alert('No submissions available to export');
+        return false;
+    }
+
+    try {
+        // Format data for CSV
+        const csvData = submissions.map(submission => ({
+            'Date': submission.submittedAt?.toLocaleDateString() || 'N/A',
+            'Form Type': submission.formType || 'Unknown',
+            'Status': submission.confirmationStatus || 'Pending',
+            'Submitter': submission.submitterData?.name || 'Unknown',
+            'Email': submission.submitterData?.email || '',
+            'Phone': submission.submitterData?.phone || '',
+            'Attendees': submission.attendeesCount || 0,
+            'Kids': submission.kidIds?.length || 0,
+            'Declaration': submission.declarationUploaded ? 'Yes' : 'No'
+        }));
+
+        // Create CSV content
+        const headers = Object.keys(csvData[0]);
+        const csvContent = [
+            headers.join(','),
+            ...csvData.map(row =>
+                headers.map(header => {
+                    const value = row[header];
+                    return typeof value === 'string' && value.includes(',')
+                        ? `"${value}"`
+                        : value;
+                }).join(',')
+            )
+        ].join('\n');
+
+        // Download
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${filename}_${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+
+        return true;
+    } catch (error) {
+        console.error('CSV Export Error:', error);
+        alert('Export failed. Please try again.');
+        return false;
+    }
+};

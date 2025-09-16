@@ -67,26 +67,23 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
     
-    // Forms - admin can create/edit, users can read forms assigned to their role
+    // Forms - UPDATED: More permissive for parents
     match /forms/{formId} {
-      allow read: if isAuthenticated() && (
-        isAdmin() || 
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in resource.data.targetUsers ||
-        resource.data.isPublic == true
-      );
+      allow read: if isAuthenticated();  // Allow all authenticated users to read forms
       allow create: if isAdmin();
-      allow update: if isAdmin() || 
+      allow update: if isAdmin() ||
         (isAuthenticated() && resource.data.createdBy == request.auth.uid);
       allow delete: if isAdmin();
     }
-    
-    // Form submissions - users can create their own, admin can read all
+
+    // Form submissions - UPDATED: Allow reading by submitter, admin can read all
     match /form_submissions/{submissionId} {
-      allow read: if isAuthenticated() && 
+      allow read: if isAuthenticated() &&
         (resource.data.submittedBy == request.auth.uid || isAdmin());
-      allow create: if isAuthenticated() && 
+      allow create: if isAuthenticated() &&
         request.resource.data.submittedBy == request.auth.uid;
-      allow update: if isAdmin();
+      allow update: if isAdmin() ||
+        (isAuthenticated() && resource.data.submittedBy == request.auth.uid);
       allow delete: if isAdmin();
     }
     

@@ -9,9 +9,10 @@ import {
     getFormById,
     getFormSubmissions,
     getFormsAnalytics
-} from '../../services/formService';
-import { getUserData } from '../../services/userService';
-import { getKidsByParent } from '../../services/kidService';
+} from '@/services/formService.js';
+import { getUserData } from '@/services/userService.js';
+import { getKidsByParent } from '@/services/kidService.js';
+import { exportSubmissionsToCSV } from "@/utils/formatUtils.js";
 import {
     IconNotes as FileText,
     IconEye as Eye,
@@ -47,6 +48,7 @@ const FormSubmissionsPage = () => {
     const [formTypeFilter, setFormTypeFilter] = useState('all');
     const [selectedSubmission, setSelectedSubmission] = useState(null);
     const [submissionDetails, setSubmissionDetails] = useState({});
+    const [isExporting, setIsExporting] = useState(false);
 
     // Load data
     useEffect(() => {
@@ -86,27 +88,61 @@ const FormSubmissionsPage = () => {
         try {
             const details = { ...submission };
 
-            // Load submitter user data
+            // Load submitter user data with error handling
             if (submission.submitterId) {
-                details.submitterData = await getUserData(submission.submitterId);
+                try {
+                    details.submitterData = await getUserData(submission.submitterId);
+                } catch (error) {
+                    console.warn('Could not load user data for:', submission.submitterId, error);
+                    details.submitterData = {
+                        name: 'Unknown User',
+                        email: submission.submitterEmail || '',
+                        phone: submission.submitterPhone || ''
+                    };
+                }
             }
 
-            // Load kids data if available
+            // Load kids data if available - with better error handling
             if (submission.kidIds && submission.kidIds.length > 0) {
-                details.kidsData = await Promise.all(
-                    submission.kidIds.map(async (kidId) => {
-                        try {
-                            const { getKidById } = await import('../../services/kidService');
-                            return await getKidById(kidId);
-                        } catch (error) {
-                            console.warn(`Failed to load kid ${kidId}:`, error);
-                            return null;
+                details.kidsData = [];
+
+                for (const kidId of submission.kidIds) {
+                    try {
+                        const { getKidById } = await import('../../services/kidService');
+                        const kidData = await getKidById(kidId);
+
+                        if (kidData) {
+                            details.kidsData.push(kidData);
+                        } else {
+                            // Kid not found, add placeholder
+                            console.warn(`Kid ${kidId} not found, using placeholder`);
+                            details.kidsData.push({
+                                id: kidId,
+                                personalInfo: {
+                                    firstName: 'Unknown',
+                                    lastName: 'Kid',
+                                    participantNumber: kidId
+                                }
+                            });
                         }
-                    })
-                );
-                details.kidsData = details.kidsData.filter(kid => kid !== null);
+                    } catch (error) {
+                        console.warn(`Could not load kid ${kidId}:`, error.message);
+
+                        // Add placeholder data instead of failing completely
+                        details.kidsData.push({
+                            id: kidId,
+                            personalInfo: {
+                                firstName: 'Missing',
+                                lastName: 'Kid Data',
+                                participantNumber: kidId
+                            },
+                            error: true
+                        });
+                    }
+                }
             }
 
+            // Store the loaded details
             setSubmissionDetails(prev => ({
                 ...prev,
                 [submission.id]: details
@@ -115,7 +151,31 @@ const FormSubmissionsPage = () => {
             return details;
         } catch (error) {
             console.error('Error loading submission details:', error);
-            return submission;
+
+            // Return submission with basic data even if details loading fails
+            const fallbackDetails = {
+                ...submission,
+                submitterData: {
+                    name: 'Unknown User',
+                    email: submission.submitterEmail || '',
+                    phone: submission.submitterPhone || ''
+                },
+                kidsData: submission.kidIds ? submission.kidIds.map(kidId => ({
+                    id: kidId,
+                    personalInfo: {
+                        firstName: 'Unknown',
+                        lastName: 'Kid',
+                        participantNumber: kidId
+                    }
+                })) : []
+            };
+
+            setSubmissionDetails(prev => ({
+                ...prev,
+                [submission.id]: fallbackDetails
+            }));
+
+            return fallbackDetails;
         }
     };
 
@@ -163,33 +223,25 @@ const FormSubmissionsPage = () => {
     };
 
     // Export submissions to CSV
-    const handleExportSubmissions = () => {
-        const csvData = filteredSubmissions.map(submission => ({
-            'Submission Date': submission.submittedAt?.toLocaleDateString(),
-            'Status': submission.confirmationStatus,
-            'Type': submission.formType,
-            'Submitter': submission.submitterData?.name || 'Unknown',
-            'Email': submission.submitterData?.email || '',
-            'Phone': submission.submitterData?.phone || '',
-            'Attendees Count': submission.attendeesCount || 0,
-            'Kids Count': submission.kidIds?.length || 0,
-            'Shirts Count': submission.shirts?.length || 0,
-            'Extra Shirts Count': submission.extraShirts?.length || 0,
-            'Declaration Uploaded': submission.declarationUploaded ? 'Yes' : 'No'
-        }));
+    const handleExportSubmissions = async () => {
+        if (filteredSubmissions.length === 0) {
+            alert(t('forms.noSubmissionsToExport', 'No submissions available to export'));
+            return;
+        }
 
-        // Convert to CSV and download
-        const csv = [
-            Object.keys(csvData[0]).join(','),
-            ...csvData.map(row => Object.values(row).join(','))
-        ].join('\n');
-
-        const blob = new Blob([csv], { type: 'text/csv' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `form_submissions_${formId || 'all'}_${new Date().toISOString().split('T')[0]}.csv`;
-        a.click();
+        setIsExporting(true);
+        try {
+            const filename = formId ? `form_${formId}_submissions` : 'all_submissions';
+            const success = exportSubmissionsToCSV(filteredSubmissions, filename);
+            if (!success) {
+                alert(t('forms.exportError', 'Export failed. Please try again.'));
+            }
+        } catch (error) {
+            console.error('Export error:', error);
+            alert(t('forms.exportError', 'Export failed. Please try again.'));
+        } finally {
+            setIsExporting(false);
+        }
     };
 
     if (!permissions) {
@@ -283,10 +335,13 @@ const FormSubmissionsPage = () => {
                             <button
                                 className="btn btn-secondary"
                                 onClick={handleExportSubmissions}
-                                disabled={filteredSubmissions.length === 0}
+                                disabled={isExporting || filteredSubmissions.length === 0}
                             >
                                 <Download size={16} />
-                                {t('forms.exportSubmissions', 'Export CSV')}
+                                {isExporting ?
+                                    t('forms.exporting', 'Exporting...') :
+                                    t('forms.exportSubmissions', 'Export CSV')
+                                }
                             </button>
                         </div>
                     </div>

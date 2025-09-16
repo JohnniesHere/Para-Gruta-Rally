@@ -158,11 +158,13 @@ export const getFormById = async (formId) => {
         return {
             id: formSnap.id,
             ...data,
-            createdAt: data.createdAt?.toDate(),
-            updatedAt: data.updatedAt?.toDate(),
+            createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : data.createdAt,
+            updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : data.updatedAt,
             eventDetails: {
                 ...data.eventDetails,
-                eventDate: data.eventDetails?.eventDate?.toDate()
+                eventDate: data.eventDetails?.eventDate?.toDate ?
+                    data.eventDetails.eventDate.toDate() :
+                    data.eventDetails?.eventDate
             }
         };
     } catch (error) {
@@ -331,38 +333,35 @@ export const submitFormResponse = async (submissionData) => {
  * @param {Object} filters - Query filters
  * @returns {Promise<Array>} List of submissions
  */
-export const getFormSubmissions = async (filters = {}) => {
+export const getFormSubmissions = async (formIdOrFilters = null) => {
     try {
         const submissionsRef = collection(db, FORM_SUBMISSIONS_COLLECTION);
-        let q = query(submissionsRef, orderBy('submittedAt', 'desc'));
+        let q;
 
-        // Apply filters
-        if (filters.submitterId) {
-            q = query(submissionsRef,
-                where('submitterId', '==', filters.submitterId),
+        // If no parameter, get all submissions
+        if (!formIdOrFilters) {
+            q = query(submissionsRef, orderBy('submittedAt', 'desc'));
+        }
+        // If it's a string, treat as formId
+        else if (typeof formIdOrFilters === 'string') {
+            q = query(
+                submissionsRef,
+                where('formId', '==', formIdOrFilters),
                 orderBy('submittedAt', 'desc')
             );
         }
+        // If it's an object, treat as filters
+        else {
+            const filters = formIdOrFilters;
+            let queryConstraints = [];
 
-        if (filters.formId) {
-            q = query(submissionsRef,
-                where('formId', '==', filters.formId),
-                orderBy('submittedAt', 'desc')
-            );
-        }
+            if (filters.formId) queryConstraints.push(where('formId', '==', filters.formId));
+            if (filters.submitterId) queryConstraints.push(where('submitterId', '==', filters.submitterId));
+            if (filters.formType) queryConstraints.push(where('formType', '==', filters.formType));
+            if (filters.confirmationStatus) queryConstraints.push(where('confirmationStatus', '==', filters.confirmationStatus));
 
-        if (filters.formType) {
-            q = query(submissionsRef,
-                where('formType', '==', filters.formType),
-                orderBy('submittedAt', 'desc')
-            );
-        }
-
-        if (filters.confirmationStatus) {
-            q = query(submissionsRef,
-                where('confirmationStatus', '==', filters.confirmationStatus),
-                orderBy('submittedAt', 'desc')
-            );
+            queryConstraints.push(orderBy('submittedAt', 'desc'));
+            q = query(submissionsRef, ...queryConstraints);
         }
 
         const querySnapshot = await getDocs(q);
@@ -373,14 +372,14 @@ export const getFormSubmissions = async (filters = {}) => {
             submissions.push({
                 id: doc.id,
                 ...data,
-                submittedAt: data.submittedAt?.toDate(),
-                updatedAt: data.updatedAt?.toDate()
+                submittedAt: data.submittedAt?.toDate ? data.submittedAt.toDate() : data.submittedAt,
+                updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : data.updatedAt
             });
         });
 
         return submissions;
     } catch (error) {
-        console.error('❌ Error getting form submissions:', error);
+        console.error('Error getting form submissions:', error);
         throw error;
     }
 };
