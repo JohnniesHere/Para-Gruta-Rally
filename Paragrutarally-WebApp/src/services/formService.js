@@ -155,20 +155,262 @@ export const getFormById = async (formId) => {
         }
 
         const data = formSnap.data();
+
+        // Helper function to safely convert dates
+        const safeToDate = (timestamp) => {
+            if (!timestamp) return null;
+            if (timestamp instanceof Date) return timestamp;
+            if (typeof timestamp === 'string') return new Date(timestamp);
+            if (timestamp?.toDate && typeof timestamp.toDate === 'function') {
+                return timestamp.toDate();
+            }
+            // If it's already a timestamp object but toDate fails, return as-is
+            return timestamp;
+        };
+
+        // Safely convert eventDate
+        let eventDateConverted = null;
+        if (data.eventDetails?.eventDate) {
+            try {
+                eventDateConverted = safeToDate(data.eventDetails.eventDate);
+            } catch (e) {
+                console.warn('Could not convert eventDate:', e);
+                eventDateConverted = data.eventDetails.eventDate;
+            }
+        }
+
         return {
             id: formSnap.id,
             ...data,
-            createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : data.createdAt,
-            updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : data.updatedAt,
-            eventDetails: {
+            createdAt: safeToDate(data.createdAt),
+            updatedAt: safeToDate(data.updatedAt),
+            eventDetails: data.eventDetails ? {
                 ...data.eventDetails,
-                eventDate: data.eventDetails?.eventDate?.toDate ?
-                    data.eventDetails.eventDate.toDate() :
-                    data.eventDetails?.eventDate
-            }
+                eventDate: eventDateConverted
+            } : undefined
         };
     } catch (error) {
         console.error('❌ Error getting form by ID:', error);
+        throw error;
+    }
+};
+
+/**
+ * Get ALL form submissions with user details (for admin overview)
+ * @returns {Promise<Array>} List of all submissions with user and form details
+ */
+export const getAllSubmissionsWithDetails = async () => {
+    try {
+        console.log('🔍 Getting all submissions with details');
+
+        // Get all submissions
+        const submissionsRef = collection(db, FORM_SUBMISSIONS_COLLECTION);
+        const querySnapshot = await getDocs(submissionsRef);
+
+        const submissions = [];
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            submissions.push({
+                id: doc.id,
+                ...data,
+                submittedAt: data.submittedAt?.toDate ? data.submittedAt.toDate() : data.submittedAt,
+                updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : data.updatedAt
+            });
+        });
+
+        console.log(`✅ Found ${submissions.length} total submissions`);
+
+        // Get unique submitter IDs
+        const submitterIds = [...new Set(submissions.map(s => s.submitterId).filter(Boolean))];
+        console.log('👥 Loading user data for:', submitterIds.length, 'users');
+
+        // Get unique form IDs
+        const formIds = [...new Set(submissions.map(s => s.formId).filter(Boolean))];
+        console.log('📋 Loading form data for:', formIds.length, 'forms');
+
+        // Fetch user data
+        const userDataMap = {};
+        await Promise.all(
+            submitterIds.map(async (userId) => {
+                try {
+                    const userRef = doc(db, 'users', userId);
+                    const userSnap = await getDoc(userRef);
+                    if (userSnap.exists()) {
+                        const userData = userSnap.data();
+                        const userName = userData.displayName ||
+                            userData.name ||
+                            `${userData.firstName || ''} ${userData.lastName || ''}`.trim() ||
+                            null;
+
+                        userDataMap[userId] = {
+                            name: userName || `משתמש ${userId.slice(-4)}`,
+                            email: userData.email || '',
+                            phone: userData.phone || userData.phoneNumber || '',
+                            role: userData.role || 'parent'
+                        };
+                        console.log(`✅ Loaded user ${userId}:`, userDataMap[userId].name);
+                    } else {
+                        console.warn(`⚠️ User document not found: ${userId}`);
+                        userDataMap[userId] = {
+                            name: `משתמש ${userId.slice(-4)}`,
+                            email: '',
+                            phone: '',
+                            role: 'unknown'
+                        };
+                    }
+                } catch (error) {
+                    console.error(`❌ Error loading user ${userId}:`, error);
+                    userDataMap[userId] = {
+                        name: `משתמש ${userId.slice(-4)}`,
+                        email: '',
+                        phone: '',
+                        role: 'unknown'
+                    };
+                }
+            })
+        );
+
+        // Fetch form data
+        const formDataMap = {};
+        await Promise.all(
+            formIds.map(async (formId) => {
+                try {
+                    const formData = await getFormById(formId);
+                    formDataMap[formId] = {
+                        title: formData.title || 'טופס לא ידוע',
+                        type: formData.type || 'unknown'
+                    };
+                } catch (error) {
+                    console.warn(`Could not load form ${formId}:`, error);
+                    formDataMap[formId] = {
+                        title: `טופס ${formId.slice(-4)}`,
+                        type: 'unknown'
+                    };
+                }
+            })
+        );
+
+        // Enrich submissions
+        const enrichedSubmissions = submissions.map(submission => ({
+            ...submission,
+            submitterName: userDataMap[submission.submitterId]?.name || 'משתמש לא ידוע',
+            submitterEmail: userDataMap[submission.submitterId]?.email || '',
+            submitterPhone: userDataMap[submission.submitterId]?.phone || '',
+            submitterRole: userDataMap[submission.submitterId]?.role || 'unknown',
+            formTitle: formDataMap[submission.formId]?.title || 'טופס לא ידוע',
+            formType: formDataMap[submission.formId]?.type || 'unknown'
+        }));
+
+        // Sort by date
+        enrichedSubmissions.sort((a, b) => {
+            const dateA = a.submittedAt instanceof Date ? a.submittedAt : new Date(a.submittedAt);
+            const dateB = b.submittedAt instanceof Date ? b.submittedAt : new Date(b.submittedAt);
+            return dateB - dateA;
+        });
+
+        return enrichedSubmissions;
+
+    } catch (error) {
+        console.error('❌ Error getting all submissions with details:', error);
+        throw error;
+    }
+};
+
+/**
+ * Get form submissions with user details for a specific form
+ * @param {string} formId - Form ID to get submissions for
+ * @returns {Promise<Array>} List of submissions with user details
+ */
+export const getFormSubmissionsWithUserDetails = async (formId) => {
+    try {
+        console.log('🔍 Getting submissions for form:', formId);
+
+        // Get submissions for this form
+        const submissionsRef = collection(db, FORM_SUBMISSIONS_COLLECTION);
+        const q = query(
+            submissionsRef,
+            where('formId', '==', formId)
+        );
+
+        const querySnapshot = await getDocs(q);
+        const submissions = [];
+
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            submissions.push({
+                id: doc.id,
+                ...data,
+                submittedAt: data.submittedAt?.toDate ? data.submittedAt.toDate() : data.submittedAt,
+                updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : data.updatedAt
+            });
+        });
+
+        console.log(`✅ Found ${submissions.length} submissions for form ${formId}`);
+
+        // Get unique submitter IDs
+        const submitterIds = [...new Set(submissions.map(s => s.submitterId).filter(Boolean))];
+        console.log('👥 Loading user data for:', submitterIds);
+
+        // Fetch user data
+        const userDataMap = {};
+        await Promise.all(
+            submitterIds.map(async (userId) => {
+                try {
+                    const userRef = doc(db, 'users', userId);
+                    const userSnap = await getDoc(userRef);
+                    if (userSnap.exists()) {
+                        const userData = userSnap.data();
+                        userDataMap[userId] = {
+                            name: userData.displayName ||
+                                userData.name ||
+                                `${userData.firstName || ''} ${userData.lastName || ''}`.trim() ||
+                                `משתמש ${userId.slice(-4)}`,
+                            email: userData.email || '',
+                            phone: userData.phone || userData.phoneNumber || '',
+                            role: userData.role || 'parent'
+                        };
+                        console.log(`✅ Loaded user ${userId}:`, userDataMap[userId].name);
+                    } else {
+                        console.warn(`⚠️ User not found: ${userId}`);
+                        userDataMap[userId] = {
+                            name: `משתמש ${userId.slice(-4)}`,
+                            email: '',
+                            phone: '',
+                            role: 'unknown'
+                        };
+                    }
+                } catch (error) {
+                    console.warn(`❌ Could not load user ${userId}:`, error);
+                    userDataMap[userId] = {
+                        name: `משתמש ${userId.slice(-4)}`,
+                        email: '',
+                        phone: '',
+                        role: 'unknown'
+                    };
+                }
+            })
+        );
+
+        // Enrich submissions
+        const enrichedSubmissions = submissions.map(submission => ({
+            ...submission,
+            submitterName: userDataMap[submission.submitterId]?.name || 'משתמש לא ידוע',
+            submitterEmail: userDataMap[submission.submitterId]?.email || '',
+            submitterPhone: userDataMap[submission.submitterId]?.phone || '',
+            submitterRole: userDataMap[submission.submitterId]?.role || 'unknown'
+        }));
+
+        // Sort by date
+        enrichedSubmissions.sort((a, b) => {
+            const dateA = a.submittedAt instanceof Date ? a.submittedAt : new Date(a.submittedAt);
+            const dateB = b.submittedAt instanceof Date ? b.submittedAt : new Date(b.submittedAt);
+            return dateB - dateA;
+        });
+
+        return enrichedSubmissions;
+
+    } catch (error) {
+        console.error('❌ Error getting submissions with user details:', error);
         throw error;
     }
 };
@@ -262,6 +504,12 @@ export const deleteForm = async (formId) => {
  */
 export const createFormSubmission = async (submissionData) => {
     try {
+        console.log('🔍 Attempting to create submission with data:', {
+            ...submissionData,
+            submitterId: submissionData.submitterId,
+            formId: submissionData.formId,
+            timestamp: new Date().toISOString()
+        });
 
         const submissionsRef = collection(db, FORM_SUBMISSIONS_COLLECTION);
 
@@ -272,26 +520,32 @@ export const createFormSubmission = async (submissionData) => {
             updatedAt: serverTimestamp()
         };
 
+        console.log('📤 Data being submitted:', dataToSubmit);
 
         const docRef = await addDoc(submissionsRef, dataToSubmit);
 
+        console.log('✅ Submission created successfully with ID:', docRef.id);
+
         // Increment form submission count
         if (submissionData.formId) {
-            const formRef = doc(db, FORMS_COLLECTION, submissionData.formId);
-            await updateDoc(formRef, {
-                submissionCount: increment(1),
-                updatedAt: serverTimestamp()
-            });
+            try {
+                const formRef = doc(db, FORMS_COLLECTION, submissionData.formId);
+                await updateDoc(formRef, {
+                    submissionCount: increment(1),
+                    updatedAt: serverTimestamp()
+                });
+            } catch (countError) {
+                console.warn('⚠️ Could not increment form count:', countError);
+                // Don't fail the submission if count update fails
+            }
         }
 
         return docRef.id;
     } catch (error) {
         console.error('❌ Error creating form submission:', error);
-        console.error('❌ Error details:', {
-            message: error.message,
-            code: error.code,
-            stack: error.stack
-        });
+        console.error('❌ Error code:', error.code);
+        console.error('❌ Error message:', error.message);
+        console.error('❌ Submission data that failed:', submissionData);
         throw error;
     }
 };
@@ -735,6 +989,8 @@ export default {
     getUserSubmissionSummary,
     hasUserSubmittedForm,
     getUserFormSubmission,
+    getAllSubmissionsWithDetails,
+    getFormSubmissionsWithUserDetails,
 
     // Existing functions (keeping for compatibility)
     createForm,
