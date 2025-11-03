@@ -273,7 +273,6 @@ const FormSubmissionModal = ({
                 formType: userType
             };
 
-
             // Add optional fields based on form data
             if (formData.kidIds.length > 0) {
                 submissionData.kidIds = formData.kidIds;
@@ -299,18 +298,35 @@ const FormSubmissionModal = ({
                 submissionData.motoForLife = formData.motoForLife.trim();
             }
 
-
-            // Submit to database
+// Submit to database
             const submissionId = await createFormSubmission(submissionData);
+            console.log('✅ Form submitted successfully:', submissionId);
 
-            // Call success callback
-            try {
-                onSubmit(submissionData);
-            } catch (callbackError) {
-                console.warn('⚠️ Callback error (submission succeeded):', callbackError);
+// Show success message
+            alert(t('forms.success.submitted', 'Form submitted successfully!'));
+
+// Call success callback
+            if (onSubmit && typeof onSubmit === 'function') {
+                try {
+                    onSubmit(submissionData);
+                } catch (callbackError) {
+                    console.warn('⚠️ Callback error (submission succeeded):', callbackError);
+                }
             }
 
+// Close modal
             onClose();
+
+            // Call success callback after closing - wrapped in setTimeout to avoid blocking
+            setTimeout(() => {
+                try {
+                    if (onSubmit && typeof onSubmit === 'function') {
+                        onSubmit(submissionData);
+                    }
+                } catch (callbackError) {
+                    console.warn('⚠️ Callback error (submission succeeded):', callbackError);
+                }
+            }, 100);
 
         } catch (error) {
             console.error('❌ Error submitting form:', error);

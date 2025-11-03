@@ -67,23 +67,25 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
     
-    // Forms - UPDATED: More permissive for parents
+    // Forms - Allow reading and incrementing view count
     match /forms/{formId} {
-      allow read: if isAuthenticated();  // Allow all authenticated users to read forms
+      allow read: if isAuthenticated();
       allow create: if isAdmin();
-      allow update: if isAdmin() ||
-        (isAuthenticated() && resource.data.createdBy == request.auth.uid);
       allow delete: if isAdmin();
+      // Allow admins to update anything, or users to update only viewCount/updatedAt
+      allow update: if isAdmin() ||
+        (isAuthenticated() &&
+         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewCount', 'updatedAt']));
     }
 
-    // Form submissions - UPDATED: Allow reading by submitter, admin can read all
+    // Form submissions - FIXED: Changed submittedBy to submitterId throughout
     match /form_submissions/{submissionId} {
       allow read: if isAuthenticated() &&
-        (resource.data.submittedBy == request.auth.uid || isAdmin());
+        (resource.data.submitterId == request.auth.uid || isAdmin());
       allow create: if isAuthenticated() &&
-        request.resource.data.submittedBy == request.auth.uid;
+        request.resource.data.submitterId == request.auth.uid;
       allow update: if isAdmin() ||
-        (isAuthenticated() && resource.data.submittedBy == request.auth.uid);
+        (isAuthenticated() && resource.data.submitterId == request.auth.uid);
       allow delete: if isAdmin();
     }
     
