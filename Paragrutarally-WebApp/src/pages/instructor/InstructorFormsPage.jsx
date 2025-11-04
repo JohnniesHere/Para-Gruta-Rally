@@ -25,7 +25,8 @@ import {
     IconHeart as Heart,
     IconExternalLink as ExternalLink,
     IconChalkboard as ChalkboardTeacher,
-    IconMapPin as MapPin
+    IconMapPin as MapPin,
+    IconFileText as FileIcon
 } from '@tabler/icons-react';
 
 const InstructorFormsPage = () => {
@@ -504,6 +505,28 @@ const InstructorFormsPage = () => {
                                                             </div>
                                                         </div>
                                                     )}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Declaration File */}
+                                        {viewSubmission.declarationUploaded && (
+                                            <div className="details-section">
+                                                <h4>
+                                                    <FileIcon size={20} />
+                                                    {t('forms.signedDeclaration', 'Signed Declaration')}
+                                                </h4>
+                                                <div className="declaration-file">
+                                                    <a
+                                                        href={viewSubmission.declarationUploaded}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="file-link"
+                                                    >
+                                                        <FileIcon size={16} />
+                                                        {t('forms.viewDeclaration', 'View Declaration File')}
+                                                        <ExternalLink size={12} />
+                                                    </a>
                                                 </div>
                                             </div>
                                         )}

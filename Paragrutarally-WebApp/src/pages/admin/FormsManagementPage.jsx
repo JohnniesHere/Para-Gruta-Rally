@@ -523,9 +523,9 @@ const FormsManagementPage = () => {
                                 <div className="template-preview">
                                     <FileText className="template-preview-icon" size={40} />
                                 </div>
-                                <div className="template-name">{t('forms.instructorEventTemplate', 'Instructor Training Registration')}</div>
+                                <div className="template-name">{t('forms.instructorEventTemplate', 'Instructor Event Registration')}</div>
                                 <div className="template-description">
-                                    {t('forms.instructorEventDesc', 'Template for instructor training events and workshops')}
+                                    {t('forms.instructorEventDesc', 'Template for instructor event registration and attendance confirmation')}
                                 </div>
                                 <button
                                     className="use-template-btn"
@@ -582,7 +582,7 @@ const FormsManagementPage = () => {
                                                         </span>
                                                 </td>
                                                 <td>
-                                                    {submission.submitterData?.name || t('forms.unknownUser', 'Unknown User')}
+                                                    {submission.submitterData?.name || submission.submitterName || t('forms.unknownUser', 'Unknown User')}
                                                 </td>
                                                 <td>
                                                     <button

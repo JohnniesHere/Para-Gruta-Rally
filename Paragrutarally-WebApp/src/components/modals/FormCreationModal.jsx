@@ -57,8 +57,21 @@ const FormCreationModal = ({
     useEffect(() => {
         if (isOpen) {
             loadEvents();
+            
+            // Set targetUsers based on templateType
+            if (templateType === 'instructor') {
+                setFormData(prev => ({
+                    ...prev,
+                    targetUsers: ['instructor']
+                }));
+            } else if (templateType === 'parent') {
+                setFormData(prev => ({
+                    ...prev,
+                    targetUsers: ['parent']
+                }));
+            }
         }
-    }, [isOpen]);
+    }, [isOpen, templateType]);
 
     // Load events from database
     const loadEvents = async () => {

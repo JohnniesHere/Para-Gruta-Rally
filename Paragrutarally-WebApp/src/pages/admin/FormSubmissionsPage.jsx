@@ -29,7 +29,9 @@ import {
     IconPhone as Phone,
     IconShirt as Shirt,
     IconFileText as FileIcon,
-    IconExternalLink as ExternalLink
+    IconExternalLink as ExternalLink,
+    IconChevronDown as ChevronDown,
+    IconChevronUp as ChevronUp
 } from '@tabler/icons-react';
 
 const FormSubmissionsPage = () => {
@@ -46,7 +48,7 @@ const FormSubmissionsPage = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
     const [formTypeFilter, setFormTypeFilter] = useState('all');
-    const [selectedSubmission, setSelectedSubmission] = useState(null);
+    const [expandedSubmissions, setExpandedSubmissions] = useState(new Set());
     const [submissionDetails, setSubmissionDetails] = useState({});
     const [isExporting, setIsExporting] = useState(false);
 
@@ -94,12 +96,23 @@ const FormSubmissionsPage = () => {
                     details.submitterData = await getUserData(submission.submitterId);
                 } catch (error) {
                     console.warn('Could not load user data for:', submission.submitterId, error);
+                    // Try to use data from the submission object itself as fallback
                     details.submitterData = {
-                        name: 'Unknown User',
-                        email: submission.submitterEmail || '',
-                        phone: submission.submitterPhone || ''
+                        name: submission.submitterName || submission.submitterData?.name || 'Unknown User',
+                        email: submission.submitterEmail || submission.submitterData?.email || '',
+                        phone: submission.submitterPhone || submission.submitterData?.phone || ''
                     };
                 }
+            } else if (submission.submitterData) {
+                // If no submitterId but submitterData exists in submission
+                details.submitterData = submission.submitterData;
+            } else {
+                // Last resort fallback
+                details.submitterData = {
+                    name: submission.submitterName || 'Unknown User',
+                    email: submission.submitterEmail || '',
+                    phone: submission.submitterPhone || ''
+                };
             }
 
             // Load kids data if available - with better error handling
@@ -156,9 +169,9 @@ const FormSubmissionsPage = () => {
             const fallbackDetails = {
                 ...submission,
                 submitterData: {
-                    name: 'Unknown User',
-                    email: submission.submitterEmail || '',
-                    phone: submission.submitterPhone || ''
+                    name: submission.submitterName || submission.submitterData?.name || 'Unknown User',
+                    email: submission.submitterEmail || submission.submitterData?.email || '',
+                    phone: submission.submitterPhone || submission.submitterData?.phone || ''
                 },
                 kidsData: submission.kidIds ? submission.kidIds.map(kidId => ({
                     id: kidId,
@@ -177,6 +190,28 @@ const FormSubmissionsPage = () => {
 
             return fallbackDetails;
         }
+    };
+
+    // Toggle submission expansion - THIS WAS MISSING!
+    const toggleSubmissionExpansion = async (submission) => {
+        const newExpanded = new Set(expandedSubmissions);
+
+        if (newExpanded.has(submission.id)) {
+            // Collapse
+            newExpanded.delete(submission.id);
+        } else {
+            // Expand and load details if not already loaded
+            newExpanded.add(submission.id);
+            if (!submissionDetails[submission.id]) {
+                const details = await loadSubmissionDetails(submission);
+                setSubmissionDetails(prev => ({
+                    ...prev,
+                    [submission.id]: details
+                }));
+            }
+        }
+
+        setExpandedSubmissions(newExpanded);
     };
 
     // Get status info
@@ -215,12 +250,6 @@ const FormSubmissionsPage = () => {
             return matchesSearch && matchesStatus && matchesType;
         });
     }, [submissions, searchTerm, statusFilter, formTypeFilter]);
-
-    // Handle view submission details
-    const handleViewSubmission = async (submission) => {
-        setSelectedSubmission(submission);
-        await loadSubmissionDetails(submission);
-    };
 
     // Export submissions to CSV
     const handleExportSubmissions = async () => {
@@ -371,21 +400,22 @@ const FormSubmissionsPage = () => {
                                     const StatusIcon = statusInfo.icon;
 
                                     return (
-                                        <tr key={submission.id}>
-                                            <td>
-                                                {submission.submittedAt?.toLocaleDateString()} {submission.submittedAt?.toLocaleTimeString()}
-                                            </td>
-                                            <td>
-                                                <div className="submitter-info">
-                                                    <div className="submitter-name">
-                                                        {submission.submitterData?.name || t('common.unknown', 'Unknown')}
+                                        <React.Fragment key={submission.id}>
+                                            <tr>
+                                                <td>
+                                                    {submission.submittedAt?.toLocaleDateString()} {submission.submittedAt?.toLocaleTimeString()}
+                                                </td>
+                                                <td>
+                                                    <div className="submitter-info">
+                                                        <div className="submitter-name">
+                                                            {submission.submitterData?.name || t('common.unknown', 'Unknown')}
+                                                        </div>
+                                                        <div className="submitter-email">
+                                                            {submission.submitterData?.email}
+                                                        </div>
                                                     </div>
-                                                    <div className="submitter-email">
-                                                        {submission.submitterData?.email}
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td>
+                                                </td>
+                                                <td>
                                                     <span
                                                         className="submission-status"
                                                         style={{ borderColor: statusInfo.color }}
@@ -393,37 +423,194 @@ const FormSubmissionsPage = () => {
                                                         <StatusIcon size={12} style={{ color: statusInfo.color }} />
                                                         {statusInfo.label}
                                                     </span>
-                                            </td>
-                                            <td>
+                                                </td>
+                                                <td>
                                                     <span className="form-type-badge">
                                                         {submission.formType === 'parent'
                                                             ? t('forms.parent', 'Parent')
                                                             : t('forms.instructor', 'Instructor')
                                                         }
                                                     </span>
-                                            </td>
-                                            <td>
-                                                <div className="attendees-summary">
+                                                </td>
+                                                <td>
+                                                    <div className="attendees-summary">
                                                         <span className="attendee-count">
                                                             {submission.attendeesCount || 0}
                                                         </span>
-                                                    {submission.kidIds && submission.kidIds.length > 0 && (
-                                                        <span className="kids-count">
+                                                        {submission.kidIds && submission.kidIds.length > 0 && (
+                                                            <span className="kids-count">
                                                                 ({submission.kidIds.length} {t('forms.kids', 'kids')})
                                                             </span>
-                                                    )}
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <button
-                                                    className="btn-action view"
-                                                    onClick={() => handleViewSubmission(submission)}
-                                                    title={t('forms.viewDetails', 'View Details')}
-                                                >
-                                                    <Eye size={16} />
-                                                </button>
-                                            </td>
-                                        </tr>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <button
+                                                        className="btn-action view"
+                                                        onClick={() => toggleSubmissionExpansion(submission)}
+                                                        title={expandedSubmissions.has(submission.id) ? t('forms.hideDetails', 'Hide Details') : t('forms.viewDetails', 'View Details')}
+                                                    >
+                                                        {expandedSubmissions.has(submission.id) ? (
+                                                            <ChevronUp size={16} />
+                                                        ) : (
+                                                            <ChevronDown size={16} />
+                                                        )}
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            {expandedSubmissions.has(submission.id) && (
+                                                <tr className="expanded-row">
+                                                    <td colSpan="6">
+                                                        {submissionDetails[submission.id] ? (
+                                                            <div className="submission-details-expanded">
+                                                                {/* Contact Information */}
+                                                                <div className="details-section">
+                                                                    <h4>{t('forms.contactInformation', 'Contact Information')}</h4>
+                                                                    <div className="details-grid">
+                                                                        {submissionDetails[submission.id].submitterData && (
+                                                                            <>
+                                                                                <div className="detail-item">
+                                                                                    <label>{t('forms.fullName', 'Full Name')}</label>
+                                                                                    <span>{submissionDetails[submission.id].submitterData.name || t('common.unknown', 'Unknown')}</span>
+                                                                                </div>
+                                                                                <div className="detail-item">
+                                                                                    <label><Mail size={14} /> {t('forms.email', 'Email')}</label>
+                                                                                    <span>{submissionDetails[submission.id].submitterData.email}</span>
+                                                                                </div>
+                                                                                <div className="detail-item">
+                                                                                    <label><Phone size={14} /> {t('forms.phone', 'Phone')}</label>
+                                                                                    <span>{submissionDetails[submission.id].submitterData.phone || t('common.notProvided', 'Not provided')}</span>
+                                                                                </div>
+                                                                            </>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+
+                                                                {/* Attendance Information */}
+                                                                <div className="details-section">
+                                                                    <h4>{t('forms.attendanceInformation', 'Attendance Information')}</h4>
+                                                                    <div className="attendance-details">
+                                                                        <div className="detail-item">
+                                                                            <label>{t('forms.totalAttendees', 'Total Attendees')}</label>
+                                                                            <span className="attendee-count-large">
+                                                                                {submission.attendeesCount || 0}
+                                                                            </span>
+                                                                        </div>
+
+                                                                        {/* Kids Info for Parent Forms */}
+                                                                        {submission.formType === 'parent' && submissionDetails[submission.id].kidsData && (
+                                                                            <div className="kids-info">
+                                                                                <label>{t('forms.selectedKids', 'Selected Kids')}</label>
+                                                                                <div className="kids-list">
+                                                                                    {submissionDetails[submission.id].kidsData.map(kid => (
+                                                                                        <div key={kid.id} className="kid-item">
+                                                                                            <span className="kid-name">
+                                                                                                {kid.personalInfo?.firstName} {kid.personalInfo?.lastName}
+                                                                                            </span>
+                                                                                            <span className="kid-number">
+                                                                                                #{kid.participantNumber}
+                                                                                            </span>
+                                                                                        </div>
+                                                                                    ))}
+                                                                                </div>
+                                                                            </div>
+                                                                        )}
+
+                                                                        {/* Extra Attendees */}
+                                                                        {submission.extraAttendees && submission.extraAttendees.length > 0 && (
+                                                                            <div className="extra-attendees">
+                                                                                <label>{t('forms.extraAttendees', 'Extra Attendees')}</label>
+                                                                                <div className="extra-attendees-list">
+                                                                                    {submission.extraAttendees.map((attendee, index) => (
+                                                                                        <div key={index} className="extra-attendee-item">
+                                                                                            {attendee}
+                                                                                        </div>
+                                                                                    ))}
+                                                                                </div>
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+
+                                                                {/* Shirts Info */}
+                                                                {(submission.shirts?.length > 0 || submission.extraShirts?.length > 0) && (
+                                                                    <div className="details-section">
+                                                                        <h4>
+                                                                            <Shirt size={20} />
+                                                                            {t('forms.shirtInformation', 'Shirt Information')}
+                                                                        </h4>
+                                                                        <div className="shirts-details">
+                                                                            {submission.shirts?.length > 0 && (
+                                                                                <div className="shirts-group">
+                                                                                    <label>{t('forms.requiredShirts', 'Required Shirts')}</label>
+                                                                                    <div className="shirts-list">
+                                                                                        {submission.shirts.map((shirt, index) => (
+                                                                                            <span key={index} className="shirt-size">
+                                                                                                {shirt}
+                                                                                            </span>
+                                                                                        ))}
+                                                                                    </div>
+                                                                                </div>
+                                                                            )}
+
+                                                                            {submission.extraShirts?.length > 0 && (
+                                                                                <div className="shirts-group">
+                                                                                    <label>{t('forms.extraShirts', 'Extra Shirts')}</label>
+                                                                                    <div className="shirts-list">
+                                                                                        {submission.extraShirts.map((shirt, index) => (
+                                                                                            <span key={index} className="shirt-size extra">
+                                                                                                {shirt}
+                                                                                            </span>
+                                                                                        ))}
+                                                                                    </div>
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+                                                                )}
+
+                                                                {/* Instructor Specific */}
+                                                                {submission.formType === 'instructor' && submission.motoForLife && (
+                                                                    <div className="details-section">
+                                                                        <h4>{t('forms.motoForLife', 'Motto for Life')}</h4>
+                                                                        <div className="motto-text">
+                                                                            {submission.motoForLife}
+                                                                        </div>
+                                                                    </div>
+                                                                )}
+
+                                                                {/* Declaration File */}
+                                                                {submission.declarationUploaded && (
+                                                                    <div className="details-section">
+                                                                        <h4>
+                                                                            <FileIcon size={20} />
+                                                                            {t('forms.signedDeclaration', 'Signed Declaration')}
+                                                                        </h4>
+                                                                        <div className="declaration-file">
+                                                                            <a
+                                                                                href={submission.declarationUploaded}
+                                                                                target="_blank"
+                                                                                rel="noopener noreferrer"
+                                                                                className="file-link"
+                                                                            >
+                                                                                <FileIcon size={16} />
+                                                                                {t('forms.viewDeclaration', 'View Declaration File')}
+                                                                                <ExternalLink size={12} />
+                                                                            </a>
+                                                                        </div>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        ) : (
+                                                            <div className="loading-details">
+                                                                <Clock className="loading-spinner" size={24} />
+                                                                <p>{t('forms.loadingDetails', 'Loading details...')}</p>
+                                                            </div>
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </React.Fragment>
                                     );
                                 })}
                                 </tbody>
@@ -441,211 +628,6 @@ const FormSubmissionsPage = () => {
                                     : t('forms.noSubmissionsYet', 'No submissions have been received yet')
                                 }
                             </p>
-                        </div>
-                    )}
-
-                    {/* Submission Details Modal */}
-                    {selectedSubmission && (
-                        <div className="modal-overlay">
-                            <div className="modal-content submission-details-modal">
-                                <div className="modal-header">
-                                    <h3>{t('forms.submissionDetails', 'Submission Details')}</h3>
-                                    <button
-                                        className="modal-close"
-                                        onClick={() => setSelectedSubmission(null)}
-                                    >
-                                        <X size={20} />
-                                    </button>
-                                </div>
-
-                                <div className="modal-body">
-                                    {submissionDetails[selectedSubmission.id] ? (
-                                        <div className="submission-details">
-                                            {/* Basic Info */}
-                                            <div className="details-section">
-                                                <h4>{t('forms.basicInformation', 'Basic Information')}</h4>
-                                                <div className="details-grid">
-                                                    <div className="detail-item">
-                                                        <label>{t('forms.submittedAt', 'Submitted At')}</label>
-                                                        <span>
-                                                            {selectedSubmission.submittedAt?.toLocaleDateString()} {selectedSubmission.submittedAt?.toLocaleTimeString()}
-                                                        </span>
-                                                    </div>
-                                                    <div className="detail-item">
-                                                        <label>{t('forms.confirmationStatus', 'Status')}</label>
-                                                        <span className="status-value">
-                                                            {getStatusInfo(selectedSubmission.confirmationStatus).label}
-                                                        </span>
-                                                    </div>
-                                                    <div className="detail-item">
-                                                        <label>{t('forms.formType', 'Form Type')}</label>
-                                                        <span>
-                                                            {selectedSubmission.formType === 'parent'
-                                                                ? t('forms.parentForm', 'Parent Form')
-                                                                : t('forms.instructorForm', 'Instructor Form')
-                                                            }
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {/* Submitter Info */}
-                                            <div className="details-section">
-                                                <h4>{t('forms.submitterInformation', 'Submitter Information')}</h4>
-                                                <div className="submitter-details">
-                                                    <div className="detail-item">
-                                                        <label>{t('forms.name', 'Name')}</label>
-                                                        <span>{submissionDetails[selectedSubmission.id].submitterData?.name}</span>
-                                                    </div>
-                                                    <div className="detail-item">
-                                                        <label>{t('forms.email', 'Email')}</label>
-                                                        <span className="contact-info">
-                                                            <Mail size={16} />
-                                                            {submissionDetails[selectedSubmission.id].submitterData?.email}
-                                                        </span>
-                                                    </div>
-                                                    <div className="detail-item">
-                                                        <label>{t('forms.phone', 'Phone')}</label>
-                                                        <span className="contact-info">
-                                                            <Phone size={16} />
-                                                            {submissionDetails[selectedSubmission.id].submitterData?.phone}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {/* Attendance Info */}
-                                            <div className="details-section">
-                                                <h4>{t('forms.attendanceInformation', 'Attendance Information')}</h4>
-                                                <div className="attendance-details">
-                                                    <div className="detail-item">
-                                                        <label>{t('forms.totalAttendees', 'Total Attendees')}</label>
-                                                        <span className="attendee-count-large">
-                                                            {selectedSubmission.attendeesCount || 0}
-                                                        </span>
-                                                    </div>
-
-                                                    {/* Kids Info for Parent Forms */}
-                                                    {selectedSubmission.formType === 'parent' && submissionDetails[selectedSubmission.id].kidsData && (
-                                                        <div className="kids-info">
-                                                            <label>{t('forms.selectedKids', 'Selected Kids')}</label>
-                                                            <div className="kids-list">
-                                                                {submissionDetails[selectedSubmission.id].kidsData.map(kid => (
-                                                                    <div key={kid.id} className="kid-item">
-                                                                        <span className="kid-name">
-                                                                            {kid.personalInfo?.firstName} {kid.personalInfo?.lastName}
-                                                                        </span>
-                                                                        <span className="kid-number">
-                                                                            #{kid.participantNumber}
-                                                                        </span>
-                                                                    </div>
-                                                                ))}
-                                                            </div>
-                                                        </div>
-                                                    )}
-
-                                                    {/* Extra Attendees */}
-                                                    {selectedSubmission.extraAttendees && selectedSubmission.extraAttendees.length > 0 && (
-                                                        <div className="extra-attendees">
-                                                            <label>{t('forms.extraAttendees', 'Extra Attendees')}</label>
-                                                            <div className="extra-attendees-list">
-                                                                {selectedSubmission.extraAttendees.map((attendee, index) => (
-                                                                    <div key={index} className="extra-attendee-item">
-                                                                        {attendee}
-                                                                    </div>
-                                                                ))}
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-
-                                            {/* Shirts Info */}
-                                            {(selectedSubmission.shirts?.length > 0 || selectedSubmission.extraShirts?.length > 0) && (
-                                                <div className="details-section">
-                                                    <h4>
-                                                        <Shirt size={20} />
-                                                        {t('forms.shirtInformation', 'Shirt Information')}
-                                                    </h4>
-                                                    <div className="shirts-details">
-                                                        {selectedSubmission.shirts?.length > 0 && (
-                                                            <div className="shirts-group">
-                                                                <label>{t('forms.requiredShirts', 'Required Shirts')}</label>
-                                                                <div className="shirts-list">
-                                                                    {selectedSubmission.shirts.map((shirt, index) => (
-                                                                        <span key={index} className="shirt-size">
-                                                                            {shirt}
-                                                                        </span>
-                                                                    ))}
-                                                                </div>
-                                                            </div>
-                                                        )}
-
-                                                        {selectedSubmission.extraShirts?.length > 0 && (
-                                                            <div className="shirts-group">
-                                                                <label>{t('forms.extraShirts', 'Extra Shirts')}</label>
-                                                                <div className="shirts-list">
-                                                                    {selectedSubmission.extraShirts.map((shirt, index) => (
-                                                                        <span key={index} className="shirt-size extra">
-                                                                            {shirt}
-                                                                        </span>
-                                                                    ))}
-                                                                </div>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            )}
-
-                                            {/* Instructor Specific */}
-                                            {selectedSubmission.formType === 'instructor' && selectedSubmission.motoForLife && (
-                                                <div className="details-section">
-                                                    <h4>{t('forms.motoForLife', 'Motto for Life')}</h4>
-                                                    <div className="motto-text">
-                                                        {selectedSubmission.motoForLife}
-                                                    </div>
-                                                </div>
-                                            )}
-
-                                            {/* Declaration File */}
-                                            {selectedSubmission.declarationUploaded && (
-                                                <div className="details-section">
-                                                    <h4>
-                                                        <FileIcon size={20} />
-                                                        {t('forms.signedDeclaration', 'Signed Declaration')}
-                                                    </h4>
-                                                    <div className="declaration-file">
-                                                        <a
-                                                            href={selectedSubmission.declarationUploaded}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            className="file-link"
-                                                        >
-                                                            <FileIcon size={16} />
-                                                            {t('forms.viewDeclaration', 'View Declaration File')}
-                                                            <ExternalLink size={12} />
-                                                        </a>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    ) : (
-                                        <div className="loading-details">
-                                            <Clock className="loading-spinner" size={24} />
-                                            <p>{t('forms.loadingDetails', 'Loading details...')}</p>
-                                        </div>
-                                    )}
-                                </div>
-
-                                <div className="modal-footer">
-                                    <button
-                                        className="btn btn-secondary"
-                                        onClick={() => setSelectedSubmission(null)}
-                                    >
-                                        {t('common.close', 'Close')}
-                                    </button>
-                                </div>
-                            </div>
                         </div>
                     )}
                 </div>
