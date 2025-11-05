@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import Dashboard from '../../components/layout/Dashboard';
 import FormSubmissionModal from '../../components/modals/FormSubmissionModal';
 import FormViewModal from '../../components/modals/FormViewModal';
+import ViewSubmissionModal from '../../components/modals/ViewSubmissionModal';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { usePermissions } from '../../hooks/usePermissions';
@@ -41,7 +42,8 @@ const InstructorFormsPage = () => {
     const [showSubmissionModal, setShowSubmissionModal] = useState(false);
     const [showViewModal, setShowViewModal] = useState(false);
     const [selectedForm, setSelectedForm] = useState(null);
-    const [viewSubmission, setViewSubmission] = useState(null);
+    const [showViewSubmissionModal, setShowViewSubmissionModal] = useState(false);
+    const [selectedSubmission, setSelectedSubmission] = useState(null);
 
     // Load data
     useEffect(() => {
@@ -135,9 +137,10 @@ const InstructorFormsPage = () => {
         }
     };
 
-    // Handle view submission details
+    // Handle view submission details - Updated to use the modal
     const handleViewSubmission = (submission) => {
-        setViewSubmission(submission);
+        setSelectedSubmission(submission);
+        setShowViewSubmissionModal(true);
     };
 
     // Check if user has submitted a form
@@ -388,6 +391,7 @@ const InstructorFormsPage = () => {
                         form={selectedForm}
                         userType="instructor"
                         onSubmit={(submissionData) => {
+                            console.log('✅ Instructor form submitted:', submissionData);
                             loadFormsData(); // Reload data after submission
                         }}
                     />
@@ -402,148 +406,16 @@ const InstructorFormsPage = () => {
                         }}
                     />
 
-                    {/* Submission Details Modal */}
-                    {viewSubmission && (
-                        <div className="modal-overlay">
-                            <div className="modal-content submission-details-modal">
-                                <div className="modal-header">
-                                    <h3>{t('forms.submissionDetails', 'Submission Details')}</h3>
-                                    <button
-                                        className="modal-close"
-                                        onClick={() => setViewSubmission(null)}
-                                    >
-                                        <X size={20} />
-                                    </button>
-                                </div>
-
-                                <div className="modal-body">
-                                    <div className="submission-details">
-                                        {/* Basic Info */}
-                                        <div className="details-section">
-                                            <h4>{t('forms.basicInformation', 'Basic Information')}</h4>
-                                            <div className="details-grid">
-                                                <div className="detail-item">
-                                                    <label>{t('forms.submittedAt', 'Submitted At')}</label>
-                                                    <span>
-                                                        {viewSubmission.submittedAt?.toLocaleDateString()} {viewSubmission.submittedAt?.toLocaleTimeString()}
-                                                    </span>
-                                                </div>
-                                                <div className="detail-item">
-                                                    <label>{t('forms.confirmationStatus', 'Status')}</label>
-                                                    <span className="status-value">
-                                                        {getStatusInfo(viewSubmission.confirmationStatus).label}
-                                                    </span>
-                                                </div>
-                                                <div className="detail-item">
-                                                    <label>{t('forms.totalAttendees', 'Total Attendees')}</label>
-                                                    <span>{viewSubmission.attendeesCount || 1}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* Extra Attendees */}
-                                        {viewSubmission.extraAttendees && viewSubmission.extraAttendees.length > 0 && (
-                                            <div className="details-section">
-                                                <h4>{t('forms.extraAttendees', 'Additional Attendees')}</h4>
-                                                <div className="extra-attendees-list">
-                                                    {viewSubmission.extraAttendees.map((attendeeString, index) => {
-                                                        const [firstName, lastName, phone] = attendeeString.split('|');
-                                                        return (
-                                                            <div key={index} className="extra-attendee-item">
-                                                                <strong>{firstName} {lastName}</strong>
-                                                                {phone && <span> - {phone}</span>}
-                                                            </div>
-                                                        );
-                                                    })}
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {/* Motto for Life */}
-                                        {viewSubmission.motoForLife && (
-                                            <div className="details-section">
-                                                <h4>
-                                                    <Heart size={20} />
-                                                    {t('forms.motoForLife', 'My Motto for Life')}
-                                                </h4>
-                                                <div className="motto-display">
-                                                    "{viewSubmission.motoForLife}"
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {/* Shirts Info */}
-                                        {(viewSubmission.shirts?.length > 0 || viewSubmission.extraShirts?.length > 0) && (
-                                            <div className="details-section">
-                                                <h4>
-                                                    <Shirt size={20} />
-                                                    {t('forms.shirtInformation', 'Shirt Information')}
-                                                </h4>
-                                                <div className="shirts-details">
-                                                    {viewSubmission.shirts?.length > 0 && (
-                                                        <div className="shirts-group">
-                                                            <label>{t('forms.requiredShirts', 'Required Shirts')}</label>
-                                                            <div className="shirts-list">
-                                                                {viewSubmission.shirts.map((shirt, index) => (
-                                                                    <span key={index} className="shirt-size">
-                                                                        {shirt}
-                                                                    </span>
-                                                                ))}
-                                                            </div>
-                                                        </div>
-                                                    )}
-
-                                                    {viewSubmission.extraShirts?.length > 0 && (
-                                                        <div className="shirts-group">
-                                                            <label>{t('forms.extraShirts', 'Extra Shirts')}</label>
-                                                            <div className="shirts-list">
-                                                                {viewSubmission.extraShirts.map((shirt, index) => (
-                                                                    <span key={index} className="shirt-size extra">
-                                                                        {shirt}
-                                                                    </span>
-                                                                ))}
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {/* Declaration File */}
-                                        {viewSubmission.declarationUploaded && (
-                                            <div className="details-section">
-                                                <h4>
-                                                    <FileIcon size={20} />
-                                                    {t('forms.signedDeclaration', 'Signed Declaration')}
-                                                </h4>
-                                                <div className="declaration-file">
-                                                    <a
-                                                        href={viewSubmission.declarationUploaded}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="file-link"
-                                                    >
-                                                        <FileIcon size={16} />
-                                                        {t('forms.viewDeclaration', 'View Declaration File')}
-                                                        <ExternalLink size={12} />
-                                                    </a>
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-
-                                <div className="modal-footer">
-                                    <button
-                                        className="btn btn-secondary"
-                                        onClick={() => setViewSubmission(null)}
-                                    >
-                                        {t('common.close', 'Close')}
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
+                    {/* View Submission Modal - Now using the proper component */}
+                    <ViewSubmissionModal
+                        isOpen={showViewSubmissionModal}
+                        submission={selectedSubmission}
+                        onClose={() => {
+                            setShowViewSubmissionModal(false);
+                            setSelectedSubmission(null);
+                        }}
+                        userType="instructor"
+                    />
                 </div>
             </div>
         </Dashboard>
