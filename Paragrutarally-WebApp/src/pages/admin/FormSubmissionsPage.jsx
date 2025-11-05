@@ -7,7 +7,7 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import { usePermissions } from '../../hooks/usePermissions.jsx';
 import {
     getFormById,
-    getFormSubmissions,
+    getFormSubmissionsWithUserDetails, getAllSubmissionsWithDetails,
     getFormsAnalytics
 } from '@/services/formService.js';
 import { getUserData } from '@/services/userService.js';
@@ -64,13 +64,13 @@ const FormSubmissionsPage = () => {
                 // Load specific form and its submissions
                 const [formData, submissionsData] = await Promise.all([
                     getFormById(formId),
-                    getFormSubmissions(formId)
+                    getFormSubmissionsWithUserDetails(formId)
                 ]);
                 setForm(formData);
                 setSubmissions(submissionsData);
             } else {
                 // Load all submissions
-                const submissionsData = await getFormSubmissions();
+                const submissionsData = await getAllSubmissionsWithDetails();
                 setSubmissions(submissionsData);
             }
 
@@ -459,7 +459,7 @@ const FormSubmissionsPage = () => {
                                                 </td>
                                             </tr>
                                             {expandedSubmissions.has(submission.id) && (
-                                                <tr className="expanded-row">
+                                                <tr className="expanded-row submission-expanded-row">
                                                     <td colSpan="6">
                                                         {submissionDetails[submission.id] ? (
                                                             <div className="submission-details-expanded">
@@ -469,16 +469,16 @@ const FormSubmissionsPage = () => {
                                                                     <div className="details-grid">
                                                                         {submissionDetails[submission.id].submitterData && (
                                                                             <>
-                                                                                <div className="detail-item">
-                                                                                    <label>{t('forms.fullName', 'Full Name')}</label>
+                                                                                <div className="detail-item" style={{marginBottom: "16px"}}>
+                                                                                    <label style={{display: "block", fontWeight: 600, marginBottom: "8px"}}>{t('forms.fullName', 'Full Name')}</label>
                                                                                     <span>{submissionDetails[submission.id].submitterData.name || t('common.unknown', 'Unknown')}</span>
                                                                                 </div>
-                                                                                <div className="detail-item">
-                                                                                    <label><Mail size={14} /> {t('forms.email', 'Email')}</label>
+                                                                                <div className="detail-item" style={{marginBottom: "16px"}}>
+                                                                                    <label style={{display: "block", fontWeight: 600, marginBottom: "8px"}}><Mail size={14} /> {t('forms.email', 'Email')}</label>
                                                                                     <span>{submissionDetails[submission.id].submitterData.email}</span>
                                                                                 </div>
-                                                                                <div className="detail-item">
-                                                                                    <label><Phone size={14} /> {t('forms.phone', 'Phone')}</label>
+                                                                                <div className="detail-item" style={{marginBottom: "16px"}}>
+                                                                                    <label style={{display: "block", fontWeight: 600, marginBottom: "8px"}}><Phone size={14} /> {t('forms.phone', 'Phone')}</label>
                                                                                     <span>{submissionDetails[submission.id].submitterData.phone || t('common.notProvided', 'Not provided')}</span>
                                                                                 </div>
                                                                             </>

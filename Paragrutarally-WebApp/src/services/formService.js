@@ -24,6 +24,45 @@ const FORMS_COLLECTION = 'forms';
 const FORM_SUBMISSIONS_COLLECTION = 'form_submissions';
 const STORAGE_DECLARATIONS_PATH = 'signedParentsDeclarations';
 
+/**
+ * Helper function to fetch user data by ID
+ * @param {string} userId - User ID
+ * @returns {Promise<Object>} User data object
+ */
+const fetchUserData = async (userId) => {
+    try {
+        const userRef = doc(db, 'users', userId);
+        const userSnap = await getDoc(userRef);
+
+        if (userSnap.exists()) {
+            const userData = userSnap.data();
+            // IMPORTANT: Use 'name' field ONLY, not displayName
+            return {
+                name: userData.name || `משתמש ${userId.slice(-4)}`,
+                email: userData.email || '',
+                phone: userData.phone || userData.phoneNumber || '',
+                role: userData.role || 'parent'
+            };
+        } else {
+            console.warn(`⚠️ User document not found: ${userId}`);
+            return {
+                name: `משתמש ${userId.slice(-4)}`,
+                email: '',
+                phone: '',
+                role: 'unknown'
+            };
+        }
+    } catch (error) {
+        console.error(`❌ Error loading user ${userId}:`, error);
+        return {
+            name: `משתמש ${userId.slice(-4)}`,
+            email: '',
+            phone: '',
+            role: 'unknown'
+        };
+    }
+};
+
 // ========================================
 // FORM MANAGEMENT
 // ========================================
@@ -228,45 +267,12 @@ export const getAllSubmissionsWithDetails = async () => {
         const formIds = [...new Set(submissions.map(s => s.formId).filter(Boolean))];
         console.log('📋 Loading form data for:', formIds.length, 'forms');
 
-        // Fetch user data
+        // Fetch user data using the helper function
         const userDataMap = {};
         await Promise.all(
             submitterIds.map(async (userId) => {
-                try {
-                    const userRef = doc(db, 'users', userId);
-                    const userSnap = await getDoc(userRef);
-                    if (userSnap.exists()) {
-                        const userData = userSnap.data();
-                        const userName = userData.displayName ||
-                            userData.name ||
-                            `${userData.firstName || ''} ${userData.lastName || ''}`.trim() ||
-                            null;
-
-                        userDataMap[userId] = {
-                            name: userName || `משתמש ${userId.slice(-4)}`,
-                            email: userData.email || '',
-                            phone: userData.phone || userData.phoneNumber || '',
-                            role: userData.role || 'parent'
-                        };
-                        console.log(`✅ Loaded user ${userId}:`, userDataMap[userId].name);
-                    } else {
-                        console.warn(`⚠️ User document not found: ${userId}`);
-                        userDataMap[userId] = {
-                            name: `משתמש ${userId.slice(-4)}`,
-                            email: '',
-                            phone: '',
-                            role: 'unknown'
-                        };
-                    }
-                } catch (error) {
-                    console.error(`❌ Error loading user ${userId}:`, error);
-                    userDataMap[userId] = {
-                        name: `משתמש ${userId.slice(-4)}`,
-                        email: '',
-                        phone: '',
-                        role: 'unknown'
-                    };
-                }
+                userDataMap[userId] = await fetchUserData(userId);
+                console.log(`✅ Loaded user ${userId}:`, userDataMap[userId].name);
             })
         );
 
@@ -297,6 +303,7 @@ export const getAllSubmissionsWithDetails = async () => {
             submitterEmail: userDataMap[submission.submitterId]?.email || '',
             submitterPhone: userDataMap[submission.submitterId]?.phone || '',
             submitterRole: userDataMap[submission.submitterId]?.role || 'unknown',
+            submitterData: userDataMap[submission.submitterId],
             formTitle: formDataMap[submission.formId]?.title || 'טופס לא ידוע',
             formType: formDataMap[submission.formId]?.type || 'unknown'
         }));
@@ -351,43 +358,12 @@ export const getFormSubmissionsWithUserDetails = async (formId) => {
         const submitterIds = [...new Set(submissions.map(s => s.submitterId).filter(Boolean))];
         console.log('👥 Loading user data for:', submitterIds);
 
-        // Fetch user data
+        // Fetch user data using the helper function
         const userDataMap = {};
         await Promise.all(
             submitterIds.map(async (userId) => {
-                try {
-                    const userRef = doc(db, 'users', userId);
-                    const userSnap = await getDoc(userRef);
-                    if (userSnap.exists()) {
-                        const userData = userSnap.data();
-                        userDataMap[userId] = {
-                            name: userData.displayName ||
-                                userData.name ||
-                                `${userData.firstName || ''} ${userData.lastName || ''}`.trim() ||
-                                `משתמש ${userId.slice(-4)}`,
-                            email: userData.email || '',
-                            phone: userData.phone || userData.phoneNumber || '',
-                            role: userData.role || 'parent'
-                        };
-                        console.log(`✅ Loaded user ${userId}:`, userDataMap[userId].name);
-                    } else {
-                        console.warn(`⚠️ User not found: ${userId}`);
-                        userDataMap[userId] = {
-                            name: `משתמש ${userId.slice(-4)}`,
-                            email: '',
-                            phone: '',
-                            role: 'unknown'
-                        };
-                    }
-                } catch (error) {
-                    console.warn(`❌ Could not load user ${userId}:`, error);
-                    userDataMap[userId] = {
-                        name: `משתמש ${userId.slice(-4)}`,
-                        email: '',
-                        phone: '',
-                        role: 'unknown'
-                    };
-                }
+                userDataMap[userId] = await fetchUserData(userId);
+                console.log(`✅ Loaded user ${userId}:`, userDataMap[userId].name);
             })
         );
 
@@ -397,7 +373,8 @@ export const getFormSubmissionsWithUserDetails = async (formId) => {
             submitterName: userDataMap[submission.submitterId]?.name || 'משתמש לא ידוע',
             submitterEmail: userDataMap[submission.submitterId]?.email || '',
             submitterPhone: userDataMap[submission.submitterId]?.phone || '',
-            submitterRole: userDataMap[submission.submitterId]?.role || 'unknown'
+            submitterRole: userDataMap[submission.submitterId]?.role || 'unknown',
+            submitterData: userDataMap[submission.submitterId]
         }));
 
         // Sort by date
@@ -551,40 +528,8 @@ export const createFormSubmission = async (submissionData) => {
 };
 
 /**
- * Submit form response (keeping existing function for compatibility)
- * @param {Object} submissionData - Form submission data
- * @returns {Promise<string>} Submission document ID
- */
-export const submitFormResponse = async (submissionData) => {
-    try {
-        const submission = {
-            ...submissionData,
-            submittedAt: serverTimestamp(),
-            updatedAt: serverTimestamp()
-        };
-
-        const docRef = await addDoc(collection(db, FORM_SUBMISSIONS_COLLECTION), submission);
-
-        // Update form submission count
-        const formRef = doc(db, FORMS_COLLECTION, submissionData.formId);
-        const formDoc = await getDoc(formRef);
-        if (formDoc.exists()) {
-            const currentCount = formDoc.data().submissionCount || 0;
-            await updateDoc(formRef, {
-                submissionCount: currentCount + 1
-            });
-        }
-
-        return docRef.id;
-    } catch (error) {
-        console.error('❌ Error submitting form:', error);
-        throw new Error(`Failed to submit form: ${error.message}`);
-    }
-};
-
-/**
- * Get form submissions with optional filters
- * @param {Object} filters - Query filters
+ * Get form submissions - basic version without user details
+ * @param {string|Object} formIdOrFilters - Form ID or filter object
  * @returns {Promise<Array>} List of submissions
  */
 export const getFormSubmissions = async (formIdOrFilters = null) => {
@@ -703,45 +648,17 @@ export const deleteFormSubmission = async (submissionId) => {
  */
 export const uploadDeclarationFile = async (file, userId, formId) => {
     try {
-        // Create unique filename
-        const timestamp = Date.now();
         const fileExtension = file.name.split('.').pop();
-        const fileName = `${userId}_${formId}_${timestamp}.${fileExtension}`;
+        const fileName = `${userId}_${formId}_${Date.now()}.${fileExtension}`;
+        const fileRef = ref(storage, `${STORAGE_DECLARATIONS_PATH}/${fileName}`);
 
-        // Create storage reference
-        const storageRef = ref(storage, `${STORAGE_DECLARATIONS_PATH}/${fileName}`);
-
-        // Upload file
-        const uploadResult = await uploadBytes(storageRef, file);
-
-        // Get download URL
-        const downloadURL = await getDownloadURL(uploadResult.ref);
+        await uploadBytes(fileRef, file);
+        const downloadURL = await getDownloadURL(fileRef);
 
         return downloadURL;
     } catch (error) {
         console.error('❌ Error uploading declaration file:', error);
         throw error;
-    }
-};
-
-/**
- * Upload signed declaration file (keeping existing function for compatibility)
- * @param {File} file - File to upload
- * @param {string} userId - User ID for file organization
- * @returns {Promise<string>} Download URL
- */
-export const uploadSignedDeclaration = async (file, userId) => {
-    try {
-        const fileName = `${Date.now()}_${file.name}`;
-        const fileRef = ref(storage, `${STORAGE_DECLARATIONS_PATH}/${userId}/${fileName}`);
-
-        const snapshot = await uploadBytes(fileRef, file);
-        const downloadURL = await getDownloadURL(snapshot.ref);
-
-        return downloadURL;
-    } catch (error) {
-        console.error('❌ Error uploading file:', error);
-        throw new Error(`Failed to upload file: ${error.message}`);
     }
 };
 
@@ -752,9 +669,8 @@ export const uploadSignedDeclaration = async (file, userId) => {
  */
 export const deleteDeclarationFile = async (fileUrl) => {
     try {
-        const storageRef = ref(storage, fileUrl);
-        await deleteObject(storageRef);
-
+        const fileRef = ref(storage, fileUrl);
+        await deleteObject(fileRef);
     } catch (error) {
         console.error('❌ Error deleting declaration file:', error);
         throw error;
@@ -762,99 +678,35 @@ export const deleteDeclarationFile = async (fileUrl) => {
 };
 
 // ========================================
-// STATISTICS AND ANALYTICS
+// ANALYTICS
 // ========================================
 
 /**
- * Get form statistics
- * @param {string} formId - Form document ID
- * @returns {Promise<Object>} Form statistics
+ * Get forms analytics
+ * @returns {Promise<Object>} Analytics data
  */
-export const getFormStatistics = async (formId) => {
+export const getFormsAnalytics = async () => {
     try {
-        // Get form basic info
-        const form = await getFormById(formId);
+        const forms = await getAllForms();
+        const submissions = await getFormSubmissions();
 
-        // Get submissions for this form
-        const submissions = await getFormSubmissions({ formId });
-
-        // Calculate statistics
-        const stats = {
-            totalViews: form.viewCount || 0,
+        return {
+            totalForms: forms.length,
+            activeForms: forms.filter(f => f.status === 'active').length,
             totalSubmissions: submissions.length,
-            attendingCount: submissions.filter(s => s.confirmationStatus === 'attending').length,
-            notAttendingCount: submissions.filter(s => s.confirmationStatus === 'not attending').length,
-            undecidedCount: submissions.filter(s => s.confirmationStatus === 'needs to decide').length,
-            totalAttendees: submissions.reduce((sum, s) => sum + (s.attendeesCount || 0), 0),
-            parentSubmissions: submissions.filter(s => s.formType === 'parent').length,
-            instructorSubmissions: submissions.filter(s => s.formType === 'instructor').length,
-            submissionsWithDeclarations: submissions.filter(s => s.declarationUploaded).length
+            pendingSubmissions: submissions.filter(s => s.confirmationStatus === 'needs to decide').length
         };
-
-        return stats;
     } catch (error) {
-        console.error('❌ Error getting form statistics:', error);
+        console.error('❌ Error getting forms analytics:', error);
         throw error;
     }
 };
 
 /**
- * Get user submission summary
- * @param {string} userId - User ID
- * @returns {Promise<Object>} User submission summary
- */
-export const getUserSubmissionSummary = async (userId) => {
-    try {
-        const submissions = await getFormSubmissions({ submitterId: userId });
-
-        const summary = {
-            totalSubmissions: submissions.length,
-            attendingEvents: submissions.filter(s => s.confirmationStatus === 'attending').length,
-            pendingDecisions: submissions.filter(s => s.confirmationStatus === 'needs to decide').length,
-            recentSubmissions: submissions.slice(0, 5), // Last 5 submissions
-            totalAttendees: submissions.reduce((sum, s) => sum + (s.attendeesCount || 0), 0)
-        };
-
-        return summary;
-    } catch (error) {
-        console.error('❌ Error getting user submission summary:', error);
-        throw error;
-    }
-};
-
-// ========================================
-// UTILITY FUNCTIONS
-// ========================================
-
-/**
- * Check if user has submitted a specific form
+ * Get a user's submission for a specific form
  * @param {string} userId - User ID
  * @param {string} formId - Form ID
- * @returns {Promise<boolean>} Whether user has submitted the form
- */
-export const hasUserSubmittedForm = async (userId, formId) => {
-    try {
-        const submissionsRef = collection(db, FORM_SUBMISSIONS_COLLECTION);
-        const q = query(
-            submissionsRef,
-            where('submitterId', '==', userId),
-            where('formId', '==', formId),
-            limit(1)
-        );
-
-        const querySnapshot = await getDocs(q);
-        return !querySnapshot.empty;
-    } catch (error) {
-        console.error('❌ Error checking user form submission:', error);
-        throw error;
-    }
-};
-
-/**
- * Get user's submission for a specific form
- * @param {string} userId - User ID
- * @param {string} formId - Form ID
- * @returns {Promise<Object|null>} User's submission or null
+ * @returns {Promise<Object|null>} Submission data or null if not found
  */
 export const getUserFormSubmission = async (userId, formId) => {
     try {
@@ -863,147 +715,26 @@ export const getUserFormSubmission = async (userId, formId) => {
             submissionsRef,
             where('submitterId', '==', userId),
             where('formId', '==', formId),
-            orderBy('submittedAt', 'desc'),
             limit(1)
         );
 
         const querySnapshot = await getDocs(q);
+
         if (querySnapshot.empty) {
             return null;
         }
 
         const doc = querySnapshot.docs[0];
         const data = doc.data();
+
         return {
             id: doc.id,
             ...data,
-            submittedAt: data.submittedAt?.toDate(),
-            updatedAt: data.updatedAt?.toDate()
+            submittedAt: data.submittedAt?.toDate ? data.submittedAt.toDate() : data.submittedAt,
+            updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : data.updatedAt
         };
     } catch (error) {
         console.error('❌ Error getting user form submission:', error);
         throw error;
     }
-};
-
-/**
- * Send form to users (create form assignments) - keeping existing function
- * @param {string} formId - Form document ID
- * @param {Array} targetUsers - Array of user objects
- * @returns {Promise<number>} Number of assignments created
- */
-export const sendFormToUsers = async (formId, targetUsers) => {
-    try {
-        const batch = writeBatch(db);
-        const assignmentsRef = collection(db, 'form_assignments');
-
-        targetUsers.forEach(user => {
-            const assignmentRef = doc(assignmentsRef);
-            batch.set(assignmentRef, {
-                formId,
-                userId: user.id,
-                userRole: user.role,
-                status: 'pending',
-                assignedAt: serverTimestamp(),
-                notificationSent: false,
-                remindersSent: 0
-            });
-        });
-
-        await batch.commit();
-        return targetUsers.length;
-    } catch (error) {
-        console.error('❌ Error sending form:', error);
-        throw new Error(`Failed to send form: ${error.message}`);
-    }
-};
-
-/**
- * Get forms analytics - keeping existing function
- * @returns {Promise<Object>} Analytics data
- */
-export const getFormsAnalytics = async () => {
-    try {
-        const [forms, submissions] = await Promise.all([
-            getAllForms(),
-            getFormSubmissions()
-        ]);
-
-        const analytics = {
-            totalForms: forms.length,
-            totalSubmissions: submissions.length,
-            pendingReviews: submissions.filter(s => s.confirmationStatus === 'needs to decide').length,
-            completionRate: forms.length > 0 ? Math.round((submissions.length / forms.length) * 100) : 0,
-            byFormType: {},
-            byStatus: {}
-        };
-
-        // Count by form type
-        submissions.forEach(submission => {
-            const formType = submission.formType || 'unknown';
-            analytics.byFormType[formType] = (analytics.byFormType[formType] || 0) + 1;
-        });
-
-        // Count by confirmation status
-        submissions.forEach(submission => {
-            const status = submission.confirmationStatus || 'unknown';
-            analytics.byStatus[status] = (analytics.byStatus[status] || 0) + 1;
-        });
-
-        return analytics;
-    } catch (error) {
-        console.error('❌ Error getting forms analytics:', error);
-        throw new Error(`Failed to get forms analytics: ${error.message}`);
-    }
-};
-
-/**
- * Mark form assignment as completed - keeping existing function
- * @param {string} assignmentId - Assignment document ID
- * @returns {Promise<void>}
- */
-export const markAssignmentCompleted = async (assignmentId) => {
-    try {
-        await updateDoc(doc(db, 'form_assignments', assignmentId), {
-            status: 'completed',
-            completedAt: serverTimestamp()
-        });
-
-    } catch (error) {
-        console.error('❌ Error marking assignment completed:', error);
-        throw new Error(`Failed to mark assignment completed: ${error.message}`);
-    }
-};
-
-
-
-// Export all functions
-export default {
-    // New functions
-    getActiveForms,
-    incrementFormViewCount,
-    createFormSubmission,
-    uploadDeclarationFile,
-    deleteDeclarationFile,
-    getFormStatistics,
-    getUserSubmissionSummary,
-    hasUserSubmittedForm,
-    getUserFormSubmission,
-    getAllSubmissionsWithDetails,
-    getFormSubmissionsWithUserDetails,
-
-    // Existing functions (keeping for compatibility)
-    createForm,
-    getAllForms,
-    getFormById,
-    updateForm,
-    deleteForm,
-    sendFormToUsers,
-    submitFormResponse,
-    getFormSubmissions,
-    getUserFormAssignments,
-    uploadSignedDeclaration,
-    getFormsAnalytics,
-    markAssignmentCompleted,
-    getFormsForRole
 };

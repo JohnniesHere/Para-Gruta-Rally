@@ -9,7 +9,7 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import { usePermissions } from '../../hooks/usePermissions.jsx';
 import {
     getAllForms,
-    getFormSubmissions,
+    getAllSubmissionsWithDetails,
     deleteForm
 } from '@/services/formService.js';
 import { exportSubmissionsToCSV } from '@/utils/formatUtils.js';
@@ -81,7 +81,7 @@ const FormsManagementPage = () => {
                 return []; // Return empty array if forms fail to load
             });
 
-            const submissionsData = await getFormSubmissions().catch(err => {
+            const submissionsData = await getAllSubmissionsWithDetails().catch(err => {
                 console.error('Error loading submissions:', err);
                 return []; // Return empty array if submissions fail to load
             });
