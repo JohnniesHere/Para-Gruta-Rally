@@ -5854,14 +5854,17 @@ export const LANGUAGES = {
 
 // Templates and Creation
         "forms.formTemplates": "📋 תבניות טפסים",
-        "forms.parentEventTemplate": "הרשמת הורים לאירוע",
+        "forms.parentEventTemplate": "הזמנת הורים לאירוע",
         "forms.parentEventDesc": "תבנית סטנדרטית להרשמת הורים לאירועים עם בחירת ילדים",
-        "forms.instructorEventTemplate": "הרשמת מדריכים להכשרה",
-        "forms.instructorEventDesc": "תבנית לאירועי הכשרה וסדנאות למדריכים",
+        "forms.instructorEventTemplate": "הזמנת מדריכים לאירוע",
+        "forms.instructorEventDesc": "תבנית סטנדרטית להרשמת מדריכים לאירועים",
         "forms.customFormTemplate": "טופס מותאם",
         "forms.customFormDesc": "צור טופס מותאם עם השדות והעיצוב שלך",
         "forms.useTemplate": "השתמש בתבנית",
         "forms.createCustom": "צור מותאם",
+        "forms.hideDetails": "הסתר פרטים",
+        "forms.fullName": "שם מלא של המשתמש",
+        "forms.instructorTraining": "אירוע מדריכים",
 
 // Form Creation Modal
         "forms.titleRequired": "כותרת הטופס נדרשת",
