@@ -649,6 +649,20 @@ export const LANGUAGES = {
         //Users update hints
         'users.phoneHint': 'Israeli phone number format required (0501234567)',
 
+        //Users delete modal
+        'users.deleteUserTitle': 'Delete user',
+        'users.deleteWarning': 'This action cannot be undone!',
+        'users.deleteConsequences': 'This will permanently delete:',
+        'users.deleteConsequence1': 'User authentication account (login access)',
+        'users.deleteConsequence2': 'User profile and all associated data',
+        'users.deleteConsequence3': 'All user-generated content and records',
+        'users.deleteConsequence4': 'All user preferences and settings',
+        'users.completeDeleteionNote': 'Complete Deletion:',
+        'users.completeDeleteionExplanation': 'This will remove the user from both the authentication system and the database. The user will no longer be able to log in and all their data will be permanently deleted.',
+        'users.deleteConfirmText': 'Are you absolutely sure you want to delete this user?',
+        'users.deleteConfirm': 'Yes, Delete User Completely',
+        'users.deleting': 'Deleting...',
+
         // My Account
         'account.title': 'My Account',
         'account.profile': 'Profile Information',
@@ -4233,6 +4247,21 @@ export const LANGUAGES = {
 
         //Users update hints
         'users.phoneHint': 'מספר הטלפון חייב להיות בפורמט ישראלי תקין (0501234567)',
+
+        //Users delete modal
+        'users.deleteUserTitle': 'מחק משתמש',
+        'users.deleteWarning': 'פעולה זו אינה הפיכה!',
+        'users.deleteConsequences': 'פעולה זו תמחק לצמיתות:',
+        'users.deleteConsequence1': 'אישור משתמש במערכת (אישור כניסה)',
+        'users.deleteConsequence2': 'פרופיל משתמש וכל מידע נוסף הקשור אליו',
+        'users.deleteConsequence3': 'כל התכנים הקשורים במשתמש',
+        'users.deleteConsequence4': 'העדפות משתמש והגדרות',
+        'users.completeDeleteionNote': 'לסיום המחיקה:',
+        'users.completeDeleteionExplanation': 'פעולה זו תמחק את המשתמש ממערכת האישורים וממסד הנתונים. המשתמש לא יוכל יותר להיכנס וכל המידע שלו ימחק לצמיתות.',
+        'users.deleteConfirmText': 'האם אתה בטוח לחלוטין שאתה רוצה למחוק את המשתמש הזה?',
+        'users.deleteConfirm': 'כן, מחק את המשתמש לצמיתות',
+        'users.deleting': 'מוחק...',
+
 
 
         // My Account
