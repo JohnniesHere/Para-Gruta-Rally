@@ -127,8 +127,15 @@ const HostDashboardPage = () => {
             lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             participantNumber?.toString().includes(searchTerm);
 
-        const matchesEvent = eventFilter === '' ||
-            events.find(e => e.id === eventFilter && e.participatingTeams?.includes(kid.teamId));
+        let matchesEvent = true;
+
+        // Check if a specific event is selected for filtering
+        if (eventFilter !== '') {
+            const selectedEvent = events.find(e => e.id === eventFilter);
+
+            // Check if the event exists AND if its list of participating teams includes the kid's team ID
+            matchesEvent = selectedEvent && selectedEvent.participatingTeams?.includes(kid.teamId);
+        }
 
         return matchesSearch && matchesEvent;
     });

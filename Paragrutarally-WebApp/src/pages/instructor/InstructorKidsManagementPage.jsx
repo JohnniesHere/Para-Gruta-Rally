@@ -106,9 +106,9 @@ const InstructorKidsManagementPage = () => {
     const filteredKids = useMemo(() => {
         return kids.filter(kid => {
             // Check if instructor can view this kid
-            if (!permissions.canViewKid(kid, userData, user)) {
-                return false;
-            }
+            // if (!permissions.canViewKid(kid, userData, user)) {
+            //     return false;
+            // }
 
             const matchesSearch = searchTerm === '' ||
                 kid.personalInfo?.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -127,10 +127,10 @@ const InstructorKidsManagementPage = () => {
         return team ? team.name : t('common.unassigned', 'Unassigned');
     };
 
-    // Check if instructor can edit this kid
-    const canEditKid = (kid) => {
-        return permissions.canEditKid(kid, userData, user);
-    };
+    // // Check if instructor can edit this kid
+    // const canEditKid = (kid) => {
+    //     return permissions.canEditKid(kid, userData, user);
+    // };
 
     // Helper function to safely display field data based on permissions
     const getFieldValue = (kid, fieldPath, defaultValue = '-') => {
